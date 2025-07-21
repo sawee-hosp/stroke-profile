@@ -708,7 +708,7 @@ async function handleShareProfile() {
                 "contents": {
                     "type": "bubble",
                     "size": "kilo",
-                    "body": {
+                     "body": {
                         "type": "box",
                         "layout": "vertical",
                         "paddingAll": "20px",
@@ -723,24 +723,32 @@ async function handleShareProfile() {
                                 "size": "xl",
                                 "align": "center"
                             },
+                            // --- vvv ส่วนที่แก้ไข vvv ---
                             {
-                                "type": "box",
+                                "type": "box", // 1. สร้างกล่องใหม่ขึ้นมาครอบ
                                 "layout": "vertical",
+                                "alignItems": "center", // 2. สั่งให้ของข้างในกล่องนี้อยู่กึ่งกลาง
                                 "margin": "lg",
-                                "cornerRadius": "150px",
-                                "width": "150px",
-                                "height": "150px",
-                                "alignItems": "center",
-                                "contents": [{
-                                    "type": "image",
-                                    "url": vhv.profilePicture || 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png',
-                                    "size": "full",
-                                    "aspectMode": "cover",
-                                    "aspectRatio": "1:1"
-                                }]
+                                "contents": [
+                                    { // นี่คือกล่องรูปภาพเดิม
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "cornerRadius": "150px",
+                                        "width": "150px",
+                                        "height": "150px",
+                                        "contents": [{
+                                            "type": "image",
+                                            "url": vhv.profilePicture || 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png',
+                                            "size": "full",
+                                            "aspectMode": "cover",
+                                            "aspectRatio": "1:1"
+                                        }]
+                                    }
+                                ]
                             },
+                            // --- ^^^ สิ้นสุดส่วนที่แก้ไข ^^^ ---
                             {
-                                "type": "box",
+                                "type": "box", // กล่องข้อความจะกลับไปชิดซ้ายเหมือนเดิม
                                 "layout": "vertical",
                                 "margin": "lg",
                                 "spacing": "sm",
@@ -762,6 +770,7 @@ async function handleShareProfile() {
                                 ]
                             }
                         ]
+                        // **ลบ alignItems: "center" ออกจาก body หลักแล้ว**
                     },
                     "footer": {
                         "type": "box",
