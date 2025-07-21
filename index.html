@@ -678,39 +678,50 @@ async function handleShareProfile() {
             if (sharePhone && vhv.phone) {
                 const cleanPhone = String(vhv.phone).replace(/'/g, '');
                 footerButtons.push({
-                    "type": "button",
-                    "action": { "type": "uri", "label": "โทรศัพท์", "uri": `tel:${cleanPhone}` },
+                    "type": "button", "action": { "type": "uri", "label": "โทรศัพท์", "uri": `tel:${cleanPhone}` },
                     "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
             if (shareLine && vhv.line_id) {
                 footerButtons.push({
-                    "type": "button",
-                    "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` },
+                    "type": "button", "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` },
                     "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
             if (shareLocation && vhv.asm_home) {
                 footerButtons.push({
-                    "type": "button",
-                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://www.google.com/maps/search/?api=1&query=${vhv.asm_home}` },
+                    "type": "button", "action": { "type": "uri", "label": "ดูแผนที่", "uri": `http://googleusercontent.com/maps.google.com/?q=${vhv.asm_home}` },
                     "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
 
-            // ไม่บังคับให้เลือกปุ่ม แต่ถ้ามีปุ่มจะเพิ่มเส้นคั่น
             if (footerButtons.length > 0) {
                  footerButtons.push({ "type": "separator", "margin": "md", "color": "#FFFFFF" });
             }
             footerButtons.push({
-                "type": "text",
-                "text": "แชร์จาก สวีรู้ทันสโตรก",
-                "color": "#FFFFFF",
-                "size": "xs",
-                "align": "center",
-                "margin": "md"
+                "type": "text", "text": "แชร์จาก สวีรู้ทันสโตรก", "color": "#FFFFFF",
+                "size": "xs", "align": "center", "margin": "md"
             });
             
+            // --- vvv สร้าง heroBlock ตามโครงสร้างใหม่ vvv ---
+            const heroBlock = {
+                "type": "box",
+                "layout": "vertical",
+                "backgroundColor": "#007BFF",
+                "paddingAll": "20px",
+                "contents": [
+                    {
+                        "type": "image",
+                        "url": vhv.profilePicture || 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png', // ใช้ URL ที่ LINE รับรองเป็น fallback
+                        "size": "full",
+                        "aspectRatio": "1:1",
+                        "aspectMode": "cover",
+                        "cornerRadius": "150px"
+                    }
+                ]
+            };
+            // --- ^^^ สิ้นสุดการสร้าง heroBlock ^^^ ---
+
             const flexMessage = {
                 "type": "flex",
                 "altText": `ข้อมูลติดต่อ อสม.สโตรก: ${vhv.name}`,
@@ -720,33 +731,22 @@ async function handleShareProfile() {
                     "header": {
                         "type": "box",
                         "layout": "vertical",
-                        "contents": [ { 
-                            "type": "text", 
-                            "text": "อสม.สโตรกของคุณ", 
-                            "color": "#FFFFFF", 
-                            "weight": "bold",
-                            "size": "xl",
-                            "align": "center"
-                        } ],
                         "backgroundColor": "#007BFF",
-                        "paddingAll": "lg"
+                        "paddingBottom": "none",
+                        "contents": [ { 
+                            "type": "text", "text": "อสม.สโตรกของคุณ", "color": "#FFFFFF", 
+                            "weight": "bold", "size": "xl", "align": "center"
+                        } ]
                     },
-                    "hero": {
-                        "type": "image",
-                        "url": vhv.profilePicture || 'https://via.placeholder.com/150',
-                        "size": "150px",
-                        "aspectRatio": "1:1",
-                        "aspectMode": "cover",
-                        "cornerRadius": "150px",
-                        "align": "center"
-                        // **ลบ margin ออกจากตรงนี้**
-                    },
+                    "hero": heroBlock, // <-- นำ heroBlock ที่สร้างไว้มาใช้
                     "body": {
                         "type": "box",
                         "layout": "vertical",
                         "spacing": "sm",
+                        "backgroundColor": "#007BFF",
+                        "paddingAll": "lg",
                         "contents": [
-                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center", "margin": "md" },
+                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
                             { "type": "separator", "margin": "lg", "color": "#FFFFFF" },
                             { "type": "box", "layout": "baseline", "margin": "md", "contents": [
                                 { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
@@ -760,9 +760,7 @@ async function handleShareProfile() {
                                 { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
                                 { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm", "color": "#FFFFFF" }
                             ]}
-                        ],
-                        "backgroundColor": "#007BFF",
-                        "paddingAll": "lg"
+                        ]
                     },
                     "footer": {
                         "type": "box",
