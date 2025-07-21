@@ -102,8 +102,8 @@
                       </select>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">ตำแหน่งบ้าน อสม.</label>
+            <div class="mb-3">
+                <label class="form-label">ตำแหน่งบ้าน อสม. <span class="text-danger small">(ปักหมุดเมื่ออยู่ที่บ้านแล้วเท่านั้น)</span></label>
                 <div class="input-group">
                     <input type="text" class="form-control" id="vhvAsmHome" placeholder="ยังไม่ได้ปักหมุด" readonly>
                     <button class="btn btn-outline-primary" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่</button>
@@ -552,8 +552,8 @@
             document.getElementById('vhvPhone').value = vhvData.phone || userData.telephone || '';
             document.getElementById('vhvLineId').value = vhvData.line_id || userData.line_id || '';
             document.getElementById('vhvAsmHome').value = vhvData.asm_home || '';
+            document.getElementById('vhvAsmHome').value = vhvData.asm_home || ''; // <-- เพิ่มบรรทัดนี้
             document.getElementById('vhvPdpa').checked = true;
-
             const areaSelect = document.getElementById('vhvArea');
             areaSelect.innerHTML = ''; 
             const currentAreas = vhvData.area ? vhvData.area.split(',') : [];
@@ -596,8 +596,8 @@
                 phone: document.getElementById('vhvPhone').value.trim(),
                 line_id: document.getElementById('vhvLineId').value.trim(),
                 areas: selectedAreas,
-                pdpa: pdpaText,
-                asm_home: document.getElementById('vhvAsmHome').value.trim(), 
+              pdpa: pdpaText,
+                asm_home: document.getElementById('vhvAsmHome').value.trim(), // <-- เพิ่มบรรทัดนี้
                 asm_test: ALL_USER_DATA.vhvProfile?.asm_test || '',
             };
 
@@ -621,7 +621,16 @@
                 alert("ปักหมุดสำเร็จ! กรุณากด 'บันทึกข้อมูล' เพื่อยืนยัน");
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
-
+function pinVhvHomeInForm() {
+            if (!confirm("คุณอยู่ที่บ้านพักของคุณแล้วใช่หรือไม่?")) return;
+            showLoading(true, "กำลังระบุตำแหน่ง...");
+            navigator.geolocation.getCurrentPosition(pos => {
+                const latlong = `${pos.coords.latitude},${pos.coords.longitude}`;
+                document.getElementById('vhvAsmHome').value = latlong;
+                showLoading(false);
+                alert("ปักหมุดสำเร็จ! กรุณากด 'บันทึกข้อมูล' เพื่อยืนยันการเปลี่ยนแปลง");
+            }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
+        }
         async function handleShareProfile() {
             if (!liff.isInClient()) {
                 alert("ฟังก์ชันนี้ใช้ได้เฉพาะในแอป LINE เท่านั้น");
