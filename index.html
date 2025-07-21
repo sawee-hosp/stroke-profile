@@ -658,12 +658,7 @@ function pinVhvHomeInForm() {
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
 async function handleShareProfile() {
-            // --- vvv เอาตัวเช็คออกตามที่ขอ vvv ---
-            // if (!liff.isInClient() || !liff.isApiAvailable('shareTargetPicker')) {
-            //     alert("ฟังก์ชันแชร์ใช้ได้เฉพาะในแอป LINE เท่านั้น");
-            //     return;
-            // }
-
+            // เช็ค Liff ถูกเอาออกแล้วเพื่อให้ทดสอบบนเว็บได้
             const vhv = ALL_USER_DATA.vhvProfile;
             if (!vhv) {
                 alert("ไม่พบข้อมูล อสม. ที่จะแชร์");
@@ -691,7 +686,11 @@ async function handleShareProfile() {
             }
             if (shareLocation && vhv.asm_home) {
                 footerButtons.push({
-                    "type": "button", "action": { "type": "uri", "label": "ดูแผนที่", "uri": `http://googleusercontent.com/maps.google.com/?q=${vhv.asm_home}` },
+                    "type": "button", "action": { 
+                        "type": "uri", 
+                        "label": "ดูแผนที่", 
+                        "uri": `https://www.google.com/maps?q=${vhv.asm_home}` 
+                    },
                     "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
@@ -704,7 +703,6 @@ async function handleShareProfile() {
                 "size": "xs", "align": "center", "margin": "md"
             });
             
-            // --- vvv โครงสร้าง Flex แบบใหม่ทั้งหมด vvv ---
             const flexMessage = {
                 "type": "flex",
                 "altText": `ข้อมูลติดต่อ อสม.สโตรก: ${vhv.name}`,
@@ -721,12 +719,13 @@ async function handleShareProfile() {
                                 "weight": "bold",
                                 "color": "#FFFFFF",
                                 "size": "xl",
-                                "align": "center"
+                                "align": "center",
+                                "margin": "none" // <-- 3. ลดระยะห่าง
                             },
                             {
                                 "type": "box",
                                 "layout": "vertical",
-                                "margin": "lg",
+                                "margin": "md",
                                 "cornerRadius": "150px",
                                 "width": "150px",
                                 "height": "150px",
@@ -742,21 +741,21 @@ async function handleShareProfile() {
                             {
                                 "type": "box",
                                 "layout": "vertical",
-                                "margin": "lg",
-                                "spacing": "sm",
+                                "margin": "md",
+                                "spacing": "none", // <-- 3. ลดระยะห่าง
                                 "contents": [
                                     { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
-                                    { "type": "separator", "margin": "lg", "color": "#FFFFFF" },
-                                    { "type": "box", "layout": "baseline", "margin": "md", "contents": [
-                                        { "type": "text", "text": "พื้นที่ดูแล:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                    { "type": "separator", "margin": "md", "color": "#FFFFFF" },
+                                    { "type": "box", "layout": "baseline", "margin": "md", "spacing": "none", "contents": [ // <-- 3. ลดระยะห่าง
+                                        { "type": "text", "text": "พื้นที่ดูแล:", "color": "#FFFFFF", "size": "sm", "flex": 2 }, // <-- 2. เปลี่ยนเป็นสีขาว
                                         { "type": "text", "text": vhv.area || "N/A", "color": "#FFFFFF", "size": "sm", "flex": 4, "wrap": true }
                                     ]},
-                                    { "type": "box", "layout": "baseline", "contents": [
-                                        { "type": "text", "text": "ผลทดสอบ:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                    { "type": "box", "layout": "baseline", "spacing": "none", "contents": [ // <-- 3. ลดระยะห่าง
+                                        { "type": "text", "text": "ผลทดสอบ:", "color": "#FFFFFF", "size": "sm", "flex": 2 }, // <-- 2. เปลี่ยนเป็นสีขาว
                                         { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "color": "#FFFFFF", "size": "sm", "flex": 4 }
                                     ]},
-                                    { "type": "box", "layout": "baseline", "contents": [
-                                        { "type": "text", "text": "ลงทะเบียน:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                    { "type": "box", "layout": "baseline", "spacing": "none", "contents": [ // <-- 3. ลดระยะห่าง
+                                        { "type": "text", "text": "ลงทะเบียน:", "color": "#FFFFFF", "size": "sm", "flex": 2 }, // <-- 2. เปลี่ยนเป็นสีขาว
                                         { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "color": "#FFFFFF", "size": "sm", "flex": 4 }
                                     ]}
                                 ]
@@ -769,14 +768,13 @@ async function handleShareProfile() {
                     "footer": {
                         "type": "box",
                         "layout": "vertical",
-                        "spacing": "sm",
+                        "spacing": "xs", // <-- 3. ลดระยะห่าง
                         "contents": footerButtons,
                         "backgroundColor": "#007BFF"
                     }
                 }
             };
             
-            // สำหรับทดสอบบนเว็บ: copy ผลลัพธ์ใน Console ไปวางใน LINE Flex Simulator
             console.log("Generated Flex Message JSON:", JSON.stringify(flexMessage, null, 2));
 
             try {
