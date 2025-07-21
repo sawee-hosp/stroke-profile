@@ -9,30 +9,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        body { font-family: "Noto Sans Thai", sans-serif; font-size: 17px; background-color: #f5f5f5; padding-top: 1rem; padding-bottom: 1rem; margin: 0; }
-        .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 1.25rem; }
-        .profile-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px auto; display: block; border: 4px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; }
-        .section-title i { margin-right: 0.6rem; color: #0d6efd; }
-        .card-vhv-brown { background-color: #f0eade; border: 1px solid #d3c0a4; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1060; }
-        .btn-call { background-color: transparent; border: 1px solid #198754; color: #198754; padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+        :root {
+            --bs-primary-rgb: 13, 110, 253;
+        }
+        body { font-family: "Noto Sans Thai", sans-serif; font-size: 16px; background-color: #f0f2f5; padding-top: 1rem; padding-bottom: 1rem; margin: 0; }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.25rem; }
+        .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
+        .section-title i { margin-right: 0.6rem; color: #0d6efd; font-size: 1.2rem; }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1060; }
+        .btn-call { background-color: transparent; border: 1px solid #198754; color: #198754; padding: 0.3rem 0.6rem; font-size: 0.9rem; line-height: 1; border-radius: 0.25rem; }
         .btn-call:hover { background-color: #198754; color: white; }
-        .patient-pic { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; }
-        .grid-span-2 { grid-column: span 2; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .info-item { display: flex; align-items: center; font-size: 0.95rem; }
+        .info-item i { font-size: 1.4rem; color: #0d6efd; min-width: 30px; }
+        .info-item div { display: flex; flex-direction: column; }
+        .info-item .label { font-size: 0.8rem; color: #6c757d; }
     </style>
 </head>
 <body>
 
     <div id="loading">
-        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <span id="loading-text">กำลังโหลดข้อมูล...</span>
     </div>
 
     <div class="container" id="main-content" style="display: none;">
-        <div class="row">
-            <div id="dynamic-content-container"></div>
-        </div>
+        <div class="row" id="dynamic-content-container">
+            </div>
+        <div id="vhv-register-button-container">
+             </div>
     </div>
 
     <div class="container" id="unregistered-user" style="display: none;">
@@ -45,49 +50,80 @@
         </div>
     </div>
 
-    <div class="modal fade" id="vhvRegisterModal" tabindex="-1">
+    <div class="modal fade" id="distanceModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header"><h1 class="modal-title fs-5" id="vhvRegisterModalLabel">ลงทะเบียน อสม.สโตรก</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body">
-                    <form id="vhvForm">
-                        <div class="mb-3"><label class="form-label">ตำแหน่งบ้าน อสม.</label><button type="button" class="btn btn-outline-primary w-100" onclick="getVhvHomeLocation()"><i class="bi bi-geo-alt-fill"></i> <span id="vhvLocationStatus">คลิกเพื่อปักหมุดตำแหน่งบ้าน</span></button><input type="hidden" id="vhvAsmHome"></div>
-                        <div class="mb-3"><label for="vhvName" class="form-label">ชื่อ-นามสกุลจริง</label><input type="text" class="form-control" id="vhvName" required></div>
-                        <div class="mb-3"><label for="vhvPhone" class="form-label">เบอร์โทรศัพท์ (10 หลัก)</label><input type="tel" class="form-control" id="vhvPhone" required pattern="[0-9]{10}"></div>
-                        <div class="mb-3"><label for="vhvArea" class="form-label">พื้นที่ดูแล (คั่นด้วยจุลภาค ,)</label><input type="text" class="form-control" id="vhvArea" placeholder="เช่น ต.นาโพธิ์ ม.7,ต.ทุ่งคา ม.1" required></div>
-                        <div class="mb-3"><label for="vhvLineId" class="form-label">LINE ID (ถ้ามี)</label><input type="text" class="form-control" id="vhvLineId"></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" required><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
-                    </form>
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">ปักหมุดตำแหน่งใหม่</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-primary" onclick="handleVhvRegistration()">บันทึกข้อมูล</button></div>
+                <div class="modal-body">
+                    <p class="small text-muted">กรุณากดปุ่มเพื่อระบุตำแหน่งปัจจุบันของคุณ ระบบจะคำนวณระยะทางและเวลาเดินทางไป รพ.สวี โดยอัตโนมัติ</p>
+                    <div class="mb-3">
+                        <label for="locationType" class="form-label">ประเภทตำแหน่ง</label>
+                        <select class="form-select" id="locationType">
+                            <option value="บ้าน">บ้าน</option>
+                            <option value="ทางผ่าน">ทางผ่าน</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="handlePinNewLocation()">
+                        <i class="bi bi-geo-alt-fill"></i> ปักหมุดตำแหน่งปัจจุบัน
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+    
+    <div class="modal fade" id="vhvRegisterModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header"><h1 class="modal-title fs-5" id="vhvRegisterModalLabel">ลงทะเบียน อสม.สโตรก</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <form id="vhvForm">
+              <div class="mb-3"><label for="vhvName" class="form-label">ชื่อ-นามสกุลจริง</label><input type="text" class="form-control" id="vhvName" required></div>
+              <div class="mb-3"><label for="vhvPhone" class="form-label">เบอร์โทรศัพท์ (10 หลัก)</label><input type="tel" class="form-control" id="vhvPhone" required pattern="[0-9]{10}"></div>
+              <div class="mb-3"><label for="vhvLineId" class="form-label">LINE ID (ถ้ามี)</label><input type="text" class="form-control" id="vhvLineId"></div>
+              <div class="mb-3">
+                  <label for="vhvArea" class="form-label">เลือกพื้นที่ดูแล (เลือกได้หลายพื้นที่)</label>
+                  <select class="form-select" id="vhvArea" multiple required size="5">
+                      </select>
+              </div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" required><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
+            </form>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-primary" onclick="handleVhvRegistration()">บันทึกข้อมูล</button></div>
+        </div>
+      </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
         let LIFF_PROFILE = null;
+        let ALL_USER_DATA = null;
+        let DISTANCE_MODAL = null;
         let VHV_REG_MODAL = null;
-        let VHV_PROFILE_DATA = null;
         
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', initializeLiff);
 
         async function initializeLiff() {
+            DISTANCE_MODAL = new bootstrap.Modal(document.getElementById('distanceModal'));
             VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
             try {
                 await liff.init({ liffId: "2005789397-RLAGXrBJ" });
-                if (!liff.isLoggedIn()) { liff.login(); } 
-                else {
-                    LIFF_PROFILE = await liff.getProfile();
-                    fetchUserData(LIFF_PROFILE.userId);
-                }
+                if (!liff.isLoggedIn()) { liff.login(); return; } 
+                
+                LIFF_PROFILE = await liff.getProfile();
+                fetchUserData(LIFF_PROFILE.userId);
+
             } catch (error) { handleFailure("เกิดข้อผิดพลาดในการเปิดแอป: " + error.message); }
         }
 
         function fetchUserData(userId) {
-            showLoading(true);
+            showLoading(true, "กำลังโหลดข้อมูล...");
             fetch(`${WEB_APP_URL}?action=getUserData&userId=${userId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -97,7 +133,7 @@
                     if (!data.userProfile) {
                         document.getElementById('unregistered-user').style.display = 'block';
                     } else {
-                        VHV_PROFILE_DATA = data.vhvProfile;
+                        ALL_USER_DATA = data;
                         updatePage(data);
                         document.getElementById('main-content').style.display = 'block';
                     }
@@ -108,165 +144,217 @@
         
         function updatePage(data) {
             const container = document.getElementById('dynamic-content-container');
-            let html = '';
-
-            // --- Build HTML string for all cards ---
-            html += buildProfileCard(data.userProfile);
-            html += buildDailyCheckCard(data.dailyCheckCounts);
+            let html = buildProfileCard(data.userProfile);
+            html += buildDailyCheckCard(data.dailyCheckInfo);
             html += buildCommunityLeadersCard(data.communityLeaders);
-            html += buildDistanceCard(data.latestDistance);
+            html += buildDistanceCard(data.homeDistance, data.userProfile.help);
             html += buildStickerCard(data.stickerShareCount);
+            html += buildKnowledgeTestCard(data.knowledgeTestStats);
 
-            if (data.isVhv) {
-                html += buildVhvDashboard(data.vhvProfile, data.patientDetails);
-            } else {
-                html += buildVhvRegistrationButton();
-            }
-            
-            // Inject the complete HTML into the container once
             container.innerHTML = html;
+            
+            // Handle VHV registration button separately
+            if (!data.isVhv) {
+                document.getElementById('vhv-register-button-container').innerHTML = buildVhvRegistrationButton();
+            }
         }
 
         // --- HTML Builder Functions ---
+
         function buildProfileCard(p) {
             if (!p) return '';
-            const riskColorClass = getRiskColorClass(p.thai_cv_risk_score);
+            const riskValue = p.thai_cv_risk_score / 100;
+            const riskInfo = classifyRisk(riskValue);
+
+            const healthFactors = `
+                <div class="info-item">
+                    <i class="bi bi-gender-ambiguous"></i>
+                    <div><span class="label">เพศ</span> <b>${p.gender == 1 ? 'ชาย' : 'หญิง'}</b></div>
+                </div>
+                <div class="info-item">
+                    <i class="bi bi-calendar-event"></i>
+                    <div><span class="label">อายุ</span> <b>${p.age || 'N/A'} ปี</b></div>
+                </div>
+                <div class="info-item">
+                    <i class="bi bi-fire"></i>
+                    <div><span class="label">สูบบุหรี่</span> <b>${p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'}</b></div>
+                </div>
+                 <div class="info-item">
+                    <i class="bi bi-bandaid"></i>
+                    <div><span class="label">เบาหวาน</span> <b>${p.dm == 1 ? 'เป็น' : 'ไม่เป็น'}</b></div>
+                </div>
+                <div class="info-item">
+                    <i class="bi bi-speedometer2"></i>
+                    <div><span class="label">ความดัน (SBP)</span> <b>${p.sbp || 'N/A'} mmHg</b></div>
+                </div>
+                 <div class="info-item">
+                    <i class="bi bi-droplet-half"></i>
+                    <div><span class="label">ไขมัน (Cholesterol)</span> <b>${p.cholesterol || 'N/A'} mg/dL</b></div>
+                </div>
+                <div class="info-item">
+                    <i class="bi bi-arrows-expand"></i>
+                    <div><span class="label">รอบเอว</span> <b>${p.waist || 'N/A'} นิ้ว</b></div>
+                </div>
+                <div class="info-item">
+                    <i class="bi bi-rulers"></i>
+                    <div><span class="label">ส่วนสูง</span> <b>${p.height || 'N/A'} ซม.</b></div>
+                </div>
+                <div class="info-item" style="grid-column: span 2;">
+                    <i class="bi bi-clipboard-plus"></i>
+                    <div><span class="label">โรคประจำตัว</span> <b>${p['u/d'] || 'ไม่มี'}</b></div>
+                </div>
+            `;
+            
             return `
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="text-center">
-                                <img src="${p.pictureUrl || 'https://via.placeholder.com/100'}" alt="รูปโปรไฟล์" class="profile-img">
-                                <div class="fs-5 fw-bold">${p.name || 'N/A'}</div>
-                                <div class="text-muted small mb-2">เบอร์โทร: ${p.telephone || 'N/A'}</div>
-                                <span class="badge bg-secondary fw-normal">ลงทะเบียนเมื่อ: ${p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : 'N/A'}</span>
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" alt="รูปโปรไฟล์" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1">${p.name || 'N/A'}</h5>
+                                    <div class="small text-muted mb-1">โทร: ${p.telephone || 'N/A'}</div>
+                                    <div class="small text-muted mb-2">Line: ${p.line_id || 'N/A'}</div>
+                                    <span class="badge bg-secondary fw-normal">ลงทะเบียน: ${p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : 'N/A'}</span>
+                                </div>
                             </div>
                             <hr>
-                            <h5 class="section-title"><i class="bi bi-heart-pulse-fill"></i>ประวัติสุขภาพ</h5>
-                            <div class="text-center mb-3">
-                                <div>% ความเสี่ยงสโตรก</div>
-                                <div class="display-4 fw-bolder ${riskColorClass}">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'N/A'}</div>
-                                <div class="fw-bold">${p.risk_group || 'N/A'}</div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                 <div class="text-center flex-grow-1">
+                                    <div style="color: ${riskInfo.color};">
+                                        <div class="display-4 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'N/A'}</div>
+                                        <div class="fw-bold">${riskInfo.text}</div>
+                                    </div>
+                                </div>
+                                <a href="https://liff.line.me/2005789397-nebQ8oJy" class="btn btn-outline-primary ms-3">ประเมินใหม่</a>
                             </div>
+                            <h6 class="section-title border-top pt-3"><i class="bi bi-heart-pulse-fill"></i>ปัจจัยเสี่ยงของคุณ</h6>
+                            <div class="info-grid">${healthFactors}</div>
                         </div>
                     </div>
                 </div>`;
         }
+        
+        function buildDailyCheckCard(info) {
+            let daysSinceCheck = '';
+            if (info.latestCheckTimestamp) {
+                const lastCheckDate = new Date(info.latestCheckTimestamp);
+                const today = new Date();
+                lastCheckDate.setHours(0,0,0,0);
+                today.setHours(0,0,0,0);
+                
+                const diffTime = Math.abs(today - lastCheckDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        function buildDailyCheckCard(counts) {
-            const symptomCount = counts ? counts.symptomCount : 0;
-            const noSymptomCount = counts ? counts.noSymptomCount : 0;
+                if (diffDays > 0) {
+                    daysSinceCheck = `<p class="text-center text-danger small mt-3 mb-0">คุณไม่ได้เช็คอาการสโตรกมาแล้ว ${diffDays} วัน</p>`;
+                }
+            } else {
+                 daysSinceCheck = `<p class="text-center text-danger small mt-3 mb-0">คุณยังไม่เคยประเมินอาการสโตรก</p>`;
+            }
+
             return `
                 <div class="col-lg-6 col-12">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ประเมินอาการสโตรกประจำวัน</h5>
-                            <div class="d-flex justify-content-around text-center mb-3">
-                                <div><div class="fs-4 fw-bold text-danger">${symptomCount}</div><div class="small">มีอาการ</div></div>
-                                <div><div class="fs-4 fw-bold text-success">${noSymptomCount}</div><div class="small">ไม่มีอาการ</div></div>
+                            <div class="d-flex justify-content-around text-center mb-2">
+                                <div><div class="fs-4 fw-bold text-danger">${info.symptomCount}</div><div class="small">มีอาการ</div></div>
+                                <div><div class="fs-4 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ไม่มีอาการ</div></div>
                             </div>
-                            <a href="https://liff.line.me/2005789397-WRm1lYd9" class="btn btn-primary w-100">ประเมินอาการตอนนี้</a>
+                            ${daysSinceCheck}
+                            <a href="https://liff.line.me/2005789397-WRm1lYd9" class="btn btn-primary w-100 mt-3">ประเมินอาการตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
         }
-
+        
         function buildCommunityLeadersCard(leaders) {
-            let leaderHtml = '<p class="text-muted">ไม่พบข้อมูลผู้นำชุมชนในพื้นที่ของคุณ</p>';
+            let leaderHtml = `<p class="text-muted">ไม่พบข้อมูลผู้นำชุมชนในพื้นที่ของคุณ</p>`;
             if (leaders) {
                 let items = '';
-                if(leaders.volunteer1 && leaders.volunteer1_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. คนที่ 1: ${leaders.volunteer1}</span><a href="tel:${leaders.volunteer1_tel}" class="btn-call">โทร</a></li>`;
-                if(leaders.volunteer2 && leaders.volunteer2_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. คนที่ 2: ${leaders.volunteer2}</span><a href="tel:${leaders.volunteer2_tel}" class="btn-call">โทร</a></li>`;
-                if(leaders.village_headman && leaders.headman_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>ผู้นำชุมชน: ${leaders.village_headman}</span><a href="tel:${leaders.headman_tel}" class="btn-call">โทร</a></li>`;
-                if(leaders.pcu && leaders.pcu_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>รพ.สต.: ${leaders.pcu}</span><a href="tel:${leaders.pcu_tel}" class="btn-call">โทร</a></li>`;
-                if (items) {
-                    leaderHtml = `<ul class="list-group list-group-flush">${items}</ul>`;
-                }
+                if(leaders.volunteer1 && leaders.volunteer1_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. 1: ${leaders.volunteer1} <small class="text-muted d-block">${leaders.area}</small></span><a href="tel:${leaders.volunteer1_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                if(leaders.volunteer2 && leaders.volunteer2_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. 2: ${leaders.volunteer2} <small class="text-muted d-block">${leaders.area}</small></span><a href="tel:${leaders.volunteer2_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                if(leaders.village_headman && leaders.headman_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>ผู้นำชุมชน: ${leaders.village_headman}</span><a href="tel:${leaders.headman_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                
+                leaderHtml = `<div class="mb-2 fw-bold">รพ.สต.: ${leaders.pcu || 'N/A'} ${leaders.pcu_tel ? `(<a href="tel:${leaders.pcu_tel}">โทร</a>)` : ''}</div><ul class="list-group list-group-flush">${items}</ul>`;
             }
             return `
                 <div class="col-lg-6 col-12">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="section-title"><i class="bi bi-person-hearts"></i>ผู้นำชุมชนและ อสม.</h5>
+                            <h5 class="section-title"><i class="bi bi-person-hearts"></i>อสม. และผู้นำชุมชน</h5>
                             ${leaderHtml}
                         </div>
                     </div>
                 </div>`;
         }
-
-        function buildDistanceCard(latestDistance) {
-            let historyHtml = '<p class="text-muted">ไม่พบประวัติการวัดระยะทาง</p>';
+        
+        function buildDistanceCard(distanceInfo, helpText) {
+            let historyHtml = '<p class="text-muted">ไม่พบประวัติการปักหมุดตำแหน่ง "บ้าน"</p>';
             let cardClass = 'card';
-            if(latestDistance) {
-                const d = latestDistance;
-                historyHtml = `<p class="mb-1"><strong>ระยะทางล่าสุด:</strong> ${parseFloat(d.distance).toFixed(1)} กม. / ${Math.round(d.duration)} นาที</p>`;
-                const duration = Math.round(d.duration);
-                if (duration <= 60) cardClass += ' bg-success-subtle';
-                else if (duration <= 210) cardClass += ' bg-warning-subtle';
+            let analysisHtml = '';
+
+            if (distanceInfo) {
+                const durationMins = parseInt(distanceInfo.duration, 10);
+                if (durationMins < 120) cardClass += ' bg-success-subtle';
+                else if (durationMins < 210) cardClass += ' bg-warning-subtle';
                 else cardClass += ' bg-danger-subtle';
+
+                historyHtml = `<p class="mb-1"><strong>ระยะทางจากบ้าน:</strong> ${parseFloat(distanceInfo.distance).toFixed(1)} กม.</p>
+                               <p><strong>ใช้เวลาเดินทาง:</strong> ${formatDuration(durationMins)}</p>`;
+                
+                const travelTimeHours = durationMins / 60;
+                if (travelTimeHours * 2 > 3.5) {
+                    analysisHtml = `<p class="small mb-1"><b>วิเคราะห์:</b> ด้วยระยะทางนี้หากท่านรอรถ รพ. ไปรับ อาจทำให้มารับยาไม่ทัน <b>โปรดวางแผนการเดินทางสำรองในกรณีฉุกเฉินด้วย</b></p>`;
+                } else {
+                     analysisHtml = `<p class="small mb-1"><b>วิเคราะห์:</b> ท่านสามารถเรียกรถ รพ. ไปรับได้ อย่างไรก็ตามควรวางแผนสำรองในกรณีฉุกเฉินด้วย</p>`;
+                }
+                analysisHtml += `<p class="small"><b>วิธีเดินทางที่วางแผนไว้:</b> ${helpText || 'ไม่ได้ระบุ'}</p>`;
             }
+
             return `
                 <div class="col-lg-6 col-12">
-                    <div class="${cardClass}" id="distanceCard">
+                    <div class="${cardClass}">
                         <div class="card-body">
                             <h5 class="section-title"><i class="bi bi-hospital-fill"></i>ระยะทางไป รพ.สวี</h5>
                             ${historyHtml}
-                            <p class="small text-danger fst-italic">"การรับยาละลายลิ่มเลือด (rT-PA) มีความสำคัญอย่างยิ่ง และต้องได้รับภายใน 4.5 ชั่วโมงหลังเกิดอาการ"</p>
+                            <p class="small text-danger fst-italic mt-2">"การรับยาละลายลิ่มเลือด (rT-PA) มีความสำคัญอย่างยิ่ง และต้องได้รับภายใน 4.5 ชั่วโมงหลังเกิดอาการ"</p>
+                            <div class="border-top pt-2 mt-2">${analysisHtml}</div>
+                            <button type="button" class="btn btn-secondary w-100 mt-2" onclick="DISTANCE_MODAL.show()">
+                                <i class="bi bi-pin-map-fill"></i> ปักหมุดใหม่
+                            </button>
                         </div>
                     </div>
                 </div>`;
         }
-
+        
         function buildStickerCard(count) {
+            const message = count > 10 ? '<p class="text-center small mt-2">คุณคือนักส่งสติกเกอร์ตัวยง และเป็นนักเผยแพร่ความรู้ ให้คนตระหนักในโรคสโตรก สุดยอดจริงๆ!</p>' : '';
             return `
                 <div class="col-lg-6 col-12">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="section-title"><i class="bi bi-send-check-fill"></i>ส่งสติกเกอร์ประจำวัน</h5>
-                            <p class="text-center">ส่งแล้ว <strong class="fs-5">${count || 0}</strong> ครั้ง</p>
-                            <a href="https://liff.line.me/2005789397-37lemBgX" class="btn btn-info w-100 text-white">ส่งสติกเกอร์สโตรกตอนนี้</a>
+                            <p class="text-center mb-0">ส่งแล้ว <strong class="fs-4 mx-1">${count || 0}</strong> ครั้ง</p>
+                            ${message}
+                            <a href="https://liff.line.me/2005789397-37lemBgX" class="btn btn-info w-100 text-white mt-3">ส่งสติกเกอร์ตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
         }
-
-        function buildVhvDashboard(vhvProfile, patients) {
-            let patientHtml = '<p class="text-muted">ไม่พบผู้ป่วยในพื้นที่ดูแลของคุณ หรือยังไม่มีผู้ยินยอมให้ข้อมูล</p>';
-            if (patients && patients.length > 0) {
-                patientHtml = '';
-                patients.forEach(p => {
-                    const mapLink = p.latestDistance && p.latestDistance.latlong ? `http://googleusercontent.com/maps.google.com/4{p.latestDistance.latlong}` : '#';
-                    patientHtml += `
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <img src="${p.pictureUrl || 'https://via.placeholder.com/40'}" class="patient-pic">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">${p.name}</h6>
-                                    <small class="text-muted">${`ต.${p.district} ม.${p.village}`}</small>
-                                </div>
-                                <a href="tel:${p.telephone}" class="btn-call"><i class="bi bi-telephone-fill"></i> โทร</a>
-                            </div>
-                        </div>`;
-                });
-            }
-
-            const homeWarning = !vhvProfile.asm_home ? `<div class="alert alert-warning mt-2"><i class="bi bi-exclamation-triangle-fill"></i> กรุณาปักหมุดตำแหน่งบ้านของคุณ</div>` : '';
-
-            return `
+        
+        function buildKnowledgeTestCard(stats) {
+             return `
                 <div class="col-12">
-                     <div class="card card-vhv-brown">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="section-title text-success mb-0"><i class="bi bi-person-check-fill"></i>คุณคือ อสม.สโตรก</h5>
-                                <button class="btn btn-sm btn-outline-success" onclick="openVhvModal(true)">แก้ไขข้อมูล</button>
-                            </div>
-                            ${homeWarning}
-                        </div>
-                    </div>
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="section-title"><i class="bi bi-people-fill"></i>รายชื่อในความดูแล</h5>
-                            <div class="list-group">${patientHtml}</div>
+                            <h5 class="section-title"><i class="bi bi-patch-question-fill"></i>ทดสอบความรู้สโตรก</h5>
+                             <div class="d-flex justify-content-around text-center mb-3">
+                                <div><div class="fs-4 fw-bold">${stats.testCount}</div><div class="small">ทดสอบแล้ว (ครั้ง)</div></div>
+                                <div><div class="fs-4 fw-bold">${stats.maxScore}</div><div class="small">คะแนนสูงสุด</div></div>
+                            </div>
+                            <a href="https://liff.line.me/2005789397-ROQvjpYk" class="btn btn-success w-100">ทำแบบทดสอบ</a>
                         </div>
                     </div>
                 </div>`;
@@ -274,10 +362,10 @@
 
         function buildVhvRegistrationButton() {
             return `
-                <div class="col-12">
-                    <div class="card card-vhv-brown">
+                 <div class="col-12 mt-3">
+                    <div class="card">
                         <div class="card-body text-center p-3">
-                            <button class="btn btn-lg" style="background-color: #6f4e37; color: white;" onclick="openVhvModal(false)">
+                            <button class="btn btn-lg btn-warning" onclick="openVhvModal(false)">
                                 <i class="bi bi-person-plus-fill"></i> ลงทะเบียน อสม.สโตรก
                             </button>
                         </div>
@@ -286,45 +374,95 @@
         }
 
         // --- Event Handlers & Modal Functions ---
-        function openVhvModal(isEditing) {
-            const existingData = isEditing ? VHV_PROFILE_DATA : {};
-            document.getElementById('vhvForm').reset();
-            document.getElementById('vhvRegisterModalLabel').textContent = isEditing ? 'แก้ไขข้อมูล อสม.สโตรก' : 'ลงทะเบียน อสม.สโตรก';
-            document.getElementById('vhvName').value = existingData.name || '';
-            document.getElementById('vhvPhone').value = existingData.phone || '';
-            document.getElementById('vhvLineId').value = existingData.line_id || '';
-            document.getElementById('vhvArea').value = existingData.area || '';
-            document.getElementById('vhvAsmHome').value = existingData.asm_home || '';
-            document.getElementById('vhvLocationStatus').textContent = existingData.asm_home ? 'ปักหมุดตำแหน่งบ้านแล้ว' : 'คลิกเพื่อปักหมุดตำแหน่งบ้าน';
-            document.getElementById('vhvPdpa').checked = !!existingData.pdpa;
-            VHV_REG_MODAL.show();
+        
+        function handlePinNewLocation() {
+            const type = document.getElementById('locationType').value;
+            showLoading(true, "กำลังระบุตำแหน่ง...");
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const latlong = `${lat},${lon}`;
+                showLoading(true, "กำลังคำนวณระยะทาง...");
+
+                fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${lat}&lon=${lon}`)
+                    .then(res => res.json())
+                    .then(distanceData => {
+                        if (distanceData.error) throw new Error(distanceData.error);
+                        
+                        showLoading(true, "กำลังบันทึกข้อมูล...");
+                        const postData = {
+                            action: 'saveNewLocation',
+                            data: {
+                                userId: LIFF_PROFILE.userId,
+                                type: type,
+                                latlong: latlong,
+                                distance: distanceData.distance_km,
+                                duration: distanceData.duration_mins
+                            }
+                        };
+                        return fetch(WEB_APP_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify(postData)
+                        });
+                    })
+                    .then(() => {
+                        alert("บันทึกตำแหน่งสำเร็จ! กำลังโหลดข้อมูลใหม่");
+                        window.location.reload();
+                    })
+                    .catch(handleFailure);
+
+            }, err => {
+                handleFailure("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message);
+            }, { enableHighAccuracy: true });
         }
         
-        function getVhvHomeLocation() {
-            if (!confirm('ตอนนี้คุณอยู่ที่บ้านพักของคุณแล้วใช่หรือไม่?')) return;
-            showLoading(true, "กำลังระบุตำแหน่ง...");
-            navigator.geolocation.getCurrentPosition(pos => {
-                const coords = `${pos.coords.latitude},${pos.coords.longitude}`;
-                document.getElementById('vhvAsmHome').value = coords;
-                document.getElementById('vhvLocationStatus').textContent = 'บันทึกพิกัดแล้ว';
-                showLoading(false);
-            }, err => { handleFailure("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message); }, { enableHighAccuracy: true });
+        function openVhvModal() {
+            document.getElementById('vhvForm').reset();
+            const existingData = ALL_USER_DATA.vhvProfile || {};
+            
+            document.getElementById('vhvName').value = existingData.name || ALL_USER_DATA.userProfile.name ||'';
+            document.getElementById('vhvPhone').value = existingData.phone || ALL_USER_DATA.userProfile.telephone || '';
+            document.getElementById('vhvLineId').value = existingData.line_id || ALL_USER_DATA.userProfile.line_id || '';
+            document.getElementById('vhvPdpa').checked = !!existingData.pdpa;
+            
+            // Populate areas
+            const areaSelect = document.getElementById('vhvArea');
+            areaSelect.innerHTML = ''; // Clear old options
+            ALL_USER_DATA.availableVhvAreas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area;
+                option.textContent = area;
+                areaSelect.appendChild(option);
+            });
+            
+            VHV_REG_MODAL.show();
         }
 
         function handleVhvRegistration() {
             const form = document.getElementById('vhvForm');
             if (!form.checkValidity()) { form.reportValidity(); return; }
-            showLoading(true, "กำลังบันทึกข้อมูล...");
+            showLoading(true, "กำลังบันทึกข้อมูล อสม....");
+
+            const selectedAreas = Array.from(document.getElementById('vhvArea').selectedOptions).map(opt => opt.value);
+            if(selectedAreas.length === 0){
+                alert("กรุณาเลือกพื้นที่ดูแลอย่างน้อย 1 พื้นที่");
+                showLoading(false);
+                return;
+            }
+            
             const pdpaText = "ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้";
             const registrationData = {
-                displayName: LIFF_PROFILE.displayName, userID: LIFF_PROFILE.userId, profilePicture: LIFF_PROFILE.pictureUrl,
+                displayName: LIFF_PROFILE.displayName, userId: LIFF_PROFILE.userId, profilePicture: LIFF_PROFILE.pictureUrl,
                 name: document.getElementById('vhvName').value.trim(),
                 phone: document.getElementById('vhvPhone').value.trim(),
                 line_id: document.getElementById('vhvLineId').value.trim(),
-                area: document.getElementById('vhvArea').value.trim(),
-                asm_home: document.getElementById('vhvAsmHome').value.trim(),
+                areas: selectedAreas,
                 pdpa: document.getElementById('vhvPdpa').checked ? pdpaText : ""
             };
+
             fetch(WEB_APP_URL, {
                 method: 'POST', mode: 'no-cors',
                 body: JSON.stringify({ action: 'registerVhv', data: registrationData })
@@ -339,19 +477,30 @@
         }
 
         // --- Utility Functions ---
-        function getRiskColorClass(score) {
-            if (score === null || score === undefined) return '';
-            if (score < 10) return 'risk-color-green';
-            if (score < 20) return 'risk-color-yellow';
-            if (score < 30) return 'risk-color-orange';
-            if (score < 40) return 'risk-color-red';
-            return 'risk-color-darkred';
+        function classifyRisk(risk) {
+            if (risk < 0.10) return { text: "เสี่ยงต่ำ", color: "#28a745" };
+            if (risk < 0.20) return { text: "เสี่ยงปานกลาง", color: "#ffc107" };
+            if (risk < 0.30) return { text: "เสี่ยงสูง", color: "#fd7e14" };
+            if (risk < 0.40) return { text: "เสี่ยงสูงมาก", color: "#dc3545" };
+            return { text: "เสี่ยงอันตราย", color: "#8B0000" };
         }
-        function showLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
+        function formatDuration(minutes) {
+            if (!minutes || minutes < 1) return "N/A";
+            const h = Math.floor(minutes / 60);
+            const m = minutes % 60;
+            let result = '';
+            if (h > 0) result += `${h} ชั่วโมง `;
+            if (m > 0) result += `${m} นาที`;
+            return result.trim();
+        }
+        function showLoading(show, text = "กำลังโหลด...") { 
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+            document.getElementById('loading-text').textContent = text;
+        }
         function handleFailure(err) {
-            const message = err.message || err;
-            console.error(message);
-            alert(message);
+            const message = err.message || JSON.stringify(err);
+            console.error("Operation Failed:", message);
+            alert("เกิดข้อผิดพลาด: " + message);
             showLoading(false);
         }
     </script>
