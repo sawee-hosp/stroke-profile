@@ -12,7 +12,7 @@
         :root { --bs-primary-rgb: 13, 110, 253; }
         body { 
             font-family: "Noto Sans Thai", sans-serif; 
-            font-size: 18px; /* <-- เพิ่มขนาดตัวอักษรพื้นฐาน */
+            font-size: 18px;
             background-color: #f0f2f5; 
             padding-top: 1rem; 
             padding-bottom: 1rem; 
@@ -31,6 +31,7 @@
         .info-item .label { font-size: 0.8em; color: #6c757d; }
         .bg-light-brown { background-color: #f0eade; border: 1px solid #d3c0a4; }
         .btn-copy { background: none; border: none; color: #0d6efd; padding: 0 0.5rem; }
+        .details { font-size: 0.9em; color: #6c757d; }
     </style>
 </head>
 <body>
@@ -96,10 +97,11 @@
               <div class="mb-3"><label for="vhvPhone" class="form-label">เบอร์โทรศัพท์ (10 หลัก)</label><input type="tel" class="form-control" id="vhvPhone" required pattern="[0-9]{10}"></div>
               <div class="mb-3"><label for="vhvLineId" class="form-label">LINE ID (ถ้ามี)</label><input type="text" class="form-control" id="vhvLineId"></div>
               <div class="mb-3">
-                  <label for="vhvArea" class="form-label">พื้นที่ดูแล (คั่นด้วยจุลภาค ,)</label>
-                  <input type="text" class="form-control" id="vhvArea" required placeholder="เช่น ต.นาโพธิ์ ม.7,ต.ทุ่งคา ม.1">
+                  <label for="vhvArea" class="form-label">เลือกพื้นที่ดูแล (เลือกได้หลายพื้นที่)</label>
+                  <select class="form-select" id="vhvArea" multiple required size="5">
+                      </select>
               </div>
-              <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" required><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
+              <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
             </form>
           </div>
           <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button><button type="button" class="btn btn-primary" onclick="handleVhvRegistration()">บันทึกข้อมูล</button></div>
@@ -114,10 +116,10 @@
         // --- Global Variables & Constants ---
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
         const LIFF_ID_MAIN = "2005789397-RLAGXrBJ";
-        const LIFF_ID_REGIS = "2005789397-nebQ8oJy";
-        const LIFF_ID_DAILY = "2005789397-WRm1lYd9";
-        const LIFF_ID_STICKER = "2005789397-37lemBgX";
-        const LIFF_ID_KNOWLEDGE = "2005789397-ROQvjpYk";
+        const LIFF_ID_REGIS = "https://liff.line.me/2005789397-nebQ8oJy";
+        const LIFF_ID_DAILY = "https://liff.line.me/2005789397-WRm1lYd9";
+        const LIFF_ID_STICKER = "https://liff.line.me/2005789397-37lemBgX";
+        const LIFF_ID_KNOWLEDGE = "https://liff.line.me/2005789397-ROQvjpYk";
 
         let LIFF_PROFILE = null;
         let ALL_USER_DATA = null;
@@ -291,7 +293,7 @@
                                 <div><div class="fs-4 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ไม่มีอาการ</div></div>
                             </div>
                             ${daysSinceCheck}
-                            <a href="${LIFF_ID_DAILY}" class="btn btn-primary w-100 mt-3">ประเมินอาการตอนนี้</a>
+                            <a href="${LIFF_ID_DAILY}" class="btn btn-primary w-100 mt-3">เช็คอาการสโตรกตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
@@ -301,18 +303,28 @@
             let leaderHtml = `<p class="text-muted">ไม่พบข้อมูลผู้นำชุมชนในพื้นที่ของคุณ</p>`;
             if (leaders) {
                 const pcuCallBtn = leaders.pcu_tel ? `<a href="#" onclick="trackTelCall('${leaders.pcu_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>` : '';
-                let items = `<div class="d-flex justify-content-between align-items-center mb-2"><b>รพ.สต.: ${leaders.pcu || 'N/A'}</b> ${pcuCallBtn}</div>`;
                 
-                const v1Line = leaders.volunteer1_line_id ? `<span class="small text-muted">Line: ${leaders.volunteer1_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.volunteer1_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
-                const v2Line = leaders.volunteer2_line_id ? `<span class="small text-muted">Line: ${leaders.volunteer2_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.volunteer2_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
-                const headmanLine = leaders.headman_line_id ? `<span class="small text-muted">Line: ${leaders.headman_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.headman_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
+                const createVhvItem = (num, vhvData) => {
+                    if (!vhvData.name || !vhvData.tel) return '';
+                    const lineInfo = vhvData.line_id ? `Line: ${vhvData.line_id} <button class="btn-copy" onclick="copyToClipboard('${vhvData.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
+                    const distanceInfo = vhvData.distance_km ? `<i class="bi bi-sign-turn-right-fill ms-2"></i> ${vhvData.distance_km} กม.` : '';
+                    
+                    return `<li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <b>อสม. ${num}: ${vhvData.name}</b>
+                            <a href="#" onclick="trackTelCall('${vhvData.tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
+                        </div>
+                        <div class="details mt-1">${lineInfo} ${distanceInfo}</div>
+                    </li>`;
+                };
 
-                let vhvItems = '';
-                if(leaders.volunteer1 && leaders.volunteer1_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>อสม. 1: ${leaders.volunteer1} ${v1Line}</div> <a href="#" onclick="trackTelCall('${leaders.volunteer1_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
-                if(leaders.volunteer2 && leaders.volunteer2_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>อสม. 2: ${leaders.volunteer2} ${v2Line}</div> <a href="#" onclick="trackTelCall('${leaders.volunteer2_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
-                if(leaders.village_headman && leaders.headman_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>ผู้นำชุมชน: ${leaders.village_headman} ${headmanLine}</div> <a href="#" onclick="trackTelCall('${leaders.headman_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                let vhvItems = createVhvItem(1, {name: leaders.volunteer1, tel: leaders.volunteer1_tel, line_id: leaders.volunteer1_line_id, distance_km: leaders.volunteer1_distance_km});
+                vhvItems += createVhvItem(2, {name: leaders.volunteer2, tel: leaders.volunteer2_tel, line_id: leaders.volunteer2_line_id, distance_km: leaders.volunteer2_distance_km});
                 
-                leaderHtml = `${items}<ul class="list-group list-group-flush">${vhvItems}</ul>`;
+                leaderHtml = `<ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><b>รพ.สต.: ${leaders.pcu || 'N/A'}</b> ${pcuCallBtn}</li>
+                    ${vhvItems}
+                </ul>`;
             }
             return `
                 <div class="col-lg-6 col-12">
@@ -387,7 +399,7 @@
                                 <div><div class="fs-4 fw-bold">${stats.testCount}</div><div class="small">ทดสอบแล้ว (ครั้ง)</div></div>
                                 <div><div class="fs-4 fw-bold">${stats.maxScore}</div><div class="small">คะแนนสูงสุด</div></div>
                             </div>
-                            <a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-success w-100">ทำแบบทดสอบ</a>
+                            <a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-success w-100">ทำแบบทดสอบตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
@@ -400,7 +412,7 @@
 
             const testStatus = vhv.asm_test 
                 ? `<span class="text-success">คะแนนสอบ: ${vhv.asm_test}</span> <a href="${LIFF_ID_KNOWLEDGE}" class="ms-2">สอบใหม่</a>` 
-                : `<a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-sm btn-info text-white">ทำแบบทดสอบ</a>`;
+                : `<a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-sm btn-info text-white">ทำแบบทดสอบ อสม.</a>`;
             
             return `<div class="col-12"><div class="card bg-light-brown"><div class="card-body">
                 <h5 class="section-title"><i class="bi bi-person-badge"></i>แดชบอร์ด อสม.สโตรก</h5>
@@ -416,26 +428,28 @@
         }
 
         function buildVhvPatientListCard(patients) {
-            if (!patients || patients.length === 0) return '<div class="col-12"><div class="card"><div class="card-body"><p class="text-muted">ไม่พบผู้ป่วยในพื้นที่รับผิดชอบที่ยินยอมให้ข้อมูล</p></div></div></div>';
+            if (!patients || patients.length === 0) return '';
             
             let patientItems = patients.map(p => {
                 const riskInfo = classifyRisk(p.thai_cv_risk_score/100);
-                const lineInfo = p.line_id ? `<span class="mx-2">|</span> Line: ${p.line_id} <button class="btn-copy" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
+                const lineInfo = p.line_id ? `Line: ${p.line_id} <button class="btn-copy" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
+                const distanceHtml = p.distanceFromVhv_km ? `<span class="ms-2 badge bg-secondary"><i class="bi bi-geo-alt-fill"></i> ${p.distanceFromVhv_km} กม.</span>` : '';
+
                 return `<li class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                        <div>
-                           <h6 class="mb-0 fw-bold">${p.name} (${p.gender == 1 ? 'ช' : 'ญ'}, ${p.age} ปี)</h6>
+                           <h6 class="mb-0 fw-bold">${p.name} (${p.gender == 1 ? 'ช' : 'ญ'}, ${p.age} ปี) ${distanceHtml}</h6>
                            <small style="color:${riskInfo.color}; font-weight: 600;">เสี่ยง ${p.thai_cv_risk_score}% (${riskInfo.text})</small>
                        </div>
                        <div>
                            <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
                        </div>
                     </div>
-                    <div class="text-muted small mt-1">โทร: ${p.telephone} ${lineInfo}</div>
+                    <div class="details mt-1">โทร: ${p.telephone} <span class="mx-2">|</span> ${lineInfo}</div>
                 </li>`;
             }).join('');
 
-            return `<div class="col-12"><div class="card"><div class="card-body">
+            return `<div class="col-12"><div class="card bg-light-brown"><div class="card-body">
                 <h5 class="section-title"><i class="bi bi-people-fill"></i>ผู้ป่วยในความรับผิดชอบ (${patients.length} คน)</h5>
                 <ul class="list-group list-group-flush">${patientItems}</ul>
             </div></div></div>`;
@@ -492,9 +506,25 @@
             document.getElementById('vhvRegisterModalLabel').textContent = ALL_USER_DATA.isVhv ? 'แก้ไขข้อมูล อสม.สโตรก' : 'ลงทะเบียน อสม.สโตรก';
             document.getElementById('vhvName').value = vhvData.name || userData.name ||'';
             document.getElementById('vhvPhone').value = vhvData.phone || userData.telephone || '';
-            document.getElementById('vhvLineId').value = vhvData.line_id || '';
-            document.getElementById('vhvArea').value = vhvData.area || `ต.${userData.district} ม.${userData.village}`;
-            document.getElementById('vhvPdpa').checked = !!vhvData.pdpa;
+            document.getElementById('vhvLineId').value = vhvData.line_id || userData.line_id || '';
+            document.getElementById('vhvPdpa').checked = true; // Default to checked
+
+            const areaSelect = document.getElementById('vhvArea');
+            areaSelect.innerHTML = ''; // Clear old options
+            if (ALL_USER_DATA.availableVhvAreas && ALL_USER_DATA.availableVhvAreas.length > 0) {
+                ALL_USER_DATA.availableVhvAreas.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area;
+                    option.textContent = area;
+                    areaSelect.appendChild(option);
+                });
+            } else if (vhvData.area) { // If editing, show current area
+                 const option = document.createElement('option');
+                 option.value = vhvData.area;
+                 option.textContent = vhvData.area;
+                 option.selected = true;
+                 areaSelect.appendChild(option);
+            }
             
             VHV_REG_MODAL.show();
         }
@@ -502,6 +532,13 @@
         function handleVhvRegistration() {
             const form = document.getElementById('vhvForm');
             if (!form.checkValidity()) { form.reportValidity(); return; }
+            
+            const selectedAreas = Array.from(document.getElementById('vhvArea').selectedOptions).map(opt => opt.value);
+            if(selectedAreas.length === 0){
+                alert("กรุณาเลือกพื้นที่ดูแลอย่างน้อย 1 พื้นที่");
+                return;
+            }
+
             showLoading(true, "กำลังบันทึกข้อมูล...");
 
             const registrationData = {
@@ -511,9 +548,8 @@
                 name: document.getElementById('vhvName').value.trim(),
                 phone: document.getElementById('vhvPhone').value.trim(),
                 line_id: document.getElementById('vhvLineId').value.trim(),
-                area: document.getElementById('vhvArea').value.trim(),
+                areas: selectedAreas,
                 pdpa: document.getElementById('vhvPdpa').checked ? "ยินยอม" : "",
-                // ส่งค่าเดิมกลับไปหากไม่มีการเปลี่ยนแปลง
                 asm_home: ALL_USER_DATA.vhvProfile?.asm_home || '', 
                 asm_test: ALL_USER_DATA.vhvProfile?.asm_test || '',
             };
@@ -537,18 +573,16 @@
                 showLoading(true, "กำลังบันทึกตำแหน่งบ้าน...");
 
                 const vhvData = { ...ALL_USER_DATA.vhvProfile };
-                vhvData.asm_home = latlong; // อัปเดตตำแหน่งบ้าน
-
                 const postData = {
                     userId: LIFF_PROFILE.userId,
-                    displayName: vhvData.displayName,
-                    profilePicture: vhvData.profilePicture,
+                    displayName: vhvData.displayName || LIFF_PROFILE.displayName,
+                    profilePicture: vhvData.profilePicture || LIFF_PROFILE.pictureUrl,
                     name: vhvData.name,
                     phone: vhvData.phone,
                     line_id: vhvData.line_id,
-                    area: vhvData.area,
+                    areas: vhvData.area ? vhvData.area.split(',') : [],
                     pdpa: vhvData.pdpa,
-                    asm_home: vhvData.asm_home,
+                    asm_home: latlong, // Update home location
                     asm_test: vhvData.asm_test
                 };
 
@@ -567,14 +601,15 @@
         // --- Utility Functions ---
         function trackTelCall(tel) {
             if (!tel) return;
-            if (confirm(`คุณต้องการโทรออกไปยังหมายเลข ${tel} หรือไม่?`)) {
+            const cleanTel = String(tel).replace(/'/g, ''); // Remove leading apostrophe if any
+            if (confirm(`คุณต้องการโทรออกไปยังหมายเลข ${cleanTel} หรือไม่?`)) {
                 fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: JSON.stringify({ action: 'logTelCall', data: { userId: LIFF_PROFILE.userId, tel: tel } })
+                    body: JSON.stringify({ action: 'logTelCall', data: { userId: LIFF_PROFILE.userId, tel: cleanTel } })
                 }).catch(err => console.error('Failed to log call:', err));
                 
-                window.location.href = 'tel:' + tel;
+                window.location.href = 'tel:' + cleanTel;
             }
         }
 
@@ -614,7 +649,7 @@
 
         function handleFailure(err) {
             const message = err.message || JSON.stringify(err);
-            console.error("Operation Failed:", message);
+            console.error("Operation Failed:", message, err.stack);
             alert("เกิดข้อผิดพลาด: " + message);
             showLoading(false);
         }
