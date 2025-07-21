@@ -101,6 +101,15 @@
                   <select class="form-select" id="vhvArea" multiple required size="5">
                       </select>
               </div>
+
+              <div class="mb-3">
+                <label class="form-label">ตำแหน่งบ้าน อสม.</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="vhvAsmHome" placeholder="ยังไม่ได้ปักหมุด" readonly>
+                    <button class="btn btn-outline-primary" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่</button>
+                </div>
+              </div>
+
               <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
             </form>
           </div>
@@ -109,6 +118,41 @@
       </div>
     </div>
 
+    <div class="modal fade" id="shareProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">เลือกข้อมูลที่จะแชร์</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">เลือกข้อมูลโปรไฟล์ อสม. ที่คุณต้องการส่งให้ผู้อื่น</p>
+                    <div class="form-check fs-5">
+                        <input class="form-check-input" type="checkbox" value="" id="sharePhone" checked>
+                        <label class="form-check-label" for="sharePhone">
+                            แชร์เบอร์โทรศัพท์
+                        </label>
+                    </div>
+                    <div class="form-check fs-5 mt-2">
+                        <input class="form-check-input" type="checkbox" value="" id="shareLine" checked>
+                        <label class="form-check-label" for="shareLine">
+                            แชร์ LINE
+                        </label>
+                    </div>
+                    <div class="form-check fs-5 mt-2">
+                        <input class="form-check-input" type="checkbox" value="" id="shareLocation">
+                        <label class="form-check-label" for="shareLocation">
+                            แชร์พิกัดบ้าน
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์เลย</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -125,6 +169,7 @@
         let ALL_USER_DATA = null;
         let DISTANCE_MODAL = null;
         let VHV_REG_MODAL = null;
+        let SHARE_PROFILE_MODAL = null;
         
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', initializeLiff);
@@ -132,6 +177,7 @@
         async function initializeLiff() {
             DISTANCE_MODAL = new bootstrap.Modal(document.getElementById('distanceModal'));
             VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
+            SHARE_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('shareProfileModal'));
             try {
                 await liff.init({ liffId: LIFF_ID_MAIN });
                 if (!liff.isLoggedIn()) { liff.login(); return; } 
@@ -322,7 +368,7 @@
                 vhvItems += createVhvItem(2, {name: leaders.volunteer2, tel: leaders.volunteer2_tel, line_id: leaders.volunteer2_line_id, distance_km: leaders.volunteer2_distance_km});
                 
                 leaderHtml = `<ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"><b>รพ.สต.: ${leaders.pcu || 'N/A'}</b> ${pcuCallBtn}</li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center"><span>รพ.สต.: ${leaders.pcu || 'N/A'}</span> ${pcuCallBtn}</li>
                     ${vhvItems}
                 </ul>`;
             }
@@ -406,10 +452,6 @@
         }
 
         function buildVhvInfoCard(vhv) {
-            const homeStatus = vhv.asm_home 
-                ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> ปักหมุดบ้านแล้ว</span>` 
-                : `<button class="btn btn-sm btn-warning" onclick="handlePinVhvHome()">ปักหมุดบ้าน อสม.</button><p class="small text-danger mt-1 mb-0">ปักเมื่ออยู่ที่บ้านแล้วเท่านั้น!</p>`;
-
             const testStatus = vhv.asm_test 
                 ? `<span class="text-success">คะแนนสอบ: ${vhv.asm_test}</span> <a href="${LIFF_ID_KNOWLEDGE}" class="ms-2">สอบใหม่</a>` 
                 : `<a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-sm btn-info text-white">ทำแบบทดสอบ อสม.</a>`;
@@ -419,11 +461,13 @@
                 <p class="mb-1"><b>ชื่อ:</b> ${vhv.name}</p>
                 <p class="mb-1"><b>พื้นที่ดูแล:</b> ${vhv.area || 'ยังไม่ระบุ'}</p>
                 <p><b>โทร:</b> ${vhv.phone} | <b>Line:</b> ${vhv.line_id || 'N/A'}</p>
-                <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
-                    <div class="text-center">${homeStatus}</div>
-                    <div class="text-center">${testStatus}</div>
-                </div>
-                <button class="btn btn-secondary w-100 mt-3" onclick="openVhvModal()">แก้ไขข้อมูล</button>
+                <div class="text-center my-3"><b>สถานะทดสอบ:</b> ${testStatus}</div>
+                
+                <button class="btn btn-primary w-100" onclick="SHARE_PROFILE_MODAL.show()">
+                    <i class="bi bi-share-fill"></i> แชร์โปรไฟล์ อสม.สโตรกของฉัน
+                </button>
+                <button class="btn btn-secondary w-100 mt-2" onclick="openVhvModal()">แก้ไขข้อมูล</button>
+
             </div></div></div>`;
         }
 
@@ -445,7 +489,7 @@
                            <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
                        </div>
                     </div>
-                    <div class="details mt-1">โทร: ${p.telephone} <span class="mx-2">|</span> ${lineInfo}</div>
+                    <div class="details mt-1">${lineInfo}</div>
                 </li>`;
             }).join('');
 
@@ -507,24 +551,25 @@
             document.getElementById('vhvName').value = vhvData.name || userData.name ||'';
             document.getElementById('vhvPhone').value = vhvData.phone || userData.telephone || '';
             document.getElementById('vhvLineId').value = vhvData.line_id || userData.line_id || '';
-            document.getElementById('vhvPdpa').checked = true; // Default to checked
+            document.getElementById('vhvAsmHome').value = vhvData.asm_home || '';
+            document.getElementById('vhvPdpa').checked = true;
 
             const areaSelect = document.getElementById('vhvArea');
-            areaSelect.innerHTML = ''; // Clear old options
-            if (ALL_USER_DATA.availableVhvAreas && ALL_USER_DATA.availableVhvAreas.length > 0) {
-                ALL_USER_DATA.availableVhvAreas.forEach(area => {
+            areaSelect.innerHTML = ''; 
+            const currentAreas = vhvData.area ? vhvData.area.split(',') : [];
+            const availableAreas = new Set([...ALL_USER_DATA.availableVhvAreas, ...currentAreas]); // Combine available and current
+
+            availableAreas.forEach(area => {
+                if(area) {
                     const option = document.createElement('option');
                     option.value = area;
                     option.textContent = area;
+                    if(currentAreas.includes(area)) {
+                        option.selected = true;
+                    }
                     areaSelect.appendChild(option);
-                });
-            } else if (vhvData.area) { // If editing, show current area
-                 const option = document.createElement('option');
-                 option.value = vhvData.area;
-                 option.textContent = vhvData.area;
-                 option.selected = true;
-                 areaSelect.appendChild(option);
-            }
+                }
+            });
             
             VHV_REG_MODAL.show();
         }
@@ -540,6 +585,8 @@
             }
 
             showLoading(true, "กำลังบันทึกข้อมูล...");
+            const pdpaCheckbox = document.getElementById('vhvPdpa');
+            const pdpaText = pdpaCheckbox.checked ? pdpaCheckbox.nextElementSibling.textContent : "";
 
             const registrationData = {
                 userId: LIFF_PROFILE.userId,
@@ -549,8 +596,8 @@
                 phone: document.getElementById('vhvPhone').value.trim(),
                 line_id: document.getElementById('vhvLineId').value.trim(),
                 areas: selectedAreas,
-                pdpa: document.getElementById('vhvPdpa').checked ? "ยินยอม" : "",
-                asm_home: ALL_USER_DATA.vhvProfile?.asm_home || '', 
+                pdpa: pdpaText,
+                asm_home: document.getElementById('vhvAsmHome').value.trim(), 
                 asm_test: ALL_USER_DATA.vhvProfile?.asm_test || '',
             };
 
@@ -564,44 +611,126 @@
             }).catch(handleFailure);
         }
 
-        function handlePinVhvHome() {
-            if (!confirm("คุณอยู่ที่บ้านพักของคุณแล้วใช่หรือไม่? การปักหมุดจะบันทึกตำแหน่งปัจจุบันของคุณเป็นบ้าน อสม.")) return;
-            showLoading(true, "กำลังระบุตำแหน่งบ้าน...");
-
+        function pinVhvHomeInForm() {
+            if (!confirm("คุณอยู่ที่บ้านพักของคุณแล้วใช่หรือไม่?")) return;
+            showLoading(true, "กำลังระบุตำแหน่ง...");
             navigator.geolocation.getCurrentPosition(pos => {
                 const latlong = `${pos.coords.latitude},${pos.coords.longitude}`;
-                showLoading(true, "กำลังบันทึกตำแหน่งบ้าน...");
-
-                const vhvData = { ...ALL_USER_DATA.vhvProfile };
-                const postData = {
-                    userId: LIFF_PROFILE.userId,
-                    displayName: vhvData.displayName || LIFF_PROFILE.displayName,
-                    profilePicture: vhvData.profilePicture || LIFF_PROFILE.pictureUrl,
-                    name: vhvData.name,
-                    phone: vhvData.phone,
-                    line_id: vhvData.line_id,
-                    areas: vhvData.area ? vhvData.area.split(',') : [],
-                    pdpa: vhvData.pdpa,
-                    asm_home: latlong, // Update home location
-                    asm_test: vhvData.asm_test
-                };
-
-                fetch(WEB_APP_URL, {
-                    method: 'POST', mode: 'no-cors',
-                    body: JSON.stringify({ action: 'registerVhv', data: postData })
-                }).then(() => {
-                    alert("ปักหมุดตำแหน่งบ้านสำเร็จ!");
-                    window.location.reload();
-                }).catch(handleFailure);
-
+                document.getElementById('vhvAsmHome').value = latlong;
+                showLoading(false);
+                alert("ปักหมุดสำเร็จ! กรุณากด 'บันทึกข้อมูล' เพื่อยืนยัน");
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
+        }
+
+        async function handleShareProfile() {
+            if (!liff.isInClient()) {
+                alert("ฟังก์ชันนี้ใช้ได้เฉพาะในแอป LINE เท่านั้น");
+                return;
+            }
+            if (!liff.isApiAvailable('shareTargetPicker')) {
+                 alert("เบราว์เซอร์ของคุณไม่รองรับฟังก์ชันแชร์นี้");
+                return;
+            }
+
+            const vhv = ALL_USER_DATA.vhvProfile;
+            if (!vhv) {
+                alert("ไม่พบข้อมูล อสม. ที่จะแชร์");
+                return;
+            }
+            
+            const sharePhone = document.getElementById('sharePhone').checked;
+            const shareLine = document.getElementById('shareLine').checked;
+            const shareLocation = document.getElementById('shareLocation').checked;
+            
+            const footerButtons = [];
+
+            if (sharePhone && vhv.phone) {
+                footerButtons.push({
+                    "type": "button",
+                    "action": { "type": "uri", "label": "โทรศัพท์", "uri": `tel:${vhv.phone}` },
+                    "style": "primary", "height": "sm"
+                });
+            }
+            if (shareLine && vhv.line_id) {
+                footerButtons.push({
+                    "type": "button",
+                    "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` },
+                    "style": "primary", "height": "sm"
+                });
+            }
+            if (shareLocation && vhv.asm_home) {
+                footerButtons.push({
+                    "type": "button",
+                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://www.google.com/maps?q=${vhv.asm_home}` },
+                    "style": "primary", "height": "sm"
+                });
+            }
+
+            if(footerButtons.length === 0) {
+                alert("กรุณาเลือกข้อมูลที่จะแชร์อย่างน้อย 1 อย่าง (และต้องมีข้อมูลนั้นในโปรไฟล์)");
+                return;
+            }
+            
+            const flexMessage = {
+                "type": "flex",
+                "altText": `ข้อมูลติดต่อ อสม.สโตรก: ${vhv.name}`,
+                "contents": {
+                    "type": "bubble",
+                    "size": "kilo",
+                    "header": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [ { "type": "text", "text": "อสม.สโตรกของคุณ", "color": "#FFFFFF", "weight": "bold" } ],
+                        "backgroundColor": "#007BFF"
+                    },
+                    "hero": {
+                        "type": "image",
+                        "url": vhv.profilePicture || 'https://via.placeholder.com/500',
+                        "size": "full", "aspectRatio": "1:1", "aspectMode": "cover",
+                        "action": { "type": "uri", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` }
+                    },
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "spacing": "sm",
+                        "contents": [
+                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl" },
+                            { "type": "box", "layout": "baseline", "contents": [
+                                { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#666666" },
+                                { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm" }
+                            ]},
+                            { "type": "box", "layout": "baseline", "contents": [
+                                { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#666666" },
+                                { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm" }
+                            ]},
+                             { "type": "box", "layout": "baseline", "contents": [
+                                { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#666666" },
+                                { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm" }
+                            ]}
+                        ]
+                    },
+                    "footer": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "spacing": "sm",
+                        "contents": footerButtons
+                    }
+                }
+            };
+            
+            try {
+                SHARE_PROFILE_MODAL.hide();
+                await liff.shareTargetPicker([flexMessage]);
+            } catch (error) {
+                handleFailure(new Error("ไม่สามารถแชร์ได้: " + error.message));
+            }
         }
 
 
         // --- Utility Functions ---
         function trackTelCall(tel) {
             if (!tel) return;
-            const cleanTel = String(tel).replace(/'/g, ''); // Remove leading apostrophe if any
+            const cleanTel = String(tel).replace(/'/g, ''); 
             if (confirm(`คุณต้องการโทรออกไปยังหมายเลข ${cleanTel} หรือไม่?`)) {
                 fetch(WEB_APP_URL, {
                     method: 'POST',
