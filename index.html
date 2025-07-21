@@ -32,6 +32,8 @@
         .bg-light-brown { background-color: #f0eade; border: 1px solid #d3c0a4; }
         .btn-copy { background: none; border: none; color: #0d6efd; padding: 0 0.5rem; }
         .details { font-size: 0.9em; color: #6c757d; }
+        .flex-no-shrink { flex-shrink: 0; }
+        .btn-call { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -477,9 +479,17 @@ function buildVhvPatientListCard(patients) {
             let patientItems = patients.map(p => {
                 const riskInfo = classifyRisk(p.thai_cv_risk_score/100);
                 const lineInfo = p.line_id ? `Line: ${p.line_id} <button class="btn-copy" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
-                const distanceHtml = p.distanceFromVhv_km ? `<span class="ms-2 badge bg-secondary"><i class="bi bi-geo-alt-fill"></i> ${p.distanceFromVhv_km} กม.</span>` : '';
 
-                // --- ส่วนที่เพิ่มเข้ามา ---
+                // --- ส่วนที่แก้ไข ---
+                let distanceHtml = '';
+                if (p.distanceFromVhv_km && p.latlong) {
+                    // เปลี่ยนจาก span เป็น a (ลิงก์)
+                    distanceHtml = `<a href="https://www.google.com/maps/dir/?api=1&destination=${p.latlong}" target="_blank" class="ms-2 text-decoration-none">
+                        <span class="badge bg-secondary"><i class="bi bi-geo-alt-fill"></i> ${p.distanceFromVhv_km} กม.</span>
+                    </a>`;
+                }
+                // --- จบส่วนที่แก้ไข ---
+
                 let lastCheckHtml = '<small class="text-muted d-block">ยังไม่เคยเช็คอาการ</small>';
                 if (p.latestCheckTimestamp) {
                     const lastCheckDate = new Date(p.latestCheckTimestamp);
@@ -493,16 +503,15 @@ function buildVhvPatientListCard(patients) {
                         lastCheckHtml = `<small class="text-danger d-block">เช็คล่าสุด: ${diffDays} วันที่แล้ว</small>`;
                     }
                 }
-                // --- จบส่วนที่เพิ่ม ---
 
                 return `<li class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                        <div>
                            <h6 class="mb-0 fw-bold">${p.name} (${p.gender == 1 ? 'ช' : 'ญ'}, ${p.age} ปี) ${distanceHtml}</h6>
                            <small style="color:${riskInfo.color}; font-weight: 600;">เสี่ยง ${p.thai_cv_risk_score}% (${riskInfo.text})</small>
-                           ${lastCheckHtml} {/* <-- นำตัวแปรมาแสดงผล */}
+                           ${lastCheckHtml}
                        </div>
-                       <div>
+                       <div class="flex-no-shrink">
                            <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
                        </div>
                     </div>
@@ -648,7 +657,7 @@ function pinVhvHomeInForm() {
                 alert("ปักหมุดสำเร็จ! กรุณากด 'บันทึกข้อมูล' เพื่อยืนยันการเปลี่ยนแปลง");
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
-async function handleShareProfile() {
+        async function handleShareProfile() {
             if (!liff.isInClient() || !liff.isApiAvailable('shareTargetPicker')) {
                 alert("ฟังก์ชันแชร์ใช้ได้เฉพาะในแอป LINE เท่านั้น");
                 return;
@@ -683,17 +692,18 @@ async function handleShareProfile() {
             if (shareLocation && vhv.asm_home) {
                 footerButtons.push({
                     "type": "button",
-                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://maps.google.com/?q=${vhv.asm_home}` }, // <-- แก้ไข URI
+                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `http://googleusercontent.com/maps.google.com/?q=${vhv.asm_home}` },
                     "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
 
-            if(footerButtons.length === 0) {
-                alert("กรุณาเลือกข้อมูลที่จะแชร์อย่างน้อย 1 อย่าง (และต้องมีข้อมูลนั้นในโปรไฟล์)");
-                return;
-            }
+            // --- ส่วนนี้ถูกลบออกไปแล้ว ---
+            // if(footerButtons.length === 0) { ... }
 
-            footerButtons.push({ "type": "separator", "margin": "md", "color": "#FFFFFF" });
+            // เพิ่มข้อความท้ายสุดเสมอ
+            if (footerButtons.length > 0) {
+                 footerButtons.push({ "type": "separator", "margin": "md", "color": "#FFFFFF" });
+            }
             footerButtons.push({
                 "type": "text",
                 "text": "แชร์จาก สวีรู้ทันสโตรก",
