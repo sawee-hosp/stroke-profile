@@ -12,7 +12,7 @@
         :root { --bs-primary-rgb: 13, 110, 253; }
         body { 
             font-family: "Noto Sans Thai", sans-serif; 
-            font-size: 18px;
+            font-size: 20px;
             background-color: #f0f2f5; 
             padding-top: 1rem; 
             padding-bottom: 1rem; 
@@ -303,7 +303,7 @@
 
                         <h6 class="section-title border-top pt-3"><i class="bi bi-person-slash"></i>ปัจจัยเสี่ยงที่เปลี่ยนแปลงไม่ได้</h6>
                         <div class="info-grid mb-3">${nonModifiableFactors}</div>
-                        
+                        <hr>
                         <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงที่ปรับพฤติกรรมได้</h6>
                         <div class="info-grid">${modifiableFactors}</div>
                     </div>
@@ -471,7 +471,7 @@
             </div></div></div>`;
         }
 
-        function buildVhvPatientListCard(patients) {
+function buildVhvPatientListCard(patients) {
             if (!patients || patients.length === 0) return '';
             
             let patientItems = patients.map(p => {
@@ -479,11 +479,28 @@
                 const lineInfo = p.line_id ? `Line: ${p.line_id} <button class="btn-copy" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
                 const distanceHtml = p.distanceFromVhv_km ? `<span class="ms-2 badge bg-secondary"><i class="bi bi-geo-alt-fill"></i> ${p.distanceFromVhv_km} กม.</span>` : '';
 
+                // --- ส่วนที่เพิ่มเข้ามา ---
+                let lastCheckHtml = '<small class="text-muted d-block">ยังไม่เคยเช็คอาการ</small>';
+                if (p.latestCheckTimestamp) {
+                    const lastCheckDate = new Date(p.latestCheckTimestamp);
+                    const today = new Date();
+                    const diffTime = Math.abs(today - lastCheckDate);
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays === 0) {
+                        lastCheckHtml = '<small class="text-success d-block">เช็คอาการวันนี้แล้ว</small>';
+                    } else {
+                        lastCheckHtml = `<small class="text-danger d-block">เช็คล่าสุด: ${diffDays} วันที่แล้ว</small>`;
+                    }
+                }
+                // --- จบส่วนที่เพิ่ม ---
+
                 return `<li class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
                        <div>
                            <h6 class="mb-0 fw-bold">${p.name} (${p.gender == 1 ? 'ช' : 'ญ'}, ${p.age} ปี) ${distanceHtml}</h6>
                            <small style="color:${riskInfo.color}; font-weight: 600;">เสี่ยง ${p.thai_cv_risk_score}% (${riskInfo.text})</small>
+                           ${lastCheckHtml} {/* <-- นำตัวแปรมาแสดงผล */}
                        </div>
                        <div>
                            <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
@@ -653,21 +670,21 @@ async function handleShareProfile() {
                 footerButtons.push({
                     "type": "button",
                     "action": { "type": "uri", "label": "โทรศัพท์", "uri": `tel:${vhv.phone}` },
-                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
+                    "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
             if (shareLine && vhv.line_id) {
                 footerButtons.push({
                     "type": "button",
                     "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` },
-                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
+                    "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
             if (shareLocation && vhv.asm_home) {
                 footerButtons.push({
                     "type": "button",
-                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://www.google.com/maps?q={vhv.asm_home}` },
-                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
+                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://maps.google.com/?q=${vhv.asm_home}` }, // <-- แก้ไข URI
+                    "style": "primary", "height": "sm", "color": "#FFC107"
                 });
             }
 
@@ -676,13 +693,12 @@ async function handleShareProfile() {
                 return;
             }
 
-            // เพิ่มข้อความท้ายสุด
-            footerButtons.push({ "type": "separator", "margin": "md" });
+            footerButtons.push({ "type": "separator", "margin": "md", "color": "#FFFFFF" });
             footerButtons.push({
                 "type": "text",
                 "text": "แชร์จาก สวีรู้ทันสโตรก",
-                "color": "#FFFFFF", // <-- ตัวอักษรสีขาว
-                "size": "xs",      // <-- ขนาดเล็ก
+                "color": "#FFFFFF",
+                "size": "xs",
                 "align": "center",
                 "margin": "md"
             });
@@ -693,7 +709,11 @@ async function handleShareProfile() {
                 "contents": {
                     "type": "bubble",
                     "size": "kilo",
-                    "backgroundColor": "#007BFF", // <-- BG สีฟ้าสำหรับ Bubble ทั้งหมด
+                    "styles": {
+                      "header": { "backgroundColor": "#007BFF" },
+                      "body":   { "backgroundColor": "#007BFF" },
+                      "footer": { "backgroundColor": "#007BFF" }
+                    },
                     "header": {
                         "type": "box",
                         "layout": "vertical",
@@ -702,52 +722,38 @@ async function handleShareProfile() {
                             "text": "อสม.สโตรกของคุณ", 
                             "color": "#FFFFFF", 
                             "weight": "bold",
-                            "size": "xl",         // <-- ขนาด xl
-                            "align": "center"      // <-- จัดกึ่งกลาง
+                            "size": "xl",
+                            "align": "center"
                         } ]
                     },
-                    "body": {
+                    "hero": { // <-- **ย้ายรูปมาไว้ใน HERO**
+                        "type": "image",
+                        "url": vhv.profilePicture || 'https://via.placeholder.com/150',
+                        "size": "150px",
+                        "aspectRatio": "1:1",
+                        "aspectMode": "cover",
+                        "cornerRadius": "150px",
+                        "margin": "xl"
+                    },
+                    "body": { // <-- **BODY เหลือแค่ส่วนข้อความ**
                         "type": "box",
                         "layout": "vertical",
-                        "spacing": "md",
+                        "spacing": "sm",
                         "contents": [
-                            {
-                                "type": "box",
-                                "layout": "vertical",
-                                "alignItems": "center",
-                                "contents": [
-                                    {
-                                        "type": "image",
-                                        "url": vhv.profilePicture || 'https://via.placeholder.com/150',
-                                        "size": "150px",        // <-- ขนาด 150px
-                                        "aspectRatio": "1:1",
-                                        "aspectMode": "cover",
-                                        "cornerRadius": "150px" // <-- ทำให้เป็นวงกลม
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "box",
-                                "layout": "vertical",
-                                "spacing": "sm",
-                                "margin": "lg",
-                                "contents": [
-                                    { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
-                                    { "type": "separator", "margin": "md" },
-                                    { "type": "box", "layout": "baseline", "margin": "md", "contents": [
-                                        { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                        { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm", "color": "#FFFFFF" }
-                                    ]},
-                                    { "type": "box", "layout": "baseline", "contents": [
-                                        { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                        { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm", "color": "#FFFFFF" }
-                                    ]},
-                                     { "type": "box", "layout": "baseline", "contents": [
-                                        { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                        { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm", "color": "#FFFFFF" }
-                                    ]}
-                                ]
-                            }
+                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
+                            { "type": "separator", "margin": "md", "color": "#FFFFFF" },
+                            { "type": "box", "layout": "baseline", "margin": "md", "contents": [
+                                { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm", "color": "#FFFFFF" }
+                            ]},
+                            { "type": "box", "layout": "baseline", "contents": [
+                                { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm", "color": "#FFFFFF" }
+                            ]},
+                             { "type": "box", "layout": "baseline", "contents": [
+                                { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm", "color": "#FFFFFF" }
+                            ]}
                         ]
                     },
                     "footer": {
@@ -766,7 +772,6 @@ async function handleShareProfile() {
                 handleFailure(new Error("ไม่สามารถแชร์ได้: " + error.message));
             }
         }
-
 
         // --- Utility Functions ---
         function trackTelCall(tel) {
