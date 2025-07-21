@@ -658,10 +658,11 @@ function pinVhvHomeInForm() {
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
 async function handleShareProfile() {
-            if (!liff.isInClient() || !liff.isApiAvailable('shareTargetPicker')) {
-                alert("ฟังก์ชันแชร์ใช้ได้เฉพาะในแอป LINE เท่านั้น");
-                return;
-            }
+            // --- vvv เอาตัวเช็คออกตามที่ขอ vvv ---
+            // if (!liff.isInClient() || !liff.isApiAvailable('shareTargetPicker')) {
+            //     alert("ฟังก์ชันแชร์ใช้ได้เฉพาะในแอป LINE เท่านั้น");
+            //     return;
+            // }
 
             const vhv = ALL_USER_DATA.vhvProfile;
             if (!vhv) {
@@ -703,64 +704,67 @@ async function handleShareProfile() {
                 "size": "xs", "align": "center", "margin": "md"
             });
             
-            // --- vvv สร้าง heroBlock ตามโครงสร้างใหม่ vvv ---
-            const heroBlock = {
-                "type": "box",
-                "layout": "vertical",
-                "backgroundColor": "#007BFF",
-                "paddingAll": "20px",
-                "contents": [
-                    {
-                        "type": "image",
-                        "url": vhv.profilePicture || 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png', // ใช้ URL ที่ LINE รับรองเป็น fallback
-                        "size": "full",
-                        "aspectRatio": "1:1",
-                        "aspectMode": "cover",
-                        "cornerRadius": "150px"
-                    }
-                ]
-            };
-            // --- ^^^ สิ้นสุดการสร้าง heroBlock ^^^ ---
-
+            // --- vvv โครงสร้าง Flex แบบใหม่ทั้งหมด vvv ---
             const flexMessage = {
                 "type": "flex",
                 "altText": `ข้อมูลติดต่อ อสม.สโตรก: ${vhv.name}`,
                 "contents": {
                     "type": "bubble",
                     "size": "kilo",
-                    "header": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "backgroundColor": "#007BFF",
-                        "paddingBottom": "none",
-                        "contents": [ { 
-                            "type": "text", "text": "อสม.สโตรกของคุณ", "color": "#FFFFFF", 
-                            "weight": "bold", "size": "xl", "align": "center"
-                        } ]
-                    },
-                    "hero": heroBlock, // <-- นำ heroBlock ที่สร้างไว้มาใช้
                     "body": {
                         "type": "box",
                         "layout": "vertical",
-                        "spacing": "sm",
-                        "backgroundColor": "#007BFF",
-                        "paddingAll": "lg",
                         "contents": [
-                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
-                            { "type": "separator", "margin": "lg", "color": "#FFFFFF" },
-                            { "type": "box", "layout": "baseline", "margin": "md", "contents": [
-                                { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm", "color": "#FFFFFF" }
-                            ]},
-                            { "type": "box", "layout": "baseline", "contents": [
-                                { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm", "color": "#FFFFFF" }
-                            ]},
-                             { "type": "box", "layout": "baseline", "contents": [
-                                { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
-                                { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm", "color": "#FFFFFF" }
-                            ]}
-                        ]
+                            {
+                                "type": "text",
+                                "text": "อสม.สโตรกของคุณ",
+                                "weight": "bold",
+                                "color": "#FFFFFF",
+                                "size": "xl",
+                                "align": "center"
+                            },
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "margin": "lg",
+                                "cornerRadius": "150px",
+                                "width": "150px",
+                                "height": "150px",
+                                "alignItems": "center",
+                                "contents": [{
+                                    "type": "image",
+                                    "url": vhv.profilePicture || 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png',
+                                    "size": "full",
+                                    "aspectMode": "cover",
+                                    "aspectRatio": "1:1"
+                                }]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "margin": "lg",
+                                "spacing": "sm",
+                                "contents": [
+                                    { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
+                                    { "type": "separator", "margin": "lg", "color": "#FFFFFF" },
+                                    { "type": "box", "layout": "baseline", "margin": "md", "contents": [
+                                        { "type": "text", "text": "พื้นที่ดูแล:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                        { "type": "text", "text": vhv.area || "N/A", "color": "#FFFFFF", "size": "sm", "flex": 4, "wrap": true }
+                                    ]},
+                                    { "type": "box", "layout": "baseline", "contents": [
+                                        { "type": "text", "text": "ผลทดสอบ:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                        { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "color": "#FFFFFF", "size": "sm", "flex": 4 }
+                                    ]},
+                                    { "type": "box", "layout": "baseline", "contents": [
+                                        { "type": "text", "text": "ลงทะเบียน:", "color": "#EEEEEE", "size": "sm", "flex": 2 },
+                                        { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "color": "#FFFFFF", "size": "sm", "flex": 4 }
+                                    ]}
+                                ]
+                            }
+                        ],
+                        "paddingAll": "20px",
+                        "backgroundColor": "#007BFF",
+                        "alignItems": "center"
                     },
                     "footer": {
                         "type": "box",
@@ -772,11 +776,15 @@ async function handleShareProfile() {
                 }
             };
             
+            // สำหรับทดสอบบนเว็บ: copy ผลลัพธ์ใน Console ไปวางใน LINE Flex Simulator
+            console.log("Generated Flex Message JSON:", JSON.stringify(flexMessage, null, 2));
+
             try {
                 SHARE_PROFILE_MODAL.hide();
                 await liff.shareTargetPicker([flexMessage]);
             } catch (error) {
                 handleFailure(new Error("ไม่สามารถแชร์ได้: " + error.message));
+                alert("ไม่สามารถแชร์ได้ โปรดตรวจสอบ Console Log สำหรับข้อมูลเพิ่มเติม");
             }
         }
 
