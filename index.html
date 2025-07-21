@@ -631,13 +631,9 @@ function pinVhvHomeInForm() {
                 alert("ปักหมุดสำเร็จ! กรุณากด 'บันทึกข้อมูล' เพื่อยืนยันการเปลี่ยนแปลง");
             }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
-        async function handleShareProfile() {
-            if (!liff.isInClient()) {
-                alert("ฟังก์ชันนี้ใช้ได้เฉพาะในแอป LINE เท่านั้น");
-                return;
-            }
-            if (!liff.isApiAvailable('shareTargetPicker')) {
-                 alert("เบราว์เซอร์ของคุณไม่รองรับฟังก์ชันแชร์นี้");
+async function handleShareProfile() {
+            if (!liff.isInClient() || !liff.isApiAvailable('shareTargetPicker')) {
+                alert("ฟังก์ชันแชร์ใช้ได้เฉพาะในแอป LINE เท่านั้น");
                 return;
             }
 
@@ -657,21 +653,21 @@ function pinVhvHomeInForm() {
                 footerButtons.push({
                     "type": "button",
                     "action": { "type": "uri", "label": "โทรศัพท์", "uri": `tel:${vhv.phone}` },
-                    "style": "primary", "height": "sm"
+                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
                 });
             }
             if (shareLine && vhv.line_id) {
                 footerButtons.push({
                     "type": "button",
                     "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` },
-                    "style": "primary", "height": "sm"
+                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
                 });
             }
             if (shareLocation && vhv.asm_home) {
                 footerButtons.push({
                     "type": "button",
-                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://www.google.com/maps?q=${vhv.asm_home}` },
-                    "style": "primary", "height": "sm"
+                    "action": { "type": "uri", "label": "ดูแผนที่", "uri": `https://www.google.com/maps?q={vhv.asm_home}` },
+                    "style": "primary", "height": "sm", "color": "#FFC107" // <-- เปลี่ยนเป็นสีเหลือง
                 });
             }
 
@@ -679,6 +675,17 @@ function pinVhvHomeInForm() {
                 alert("กรุณาเลือกข้อมูลที่จะแชร์อย่างน้อย 1 อย่าง (และต้องมีข้อมูลนั้นในโปรไฟล์)");
                 return;
             }
+
+            // เพิ่มข้อความท้ายสุด
+            footerButtons.push({ "type": "separator", "margin": "md" });
+            footerButtons.push({
+                "type": "text",
+                "text": "แชร์จาก สวีรู้ทันสโตรก",
+                "color": "#FFFFFF", // <-- ตัวอักษรสีขาว
+                "size": "xs",      // <-- ขนาดเล็ก
+                "align": "center",
+                "margin": "md"
+            });
             
             const flexMessage = {
                 "type": "flex",
@@ -686,36 +693,61 @@ function pinVhvHomeInForm() {
                 "contents": {
                     "type": "bubble",
                     "size": "kilo",
+                    "backgroundColor": "#007BFF", // <-- BG สีฟ้าสำหรับ Bubble ทั้งหมด
                     "header": {
                         "type": "box",
                         "layout": "vertical",
-                        "contents": [ { "type": "text", "text": "อสม.สโตรกของคุณ", "color": "#FFFFFF", "weight": "bold" } ],
-                        "backgroundColor": "#007BFF"
-                    },
-                    "hero": {
-                        "type": "image",
-                        "url": vhv.profilePicture || 'https://via.placeholder.com/500',
-                        "size": "full", "aspectRatio": "1:1", "aspectMode": "cover",
-                        "action": { "type": "uri", "uri": `https://line.me/R/ti/p/~${vhv.line_id}` }
+                        "contents": [ { 
+                            "type": "text", 
+                            "text": "อสม.สโตรกของคุณ", 
+                            "color": "#FFFFFF", 
+                            "weight": "bold",
+                            "size": "xl",         // <-- ขนาด xl
+                            "align": "center"      // <-- จัดกึ่งกลาง
+                        } ]
                     },
                     "body": {
                         "type": "box",
                         "layout": "vertical",
-                        "spacing": "sm",
+                        "spacing": "md",
                         "contents": [
-                            { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl" },
-                            { "type": "box", "layout": "baseline", "contents": [
-                                { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#666666" },
-                                { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm" }
-                            ]},
-                            { "type": "box", "layout": "baseline", "contents": [
-                                { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#666666" },
-                                { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm" }
-                            ]},
-                             { "type": "box", "layout": "baseline", "contents": [
-                                { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#666666" },
-                                { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm" }
-                            ]}
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "alignItems": "center",
+                                "contents": [
+                                    {
+                                        "type": "image",
+                                        "url": vhv.profilePicture || 'https://via.placeholder.com/150',
+                                        "size": "150px",        // <-- ขนาด 150px
+                                        "aspectRatio": "1:1",
+                                        "aspectMode": "cover",
+                                        "cornerRadius": "150px" // <-- ทำให้เป็นวงกลม
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "spacing": "sm",
+                                "margin": "lg",
+                                "contents": [
+                                    { "type": "text", "text": vhv.name || "N/A", "weight": "bold", "size": "xl", "color": "#FFFFFF", "align": "center" },
+                                    { "type": "separator", "margin": "md" },
+                                    { "type": "box", "layout": "baseline", "margin": "md", "contents": [
+                                        { "type": "text", "text": "พื้นที่ดูแล:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                        { "type": "text", "text": vhv.area || "N/A", "flex": 4, "wrap": true, "size": "sm", "color": "#FFFFFF" }
+                                    ]},
+                                    { "type": "box", "layout": "baseline", "contents": [
+                                        { "type": "text", "text": "ผลทดสอบ:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                        { "type": "text", "text": vhv.asm_test || "ยังไม่ทดสอบ", "flex": 4, "size": "sm", "color": "#FFFFFF" }
+                                    ]},
+                                     { "type": "box", "layout": "baseline", "contents": [
+                                        { "type": "text", "text": "ลงทะเบียน:", "flex": 2, "size": "sm", "color": "#EEEEEE" },
+                                        { "type": "text", "text": vhv.date_regist ? new Date(vhv.date_regist).toLocaleDateString('th-TH') : "N/A", "flex": 4, "size": "sm", "color": "#FFFFFF" }
+                                    ]}
+                                ]
+                            }
                         ]
                     },
                     "footer": {
