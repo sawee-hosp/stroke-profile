@@ -3,27 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลผู้ใช้ - สวีรู้ทันสโตรก</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap" rel="stylesheet">
+    <title>ข้อมูลสุขภาพ รู้ทันสโตรก by รพ.สวี</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root {
-            --bs-primary-rgb: 13, 110, 253;
+        :root { --bs-primary-rgb: 13, 110, 253; }
+        body { 
+            font-family: "Noto Sans Thai", sans-serif; 
+            font-size: 18px; /* <-- เพิ่มขนาดตัวอักษรพื้นฐาน */
+            background-color: #f0f2f5; 
+            padding-top: 1rem; 
+            padding-bottom: 1rem; 
+            margin: 0; 
         }
-        body { font-family: "Noto Sans Thai", sans-serif; font-size: 16px; background-color: #f0f2f5; padding-top: 1rem; padding-bottom: 1rem; margin: 0; }
         .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.25rem; }
-        .section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
-        .section-title i { margin-right: 0.6rem; color: #0d6efd; font-size: 1.2rem; }
+        .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
+        .section-title i { margin-right: 0.7rem; color: #0d6efd; font-size: 1.4rem; }
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1060; }
-        .btn-call { background-color: transparent; border: 1px solid #198754; color: #198754; padding: 0.3rem 0.6rem; font-size: 0.9rem; line-height: 1; border-radius: 0.25rem; }
+        .btn-call { background-color: transparent; border: 1px solid #198754; color: #198754; padding: 0.4rem 0.7rem; font-size: 1rem; line-height: 1; border-radius: 0.3rem; text-decoration: none; }
         .btn-call:hover { background-color: #198754; color: white; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-        .info-item { display: flex; align-items: center; font-size: 0.95rem; }
-        .info-item i { font-size: 1.4rem; color: #0d6efd; min-width: 30px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .info-item { display: flex; align-items: center; font-size: 1rem; }
+        .info-item i { font-size: 1.5rem; color: #0d6efd; min-width: 35px; }
         .info-item div { display: flex; flex-direction: column; }
-        .info-item .label { font-size: 0.8rem; color: #6c757d; }
+        .info-item .label { font-size: 0.8em; color: #6c757d; }
+        .bg-light-brown { background-color: #f0eade; border: 1px solid #d3c0a4; }
+        .btn-copy { background: none; border: none; color: #0d6efd; padding: 0 0.5rem; }
     </style>
 </head>
 <body>
@@ -36,7 +43,9 @@
     <div class="container" id="main-content" style="display: none;">
         <div class="row" id="dynamic-content-container">
             </div>
-        <div id="vhv-register-button-container">
+        <div class="row" id="vhv-dashboard-container">
+             </div>
+        <div class="row" id="vhv-register-button-container">
              </div>
     </div>
 
@@ -77,16 +86,18 @@
     <div class="modal fade" id="vhvRegisterModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header"><h1 class="modal-title fs-5" id="vhvRegisterModalLabel">ลงทะเบียน อสม.สโตรก</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+          <div class="modal-header"><h1 class="modal-title fs-5" id="vhvRegisterModalLabel">ข้อมูล อสม.สโตรก</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body">
             <form id="vhvForm">
-              <div class="mb-3"><label for="vhvName" class="form-label">ชื่อ-นามสกุลจริง</label><input type="text" class="form-control" id="vhvName" required></div>
+              <div class="mb-3">
+                  <label for="vhvName" class="form-label">ชื่อ-นามสกุลจริง</label>
+                  <input type="text" class="form-control" id="vhvName" required placeholder="ใช้ชื่อจริงเพื่อความน่าเชื่อถือ">
+              </div>
               <div class="mb-3"><label for="vhvPhone" class="form-label">เบอร์โทรศัพท์ (10 หลัก)</label><input type="tel" class="form-control" id="vhvPhone" required pattern="[0-9]{10}"></div>
               <div class="mb-3"><label for="vhvLineId" class="form-label">LINE ID (ถ้ามี)</label><input type="text" class="form-control" id="vhvLineId"></div>
               <div class="mb-3">
-                  <label for="vhvArea" class="form-label">เลือกพื้นที่ดูแล (เลือกได้หลายพื้นที่)</label>
-                  <select class="form-select" id="vhvArea" multiple required size="5">
-                      </select>
+                  <label for="vhvArea" class="form-label">พื้นที่ดูแล (คั่นด้วยจุลภาค ,)</label>
+                  <input type="text" class="form-control" id="vhvArea" required placeholder="เช่น ต.นาโพธิ์ ม.7,ต.ทุ่งคา ม.1">
               </div>
               <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" required><label class="form-check-label small" for="vhvPdpa">ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้</label></div>
             </form>
@@ -100,7 +111,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
+        // --- Global Variables & Constants ---
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
+        const LIFF_ID_MAIN = "2005789397-RLAGXrBJ";
+        const LIFF_ID_REGIS = "2005789397-nebQ8oJy";
+        const LIFF_ID_DAILY = "2005789397-WRm1lYd9";
+        const LIFF_ID_STICKER = "2005789397-37lemBgX";
+        const LIFF_ID_KNOWLEDGE = "2005789397-ROQvjpYk";
+
         let LIFF_PROFILE = null;
         let ALL_USER_DATA = null;
         let DISTANCE_MODAL = null;
@@ -113,15 +131,16 @@
             DISTANCE_MODAL = new bootstrap.Modal(document.getElementById('distanceModal'));
             VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
             try {
-                await liff.init({ liffId: "2005789397-RLAGXrBJ" });
+                await liff.init({ liffId: LIFF_ID_MAIN });
                 if (!liff.isLoggedIn()) { liff.login(); return; } 
                 
                 LIFF_PROFILE = await liff.getProfile();
                 fetchUserData(LIFF_PROFILE.userId);
 
-            } catch (error) { handleFailure("เกิดข้อผิดพลาดในการเปิดแอป: " + error.message); }
+            } catch (error) { handleFailure(error); }
         }
 
+        // --- Data & Page Rendering ---
         function fetchUserData(userId) {
             showLoading(true, "กำลังโหลดข้อมูล...");
             fetch(`${WEB_APP_URL}?action=getUserData&userId=${userId}`)
@@ -144,29 +163,30 @@
         
         function updatePage(data) {
             const container = document.getElementById('dynamic-content-container');
-            let html = buildProfileCard(data.userProfile);
-            html += buildDailyCheckCard(data.dailyCheckInfo);
-            html += buildCommunityLeadersCard(data.communityLeaders);
-            html += buildDistanceCard(data.homeDistance, data.userProfile.help);
-            html += buildStickerCard(data.stickerShareCount);
-            html += buildKnowledgeTestCard(data.knowledgeTestStats);
-
-            container.innerHTML = html;
+            container.innerHTML = 
+                buildProfileCard(data.userProfile) +
+                buildDailyCheckCard(data.dailyCheckInfo) +
+                buildCommunityLeadersCard(data.communityLeaders) +
+                buildDistanceCard(data.homeDistance, data.userProfile.help) +
+                buildStickerCard(data.stickerShareCount) +
+                buildKnowledgeTestCard(data.knowledgeTestStats);
             
-            // Handle VHV registration button separately
-            if (!data.isVhv) {
+            if (data.isVhv) {
+                document.getElementById('vhv-dashboard-container').innerHTML = 
+                    buildVhvInfoCard(data.vhvProfile) +
+                    buildVhvPatientListCard(data.vhvPatientList);
+            } else {
                 document.getElementById('vhv-register-button-container').innerHTML = buildVhvRegistrationButton();
             }
         }
 
         // --- HTML Builder Functions ---
-
         function buildProfileCard(p) {
             if (!p) return '';
             const riskValue = p.thai_cv_risk_score / 100;
             const riskInfo = classifyRisk(riskValue);
 
-            const healthFactors = `
+            const nonModifiableFactors = `
                 <div class="info-item">
                     <i class="bi bi-gender-ambiguous"></i>
                     <div><span class="label">เพศ</span> <b>${p.gender == 1 ? 'ชาย' : 'หญิง'}</b></div>
@@ -174,7 +194,9 @@
                 <div class="info-item">
                     <i class="bi bi-calendar-event"></i>
                     <div><span class="label">อายุ</span> <b>${p.age || 'N/A'} ปี</b></div>
-                </div>
+                </div>`;
+            
+            const modifiableFactors = `
                 <div class="info-item">
                     <i class="bi bi-fire"></i>
                     <div><span class="label">สูบบุหรี่</span> <b>${p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'}</b></div>
@@ -202,37 +224,43 @@
                 <div class="info-item" style="grid-column: span 2;">
                     <i class="bi bi-clipboard-plus"></i>
                     <div><span class="label">โรคประจำตัว</span> <b>${p['u/d'] || 'ไม่มี'}</b></div>
-                </div>
-            `;
+                </div>`;
             
             return `
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" alt="รูปโปรไฟล์" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 15px;">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center text-center text-md-start mb-3">
+                            <div class="d-flex align-items-center flex-column flex-md-row">
+                                <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" alt="รูปโปรไฟล์" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-right: 0; margin-bottom: 15px; margin-md-right: 20px; margin-md-bottom: 0;">
                                 <div class="flex-grow-1">
                                     <h5 class="fw-bold mb-1">${p.name || 'N/A'}</h5>
-                                    <div class="small text-muted mb-1">โทร: ${p.telephone || 'N/A'}</div>
-                                    <div class="small text-muted mb-2">Line: ${p.line_id || 'N/A'}</div>
+                                    <div class="text-muted mb-1">โทร: ${p.telephone || 'N/A'}</div>
+                                    <div class="text-muted mb-2">Line: ${p.line_id || 'N/A'}</div>
                                     <span class="badge bg-secondary fw-normal">ลงทะเบียน: ${p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : 'N/A'}</span>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                 <div class="text-center flex-grow-1">
-                                    <div style="color: ${riskInfo.color};">
-                                        <div class="display-4 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'N/A'}</div>
-                                        <div class="fw-bold">${riskInfo.text}</div>
-                                    </div>
-                                </div>
-                                <a href="https://liff.line.me/2005789397-nebQ8oJy" class="btn btn-outline-primary ms-3">ประเมินใหม่</a>
-                            </div>
-                            <h6 class="section-title border-top pt-3"><i class="bi bi-heart-pulse-fill"></i>ปัจจัยเสี่ยงของคุณ</h6>
-                            <div class="info-grid">${healthFactors}</div>
                         </div>
+                        <hr>
+                        <h6 class="text-center text-dark">ความเสี่ยงเกิดสโตรกที่เคยประเมิน</h6>
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                             <div class="text-center flex-grow-1">
+                                <div style="color: ${riskInfo.color};">
+                                    <div class="display-4 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'N/A'}</div>
+                                    <div class="fw-bold">${riskInfo.text}</div>
+                                </div>
+                            </div>
+                            <a href="${LIFF_ID_REGIS}" class="btn btn-outline-primary ms-3">ประเมินใหม่</a>
+                        </div>
+
+                        <h6 class="section-title border-top pt-3"><i class="bi bi-person-slash"></i>ปัจจัยเสี่ยงที่เปลี่ยนแปลงไม่ได้</h6>
+                        <div class="info-grid mb-3">${nonModifiableFactors}</div>
+                        
+                        <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงที่ปรับพฤติกรรมได้</h6>
+                        <div class="info-grid">${modifiableFactors}</div>
                     </div>
-                </div>`;
+                </div>
+            </div>`;
         }
         
         function buildDailyCheckCard(info) {
@@ -247,7 +275,7 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays > 0) {
-                    daysSinceCheck = `<p class="text-center text-danger small mt-3 mb-0">คุณไม่ได้เช็คอาการสโตรกมาแล้ว ${diffDays} วัน</p>`;
+                    daysSinceCheck = `<p class="text-center text-danger small mt-3 mb-0">คุณไม่ได้ประเมินอาการมา ${diffDays} วัน</p>`;
                 }
             } else {
                  daysSinceCheck = `<p class="text-center text-danger small mt-3 mb-0">คุณยังไม่เคยประเมินอาการสโตรก</p>`;
@@ -263,7 +291,7 @@
                                 <div><div class="fs-4 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ไม่มีอาการ</div></div>
                             </div>
                             ${daysSinceCheck}
-                            <a href="https://liff.line.me/2005789397-WRm1lYd9" class="btn btn-primary w-100 mt-3">ประเมินอาการตอนนี้</a>
+                            <a href="${LIFF_ID_DAILY}" class="btn btn-primary w-100 mt-3">ประเมินอาการตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
@@ -272,24 +300,29 @@
         function buildCommunityLeadersCard(leaders) {
             let leaderHtml = `<p class="text-muted">ไม่พบข้อมูลผู้นำชุมชนในพื้นที่ของคุณ</p>`;
             if (leaders) {
-                let items = '';
-                if(leaders.volunteer1 && leaders.volunteer1_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. 1: ${leaders.volunteer1} <small class="text-muted d-block">${leaders.area}</small></span><a href="tel:${leaders.volunteer1_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
-                if(leaders.volunteer2 && leaders.volunteer2_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>อสม. 2: ${leaders.volunteer2} <small class="text-muted d-block">${leaders.area}</small></span><a href="tel:${leaders.volunteer2_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
-                if(leaders.village_headman && leaders.headman_tel) items += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>ผู้นำชุมชน: ${leaders.village_headman}</span><a href="tel:${leaders.headman_tel}" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                const pcuCallBtn = leaders.pcu_tel ? `<a href="#" onclick="trackTelCall('${leaders.pcu_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>` : '';
+                let items = `<div class="d-flex justify-content-between align-items-center mb-2"><b>รพ.สต.: ${leaders.pcu || 'N/A'}</b> ${pcuCallBtn}</div>`;
                 
-                leaderHtml = `<div class="mb-2 fw-bold">รพ.สต.: ${leaders.pcu || 'N/A'} ${leaders.pcu_tel ? `(<a href="tel:${leaders.pcu_tel}">โทร</a>)` : ''}</div><ul class="list-group list-group-flush">${items}</ul>`;
+                const v1Line = leaders.volunteer1_line_id ? `<span class="small text-muted">Line: ${leaders.volunteer1_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.volunteer1_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
+                const v2Line = leaders.volunteer2_line_id ? `<span class="small text-muted">Line: ${leaders.volunteer2_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.volunteer2_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
+                const headmanLine = leaders.headman_line_id ? `<span class="small text-muted">Line: ${leaders.headman_line_id} <button class="btn-copy" onclick="copyToClipboard('${leaders.headman_line_id}')"><i class="bi bi-clipboard"></i></button></span>` : '';
+
+                let vhvItems = '';
+                if(leaders.volunteer1 && leaders.volunteer1_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>อสม. 1: ${leaders.volunteer1} ${v1Line}</div> <a href="#" onclick="trackTelCall('${leaders.volunteer1_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                if(leaders.volunteer2 && leaders.volunteer2_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>อสม. 2: ${leaders.volunteer2} ${v2Line}</div> <a href="#" onclick="trackTelCall('${leaders.volunteer2_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                if(leaders.village_headman && leaders.headman_tel) vhvItems += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>ผู้นำชุมชน: ${leaders.village_headman} ${headmanLine}</div> <a href="#" onclick="trackTelCall('${leaders.headman_tel}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a></li>`;
+                
+                leaderHtml = `${items}<ul class="list-group list-group-flush">${vhvItems}</ul>`;
             }
             return `
                 <div class="col-lg-6 col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="section-title"><i class="bi bi-person-hearts"></i>อสม. และผู้นำชุมชน</h5>
-                            ${leaderHtml}
-                        </div>
-                    </div>
+                    <div class="card"><div class="card-body">
+                        <h5 class="section-title"><i class="bi bi-person-hearts"></i>อสม.สโตรกของฉัน</h5>
+                        ${leaderHtml}
+                    </div></div>
                 </div>`;
         }
-        
+
         function buildDistanceCard(distanceInfo, helpText) {
             let historyHtml = '<p class="text-muted">ไม่พบประวัติการปักหมุดตำแหน่ง "บ้าน"</p>';
             let cardClass = 'card';
@@ -338,7 +371,7 @@
                             <h5 class="section-title"><i class="bi bi-send-check-fill"></i>ส่งสติกเกอร์ประจำวัน</h5>
                             <p class="text-center mb-0">ส่งแล้ว <strong class="fs-4 mx-1">${count || 0}</strong> ครั้ง</p>
                             ${message}
-                            <a href="https://liff.line.me/2005789397-37lemBgX" class="btn btn-info w-100 text-white mt-3">ส่งสติกเกอร์ตอนนี้</a>
+                            <a href="${LIFF_ID_STICKER}" class="btn btn-info w-100 text-white mt-3">ส่งสติกเกอร์ตอนนี้</a>
                         </div>
                     </div>
                 </div>`;
@@ -354,10 +387,58 @@
                                 <div><div class="fs-4 fw-bold">${stats.testCount}</div><div class="small">ทดสอบแล้ว (ครั้ง)</div></div>
                                 <div><div class="fs-4 fw-bold">${stats.maxScore}</div><div class="small">คะแนนสูงสุด</div></div>
                             </div>
-                            <a href="https://liff.line.me/2005789397-ROQvjpYk" class="btn btn-success w-100">ทำแบบทดสอบ</a>
+                            <a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-success w-100">ทำแบบทดสอบ</a>
                         </div>
                     </div>
                 </div>`;
+        }
+
+        function buildVhvInfoCard(vhv) {
+            const homeStatus = vhv.asm_home 
+                ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> ปักหมุดบ้านแล้ว</span>` 
+                : `<button class="btn btn-sm btn-warning" onclick="handlePinVhvHome()">ปักหมุดบ้าน อสม.</button><p class="small text-danger mt-1 mb-0">ปักเมื่ออยู่ที่บ้านแล้วเท่านั้น!</p>`;
+
+            const testStatus = vhv.asm_test 
+                ? `<span class="text-success">คะแนนสอบ: ${vhv.asm_test}</span> <a href="${LIFF_ID_KNOWLEDGE}" class="ms-2">สอบใหม่</a>` 
+                : `<a href="${LIFF_ID_KNOWLEDGE}" class="btn btn-sm btn-info text-white">ทำแบบทดสอบ</a>`;
+            
+            return `<div class="col-12"><div class="card bg-light-brown"><div class="card-body">
+                <h5 class="section-title"><i class="bi bi-person-badge"></i>แดชบอร์ด อสม.สโตรก</h5>
+                <p class="mb-1"><b>ชื่อ:</b> ${vhv.name}</p>
+                <p class="mb-1"><b>พื้นที่ดูแล:</b> ${vhv.area || 'ยังไม่ระบุ'}</p>
+                <p><b>โทร:</b> ${vhv.phone} | <b>Line:</b> ${vhv.line_id || 'N/A'}</p>
+                <div class="d-flex justify-content-between align-items-center mt-3 border-top pt-3">
+                    <div class="text-center">${homeStatus}</div>
+                    <div class="text-center">${testStatus}</div>
+                </div>
+                <button class="btn btn-secondary w-100 mt-3" onclick="openVhvModal()">แก้ไขข้อมูล</button>
+            </div></div></div>`;
+        }
+
+        function buildVhvPatientListCard(patients) {
+            if (!patients || patients.length === 0) return '<div class="col-12"><div class="card"><div class="card-body"><p class="text-muted">ไม่พบผู้ป่วยในพื้นที่รับผิดชอบที่ยินยอมให้ข้อมูล</p></div></div></div>';
+            
+            let patientItems = patients.map(p => {
+                const riskInfo = classifyRisk(p.thai_cv_risk_score/100);
+                const lineInfo = p.line_id ? `<span class="mx-2">|</span> Line: ${p.line_id} <button class="btn-copy" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-clipboard"></i></button>` : '';
+                return `<li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                       <div>
+                           <h6 class="mb-0 fw-bold">${p.name} (${p.gender == 1 ? 'ช' : 'ญ'}, ${p.age} ปี)</h6>
+                           <small style="color:${riskInfo.color}; font-weight: 600;">เสี่ยง ${p.thai_cv_risk_score}% (${riskInfo.text})</small>
+                       </div>
+                       <div>
+                           <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn-call"><i class="bi bi-telephone-fill text-success"></i> โทร</a>
+                       </div>
+                    </div>
+                    <div class="text-muted small mt-1">โทร: ${p.telephone} ${lineInfo}</div>
+                </li>`;
+            }).join('');
+
+            return `<div class="col-12"><div class="card"><div class="card-body">
+                <h5 class="section-title"><i class="bi bi-people-fill"></i>ผู้ป่วยในความรับผิดชอบ (${patients.length} คน)</h5>
+                <ul class="list-group list-group-flush">${patientItems}</ul>
+            </div></div></div>`;
         }
 
         function buildVhvRegistrationButton() {
@@ -365,7 +446,7 @@
                  <div class="col-12 mt-3">
                     <div class="card">
                         <div class="card-body text-center p-3">
-                            <button class="btn btn-lg btn-warning" onclick="openVhvModal(false)">
+                            <button class="btn btn-lg btn-warning" onclick="openVhvModal()">
                                 <i class="bi bi-person-plus-fill"></i> ลงทะเบียน อสม.สโตรก
                             </button>
                         </div>
@@ -374,7 +455,6 @@
         }
 
         // --- Event Handlers & Modal Functions ---
-        
         function handlePinNewLocation() {
             const type = document.getElementById('locationType').value;
             showLoading(true, "กำลังระบุตำแหน่ง...");
@@ -386,57 +466,35 @@
                 showLoading(true, "กำลังคำนวณระยะทาง...");
 
                 fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${lat}&lon=${lon}`)
-                    .then(res => res.json())
-                    .then(distanceData => {
+                    .then(res => res.json()).then(distanceData => {
                         if (distanceData.error) throw new Error(distanceData.error);
                         
                         showLoading(true, "กำลังบันทึกข้อมูล...");
-                        const postData = {
-                            action: 'saveNewLocation',
-                            data: {
-                                userId: LIFF_PROFILE.userId,
-                                type: type,
-                                latlong: latlong,
-                                distance: distanceData.distance_km,
-                                duration: distanceData.duration_mins
-                            }
-                        };
                         return fetch(WEB_APP_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(postData)
+                            method: 'POST', mode: 'no-cors',
+                            body: JSON.stringify({ action: 'saveNewLocation', data: {
+                                userId: LIFF_PROFILE.userId, type: type, latlong: latlong,
+                                distance: distanceData.distance_km, duration: distanceData.duration_mins
+                            }})
                         });
-                    })
-                    .then(() => {
+                    }).then(() => {
                         alert("บันทึกตำแหน่งสำเร็จ! กำลังโหลดข้อมูลใหม่");
                         window.location.reload();
-                    })
-                    .catch(handleFailure);
-
-            }, err => {
-                handleFailure("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message);
-            }, { enableHighAccuracy: true });
+                    }).catch(handleFailure);
+            }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
         }
         
         function openVhvModal() {
             document.getElementById('vhvForm').reset();
-            const existingData = ALL_USER_DATA.vhvProfile || {};
+            const vhvData = ALL_USER_DATA.vhvProfile || {};
+            const userData = ALL_USER_DATA.userProfile || {};
             
-            document.getElementById('vhvName').value = existingData.name || ALL_USER_DATA.userProfile.name ||'';
-            document.getElementById('vhvPhone').value = existingData.phone || ALL_USER_DATA.userProfile.telephone || '';
-            document.getElementById('vhvLineId').value = existingData.line_id || ALL_USER_DATA.userProfile.line_id || '';
-            document.getElementById('vhvPdpa').checked = !!existingData.pdpa;
-            
-            // Populate areas
-            const areaSelect = document.getElementById('vhvArea');
-            areaSelect.innerHTML = ''; // Clear old options
-            ALL_USER_DATA.availableVhvAreas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area;
-                option.textContent = area;
-                areaSelect.appendChild(option);
-            });
+            document.getElementById('vhvRegisterModalLabel').textContent = ALL_USER_DATA.isVhv ? 'แก้ไขข้อมูล อสม.สโตรก' : 'ลงทะเบียน อสม.สโตรก';
+            document.getElementById('vhvName').value = vhvData.name || userData.name ||'';
+            document.getElementById('vhvPhone').value = vhvData.phone || userData.telephone || '';
+            document.getElementById('vhvLineId').value = vhvData.line_id || '';
+            document.getElementById('vhvArea').value = vhvData.area || `ต.${userData.district} ม.${userData.village}`;
+            document.getElementById('vhvPdpa').checked = !!vhvData.pdpa;
             
             VHV_REG_MODAL.show();
         }
@@ -444,39 +502,92 @@
         function handleVhvRegistration() {
             const form = document.getElementById('vhvForm');
             if (!form.checkValidity()) { form.reportValidity(); return; }
-            showLoading(true, "กำลังบันทึกข้อมูล อสม....");
+            showLoading(true, "กำลังบันทึกข้อมูล...");
 
-            const selectedAreas = Array.from(document.getElementById('vhvArea').selectedOptions).map(opt => opt.value);
-            if(selectedAreas.length === 0){
-                alert("กรุณาเลือกพื้นที่ดูแลอย่างน้อย 1 พื้นที่");
-                showLoading(false);
-                return;
-            }
-            
-            const pdpaText = "ข้าพเจ้ายินยอมให้ รพ.สวีเข้าถึงข้อมูล และยินยอมให้ผู้ป่วยในเขตพื้นที่ดูแลสามารถโทรศัพท์สอบถามได้";
             const registrationData = {
-                displayName: LIFF_PROFILE.displayName, userId: LIFF_PROFILE.userId, profilePicture: LIFF_PROFILE.pictureUrl,
+                userId: LIFF_PROFILE.userId,
+                displayName: LIFF_PROFILE.displayName,
+                profilePicture: LIFF_PROFILE.pictureUrl,
                 name: document.getElementById('vhvName').value.trim(),
                 phone: document.getElementById('vhvPhone').value.trim(),
                 line_id: document.getElementById('vhvLineId').value.trim(),
-                areas: selectedAreas,
-                pdpa: document.getElementById('vhvPdpa').checked ? pdpaText : ""
+                area: document.getElementById('vhvArea').value.trim(),
+                pdpa: document.getElementById('vhvPdpa').checked ? "ยินยอม" : "",
+                // ส่งค่าเดิมกลับไปหากไม่มีการเปลี่ยนแปลง
+                asm_home: ALL_USER_DATA.vhvProfile?.asm_home || '', 
+                asm_test: ALL_USER_DATA.vhvProfile?.asm_test || '',
             };
 
             fetch(WEB_APP_URL, {
                 method: 'POST', mode: 'no-cors',
                 body: JSON.stringify({ action: 'registerVhv', data: registrationData })
-            })
-            .then(() => {
+            }).then(() => {
                 VHV_REG_MODAL.hide();
-                alert("บันทึกข้อมูลสำเร็จ! กรุณาเปิดหน้านี้ใหม่อีกครั้งเพื่อดูข้อมูลที่อัปเดต");
+                alert("บันทึกข้อมูลสำเร็จ! กรุณาเปิดหน้านี้ใหม่อีกครั้ง");
                 window.location.reload(); 
-            })
-            .catch(handleFailure)
-            .finally(() => showLoading(false));
+            }).catch(handleFailure);
         }
 
+        function handlePinVhvHome() {
+            if (!confirm("คุณอยู่ที่บ้านพักของคุณแล้วใช่หรือไม่? การปักหมุดจะบันทึกตำแหน่งปัจจุบันของคุณเป็นบ้าน อสม.")) return;
+            showLoading(true, "กำลังระบุตำแหน่งบ้าน...");
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                const latlong = `${pos.coords.latitude},${pos.coords.longitude}`;
+                showLoading(true, "กำลังบันทึกตำแหน่งบ้าน...");
+
+                const vhvData = { ...ALL_USER_DATA.vhvProfile };
+                vhvData.asm_home = latlong; // อัปเดตตำแหน่งบ้าน
+
+                const postData = {
+                    userId: LIFF_PROFILE.userId,
+                    displayName: vhvData.displayName,
+                    profilePicture: vhvData.profilePicture,
+                    name: vhvData.name,
+                    phone: vhvData.phone,
+                    line_id: vhvData.line_id,
+                    area: vhvData.area,
+                    pdpa: vhvData.pdpa,
+                    asm_home: vhvData.asm_home,
+                    asm_test: vhvData.asm_test
+                };
+
+                fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    body: JSON.stringify({ action: 'registerVhv', data: postData })
+                }).then(() => {
+                    alert("ปักหมุดตำแหน่งบ้านสำเร็จ!");
+                    window.location.reload();
+                }).catch(handleFailure);
+
+            }, err => { handleFailure(new Error("ไม่สามารถเข้าถึงตำแหน่งได้: " + err.message)); }, { enableHighAccuracy: true });
+        }
+
+
         // --- Utility Functions ---
+        function trackTelCall(tel) {
+            if (!tel) return;
+            if (confirm(`คุณต้องการโทรออกไปยังหมายเลข ${tel} หรือไม่?`)) {
+                fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: 'logTelCall', data: { userId: LIFF_PROFILE.userId, tel: tel } })
+                }).catch(err => console.error('Failed to log call:', err));
+                
+                window.location.href = 'tel:' + tel;
+            }
+        }
+
+        function copyToClipboard(text) {
+            if(!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("คัดลอก Line ID แล้ว: " + text);
+            }).catch(err => {
+                alert("ไม่สามารถคัดลอกได้");
+                console.error('Could not copy text: ', err);
+            });
+        }
+
         function classifyRisk(risk) {
             if (risk < 0.10) return { text: "เสี่ยงต่ำ", color: "#28a745" };
             if (risk < 0.20) return { text: "เสี่ยงปานกลาง", color: "#ffc107" };
@@ -484,6 +595,7 @@
             if (risk < 0.40) return { text: "เสี่ยงสูงมาก", color: "#dc3545" };
             return { text: "เสี่ยงอันตราย", color: "#8B0000" };
         }
+
         function formatDuration(minutes) {
             if (!minutes || minutes < 1) return "N/A";
             const h = Math.floor(minutes / 60);
@@ -491,12 +603,15 @@
             let result = '';
             if (h > 0) result += `${h} ชั่วโมง `;
             if (m > 0) result += `${m} นาที`;
-            return result.trim();
+            return result.trim() || 'น้อยกว่า 1 นาที';
         }
+
         function showLoading(show, text = "กำลังโหลด...") { 
-            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+            const loader = document.getElementById('loading');
+            loader.style.display = show ? 'flex' : 'none';
             document.getElementById('loading-text').textContent = text;
         }
+
         function handleFailure(err) {
             const message = err.message || JSON.stringify(err);
             console.error("Operation Failed:", message);
