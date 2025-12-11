@@ -61,13 +61,11 @@
     </ul>
 
     <div class="tab-content" style="margin-top: 80px;">
-        <!-- Tab 1: Health -->
         <div class="tab-pane fade show active" id="health-tab-content">
             <div class="container tab-content-container">
                 <div class="row" id="dynamic-content-container"></div>
             </div>
         </div>
-        <!-- Tab 2: VHV -->
         <div class="tab-pane fade" id="vhv-tab-content">
             <div class="bg-vhv-theme tab-content-container">
                 <div class="container pt-3">
@@ -223,6 +221,7 @@
             }
         }
 
+        // --- Builders --- 
         function buildGamificationCard(scores) {
             if (!scores || !scores.totalScore) return '';
             const rankText = `(${scores.totalScore} คะแนน สูงเป็นลำดับที่ ${scores.rank} จาก ${scores.totalUsers} คน)`;
