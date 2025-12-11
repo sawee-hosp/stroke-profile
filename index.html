@@ -9,96 +9,38 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root { 
-            --bs-primary-rgb: 13, 110, 253; 
-            --vhv-bg: #ffc107; 
-            --vhv-dark: #b88a00;
-            --base-size: 22px; 
-        }
-        body { 
-            font-family: "Noto Sans Thai", sans-serif; 
-            font-size: var(--base-size);
-            background-color: #f0f2f5; 
-            margin: 0; 
-            padding-bottom: 4rem;
-        }
-        
+        :root { --bs-primary-rgb: 13, 110, 253; --vhv-bg: #ffc107; --vhv-dark: #b88a00; --base-size: 22px; }
+        body { font-family: "Noto Sans Thai", sans-serif; font-size: var(--base-size); background-color: #f0f2f5; margin: 0; padding-bottom: 4rem; }
         h1, h2, h3, h4, h5 { font-weight: 700 !important; }
         .h5, h5 { font-size: 1.6rem; }
-        .small, small { font-size: 1rem; }
         .btn { font-size: 1.2rem; }
-        
-        /* Navigation Tabs */
-        .nav-tabs .nav-link {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #6c757d;
-            border-radius: 0;
-            padding: 15px 10px;
-            background: #e9ecef;
-        }
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            background: #fff;
-            border-bottom-color: #fff;
-        }
-        .nav-tabs .nav-link.vhv-tab {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .nav-tabs .nav-link.vhv-tab.active {
-            background: var(--vhv-bg);
-            color: #000;
-            border-color: #dee2e6 #dee2e6 var(--vhv-bg);
-        }
-
-        .bg-vhv-theme {
-            background-color: var(--vhv-bg);
-            min-height: 100vh;
-            padding-bottom: 40px;
-        }
-
+        .nav-tabs .nav-link { font-size: 1.3rem; font-weight: bold; color: #6c757d; padding: 15px 10px; background: #e9ecef; }
+        .nav-tabs .nav-link.active { color: #0d6efd; background: #fff; }
+        .nav-tabs .nav-link.vhv-tab.active { background: var(--vhv-bg); color: #000; }
+        .bg-vhv-theme { background-color: var(--vhv-bg); min-height: 100vh; padding-bottom: 40px; }
         .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 1.5rem; border-radius: 15px; }
         .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
         .section-title i { margin-right: 0.8rem; color: #0d6efd; font-size: 1.8rem; }
         
-        /* New Black Theme Loading */
         #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: white; text-align: center; }
         #loading-text { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
-        #loading-subtext { font-size: 1.5rem; color: #ffc107; min-height: 50px; }
-        #loading-icon { font-size: 4rem; color: #ffc107; margin-bottom: 20px; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        #loading-subtext { font-size: 4rem; font-weight: 800; color: #ffc107; min-height: 100px; line-height: 1.2; text-shadow: 2px 2px 10px rgba(255,193,7,0.5); }
+        #loading-icon { font-size: 5rem; color: #ffc107; margin-bottom: 30px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
         
-        .btn-call { background-color: transparent; border: 2px solid #198754; color: #198754; padding: 0.5rem 1rem; font-size: 1.2rem; font-weight: bold; border-radius: 10px; text-decoration: none; }
-        .btn-call:hover { background-color: #198754; color: white; }
-        
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .info-item { display: flex; align-items: center; font-size: 1.2rem; }
-        .info-item i { font-size: 2rem; color: #0d6efd; min-width: 50px; }
-        .info-item .label { font-size: 0.9em; color: #6c757d; font-weight: normal; }
-        
-        .game-score-box {
-            background: #fff; border-radius: 15px; padding: 15px 5px; text-align: center; 
-            border: 2px solid #fff; height: 100%; cursor: pointer;
-        }
-        .game-score-box:active { transform: scale(0.95); background-color: #f8f9fa; }
+        .game-score-box { background: #fff; border-radius: 15px; padding: 15px 5px; text-align: center; border: 2px solid #fff; height: 100%; cursor: pointer; }
         .game-score-box h3 { margin: 5px 0; font-weight: 800; color: #0d6efd; font-size: 2.2rem; }
         .game-score-box span { font-size: 1.1rem; color: #666; line-height: 1.2; display: block; }
-        .game-icon { font-size: 2.5rem; margin-bottom: 5px; }
-        
         .profile-edit-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 50px; height: 50px; color: #0d6efd; font-size: 1.5rem; }
-        
         .check-icon { font-size: 1.8rem; margin-right: 10px; }
         .check-ok { color: #198754; }
         .check-no { color: #dc3545; opacity: 0.5; }
-
-        /* Risk Colors */
-        .risk-1 { border-left: 10px solid #28a745; }
-        .risk-2 { border-left: 10px solid #ffc107; }
-        .risk-3 { border-left: 10px solid #fd7e14; }
-        .risk-4 { border-left: 10px solid #dc3545; }
-        .risk-5 { border-left: 10px solid #8B0000; }
-        .text-line-id { font-size: 0.9rem; color: #0d6efd; cursor: pointer; }
+        .risk-1 { border-left: 15px solid #28a745; }
+        .risk-2 { border-left: 15px solid #ffc107; }
+        .risk-3 { border-left: 15px solid #fd7e14; }
+        .risk-4 { border-left: 15px solid #dc3545; }
+        .risk-5 { border-left: 15px solid #8B0000; }
+        .text-line-id { font-size: 1rem; color: #0d6efd; cursor: pointer; background: #e3f2fd; padding: 2px 8px; border-radius: 5px; display: inline-block; }
         .highlight-alert { background-color: #ffebee; border: 2px solid red; }
     </style>
 </head>
@@ -107,198 +49,135 @@
     <div id="loading">
         <i id="loading-icon" class="bi bi-heart-pulse"></i>
         <div id="loading-text">กำลังโหลดข้อมูล...</div>
-        <div class="small">จำใส่ใจอาการสโตรกมีดังนี้:</div>
+        <div style="font-size: 1.2rem;">จำใส่ใจอาการสโตรก:</div>
         <div id="loading-subtext"></div>
     </div>
 
-    <!-- Main Navigation Tabs -->
     <ul class="nav nav-tabs nav-justified fixed-top shadow-sm" id="mainTabs" role="tablist" style="height: 70px;">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="health-tab-btn" data-bs-toggle="tab" data-bs-target="#health-tab-content" type="button" role="tab"><i class="bi bi-heart-pulse-fill"></i> ข้อมูลสุขภาพ</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link vhv-tab" id="vhv-tab-btn" data-bs-toggle="tab" data-bs-target="#vhv-tab-content" type="button" role="tab"><i class="bi bi-person-badge-fill"></i> สำหรับ อสม.</button>
-        </li>
+        <li class="nav-item"><button class="nav-link active" id="health-tab-btn" data-bs-toggle="tab" data-bs-target="#health-tab-content"><i class="bi bi-heart-pulse-fill"></i> ข้อมูลสุขภาพ</button></li>
+        <li class="nav-item"><button class="nav-link vhv-tab" id="vhv-tab-btn" data-bs-toggle="tab" data-bs-target="#vhv-tab-content"><i class="bi bi-person-badge-fill"></i> สำหรับ อสม.</button></li>
     </ul>
 
-    <!-- Tab Contents -->
     <div class="tab-content" style="margin-top: 80px;">
-        
-        <!-- Tab 1: Health Info -->
-        <div class="tab-pane fade show active" id="health-tab-content" role="tabpanel">
+        <div class="tab-pane fade show active" id="health-tab-content">
             <div class="container tab-content-container">
-                <div class="row" id="dynamic-content-container">
-                    <!-- Cards will be injected here -->
-                </div>
+                <div class="row" id="dynamic-content-container"></div>
             </div>
         </div>
-
-        <!-- Tab 2: VHV Dashboard -->
-        <div class="tab-pane fade" id="vhv-tab-content" role="tabpanel">
+        <div class="tab-pane fade" id="vhv-tab-content">
             <div class="bg-vhv-theme tab-content-container">
                 <div class="container pt-3">
                     <div id="vhv-dashboard-area"></div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Modals -->
-    <!-- Profile Edit Modal -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="editProfileModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">แก้ไขข้อมูลส่วนตัว</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="editProfileForm"><div class="mb-3 text-center"><img id="edit-preview-img" src="" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-bottom:15px;"><br><small class="text-muted">รูปโปรไฟล์จะอัปเดตตาม LINE โดยอัตโนมัติ</small></div><div class="mb-3"><label class="form-label">ชื่อ-นามสกุล</label><input type="text" class="form-control form-control-lg" id="editName" required></div><div class="mb-3"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control form-control-lg" id="editPhone" required pattern="[0-9]{10}"></div></form></div><div class="modal-footer"><button class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-primary btn-lg" onclick="saveUserProfile()">บันทึก</button></div></div></div></div>
+
+    <div class="modal fade" id="rtpaModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h1 class="modal-title fs-5">ทำไมต้องไป รพ. ภายใน 4.5 ชม.?</h1><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body fs-5"><p>โรคหลอดเลือดสมองตีบ จำเป็นต้องได้รับยาละลายลิ่มเลือด (rT-PA) ให้ทันเวลา</p><ul><li><b>นาทีทอง:</b> ต้องได้รับยาภายใน 4.5 ชม. หลังเกิดอาการ</li><li><b>ผลลัพธ์:</b> ลดความพิการและโอกาสเสียชีวิต</li><li><b>สายด่วน:</b> 1669 หรือ รีบนำส่ง รพ.สวี</li></ul></div><div class="modal-footer"><button class="btn btn-secondary btn-lg w-100" data-bs-dismiss="modal">เข้าใจแล้ว</button></div></div></div></div>
+
+    <div class="modal fade" id="riskInfoModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark"><h1 class="modal-title fs-5">ความเสี่ยงสโตรกสำคัญอย่างไร?</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body fs-5"><p>เราควรลดปัจจัยเสี่ยงที่เปลี่ยนแปลงได้ เช่น สูบบุหรี่ เบาหวาน ความดัน เพื่อให้ % การเกิดสโตรกลดลง</p><p class="text-danger fw-bold">สำหรับผู้ที่เคยเป็นสโตรกแล้ว มีโอกาสเป็นซ้ำสูงกว่าคนปกติ!</p><p>ควรใส่ใจสุขภาพ ตรวจสอบอาการเสมอ หากมีอาการผิดปกติรีบไป รพ. ทันที</p></div><div class="modal-footer"><button class="btn btn-secondary btn-lg w-100" data-bs-dismiss="modal">รับทราบ</button></div></div></div></div>
+
+    <div class="modal fade" id="distanceModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">ปักหมุดตำแหน่ง</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="mb-3"><label class="form-label">ประเภทตำแหน่ง</label><select class="form-select form-select-lg" id="locationType"><option value="บ้าน">บ้าน (ใช้อ้างอิงระยะทาง)</option><option value="ทางผ่าน">ทางผ่าน (ไม่นำมาคำนวณ)</option></select></div><button class="btn btn-primary w-100 btn-lg" onclick="handlePinNewLocation()"><i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่</button></div></div></div></div>
+    
+    <div class="modal fade" id="vhvRegisterModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">ลงทะเบียน อสม.</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="vhvForm"><div class="mb-3"><label class="form-label">ชื่อ-นามสกุล</label><input type="text" class="form-control form-control-lg" id="vhvName" required></div><div class="mb-3"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control form-control-lg" id="vhvPhone" required pattern="[0-9]{10}"></div><div class="mb-3"><label class="form-label">LINE ID</label><input type="text" class="form-control form-control-lg" id="vhvLineId"></div><div class="mb-3"><label class="form-label">เลือกพื้นที่ดูแล (หมู่บ้านเดียว)</label><div class="row g-2"><div class="col-6"><select class="form-select form-select-lg" id="vhvDistrict" onchange="updateVillages()" required><option value="" disabled selected>เลือกตำบล</option></select></div><div class="col-6"><select class="form-select form-select-lg" id="vhvVillage" required disabled><option value="" disabled selected>เลือกหมู่</option></select></div></div></div><div class="mb-3"><label class="form-label">ตำแหน่งบ้าน อสม.</label><div class="input-group"><input type="text" class="form-control form-control-lg" id="vhvAsmHome" placeholder="รอปักหมุด..." readonly><button class="btn btn-outline-primary btn-lg" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div><div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label" for="vhvPdpa">ยินยอมเปิดเผยข้อมูลติดต่อ</label></div></form></div><div class="modal-footer"><button class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-primary btn-lg" onclick="handleVhvRegistration()">บันทึก</button></div></div></div></div>
+
+    <div class="modal fade" id="qrModal" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-dark text-white"><div class="modal-header border-0"><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body d-flex flex-column justify-content-center align-items-center"><h2 class="mb-4">สวีรู้ทันสโตรก</h2><img src="https://qr-official.line.me/sid/L/2005789397.png" alt="QR Code" style="max-width:90%;width:350px;border:15px solid white;border-radius:15px;"><p class="mt-4 fs-3">ให้ชาวบ้านสแกนเพื่อเพิ่มเพื่อน</p><button class="btn btn-light btn-lg mt-4 rounded-pill px-5 py-3 fs-3" data-bs-dismiss="modal">ปิด</button></div></div></div></div>
+
+    <div class="modal fade" id="shareProfileModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-5">แชร์นามบัตร อสม.</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><p class="text-muted">ระบบจะสร้างนามบัตรดิจิทัลพร้อมคะแนนของคุณเพื่อส่งให้ชาวบ้าน</p><button type="button" class="btn btn-primary btn-lg w-100" onclick="handleShareProfile()"><i class="bi bi-line"></i> ส่งเข้าไลน์</button></div></div></div></div>
+
+    <!-- Stroke Report Modal -->
+    <div class="modal fade" id="strokeReportModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-4">แก้ไขข้อมูลส่วนตัว</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-danger text-white">
+                    <h1 class="modal-title fs-4">ส่งข้อมูลผู้ป่วยสโตรก (Fast Track)</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editProfileForm">
-                        <div class="mb-3 text-center">
-                            <img id="edit-preview-img" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; margin-bottom:15px;">
-                            <br>
-                            <small class="text-muted">รูปโปรไฟล์จะอัปเดตตาม LINE โดยอัตโนมัติ</small>
+                    <form id="strokeReportForm">
+                        <div class="mb-3">
+                            <label class="form-label">ชื่อผู้ป่วย</label>
+                            <input type="text" class="form-control form-control-lg" id="srPatientName" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ชื่อ-นามสกุล</label>
-                            <input type="text" class="form-control form-control-lg" id="editName" required>
+                            <label class="form-label">เบอร์โทรผู้ป่วย/ญาติ</label>
+                            <input type="tel" class="form-control form-control-lg" id="srPhone" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">เบอร์โทรศัพท์</label>
-                            <input type="tel" class="form-control form-control-lg" id="editPhone" required pattern="[0-9]{10}">
+                            <label class="form-label">เวลาที่เริ่มมีอาการ (สำคัญมาก)</label>
+                            <input type="time" class="form-control form-control-lg" id="srOnsetTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">อาการที่พบ (BEFAST)</label>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" value="B-ทรงตัวไม่ได้" id="symB"><label class="form-check-label" for="symB">Balance (ทรงตัวไม่ได้/เดินเซ)</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" value="E-ตามัว" id="symE"><label class="form-check-label" for="symE">Eyes (ตามัว/มองไม่เห็น)</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" value="F-หน้าเบี้ยว" id="symF"><label class="form-check-label" for="symF">Face (หน้าเบี้ยว/ปากตก)</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" value="A-แขนอ่อนแรง" id="symA"><label class="form-check-label" for="symA">Arm (แขนขาอ่อนแรง)</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" value="S-พูดไม่ชัด" id="symS"><label class="form-check-label" for="symS">Speech (พูดไม่ชัด/พูดไม่ออก)</label></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">พิกัดผู้ป่วย</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="srLocation" readonly placeholder="กดปุ่มเพื่อระบุตำแหน่ง">
+                                <button type="button" class="btn btn-secondary" onclick="getLocationForReport()"><i class="bi bi-geo-alt"></i> ระบุ</button>
+                            </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-primary btn-lg" onclick="saveUserProfile()">บันทึก</button>
+                    <button type="button" class="btn btn-danger btn-lg w-100" onclick="submitStrokeReport()">ส่งข้อมูลด่วน!</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- rTPA Info Modal -->
-    <div class="modal fade" id="rtpaModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- Home Visit Modal -->
+    <div class="modal fade" id="homeVisitModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h1 class="modal-title fs-5">ทำไมต้องไป รพ. ภายใน 4.5 ชม.?</h1>
+                <div class="modal-header bg-success text-white">
+                    <h1 class="modal-title fs-4">บันทึกการเยี่ยมบ้าน</h1>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body fs-5">
-                    <p>โรคหลอดเลือดสมองตีบหรืออุดตัน จำเป็นต้องได้รับยาละลายลิ่มเลือด (rT-PA) ให้ทันเวลา</p>
-                    <ul>
-                        <li><b>นาทีทอง:</b> ต้องได้รับยาภายใน 4.5 ชั่วโมงหลังเกิดอาการ</li>
-                        <li><b>ผลลัพธ์:</b> ช่วยลดความพิการและโอกาสเสียชีวิตได้มหาศาล</li>
-                        <li><b>สายด่วน:</b> 1669 หรือ รีบนำส่ง รพ.สวี ทันที</li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-lg w-100" data-bs-dismiss="modal">เข้าใจแล้ว</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Distance Modal -->
-    <div class="modal fade" id="distanceModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-4">ปักหมุดตำแหน่ง</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="locationType" class="form-label">ประเภทตำแหน่ง</label>
-                        <select class="form-select form-select-lg" id="locationType">
-                            <option value="บ้าน">บ้าน (ใช้อ้างอิงระยะทาง)</option>
-                            <option value="ทางผ่าน">ทางผ่าน (ไม่นำมาคำนวณ)</option>
-                        </select>
+                    <input type="hidden" id="hvPatientName">
+                    <h5 id="hvTitle" class="mb-3">เยี่ยม: ...</h5>
+                    
+                    <ul class="nav nav-pills mb-3 nav-fill" id="pills-tab" role="tablist">
+                        <li class="nav-item"><button class="nav-link active" id="pills-advice-tab" data-bs-toggle="pill" data-bs-target="#pills-advice">ให้ความรู้</button></li>
+                        <li class="nav-item"><button class="nav-link" id="pills-adl-tab" data-bs-toggle="pill" data-bs-target="#pills-adl">ประเมิน ADL (หลังป่วย)</button></li>
+                    </ul>
+                    
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-advice">
+                            <div class="form-check fs-5 mb-2">
+                                <input class="form-check-input" type="checkbox" id="chkAdvice1" checked>
+                                <label class="form-check-label" for="chkAdvice1">แนะนำเรื่อง 5 สัญญาณเตือนสโตรก</label>
+                            </div>
+                            <div class="form-check fs-5 mb-2">
+                                <input class="form-check-input" type="checkbox" id="chkAdvice2" checked>
+                                <label class="form-check-label" for="chkAdvice2">แนะนำการปฏิบัติตัวเพื่อลดความเสี่ยง</label>
+                            </div>
+                            <div class="mb-3 mt-3">
+                                <label class="form-label">บันทึกเพิ่มเติม</label>
+                                <textarea class="form-control" id="hvNoteAdvice" rows="2"></textarea>
+                            </div>
+                            <button class="btn btn-success w-100 btn-lg" onclick="submitHomeVisit('Advice')">บันทึกการเยี่ยม</button>
+                        </div>
+                        <div class="tab-pane fade" id="pills-adl">
+                            <p class="text-muted small">ประเมินความสามารถในการกิจวัตรประจำวัน</p>
+                            <div class="mb-2"><label>การรับประทานอาหาร (Feeding)</label><select class="form-select" id="adlFeeding"><option value="10">ทำได้เอง (10)</option><option value="5">ต้องการความช่วยเหลือ (5)</option><option value="0">ทำไม่ได้เลย (0)</option></select></div>
+                            <div class="mb-2"><label>การลุกนั่ง/เคลื่อนย้าย (Transfer)</label><select class="form-select" id="adlTransfer"><option value="15">ทำได้เอง (15)</option><option value="10">ต้องการความช่วยเหลือเล็กน้อย (10)</option><option value="5">ต้องพยุง (5)</option><option value="0">ทำไม่ได้เลย (0)</option></select></div>
+                            <div class="mb-2"><label>การดูแลความสะอาด (Grooming)</label><select class="form-select" id="adlGrooming"><option value="5">ทำได้เอง (5)</option><option value="0">ต้องการความช่วยเหลือ (0)</option></select></div>
+                            <div class="mb-2"><label>การใช้ห้องน้ำ (Toilet)</label><select class="form-select" id="adlToilet"><option value="10">ทำได้เอง (10)</option><option value="5">ต้องการความช่วยเหลือ (5)</option><option value="0">ทำไม่ได้เลย (0)</option></select></div>
+                            <div class="mb-2"><label>การอาบน้ำ (Bathing)</label><select class="form-select" id="adlBathing"><option value="5">ทำได้เอง (5)</option><option value="0">ต้องการความช่วยเหลือ (0)</option></select></div>
+                            <div class="mb-2"><label>การเดิน/เคลื่อนที่ (Mobility)</label><select class="form-select" id="adlMobility"><option value="15">เดินได้เอง (15)</option><option value="10">เดินโดยมีคนพยุง (10)</option><option value="5">ใช้รถเข็น (5)</option><option value="0">ทำไม่ได้เลย (0)</option></select></div>
+                            <button class="btn btn-primary w-100 btn-lg mt-3" onclick="submitHomeVisit('ADL')">ส่งข้อมูลให้ทีมสโตรก</button>
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-primary w-100 btn-lg" onclick="handlePinNewLocation()">
-                        <i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- VHV Register Modal -->
-    <div class="modal fade" id="vhvRegisterModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header"><h1 class="modal-title fs-4" id="vhvRegisterModalLabel">ลงทะเบียน อสม.</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-          <div class="modal-body">
-            <form id="vhvForm">
-              <div class="mb-3">
-                  <label class="form-label">ชื่อ-นามสกุล</label>
-                  <input type="text" class="form-control form-control-lg" id="vhvName" required>
-              </div>
-              <div class="mb-3"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control form-control-lg" id="vhvPhone" required pattern="[0-9]{10}"></div>
-              <div class="mb-3"><label class="form-label">LINE ID</label><input type="text" class="form-control form-control-lg" id="vhvLineId"></div>
-              
-              <div class="mb-3">
-                  <label class="form-label">เลือกพื้นที่ดูแล (หมู่บ้านเดียว)</label>
-                  <div class="row g-2">
-                      <div class="col-6">
-                          <select class="form-select form-select-lg" id="vhvDistrict" onchange="updateVillages()" required>
-                              <option value="" disabled selected>เลือกตำบล</option>
-                          </select>
-                      </div>
-                      <div class="col-6">
-                           <select class="form-select form-select-lg" id="vhvVillage" required disabled>
-                              <option value="" disabled selected>เลือกหมู่</option>
-                          </select>
-                      </div>
-                  </div>
-              </div>
-
-            <div class="mb-3">
-                <label class="form-label">ตำแหน่งบ้าน อสม.</label>
-                <div class="input-group">
-                    <input type="text" class="form-control form-control-lg" id="vhvAsmHome" placeholder="รอปักหมุด..." readonly>
-                    <button class="btn btn-outline-primary btn-lg" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button>
-                </div>
-              </div>
-
-              <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label" for="vhvPdpa">ยินยอมเปิดเผยข้อมูลติดต่อให้ผู้ป่วยในพื้นที่</label></div>
-            </form>
-          </div>
-          <div class="modal-footer"><button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary btn-lg" onclick="handleVhvRegistration()">บันทึก</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div class="modal fade" id="qrModal" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header border-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body d-flex flex-column justify-content-center align-items-center">
-                    <h2 class="mb-4">สวีรู้ทันสโตรก</h2>
-                    <img src="https://qr-official.line.me/sid/L/2005789397.png" alt="QR Code" style="max-width: 90%; width: 350px; border: 15px solid white; border-radius: 15px;">
-                    <p class="mt-4 fs-3">ให้ชาวบ้านสแกนเพื่อเพิ่มเพื่อน</p>
-                    <button class="btn btn-light btn-lg mt-4 rounded-pill px-5 py-3 fs-3" data-bs-dismiss="modal">ปิด</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Profile Modal -->
-    <div class="modal fade" id="shareProfileModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5">แชร์นามบัตร อสม.</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <p class="text-muted">ระบบจะสร้างนามบัตรดิจิทัลพร้อมคะแนนของคุณเพื่อส่งให้ชาวบ้าน</p>
-                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="handleShareProfile()"><i class="bi bi-line"></i> ส่งเข้าไลน์</button>
                 </div>
             </div>
         </div>
@@ -326,6 +205,7 @@
         let LIFF_PROFILE = null;
         let ALL_USER_DATA = null;
         let DISTANCE_MODAL, VHV_REG_MODAL, QR_MODAL, EDIT_PROFILE_MODAL, RTPA_MODAL, SHARE_PROFILE_MODAL;
+        let STROKE_REPORT_MODAL, HOME_VISIT_MODAL, RISK_INFO_MODAL;
         let loadingInterval;
         
         document.addEventListener('DOMContentLoaded', initializeLiff);
@@ -338,6 +218,9 @@
             EDIT_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('editProfileModal'));
             RTPA_MODAL = new bootstrap.Modal(document.getElementById('rtpaModal'));
             SHARE_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('shareProfileModal'));
+            STROKE_REPORT_MODAL = new bootstrap.Modal(document.getElementById('strokeReportModal'));
+            HOME_VISIT_MODAL = new bootstrap.Modal(document.getElementById('homeVisitModal'));
+            RISK_INFO_MODAL = new bootstrap.Modal(document.getElementById('riskInfoModal'));
 
             try {
                 await liff.init({ liffId: LIFF_ID_MAIN });
@@ -447,7 +330,7 @@
                             </div>
                             <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
                                 <div class="game-score-box">
-                                    <div class="game-icon text-danger"><i class="bi bi-ambulance"></i></div>
+                                    <div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div>
                                     <h3>${scores.emergencyScore}</h3>
                                     <span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span>
                                 </div>
@@ -496,7 +379,10 @@
                 <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                         <h6 class="section-title"><i class="bi bi-activity"></i>ความเสี่ยงสโตรกที่ประเมิน</h6>
+                         <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6>
+                            <button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button>
+                         </div>
                         <div class="d-flex align-items-center justify-content-center mb-3">
                              <div class="text-center">
                                 <div style="color: ${riskInfo.color};">
@@ -539,16 +425,15 @@
             const list = pts.map(p => {
                 const riskVal = p.thai_cv_risk_score / 100;
                 const riskInfo = classifyRisk(riskVal);
-                let riskClass = 'risk-1';
-                if(riskVal >= 0.1 && riskVal < 0.2) riskClass = 'risk-2';
-                else if(riskVal >= 0.2 && riskVal < 0.3) riskClass = 'risk-3';
-                else if(riskVal >= 0.3 && riskVal < 0.4) riskClass = 'risk-4';
-                else if(riskVal >= 0.4) riskClass = 'risk-5';
+                let riskClass = 'risk-1'; let freqText = 'ติดตามปีละ 1 ครั้ง';
+                if(riskVal >= 0.1 && riskVal < 0.2) { riskClass = 'risk-2'; freqText = 'ติดตามทุก 6 เดือน'; }
+                else if(riskVal >= 0.2 && riskVal < 0.3) { riskClass = 'risk-3'; freqText = 'ติดตามทุก 3-6 เดือน'; }
+                else if(riskVal >= 0.3 && riskVal < 0.4) { riskClass = 'risk-4'; freqText = 'ติดตามทุก 1-3 เดือน'; }
+                else if(riskVal >= 0.4) { riskClass = 'risk-5'; freqText = 'พบแพทย์ทันที/ทุกเดือน'; }
 
                 const distHtml = (p.distanceFromVhv_km) ? 
                     `<small class="text-muted ms-2"><i class="bi bi-geo-alt"></i> ห่าง ${p.distanceFromVhv_km} กม.</small>` : '';
                 
-                // Highlight Logic for Red/DarkRed not checked > 7 days
                 let alertClass = '';
                 let lastCheckText = 'ยังไม่เคยเช็คอาการ';
                 if(p.latestCheckTimestamp) {
@@ -564,21 +449,27 @@
                         <div>
                             <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></h5>
                             <div class="small">${distHtml}</div>
-                            <div class="small text-muted">${lastCheckText}</div>
+                            <div class="small text-muted">${lastCheckText} | ${freqText}</div>
                             <div class="mt-1">${lineBtn}</div>
                         </div>
-                        <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn btn-outline-success rounded-circle p-2"><i class="bi bi-telephone-fill fs-4"></i></a>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="#" onclick="trackTelCall('${p.telephone}')" class="btn btn-outline-success rounded-circle p-2"><i class="bi bi-telephone-fill fs-4"></i></a>
+                            <button onclick="openHomeVisit('${p.name}')" class="btn btn-primary btn-sm rounded-pill">เยี่ยมบ้าน</button>
+                        </div>
                     </div>
                 </li>`;
             }).join('');
 
             return `<div class="card bg-white shadow-sm"><div class="card-body p-0">
-                <div class="p-3 border-bottom"><h5 class="mb-0 fw-bold">รายชื่อกลุ่มเสี่ยง (${pts.length})</h5></div>
+                <div class="p-3 border-bottom d-flex justify-content-between">
+                    <h5 class="mb-0 fw-bold">รายชื่อกลุ่มเสี่ยง (${pts.length})</h5>
+                    <button class="btn btn-danger btn-sm" onclick="STROKE_REPORT_MODAL.show()">แจ้งเหตุสโตรก!</button>
+                </div>
                 <ul class="list-group list-group-flush fs-5">${list}</ul>
             </div></div>`;
         }
 
-        // ... [Reused Builders: buildTopVhvCard, buildVhvInstructions, buildVhvInfoCard, buildVhvRegistrationButton, buildDistanceCard, etc.] ...
+        // ... [Reused Builders] ...
         
         function buildTopVhvCard(total, topList) {
             let listHtml = '';
@@ -610,7 +501,8 @@
         }
 
         function buildVhvInfoCard(vhv) {
-            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div></div></div></div>`;
+            const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
+            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
         }
 
         function buildVhvRegistrationButton() {
@@ -625,14 +517,16 @@
                  cls += min < 120 ? ' bg-success-subtle' : min < 270 ? ' bg-warning-subtle' : ' bg-danger-subtle';
                  html = `<div class="text-center"><h1>${parseFloat(d.distance).toFixed(1)} กม.</h1><h3>${Math.floor(min/60)} ชม. ${min%60} นาที</h3></div>`;
              }
-             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-ambulance text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div></div></div>`;
+             // Using bi-truck-front-fill as generic ambulance alternative
+             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div></div></div>`;
         }
 
         function buildDailyCheckCard(info) {
              let daysSinceCheck = '';
             if (info.latestCheckTimestamp) {
                 const diffDays = Math.ceil(Math.abs(new Date() - new Date(info.latestCheckTimestamp).setHours(0,0,0,0)) / (864e5));
-                if (diffDays > 0) daysSinceCheck = `<p class="text-center text-danger mt-2">ไม่ได้ประเมินมา ${diffDays} วัน (ถูกหักคะแนน)</p>`;
+                if (diffDays > 7) daysSinceCheck = `<p class="text-center text-danger mt-2">ไม่ได้ประเมินมา ${diffDays} วัน (ถูกหักคะแนน)</p>`;
+                else if (diffDays > 0) daysSinceCheck = `<p class="text-center text-muted mt-2">ไม่ได้ประเมินมา ${diffDays} วัน</p>`;
             } else { daysSinceCheck = `<p class="text-center text-danger mt-2">ยังไม่เคยประเมิน</p>`; }
             return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ใส่ใจประเมินอาการ</h5><div class="d-flex justify-content-around text-center"><div><div class="display-3 fw-bold text-danger">${info.symptomCount}</div><div class="small">มีอาการ</div></div><div><div class="display-3 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ปกติ</div></div></div>${daysSinceCheck}<p class="small text-center text-muted">ไม่มีอาการก็เช็คอินได้ (เพิ่มคะแนน)</p><a href="${LINKS.DAILY}" class="btn btn-primary w-100 btn-lg mt-1">เช็คอาการ</a></div></div></div>`;
         }
@@ -659,7 +553,7 @@
             const name = document.getElementById('editName').value;
             const phone = document.getElementById('editPhone').value;
             if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ");
-            showLoading(); // Default text
+            showLoading(); 
             fetch(WEB_APP_URL, {
                 method: 'POST', mode: 'no-cors',
                 body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } })
@@ -695,19 +589,13 @@
             villSelect.disabled = true;
             if (SAWEE_LOCATIONS[dist]) {
                 villSelect.disabled = false;
-                const count = SAWEE_LOCATIONS[dist]; // Now it's a number
+                const count = SAWEE_LOCATIONS[dist]; 
                 if (typeof count === 'number') {
                     for(let i=1; i<=count; i++) {
                         const v = "หมู่ " + i;
                         const opt = document.createElement('option');
                         opt.value = v; opt.textContent = v; villSelect.appendChild(opt);
                     }
-                } else if (Array.isArray(count)) {
-                     // Fallback for previous array structure if mixed
-                     count.forEach(v => {
-                        const opt = document.createElement('option');
-                        opt.value = v; opt.textContent = v; villSelect.appendChild(opt);
-                    });
                 }
             }
         }
@@ -772,6 +660,61 @@
                 document.getElementById('loading').style.display = 'none';
             }, e=>handleFailure(e), {enableHighAccuracy: true});
         }
+        function getLocationForReport() {
+            showLoading();
+            navigator.geolocation.getCurrentPosition(p => {
+                document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`;
+                document.getElementById('loading').style.display = 'none';
+            }, e=>handleFailure(e));
+        }
+        function submitStrokeReport() {
+            const pn = document.getElementById('srPatientName').value;
+            const ph = document.getElementById('srPhone').value;
+            const ot = document.getElementById('srOnsetTime').value;
+            const loc = document.getElementById('srLocation').value;
+            if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            
+            // Get checked symptoms
+            let sym = [];
+            ['B','E','F','A','S'].forEach(k => { if(document.getElementById('sym'+k).checked) sym.push(document.getElementById('sym'+k).value); });
+            
+            showLoading();
+            fetch(WEB_APP_URL, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({ action: 'saveStrokeReport', data: {
+                    reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName,
+                    patientName: pn, patientPhone: ph, onsetTime: ot, location: loc, symptoms: sym.join(',')
+                }})
+            }).then(() => { alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); window.location.reload(); }).catch(handleFailure);
+        }
+        function openHomeVisit(name) {
+            document.getElementById('hvPatientName').value = name;
+            document.getElementById('hvTitle').textContent = "เยี่ยม: " + name;
+            HOME_VISIT_MODAL.show();
+        }
+        function submitHomeVisit(type) {
+            const pname = document.getElementById('hvPatientName').value;
+            let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' };
+            if (type === 'Advice') {
+                let adv = [];
+                if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน");
+                if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว");
+                data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value;
+            } else {
+                data.adl = {
+                    feeding: document.getElementById('adlFeeding').value,
+                    transfer: document.getElementById('adlTransfer').value,
+                    grooming: document.getElementById('adlGrooming').value,
+                    toilet: document.getElementById('adlToilet').value,
+                    bathing: document.getElementById('adlBathing').value,
+                    mobility: document.getElementById('adlMobility').value
+                };
+            }
+            showLoading();
+            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) })
+            .then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); document.getElementById('loading').style.display='none'; }).catch(handleFailure);
+        }
+        
         function trackTelCall(tel) { if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); }
         function copyToClipboard(txt) { navigator.clipboard.writeText(txt).then(()=>alert("คัดลอก Line ID แล้ว")).catch(()=>alert("คัดลอกไม่ได้")); }
         function classifyRisk(r) { return r<0.1?{text:"เสี่ยงต่ำ",color:"#28a745"}:r<0.2?{text:"ปานกลาง",color:"#ffc107"}:r<0.3?{text:"สูง",color:"#fd7e14"}:r<0.4?{text:"สูงมาก",color:"#dc3545"}:{text:"อันตราย",color:"#8B0000"}; }
