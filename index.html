@@ -173,6 +173,44 @@
             margin-bottom: 10px; 
             border-left: 5px solid #0d6efd; 
         }
+        /* เพิ่มต่อท้ายในส่วน <style> ... </style> เดิม */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* แบ่งเป็น 2 คอลัมน์เท่ากัน */
+    gap: 10px; /* ระยะห่างระหว่างกล่อง */
+    margin-top: 10px;
+}
+
+.info-item {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.info-item i {
+    font-size: 1.5rem;
+    color: #0d6efd;
+    margin-right: 10px;
+    width: 30px;
+    text-align: center;
+}
+
+.info-item .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    line-height: 1;
+}
+
+.info-item b {
+    font-size: 1rem;
+    color: #333;
+}
     </style>
 </head>
 <body>
@@ -707,117 +745,139 @@
         }
 
         // --- Builders --- 
-        function buildGamificationCard(scores) {
-            if (!scores || !scores.totalScore) return '';
-            const rankText = `(${scores.totalScore} คะแนน สูงเป็นลำดับที่ ${scores.rank} จาก ${scores.totalUsers} คน)`;
-            
-            return `
-            <div class="col-12 mb-3">
-                <div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;">
-                    <div class="card-body p-3">
-                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5>
-                        <div class="text-center mb-3">
-                             <div class="text-primary fw-bold fs-5">${rankText}</div>
+function buildGamificationCard(scores) {
+    // แก้ไข: ตรวจสอบแค่ว่ามี object scores ไหม (ไม่เช็ค totalScore เพราะ 0 ก็คือค่าที่มีอยู่จริง)
+    if (!scores) return ''; 
+    
+    // ป้องกันค่า undefined ให้เป็น 0 ไว้ก่อน
+    const total = scores.totalScore !== undefined ? scores.totalScore : 0;
+    const rank = scores.rank || '-';
+    const totalUser = scores.totalUsers || '-';
+
+    const rankText = `(${total} คะแนน สูงเป็นลำดับที่ ${rank} จาก ${totalUser} คน)`;
+    
+    return `
+    <div class="col-12 mb-3">
+        <div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;">
+            <div class="card-body p-3">
+                <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5>
+                <div class="text-center mb-3">
+                        <div class="text-primary fw-bold fs-5">${rankText}</div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3" onclick="scrollToId('card-check')">
+                        <div class="game-score-box">
+                            <div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div>
+                            <h3>${scores.checkScore || 0}</h3>
+                            <span>ความใส่ใจอาการ(ครั้ง)</span>
                         </div>
-                        <div class="row g-3">
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-check')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div>
-                                    <h3>${scores.checkScore}</h3>
-                                    <span>ความใส่ใจอาการ(ครั้ง)</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div>
-                                    <h3>${scores.emergencyScore}</h3>
-                                    <span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-sticker')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div>
-                                    <h3>${scores.stickerScore}</h3>
-                                    <span>แชร์สติกเกอร์(ครั้ง)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-exam')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-success"><i class="bi bi-book"></i></div>
-                                    <h3>${scores.knowledgeScore}</h3>
-                                    <span>ความรู้เรื่องสโตรก(เต็ม10)</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div>
                     </div>
+                    <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
+                        <div class="game-score-box">
+                            <div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div>
+                            <h3>${scores.emergencyScore || 0}</h3>
+                            <span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span>
+                        </div>
+                    </div>
+                        <div class="col-6 col-md-3" onclick="scrollToId('card-sticker')">
+                        <div class="game-score-box">
+                            <div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div>
+                            <h3>${scores.stickerScore || 0}</h3>
+                            <span>แชร์สติกเกอร์(ครั้ง)</span>
+                        </div>
+                    </div>
+                        <div class="col-6 col-md-3" onclick="scrollToId('card-exam')">
+                        <div class="game-score-box">
+                            <div class="game-icon text-success"><i class="bi bi-book"></i></div>
+                            <h3>${scores.knowledgeScore || 0}</h3>
+                            <span>ความรู้เรื่องสโตรก(เต็ม10)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+    function buildProfileCard(p, riskOnly = false) {
+    if (!p) return '';
+    
+    // แก้ไข: ตรวจสอบค่าให้รัดกุม ถ้าไม่มีค่าให้เป็น 0
+    const riskRaw = p.thai_cv_risk_score !== undefined && p.thai_cv_risk_score !== "" ? p.thai_cv_risk_score : 0;
+    const riskValue = riskRaw / 100;
+    const riskInfo = classifyRisk(riskValue);
+    
+    if (riskOnly) {
+        // สร้างรายการปัจจัยเสี่ยง
+        const factors = [
+            {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'},
+            {i: 'bi-calendar-event', l:'อายุ', v: p.age ? `${p.age} ปี` : '-'},
+            {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'},
+            {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'},
+            {i: 'bi-speedometer2', l:'ความดัน', v: p.sbp ? `${p.sbp}` : '-'},
+            {i: 'bi-droplet', l:'ไขมัน', v: p.cholesterol ? `${p.cholesterol}` : '-'},
+            {i: 'bi-arrows-expand', l:'รอบเอว', v: p.waist ? `${p.waist}` : '-'},
+            {i: 'bi-rulers', l:'ส่วนสูง', v: p.height ? `${p.height}` : '-'}
+        ];
+
+        // สร้าง HTML โดยใช้ Class .info-grid ที่เราเพิ่ม CSS ไป
+        let factorHtml = '';
+        factors.forEach(f => {
+            factorHtml += `
+            <div class="info-item">
+                <i class="bi ${f.i}"></i>
+                <div>
+                    <span class="label">${f.l}</span>
+                    <b>${f.v}</b>
                 </div>
             </div>`;
-        }
+        });
 
-        function buildProfileCard(p, riskOnly = false) {
-            if (!p) return '';
-            const riskValue = (p.thai_cv_risk_score || 0) / 100;
-            const riskInfo = classifyRisk(riskValue);
-            
-            if (riskOnly) {
-                const factors = [
-                    {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'},
-                    {i: 'bi-calendar-event', l:'อายุ', v: `${p.age || '-'} ปี`},
-                    {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'},
-                    {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'},
-                    {i: 'bi-speedometer2', l:'ความดัน', v: `${p.sbp || 'ไม่มี'}`},
-                    {i: 'bi-droplet', l:'ไขมัน', v: `${p.cholesterol || 'ไม่มี'}`},
-                    {i: 'bi-arrows-expand', l:'รอบเอว', v: `${p.waist || 'ไม่มี'}`},
-                    {i: 'bi-rulers', l:'ส่วนสูง', v: `${p.height || 'ไม่มี'}`}
-                ];
-                let factorHtml = '';
-                factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
-
-                return `
-                <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6>
-                            <button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button>
-                         </div>
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                             <div class="text-center">
-                                <div style="color: ${riskInfo.color};">
-                                    <div class="display-3 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'ไม่มี'}</div>
-                                    <div class="fw-bold fs-4">${riskInfo.text}</div>
-                                </div>
-                            </div>
-                            <a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a>
-                        </div>
-                        <hr>
-                        <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6>
-                         <div class="info-grid">${factorHtml}</div>
+        return `
+        <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6>
+                    <button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button>
                     </div>
-                </div>
-                </div>`;
-            }
-
-            const regDate = p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : 'N/A';
-            return `
-            <div class="col-12">
-                <div class="card bg-white">
-                    <div class="card-body position-relative">
-                        <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
-                        <div class="d-flex align-items-center">
-                            <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;">
-                            <div>
-                                <h3 class="fw-bold mb-1">${p.name || 'N/A'}</h3>
-                                <div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'N/A'}</div>
-                                <span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span>
-                            </div>
+                <div class="d-flex align-items-center justify-content-center mb-3">
+                        <div class="text-center">
+                        <div style="color: ${riskInfo.color};">
+                            <div class="display-3 fw-bolder">${riskRaw}%</div>
+                            <div class="fw-bold fs-4">${riskInfo.text}</div>
                         </div>
                     </div>
+                    <a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a>
                 </div>
-            </div>`;
-        }
+                <hr>
+                <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6>
+                    <div class="info-grid">${factorHtml}</div>
+            </div>
+        </div>
+        </div>`;
+    }
 
+    // ส่วน Card โปรไฟล์ด้านบน (ไม่เปลี่ยน logic เดิมมาก แต่กัน error)
+    const regDate = p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : '-';
+    return `
+    <div class="col-12">
+        <div class="card bg-white">
+            <div class="card-body position-relative">
+                <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
+                <div class="d-flex align-items-center">
+                    <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;">
+                    <div>
+                        <h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3>
+                        <div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || '-'}</div>
+                        <span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
         function buildVhvPatientListCard(pts) {
             if(!pts || pts.length===0) return '<div class="card"><div class="card-body text-center p-4">ยังไม่มีรายชื่อกลุ่มเสี่ยงในพื้นที่</div></div>';
             
@@ -1101,18 +1161,33 @@
             fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) })
                 .then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }).catch(handleFailure);
         }
-        async function handleShareProfile() {
-            toggleLoading(true);
+ async function handleShareProfile() {
+    toggleLoading(true);
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`);
+        const data = await res.json();
+        toggleLoading(false);
+        
+        if (data.success && data.flex) {
+            SHARE_PROFILE_MODAL.hide();
+            // หุ้มด้วย try-catch เพื่อกัน LIFF Error กรณี Flex ผิด format
             try {
-                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`);
-                const data = await res.json();
-                toggleLoading(false);
-                if (data.success && data.flex) {
-                    SHARE_PROFILE_MODAL.hide();
-                    await liff.shareTargetPicker([data.flex]);
-                } else { alert("สร้างนามบัตรไม่ได้: " + data.message); }
-            } catch (err) { handleFailure(err); }
+                const result = await liff.shareTargetPicker([data.flex]);
+                if (result) {
+                    // แชร์สำเร็จ
+                    alert("ส่งนามบัตรเรียบร้อยแล้ว");
+                }
+            } catch (liffErr) {
+                console.error(liffErr);
+                // ถ้าแชร์ไม่ได้ อาจเพราะ PC หรือเงื่อนไขอื่น ให้ Alert บอก
+                alert("ไม่สามารถเปิดหน้าต่างแชร์ได้ หรือผู้ใช้ยกเลิก (ลองกดใหม่อีกครั้ง)");
+            }
+        } else { 
+            alert("สร้างนามบัตรไม่ได้: " + (data.message || "ข้อมูลไม่ครบถ้วน")); 
         }
+    } catch (err) { 
+        handleFailure(err); 
+    }
         function showQrModal() { 
             fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`);
             QR_MODAL.show(); 
