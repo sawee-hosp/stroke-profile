@@ -80,7 +80,7 @@
 
     <div class="modal fade" id="riskInfoModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark"><h1 class="modal-title fs-5">ความเสี่ยงสโตรกสำคัญอย่างไร?</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body fs-5"><p>เราควรลดปัจจัยเสี่ยงที่เปลี่ยนแปลงได้ เช่น สูบบุหรี่ เบาหวาน ความดัน เพื่อให้ % การเกิดสโตรกลดลง</p><p class="text-danger fw-bold">สำหรับผู้ที่เคยเป็นสโตรกแล้ว มีโอกาสเป็นซ้ำสูงกว่าคนปกติ!</p><p>ควรใส่ใจสุขภาพ ตรวจสอบอาการเสมอ หากมีอาการผิดปกติรีบไป รพ. ทันที</p></div><div class="modal-footer"><button class="btn btn-secondary btn-lg w-100" data-bs-dismiss="modal">รับทราบ</button></div></div></div></div>
 
-    <div class="modal fade" id="distanceModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">ปักหมุดตำแหน่ง</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="mb-3"><label class="form-label">ประเภทตำแหน่ง</label><select class="form-select form-select-lg" id="locationType"><option value="บ้าน">บ้าน (ใช้อ้างอิงระยะทาง)</option><option value="ทางผ่าน">ทางผ่าน (ไม่นำมาคำนวณ)</option></select></div><button class="btn btn-primary w-100 btn-lg" onclick="handlePinNewLocation()"><i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่</button></div></div></div></div>
+    <div class="modal fade" id="distanceModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">ปักหมุดตำแหน่ง</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="text-muted">สามารถปักหมุดได้เสมอ ไม่ว่าอยู่ที่ไหน โดยเลือกว่าตำแหน่งนี้คืออะไร</p><div class="mb-3"><label class="form-label">ประเภทตำแหน่ง</label><select class="form-select form-select-lg" id="locationType"><option value="บ้าน">บ้าน (ใช้อ้างอิงระยะทาง)</option><option value="ทางผ่าน">ทางผ่าน (เช็คระยะทางเฉยๆ)</option></select></div><button class="btn btn-primary w-100 btn-lg" onclick="handlePinNewLocation()"><i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่</button></div></div></div></div>
     
     <div class="modal fade" id="vhvRegisterModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h1 class="modal-title fs-4">ลงทะเบียน อสม.</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="vhvForm"><div class="mb-3"><label class="form-label">ชื่อ-นามสกุล</label><input type="text" class="form-control form-control-lg" id="vhvName" required></div><div class="mb-3"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control form-control-lg" id="vhvPhone" required pattern="[0-9]{10}"></div><div class="mb-3"><label class="form-label">LINE ID</label><input type="text" class="form-control form-control-lg" id="vhvLineId"></div><div class="mb-3"><label class="form-label">เลือกพื้นที่ดูแล (หมู่บ้านเดียว)</label><div class="row g-2"><div class="col-6"><select class="form-select form-select-lg" id="vhvDistrict" onchange="updateVillages()" required><option value="" disabled selected>เลือกตำบล</option></select></div><div class="col-6"><select class="form-select form-select-lg" id="vhvVillage" required disabled><option value="" disabled selected>เลือกหมู่</option></select></div></div></div><div class="mb-3"><label class="form-label">ตำแหน่งบ้าน อสม.</label><div class="input-group"><input type="text" class="form-control form-control-lg" id="vhvAsmHome" placeholder="รอปักหมุด..." readonly><button class="btn btn-outline-primary btn-lg" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div><div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label" for="vhvPdpa">ยินยอมเปิดเผยข้อมูลติดต่อ</label></div></form></div><div class="modal-footer"><button class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button><button class="btn btn-primary btn-lg" onclick="handleVhvRegistration()">บันทึก</button></div></div></div></div>
 
@@ -519,12 +519,47 @@
         function buildDistanceCard(d, help) {
              let html = '<p class="text-muted text-center">ยังไม่ปักหมุดบ้าน</p>';
              let cls = 'card';
+             // Card visual graphic
+             let graphic = '';
+             let advice = '';
+
              if(d) {
                  const min = parseInt(d.duration);
-                 cls += min < 120 ? ' bg-success-subtle' : min < 270 ? ' bg-warning-subtle' : ' bg-danger-subtle';
-                 html = `<div class="text-center"><h1>${parseFloat(d.distance).toFixed(1)} กม.</h1><h3>${Math.floor(min/60)} ชม. ${min%60} นาที</h3></div>`;
+                 const dist = parseFloat(d.distance).toFixed(1);
+                 cls += min < 150 ? ' bg-success-subtle' : min < 210 ? ' bg-warning-subtle' : ' bg-danger-subtle';
+                 
+                 // Advice logic
+                 if(min < 150) {
+                     advice = `<div class="alert alert-success mt-2"><b>ทันเวลา!</b> สามารถสแกนสมองและรับยาได้ทัน แต่ต้องรีบที่สุด</div>`;
+                 } else if (min < 210) {
+                     advice = `<div class="alert alert-warning mt-2"><b>ค่อนข้างเสี่ยง!</b> อาจรับยาไม่ทัน ต้องรีบมา รพ. ทันที</div>`;
+                 } else {
+                     advice = `<div class="alert alert-danger mt-2"><b>อาจไม่ทันยา!</b> แต่ต้องรีบมาเพื่อรักษาอาการฉุกเฉิน</div>`;
+                 }
+
+                 graphic = `
+                 <div class="d-flex align-items-center justify-content-center my-3">
+                    <div class="text-center">
+                        <i class="bi bi-person-fill-exclamation text-danger" style="font-size: 3rem;"></i>
+                        <div>ผู้ป่วย</div>
+                    </div>
+                    <div class="flex-grow-1 text-center px-2 position-relative">
+                        <div style="border-top: 3px dashed #666; width: 100%; position: absolute; top: 50%;"></div>
+                        <i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: #fff; z-index: 1;"></i>
+                        <div class="small fw-bold mt-1">${dist} กม.</div>
+                        <div class="small text-muted">${Math.floor(min/60)} ชม. ${min%60} นาที</div>
+                    </div>
+                    <div class="text-center">
+                        <i class="bi bi-hospital-fill text-success" style="font-size: 3rem;"></i>
+                        <div>รพ.สวี</div>
+                    </div>
+                 </div>`;
+                 
+                 html = graphic + advice;
+             } else {
+                 html = `<div class="alert alert-light mt-2">กดปุ่มปักหมุดเพื่อตรวจสอบระยะทางและเวลาเดินทางไป รพ.สวี</div>`;
              }
-             // Using bi-truck-front-fill as generic ambulance alternative
+
              return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div></div></div>`;
         }
 
