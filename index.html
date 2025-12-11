@@ -265,18 +265,25 @@
                 .then(res => res.json())
                 .then(data => {
                     clearInterval(loadingInterval);
-                    toggleLoading(false);
                     if (data.error) throw new Error(data.error);
                     
-                    if (!data.userProfile) {
-                        const unregisteredDiv = document.getElementById('unregistered-user');
-                        if (unregisteredDiv) unregisteredDiv.style.display = 'block';
-                        
-                        const mainTabs = document.getElementById('mainTabs');
-                        if (mainTabs) mainTabs.style.display = 'none';
-                    } else {
-                        ALL_USER_DATA = data;
-                        updatePage(data);
+                    try {
+                        if (!data.userProfile) {
+                            const unregisteredDiv = document.getElementById('unregistered-user');
+                            if (unregisteredDiv) unregisteredDiv.style.display = 'block'; // Ensure unregistered user div is created if needed, or handle gracefully
+                            
+                            // Since we removed 'unregistered-user' div in this version, let's inject it or alert
+                            // Actually, let's just use alert for now or inject basic HTML
+                            document.body.innerHTML = `<div class="container text-center mt-5"><h1>ไม่พบข้อมูลผู้ใช้</h1><p>กรุณาลงทะเบียน</p><a href="${LINKS.REGIS}" class="btn btn-primary btn-lg">ลงทะเบียน</a></div>`;
+                        } else {
+                            ALL_USER_DATA = data;
+                            updatePage(data);
+                        }
+                    } catch (renderError) {
+                        console.error(renderError);
+                        alert("เกิดข้อผิดพลาดในการแสดงผล: " + renderError.message);
+                    } finally {
+                        toggleLoading(false); // Move here to ensure it closes
                     }
                 })
                 .catch(handleFailure);
@@ -285,27 +292,37 @@
         function updatePage(data) {
             const healthContainer = document.getElementById('dynamic-content-container');
             if (healthContainer) {
+                // Check if data parts exist to avoid null errors
+                const gamification = data.gamification || {};
+                const dailyCheck = data.dailyCheckInfo || {};
+                const distance = data.homeDistance; // can be null
+                const leaders = data.communityLeaders; // can be null
+                const sticker = data.stickerShareCount || 0;
+                const exam = data.knowledgeTestStats || {};
+
                 healthContainer.innerHTML = 
                     buildProfileCard(data.userProfile) +
-                    buildGamificationCard(data.gamification) +
+                    buildGamificationCard(gamification) +
                     `<div id="card-risk">` + buildProfileCard(data.userProfile, true) + `</div>` +
-                    `<div id="card-check">` + buildDailyCheckCard(data.dailyCheckInfo) + `</div>` +
-                    `<div id="card-emergency">` + buildDistanceCard(data.homeDistance, data.userProfile.help) + `</div>` +
-                    `<div id="card-leaders">` + buildCommunityLeadersCard(data.communityLeaders) + `</div>` +
-                    `<div id="card-sticker">` + buildStickerCard(data.stickerShareCount) + `</div>` +
-                    `<div id="card-exam">` + buildKnowledgeTestCard(data.knowledgeTestStats) + `</div>`;
+                    `<div id="card-check">` + buildDailyCheckCard(dailyCheck) + `</div>` +
+                    `<div id="card-emergency">` + buildDistanceCard(distance, data.userProfile.help) + `</div>` +
+                    `<div id="card-leaders">` + buildCommunityLeadersCard(leaders) + `</div>` +
+                    `<div id="card-sticker">` + buildStickerCard(sticker) + `</div>` +
+                    `<div id="card-exam">` + buildKnowledgeTestCard(exam) + `</div>`;
             }
             
             const vhvArea = document.getElementById('vhv-dashboard-area');
             if (vhvArea) {
                 const dash = data.vhvDashboard || {};
+                const vhvProf = data.vhvProfile || {};
+                const vhvPatients = data.vhvPatientList || [];
                 
                 if (data.isVhv) {
                     vhvArea.innerHTML = 
                         buildTopVhvCard(dash.totalVhv, dash.topVhvs) +
                         buildVhvInstructions(true, dash.checklist) +
-                        buildVhvInfoCard(data.vhvProfile) +
-                        buildVhvPatientListCard(data.vhvPatientList);
+                        buildVhvInfoCard(vhvProf) +
+                        buildVhvPatientListCard(vhvPatients);
                 } else {
                     vhvArea.innerHTML = 
                         buildTopVhvCard(dash.totalVhv, dash.topVhvs) +
@@ -316,7 +333,7 @@
         }
 
         function buildGamificationCard(scores) {
-            if (!scores) return '';
+            if (!scores || !scores.totalScore) return '';
             const rankText = `(${scores.totalScore} คะแนน สูงเป็นลำดับที่ ${scores.rank} จาก ${scores.totalUsers} คน)`;
             
             return `
@@ -365,7 +382,7 @@
 
         function buildProfileCard(p, riskOnly = false) {
             if (!p) return '';
-            const riskValue = p.thai_cv_risk_score / 100;
+            const riskValue = (p.thai_cv_risk_score || 0) / 100;
             const riskInfo = classifyRisk(riskValue);
             
             if (riskOnly) {
@@ -430,7 +447,7 @@
             if(!pts || pts.length===0) return '<div class="card"><div class="card-body text-center p-4">ยังไม่มีรายชื่อกลุ่มเสี่ยงในพื้นที่</div></div>';
             
             const list = pts.map(p => {
-                const riskVal = p.thai_cv_risk_score / 100;
+                const riskVal = (p.thai_cv_risk_score || 0) / 100;
                 const riskInfo = classifyRisk(riskVal);
                 let riskClass = 'risk-1'; let freqText = 'ติดตามปีละ 1 ครั้ง';
                 if(riskVal >= 0.1 && riskVal < 0.2) { riskClass = 'risk-2'; freqText = 'ติดตามทุก 6 เดือน'; }
@@ -454,7 +471,7 @@
                 return `<li class="list-group-item ${alertClass} ${riskClass}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></h5>
+                            <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score || 0}%)</small></h5>
                             <div class="small">${distHtml}</div>
                             <div class="small text-muted">${lastCheckText} | ${freqText}</div>
                             <div class="mt-1">${lineBtn}</div>
@@ -509,7 +526,7 @@
 
         function buildVhvInfoCard(vhv) {
             const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
-            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
+            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
         }
 
         function buildVhvRegistrationButton() {
@@ -570,13 +587,13 @@
                 if (diffDays > 7) daysSinceCheck = `<p class="text-center text-danger mt-2">ไม่ได้ประเมินมา ${diffDays} วัน (ถูกหักคะแนน)</p>`;
                 else if (diffDays > 0) daysSinceCheck = `<p class="text-center text-muted mt-2">ไม่ได้ประเมินมา ${diffDays} วัน</p>`;
             } else { daysSinceCheck = `<p class="text-center text-danger mt-2">ยังไม่เคยประเมิน</p>`; }
-            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ใส่ใจประเมินอาการ</h5><div class="d-flex justify-content-around text-center"><div><div class="display-3 fw-bold text-danger">${info.symptomCount}</div><div class="small">มีอาการ</div></div><div><div class="display-3 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ปกติ</div></div></div>${daysSinceCheck}<p class="small text-center text-muted">ไม่มีอาการก็เช็คอินได้ (เพิ่มคะแนน)</p><a href="${LINKS.DAILY}" class="btn btn-primary w-100 btn-lg mt-1">เช็คอาการ</a></div></div></div>`;
+            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ใส่ใจประเมินอาการ</h5><div class="d-flex justify-content-around text-center"><div><div class="display-3 fw-bold text-danger">${info.symptomCount || 0}</div><div class="small">มีอาการ</div></div><div><div class="display-3 fw-bold text-success">${info.noSymptomCount || 0}</div><div class="small">ปกติ</div></div></div>${daysSinceCheck}<p class="small text-center text-muted">ไม่มีอาการก็เช็คอินได้ (เพิ่มคะแนน)</p><a href="${LINKS.DAILY}" class="btn btn-primary w-100 btn-lg mt-1">เช็คอาการ</a></div></div></div>`;
         }
         
-        function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
-        function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore}/10</h1><small>สอบไป ${s.testCount} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
+        function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c || 0} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
+        function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore || 0}/10</h1><small>สอบไป ${s.testCount || 0} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
         function buildCommunityLeadersCard(l) { 
-            if(!l) return '';
+            if(!l) return '<div class="col-12"><div class="card"><div class="card-body text-center text-muted">ไม่พบข้อมูลผู้นำชุมชน</div></div></div>';
             let html = '<ul class="list-group list-group-flush fs-5">';
             if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between"><span>รพ.สต.: ${l.pcu}</span>${l.pcu_tel?`<a href="tel:${l.pcu_tel}" class="btn-call">โทร</a>`:''}</li>`;
             if(l.volunteer1) html += `<li class="list-group-item d-flex justify-content-between"><span>อสม.1: ${l.volunteer1}</span><a href="tel:${l.volunteer1_tel}" class="btn-call">โทร</a></li>`;
