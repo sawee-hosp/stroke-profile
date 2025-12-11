@@ -1,745 +1,715 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลสุขภาพ รู้ทันสโตรก by รพ.สวี</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <style>
-        /* Increase base font size to ~2x regular mobile web (usually 14-16px) */
-        :root { 
-            --bs-primary-rgb: 13, 110, 253; 
-            --vhv-bg: #ffc107; 
-            --vhv-dark: #b88a00;
-            --base-size: 22px; /* Large font for elderly */
-        }
-        body { 
-            font-family: "Noto Sans Thai", sans-serif; 
-            font-size: var(--base-size);
-            background-color: #f0f2f5; 
-            margin: 0; 
-            padding-bottom: 3rem;
-        }
-        
-        h1, h2, h3, h4, h5 { font-weight: 700 !important; }
-        .h5, h5 { font-size: 1.5rem; }
-        .small, small { font-size: 0.9rem; }
-        
-        /* Navigation Tabs */
-        .nav-tabs .nav-link {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #6c757d;
-            border-radius: 0;
-            padding: 15px 10px;
-            background: #e9ecef;
-        }
-        .nav-tabs .nav-link.active {
-            color: #0d6efd;
-            background: #fff;
-            border-bottom-color: #fff;
-        }
-        /* VHV Tab Style */
-        .nav-tabs .nav-link.vhv-tab {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .nav-tabs .nav-link.vhv-tab.active {
-            background: var(--vhv-bg);
-            color: #000;
-            border-color: #dee2e6 #dee2e6 var(--vhv-bg);
-        }
+// --- Script Properties ---
+const SCRIPT_PROPERTIES = PropertiesService.getScriptProperties();
+const SHEET_ID = SCRIPT_PROPERTIES.getProperty('SHEET_ID');
 
-        .tab-content-container { padding-top: 20px; }
+// --- Sheet Names ---
+const DATABASE_SHEET_NAME = 'database';
+const ASM_DATABASE_SHEET_NAME = 'asm_database';
+const VOLUNTEER_LIST_SHEET_NAME = 'volunteer_list';
+const DAILY_CHECK_SHEET_NAME = 'daily_check';
+const STICKER_SHARE_SHEET_NAME = 'sticker_share';
+const TEST_DISTANCE_SHEET_NAME = 'test_distance';
+const KNOWLEDGE_TEST_SHEET_NAME = 'knowledge_test';
+const TEL_LOG_SHEET_NAME = 'tel_log';
+
+// --- Main HTTP Handlers ---
+
+function doGet(e) {
+  const action = e.parameter.action || 'getUserData';
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+
+  try {
+    let data;
+
+    switch (action) {
+      case 'getUserData':
+        const userId = e.parameter.userId;
+        const currentPic = e.parameter.pictureUrl; // รับรูปปัจจุบันมาเช็ค
+        if (!userId) throw new Error("ไม่พบ User ID");
         
-        /* VHV Theme Background */
-        .bg-vhv-theme {
-            background-color: var(--vhv-bg);
-            min-height: 100vh;
-            padding-bottom: 40px;
+        // Auto Sync Profile Picture
+        if (currentPic) syncProfilePicture(ss, userId, currentPic);
+        
+        const userProfile = getUserProfile(ss, userId);
+        const vhvProfile = getVhvProfile(ss, userId);
+        const isVhv = vhvProfile !== null;
+        const homeDistance = getHomeDistance(ss, userId);
+        const userLatLon = homeDistance ? homeDistance.latlong : null;
+
+        // คำนวณ Gamification & Ranking
+        const gameStats = getGamificationStats(ss, userId, homeDistance);
+
+        // ข้อมูลสำหรับหน้า อสม.
+        let vhvStats = {};
+        let vhvChecklist = {};
+        let vhvPatientList = [];
+        
+        // Top 3 Vhvs (Sticker Share in last 7 days) & Total Count
+        const topVhvs = getTopVhvs(ss);
+        const totalVhv = getVhvTotalCount(ss);
+
+        if (isVhv) {
+            vhvPatientList = getVhvPatientDetails(ss, vhvProfile.area, vhvProfile.asm_home);
+            vhvChecklist = getVhvChecklist(ss, userId, vhvProfile, vhvPatientList.length);
         }
 
-        .card { border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 1.5rem; border-radius: 15px; }
-        .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
-        .section-title i { margin-right: 0.7rem; color: #0d6efd; font-size: 1.6rem; }
-        
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
-        #loading-text { font-size: 1.5rem; color: #0d6efd; margin-top: 1rem; font-weight: bold; }
-        
-        .btn-call { background-color: transparent; border: 2px solid #198754; color: #198754; padding: 0.5rem 1rem; font-size: 1.2rem; font-weight: bold; border-radius: 10px; text-decoration: none; }
-        .btn-call:hover { background-color: #198754; color: white; }
-        
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .info-item { display: flex; align-items: center; font-size: 1.1rem; }
-        .info-item i { font-size: 1.8rem; color: #0d6efd; min-width: 45px; }
-        .info-item div { display: flex; flex-direction: column; }
-        .info-item .label { font-size: 0.9em; color: #6c757d; font-weight: normal; }
-        
-        .bg-light-brown { background-color: #fff8e1; border: 2px solid #ffecb3; }
-        .bg-light-blue { background-color: #e3f2fd; border: 1px solid #bbdefb; } /* For Score Card */
-        
-        .btn-lg { font-size: 1.4rem; padding: 0.8rem 1rem; }
-        .form-control, .form-select { font-size: 1.3rem; padding: 0.8rem; }
-        .form-label { font-size: 1.3rem; font-weight: bold; }
-
-        /* Gamification Styles */
-        .game-score-box {
-            background: #fff; border-radius: 15px; padding: 15px 5px; text-align: center; 
-            border: 2px solid #fff; height: 100%; transition: transform 0.2s; cursor: pointer;
-        }
-        .game-score-box:active { transform: scale(0.95); background-color: #f8f9fa; }
-        .game-score-box h3 { margin: 5px 0; font-weight: 800; color: #0d6efd; font-size: 2rem; }
-        .game-score-box span { font-size: 1rem; color: #666; line-height: 1.2; display: block; }
-        .game-icon { font-size: 2.5rem; margin-bottom: 5px; }
-        
-        .profile-edit-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 40px; height: 40px; color: #0d6efd; }
-
-        /* ID Card Look in Flex Preview */
-        .id-card-preview { border: 2px solid #0d6efd; border-radius: 10px; padding: 10px; background: #fff; display: flex; align-items: center; }
-        .id-card-img { width: 80px; height: 100px; object-fit: cover; border-radius: 5px; margin-right: 15px; background: #eee; }
-    </style>
-</head>
-<body>
-
-    <div id="loading">
-        <div class="spinner-border text-primary mb-3" role="status" style="width: 4rem; height: 4rem;"></div>
-        <span id="loading-text">กำลังโหลดข้อมูล...</span>
-    </div>
-
-    <!-- Main Navigation Tabs -->
-    <ul class="nav nav-tabs nav-justified fixed-top shadow-sm" id="mainTabs" role="tablist" style="height: 65px;">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="health-tab-btn" data-bs-toggle="tab" data-bs-target="#health-tab-content" type="button" role="tab"><i class="bi bi-heart-pulse-fill"></i> ข้อมูลสุขภาพ</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link vhv-tab" id="vhv-tab-btn" data-bs-toggle="tab" data-bs-target="#vhv-tab-content" type="button" role="tab"><i class="bi bi-person-badge-fill"></i> สำหรับ อสม.</button>
-        </li>
-    </ul>
-
-    <!-- Tab Contents -->
-    <div class="tab-content" style="margin-top: 70px;">
-        
-        <!-- Tab 1: Health Info -->
-        <div class="tab-pane fade show active" id="health-tab-content" role="tabpanel">
-            <div class="container tab-content-container">
-                <div class="row" id="dynamic-content-container">
-                    <!-- Cards will be injected here -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 2: VHV Dashboard -->
-        <div class="tab-pane fade" id="vhv-tab-content" role="tabpanel">
-            <div class="bg-vhv-theme tab-content-container">
-                <div class="container">
-                    <!-- VHV Content will be injected here -->
-                    <div id="vhv-dashboard-area"></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Modals -->
-    <!-- Profile Edit Modal -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5">แก้ไขข้อมูลส่วนตัว</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editProfileForm">
-                        <div class="mb-3 text-center">
-                            <img id="edit-preview-img" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:10px;">
-                            <br>
-                            <label class="form-label text-primary" onclick="alert('กรุณาเปลี่ยนรูปโปรไฟล์ใน LINE ของท่าน แล้วระบบจะอัปเดตอัตโนมัติในภายหลัง')">เปลี่ยนรูปโปรไฟล์ (ใช้รูป LINE)</label>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">ชื่อ-นามสกุล</label>
-                            <input type="text" class="form-control" id="editName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">เบอร์โทรศัพท์</label>
-                            <input type="tel" class="form-control" id="editPhone" required pattern="[0-9]{10}">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-primary" onclick="saveUserProfile()">บันทึก</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Distance Modal -->
-    <div class="modal fade" id="distanceModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5">ปักหมุดตำแหน่ง</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="locationType" class="form-label">ประเภทตำแหน่ง</label>
-                        <select class="form-select" id="locationType">
-                            <option value="บ้าน">บ้าน (ใช้อ้างอิงระยะทาง)</option>
-                            <option value="ทางผ่าน">ทางผ่าน (ไม่นำมาคำนวณ)</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-primary w-100 btn-lg" onclick="handlePinNewLocation()">
-                        <i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- VHV Register Modal -->
-    <div class="modal fade" id="vhvRegisterModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header"><h1 class="modal-title fs-5" id="vhvRegisterModalLabel">ลงทะเบียน อสม.</h1><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-          <div class="modal-body">
-            <form id="vhvForm">
-              <div class="mb-3">
-                  <label class="form-label">ชื่อ-นามสกุล</label>
-                  <input type="text" class="form-control" id="vhvName" required>
-              </div>
-              <div class="mb-3"><label class="form-label">เบอร์โทรศัพท์</label><input type="tel" class="form-control" id="vhvPhone" required pattern="[0-9]{10}"></div>
-              <div class="mb-3"><label class="form-label">LINE ID</label><input type="text" class="form-control" id="vhvLineId"></div>
-              
-              <!-- Dropdown เขตพื้นที่ -->
-              <div class="mb-3">
-                  <label class="form-label">เลือกพื้นที่ดูแล (หมู่บ้าน)</label>
-                  <div class="row g-2">
-                      <div class="col-6">
-                          <select class="form-select" id="vhvDistrict" onchange="updateVillages()" required>
-                              <option value="" disabled selected>เลือกตำบล</option>
-                          </select>
-                      </div>
-                      <div class="col-6">
-                           <select class="form-select" id="vhvVillage" required disabled>
-                              <option value="" disabled selected>เลือกหมู่</option>
-                          </select>
-                      </div>
-                  </div>
-              </div>
-
-            <div class="mb-3">
-                <label class="form-label">ตำแหน่งบ้าน อสม.</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="vhvAsmHome" placeholder="รอปักหมุด..." readonly>
-                    <button class="btn btn-outline-primary" type="button" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button>
-                </div>
-              </div>
-
-              <div class="form-check"><input class="form-check-input" type="checkbox" id="vhvPdpa" checked><label class="form-check-label small" for="vhvPdpa">ยินยอมเปิดเผยข้อมูลติดต่อให้ผู้ป่วยในพื้นที่</label></div>
-            </form>
-          </div>
-          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button><button type="button" class="btn btn-primary" onclick="handleVhvRegistration()">บันทึก</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Share Profile Modal -->
-    <div class="modal fade" id="shareProfileModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5">แชร์นามบัตร อสม.</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <p class="text-muted">ระบบจะสร้างนามบัตรดิจิทัลพร้อมคะแนนของคุณเพื่อส่งให้ชาวบ้าน</p>
-                    <button type="button" class="btn btn-primary btn-lg w-100" onclick="handleShareProfile()"><i class="bi bi-line"></i> ส่งเข้าไลน์</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div class="modal fade" id="qrModal" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header border-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body d-flex flex-column justify-content-center align-items-center">
-                    <h2 class="mb-4">สวีรู้ทันสโตรก</h2>
-                    <!-- QR Code -->
-                    <img src="https://qr-official.line.me/sid/L/2005789397.png" alt="QR Code" style="max-width: 90%; width: 300px; border: 10px solid white; border-radius: 10px;">
-                    <p class="mt-3 fs-4">ให้ชาวบ้านสแกนเพื่อเพิ่มเพื่อน</p>
-                    <button class="btn btn-light btn-lg mt-4 rounded-pill px-5" data-bs-dismiss="modal">ปิด</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
-        const LIFF_ID_MAIN = "2005789397-RLAGXrBJ";
-        
-        // Link IDs (Replace with actual IDs)
-        const LINKS = {
-            REGIS: "https://liff.line.me/2005789397-nebQ8oJy",
-            DAILY: "https://liff.line.me/2005789397-WRm1lYd9",
-            STICKER: "https://liff.line.me/2005789397-37lemBgX",
-            KNOWLEDGE: "https://liff.line.me/2005789397-ROQvjpYk"
+        data = {
+          userProfile: userProfile,
+          isVhv: isVhv,
+          vhvProfile: vhvProfile,
+          communityLeaders: userProfile ? getCommunityLeaders(ss, userProfile.district, userProfile.village, userLatLon) : null,
+          dailyCheckInfo: getDailyCheckInfo(ss, userId),
+          stickerShareCount: getStickerShareCount(ss, userId),
+          homeDistance: homeDistance,
+          knowledgeTestStats: getKnowledgeTestStats(ss, userId),
+          gamification: gameStats,
+          vhvDashboard: {
+              totalVhv: totalVhv,
+              topVhvs: topVhvs,
+              checklist: vhvChecklist
+          },
+          availableVhvAreas: getAvailableVhvAreas(ss),
+          vhvPatientList: vhvPatientList,
         };
-
-        // --- Mock Data for Sawee District (Example) ---
-        // เพิ่มข้อมูลจริงตรงนี้
-        const SAWEE_LOCATIONS = {
-            "นาโพธิ์": ["หมู่ 1", "หมู่ 2", "หมู่ 3", "หมู่ 4", "หมู่ 5", "หมู่ 6", "หมู่ 7", "หมู่ 8"],
-            "สวี": ["หมู่ 1", "หมู่ 2", "หมู่ 3", "หมู่ 4"],
-            "ทุ่งคา": ["หมู่ 1", "หมู่ 2", "หมู่ 3", "หมู่ 4", "หมู่ 5"],
-            "วิสัยใต้": ["หมู่ 1", "หมู่ 2", "หมู่ 3"],
-             // เพิ่มตำบลอื่นๆ...
+        break;
+      
+      case 'calculateDistance':
+        const originLat = e.parameter.lat;
+        const originLon = e.parameter.lon;
+        const destination = "10.2300226,99.1087481"; // รพ.สวี
+        
+        if (!originLat || !originLon) throw new Error("ไม่พบค่า Lat/Lon");
+        
+        const directions = Maps.newDirectionFinder()
+          .setOrigin(originLat + "," + originLon)
+          .setDestination(destination)
+          .setMode(Maps.DirectionFinder.Mode.DRIVING)
+          .getDirections();
+        
+        if (directions.routes.length === 0) throw new Error("ไม่สามารถคำนวณเส้นทางได้");
+        
+        const leg = directions.routes[0].legs[0];
+        data = {
+          distance_km: leg.distance.value / 1000,
+          duration_mins: Math.round(leg.duration.value / 60)
         };
+        break;
 
-        let LIFF_PROFILE = null;
-        let ALL_USER_DATA = null;
-        let DISTANCE_MODAL, VHV_REG_MODAL, SHARE_PROFILE_MODAL, QR_MODAL, EDIT_PROFILE_MODAL;
+      case 'getShareCard':
+         const vUserId = e.parameter.userId;
+         const vProfile = getVhvProfile(ss, vUserId);
+         if (vProfile) {
+           const kStats = getKnowledgeTestStats(ss, vUserId);
+           const gStats = getGamificationStats(ss, vUserId, getHomeDistance(ss, vUserId));
+           data = { success: true, flex: createFlexMessage(vProfile, kStats, gStats) }; 
+         } else {
+           data = { success: false, message: "ไม่พบข้อมูล อสม." };
+         }
+         break;
+         
+      case 'logQrShare':
+         const qUserId = e.parameter.userId;
+         updateQrShareCount(ss, qUserId);
+         data = { success: true };
+         break;
         
-        document.addEventListener('DOMContentLoaded', initializeLiff);
+      default:
+        throw new Error("Invalid GET action.");
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 
-        async function initializeLiff() {
-            DISTANCE_MODAL = new bootstrap.Modal(document.getElementById('distanceModal'));
-            VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
-            SHARE_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('shareProfileModal'));
-            QR_MODAL = new bootstrap.Modal(document.getElementById('qrModal'));
-            EDIT_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('editProfileModal'));
+  } catch (err) {
+    Logger.log(`doGet Error: ${err.stack}`);
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
-            try {
-                await liff.init({ liffId: LIFF_ID_MAIN });
-                // Check if opened from VHV link (?ref=xxx)
-                const queryString = window.location.search;
-                const urlParams = new URLSearchParams(queryString);
-                const refId = urlParams.get('ref');
+function doPost(e) {
+  try {
+    const requestData = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    let response;
 
-                if (!liff.isLoggedIn()) { liff.login(); return; } 
-                
-                LIFF_PROFILE = await liff.getProfile();
-                
-                // Fetch data with Ref ID if exists
-                let fetchUrl = `${WEB_APP_URL}?action=getUserData&userId=${LIFF_PROFILE.userId}`;
-                if(refId) fetchUrl += `&ref=${refId}`;
-                
-                fetchUserData(fetchUrl);
+    switch(requestData.action) {
+      case 'registerVhv':
+        response = handleVhvRegistration(ss, requestData.data);
+        break;
+      
+      case 'saveNewLocation':
+        const locData = requestData.data;
+        const distanceSheet = ss.getSheetByName(TEST_DISTANCE_SHEET_NAME);
+        distanceSheet.appendRow([ new Date(), locData.userId, locData.type, locData.latlong, locData.distance, locData.duration ]);
+        response = { success: true, message: "บันทึกตำแหน่งใหม่สำเร็จ!" };
+        break;
 
-            } catch (error) { handleFailure(error); }
-        }
+      case 'updateUserProfile':
+        response = updateUserProfile(ss, requestData.data);
+        break;
 
-        function fetchUserData(url) {
-            showLoading(true, "กำลังโหลดข้อมูล...");
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) throw new Error(data.error);
-                    
-                    if (!data.userProfile) {
-                        document.getElementById('unregistered-user').style.display = 'block';
-                        document.getElementById('mainTabs').style.display = 'none';
-                    } else {
-                        ALL_USER_DATA = data;
-                        updatePage(data);
-                    }
-                })
-                .catch(handleFailure)
-                .finally(() => showLoading(false));
-        }
+      case 'logTelCall':
+        const callData = requestData.data;
+        const logSheet = ss.getSheetByName(TEL_LOG_SHEET_NAME);
+        logSheet.appendRow([ new Date(), callData.userId, callData.tel ]);
+        response = { success: true };
+        break;
         
-        function updatePage(data) {
-            // Tab 1: Health
-            const healthContainer = document.getElementById('dynamic-content-container');
-            healthContainer.innerHTML = 
-                buildProfileCard(data.userProfile) +
-                buildGamificationCard(data.gamification, data.userProfile.district) +
-                `<div id="card-risk">` + buildProfileCard(data.userProfile, true) + `</div>` + // Only Risk Score part
-                `<div id="card-check">` + buildDailyCheckCard(data.dailyCheckInfo) + `</div>` +
-                `<div id="card-emergency">` + buildDistanceCard(data.homeDistance, data.userProfile.help) + `</div>` +
-                `<div id="card-leaders">` + buildCommunityLeadersCard(data.communityLeaders) + `</div>` +
-                `<div id="card-sticker">` + buildStickerCard(data.stickerShareCount) + `</div>` +
-                `<div id="card-exam">` + buildKnowledgeTestCard(data.knowledgeTestStats) + `</div>`;
-            
-            // Tab 2: VHV
-            const vhvArea = document.getElementById('vhv-dashboard-area');
-            if (data.isVhv) {
-                vhvArea.innerHTML = 
-                    buildVhvInstructions(true) +
-                    buildVhvStats(data.vhvStats) +
-                    buildVhvInfoCard(data.vhvProfile) +
-                    buildVhvPatientListCard(data.vhvPatientList);
-            } else {
-                vhvArea.innerHTML = 
-                    buildVhvInstructions(false) +
-                    buildVhvStats(data.vhvStats) + // Show total count even if not reg
-                    buildVhvRegistrationButton();
-            }
+      default:
+        throw new Error("Invalid POST action.");
+    }
+    return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    Logger.log(`doPost Error: ${err.stack}`);
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// --- Helper Functions ---
+
+// 1. Gamification Logic
+function getGamificationStats(ss, userId, homeDistance) {
+    const checkInfo = getDailyCheckInfo(ss, userId);
+    const checkScore = checkInfo.symptomCount + checkInfo.noSymptomCount;
+
+    let emergencyScore = 0;
+    if (homeDistance && homeDistance.duration) {
+        const mins = parseInt(homeDistance.duration);
+        if (mins <= 10) {
+            emergencyScore = 10;
+        } else if (mins >= 270) { // 4.5 hours
+            emergencyScore = 0;
+        } else {
+            // Linear scale from 10 mins (10 pts) to 270 mins (0 pts)
+            // Range = 260 mins. Score drops 10 pts over 260 mins.
+            emergencyScore = 10 - ((mins - 10) / 260 * 10);
         }
+    }
+    emergencyScore = parseFloat(emergencyScore.toFixed(1));
 
-        // --- Builders ---
+    const stickerScore = getStickerShareCount(ss, userId);
 
-        function buildGamificationCard(scores, district) {
-            if (!scores) return '';
-            // Rank logic display
-            const rankText = `สูงเป็นลำดับที่ <b>${scores.rank}</b> จาก ${scores.totalUsers} คน`;
-            
-            return `
-            <div class="col-12 mb-3">
-                <div class="card bg-light-blue shadow-sm">
-                    <div class="card-body p-3">
-                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5>
-                        <div class="text-center mb-3">
-                             <h1 class="display-3 fw-bold text-primary mb-0">${scores.totalScore}</h1>
-                             <div class="text-muted">คะแนนรวม (${rankText})</div>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-check')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div>
-                                    <h3>${scores.checkScore}</h3>
-                                    <span>ใส่ใจ (ครั้ง)</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-danger"><i class="bi bi-ambulance"></i></div>
-                                    <h3>${scores.emergencyScore}</h3>
-                                    <span>ฉุกเฉิน (10)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-sticker')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div>
-                                    <h3>${scores.stickerScore}</h3>
-                                    <span>แชร์ (ครั้ง)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-exam')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-success"><i class="bi bi-book"></i></div>
-                                    <h3>${scores.knowledgeScore}</h3>
-                                    <span>ความรู้ (10)</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div>
-                    </div>
-                </div>
-            </div>`;
+    const knowledgeStats = getKnowledgeTestStats(ss, userId);
+    const knowledgeScore = knowledgeStats.maxScore || 0;
+
+    const totalScore = parseFloat((checkScore + emergencyScore + stickerScore + knowledgeScore).toFixed(1));
+    const rank = getEstimatedRank(ss, totalScore);
+
+    return {
+        checkScore: checkScore,
+        emergencyScore: emergencyScore,
+        stickerScore: stickerScore,
+        knowledgeScore: knowledgeScore,
+        totalScore: totalScore,
+        rank: rank.rank,
+        totalUsers: rank.totalUsers
+    };
+}
+
+function getEstimatedRank(ss, myScore) {
+  const sheet = ss.getSheetByName(KNOWLEDGE_TEST_SHEET_NAME);
+  const data = sheet.getDataRange().getValues();
+  const totalUsers = Math.max(1, data.length - 1);
+  // Simplified rank logic for speed
+  let estimatedRank = Math.floor(totalUsers * (1 - (Math.min(myScore, 100)/120))) + 1;
+  if(estimatedRank < 1) estimatedRank = 1;
+  if(estimatedRank > totalUsers) estimatedRank = totalUsers;
+  return { rank: estimatedRank, totalUsers: totalUsers };
+}
+
+// 2. VHV Checklist Logic
+function getVhvChecklist(ss, userId, vhvProfile, patientCount) {
+    // 1. Register (Already true if we are here)
+    // 2. Exam (Level=asm in knowledge_test)
+    let hasExam = false;
+    const kSheet = ss.getSheetByName(KNOWLEDGE_TEST_SHEET_NAME);
+    const kData = kSheet.getDataRange().getValues();
+    for(let i=1; i<kData.length; i++) {
+        if(kData[i][1] === userId && String(kData[i][3]).toLowerCase() === 'asm') {
+            hasExam = true; break;
         }
-
-        function buildProfileCard(p, riskOnly = false) {
-            if (!p) return '';
-            const riskValue = p.thai_cv_risk_score / 100;
-            const riskInfo = classifyRisk(riskValue);
-            
-            // If riskOnly is true, return just the risk section for layout purposes
-            if (riskOnly) {
-                return `
-                <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                         <h6 class="section-title"><i class="bi bi-activity"></i>ความเสี่ยงสโตรกที่ประเมิน</h6>
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                             <div class="text-center">
-                                <div style="color: ${riskInfo.color};">
-                                    <div class="display-3 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'N/A'}</div>
-                                    <div class="fw-bold fs-4">${riskInfo.text}</div>
-                                </div>
-                            </div>
-                            <a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a>
-                        </div>
-                        <hr>
-                        <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6>
-                         <div class="info-grid">
-                            <div class="info-item"><i class="bi bi-fire"></i><div><span class="label">สูบบุหรี่</span> <b>${p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'}</b></div></div>
-                            <div class="info-item"><i class="bi bi-bandaid"></i><div><span class="label">เบาหวาน</span> <b>${p.dm == 1 ? 'เป็น' : 'ไม่เป็น'}</b></div></div>
-                            <div class="info-item"><i class="bi bi-speedometer2"></i><div><span class="label">ความดัน</span> <b>${p.sbp || 'N/A'}</b></div></div>
-                        </div>
-                    </div>
-                </div>
-                </div>`;
-            }
-
-            // Full Profile Header
-            return `
-            <div class="col-12">
-                <div class="card bg-white">
-                    <div class="card-body position-relative">
-                        <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
-                        <div class="d-flex align-items-center">
-                            <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 100px; height: 100px; object-fit: cover;">
-                            <div>
-                                <h4 class="fw-bold mb-1">${p.name || 'N/A'}</h4>
-                                <div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'N/A'}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+    }
+    
+    // 3. Pin Home (test_distance type='บ้าน_อสม')
+    let hasPinned = false;
+    const dSheet = ss.getSheetByName(TEST_DISTANCE_SHEET_NAME);
+    const dData = dSheet.getDataRange().getValues();
+    for(let i=dData.length-1; i>0; i--) {
+        if(dData[i][1] === userId && dData[i][2] === 'บ้าน_อสม') {
+            hasPinned = true; break;
         }
+    }
 
-        function buildVhvInstructions(isRegistered) {
-            return `
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-check"></i> ขั้นตอนการทำงานของ อสม.</h5>
-                    <ol class="list-group list-group-numbered list-group-flush fs-5">
-                        <li class="list-group-item bg-transparent">สมัครเป็น อสม.สโตรก (เลือกหมู่บ้านที่ดูแล)</li>
-                        <li class="list-group-item bg-transparent">ทำแบบทดสอบความรู้ให้ได้คะแนนเต็ม</li>
-                        <li class="list-group-item bg-transparent">ปักหมุดบ้านของท่าน (เพื่อให้ระบบแนะนำลูกบ้านได้)</li>
-                        <li class="list-group-item bg-transparent">แชร์ QR Code/นามบัตร ให้ชาวบ้านสแกนเพื่อประเมินความเสี่ยง</li>
-                        <li class="list-group-item bg-transparent">แนะนำให้ชาวบ้านทำแบบทดสอบความรู้</li>
-                        <li class="list-group-item bg-transparent">ส่งสติกเกอร์ความห่วงใยให้กลุ่มเสี่ยงสม่ำเสมอ</li>
-                    </ol>
-                </div>
-            </div>`;
+    // 4. Shared QR (asm_database col qr_share > 0)
+    const hasSharedQr = (vhvProfile.qr_share && vhvProfile.qr_share > 0);
+
+    // 5. Recommend Patients (Patient Count > 1)
+    const hasRecommended = patientCount > 1;
+
+    // 6. Shared Sticker (sticker_share > 1)
+    const stickerCount = getStickerShareCount(ss, userId);
+    const hasSharedSticker = stickerCount > 1;
+
+    return {
+        isRegistered: true,
+        hasExam: hasExam,
+        hasPinned: hasPinned,
+        hasSharedQr: hasSharedQr,
+        hasRecommended: hasRecommended,
+        hasSharedSticker: hasSharedSticker
+    };
+}
+
+// 3. Top VHV Logic
+function getTopVhvs(ss) {
+    const stickerSheet = ss.getSheetByName(STICKER_SHARE_SHEET_NAME);
+    const asmSheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    
+    if(!stickerSheet || !asmSheet) return [];
+
+    // Get Sticker Data (Last 7 days)
+    const sData = stickerSheet.getDataRange().getValues();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const counts = {}; // userId -> count
+    
+    for(let i=1; i<sData.length; i++) {
+        const ts = new Date(sData[i][0]);
+        const uid = sData[i][1]; // Assuming col 2 is userId
+        if(ts >= sevenDaysAgo) {
+            counts[uid] = (counts[uid] || 0) + 1;
         }
-        
-        function buildVhvStats(stats) {
-            if(!stats) return '';
-            const myRef = stats.myReferrals ? `<div class="col-6"><div class="border rounded p-2 bg-white"><h1>${stats.myReferrals}</h1><small>ลูกข่ายที่เข้าถึง</small></div></div>` : '';
-            return `
-            <div class="text-center mb-3">
-                <div class="row g-2">
-                    <div class="col-6 mx-auto">
-                        <div class="border rounded p-2 bg-white shadow-sm">
-                             <h1 class="text-primary fw-bold">${stats.totalVhv || 0}</h1>
-                             <small class="text-muted">อสม.ที่ลงทะเบียนแล้ว</small>
-                        </div>
-                    </div>
-                    ${myRef}
-                </div>
-            </div>`;
+    }
+
+    // Map to VHV Profiles
+    const asmData = asmSheet.getDataRange().getValues();
+    const vhvs = [];
+    const asmHeaders = asmData[0].map(h => h.trim());
+    const uIdx = asmHeaders.indexOf('userId');
+    const nIdx = asmHeaders.indexOf('name');
+    const pIdx = asmHeaders.indexOf('profilePicture');
+
+    for(let i=1; i<asmData.length; i++) {
+        const uid = asmData[i][uIdx];
+        if(counts[uid]) {
+            vhvs.push({
+                name: asmData[i][nIdx],
+                picture: asmData[i][pIdx],
+                score: counts[uid]
+            });
         }
+    }
 
-        function buildVhvInfoCard(vhv) {
-            const btnExam = !vhv.asm_test ? `<a href="${LINKS.KNOWLEDGE}" class="btn btn-warning w-100 mt-2 text-dark fw-bold">⚠️ ยังไม่มีคะแนนสอบ (คลิกทำข้อสอบ)</a>` : `<div class="text-success mt-2 fw-bold"><i class="bi bi-check-circle"></i> สอบแล้ว (${vhv.asm_test}/10)</div>`;
+    // Sort & Slice
+    vhvs.sort((a,b) => b.score - a.score);
+    return vhvs.slice(0, 3);
+}
 
-            return `<div class="card border-warning shadow"><div class="card-body">
-                <div class="text-center mb-3">
-                    <button class="btn btn-dark btn-lg w-100 shadow rounded-pill" onclick="showQrModal()">
-                         <i class="bi bi-qr-code"></i> แสดง QR Code สวีรู้ทันสโตรก
-                    </button>
-                </div>
-                <hr>
-                <h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5>
-                <p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name}</p>
-                <p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area}</p>
-                ${btnExam}
-                <div class="row mt-3 g-2">
-                    <div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div>
-                    <div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div>
-                </div>
-            </div></div>`;
+// 4. Flex Message (Safe & Enhanced)
+function createFlexMessage(p, kStats, gStats) {
+  // Null Checks
+  const name = p.name || "อสม.สโตรก";
+  const pic = p.profilePicture || "https://via.placeholder.com/150";
+  const area = p.area || "ไม่ระบุ";
+  const phone = p.phone ? p.phone.replace(/'/g,'') : "";
+  const lineId = p.line_id || "";
+  const exam = kStats.maxScore ? kStats.maxScore : "-";
+  const health = gStats.totalScore || "-";
+
+  // Buttons Logic (Safe)
+  const buttons = [];
+  if (lineId) {
+      buttons.push({
+         "type": "button", "style": "primary", "height": "sm", "color": "#06C755",
+         "action": { "type": "uri", "label": "เพิ่มเพื่อน LINE", "uri": `https://line.me/ti/p/~${lineId}` }
+      });
+  }
+  if (phone) {
+      buttons.push({
+         "type": "button", "style": "secondary", "height": "sm",
+         "action": { "type": "uri", "label": "โทรหา อสม.", "uri": `tel:${phone}` }
+      });
+  }
+
+  // Emergency Button
+  const emergencyBtn = {
+      "type": "button", "style": "primary", "height": "sm", "color": "#FF3333",
+      "action": { "type": "uri", "label": "โทรสายด่วน รพ.สวี", "uri": "tel:08947455523" }
+  };
+
+  return {
+    "type": "flex",
+    "altText": `นามบัตร อสม. ${name}`,
+    "contents": {
+      "type": "bubble",
+      "size": "mega",
+      "body": {
+        "type": "box", "layout": "vertical", "backgroundColor": "#f0f8ff", "paddingAll": "0px",
+        "contents": [
+          {
+            "type": "box", "layout": "vertical", "paddingAll": "15px", "backgroundColor": "#0d6efd",
+            "contents": [
+               { "type": "text", "text": "บัตรประจำตัว อสม.สโตรก", "color": "#ffffff", "weight": "bold", "size": "md" },
+               { "type": "text", "text": "รพ.สวี จ.ชุมพร", "color": "#ffffff", "size": "xs", "alpha": 0.8 }
+            ]
+          },
+          {
+            "type": "box", "layout": "horizontal", "paddingAll": "15px", "spacing": "md", "alignItems": "center",
+            "contents": [
+              {
+                "type": "image", "url": pic, "aspectMode": "cover", "size": "100px", "aspectRatio": "3:4", "cornerRadius": "8px", "flex": 0
+              },
+              {
+                "type": "box", "layout": "vertical", "spacing": "xs", "flex": 1,
+                "contents": [
+                  { "type": "text", "text": name, "weight": "bold", "size": "md", "color": "#333333", "wrap": true },
+                  { "type": "text", "text": `พื้นที่: ${area}`, "size": "xxs", "color": "#666666", "wrap": true },
+                  { "type": "separator", "margin": "sm" },
+                  { "type": "text", "text": `สอบได้: ${exam}/10`, "size": "xxs", "color": "#0d6efd", "weight": "bold" },
+                  { "type": "text", "text": `คะแนนสุขภาพ: ${health}`, "size": "xxs", "color": "#0d6efd", "weight": "bold" }
+                ]
+              }
+            ]
+          },
+          // Emergency Section
+          {
+             "type": "box", "layout": "vertical", "paddingAll": "15px", "backgroundColor": "#ffebee",
+             "contents": [
+                 { "type": "text", "text": "มีปัญหาสงสัยเรื่องสโตรก ปรึกษา อสม. หรือ", "size": "xxs", "color": "#d32f2f", "align": "center", "wrap": true },
+                 { "type": "spacer", "size": "sm" },
+                 emergencyBtn
+             ]
+          },
+          // Contact Buttons
+          {
+            "type": "box", "layout": "vertical", "paddingAll": "15px", "spacing": "sm", "contents": buttons
+          }
+        ]
+      }
+    }
+  };
+}
+
+// 5. Update QR Share Count
+function updateQrShareCount(ss, userId) {
+    const sheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => h.trim());
+    const uIdx = headers.indexOf('userId');
+    const qIdx = headers.indexOf('qr_share');
+    
+    // If qr_share col doesn't exist, created virtually by logic, but assume created in sheet
+    // If not found in header, we can't update properly without `getRange`.
+    // Assuming user added column "qr_share"
+    
+    if(qIdx === -1) return; // Column not found
+
+    for(let i=1; i<data.length; i++) {
+        if(data[i][uIdx] === userId) {
+            const currentVal = parseInt(data[i][qIdx]) || 0;
+            sheet.getRange(i+1, qIdx+1).setValue(currentVal + 1);
+            break;
         }
+    }
+}
 
-        function buildVhvRegistrationButton() {
-            return `<div class="card bg-white text-center p-4">
-                <i class="bi bi-person-plus-fill display-1 text-warning mb-3"></i>
-                <h3>สมัครเป็น อสม.สโตรก</h3>
-                <p class="text-muted">สำหรับ อสม. รพ.สวี เท่านั้น</p>
-                <button class="btn btn-lg btn-warning fw-bold w-100" onclick="openVhvModal()">ลงทะเบียน</button>
-            </div>`;
-        }
-
-        // Reusing existing builders (with slight class tweaks for size)
-        function buildDailyCheckCard(info) {
-             let daysSinceCheck = '';
-            if (info.latestCheckTimestamp) {
-                const diffDays = Math.ceil(Math.abs(new Date() - new Date(info.latestCheckTimestamp).setHours(0,0,0,0)) / (864e5));
-                if (diffDays > 0) daysSinceCheck = `<p class="text-center text-danger mt-2">ไม่ได้ประเมินมา ${diffDays} วัน</p>`;
-            } else { daysSinceCheck = `<p class="text-center text-danger mt-2">ยังไม่เคยประเมิน</p>`; }
-            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ใส่ใจประเมินอาการ</h5><div class="d-flex justify-content-around text-center"><div><div class="display-4 fw-bold text-danger">${info.symptomCount}</div><div class="small">มีอาการ</div></div><div><div class="display-4 fw-bold text-success">${info.noSymptomCount}</div><div class="small">ปกติ</div></div></div>${daysSinceCheck}<a href="${LINKS.DAILY}" class="btn btn-primary w-100 btn-lg mt-3">เช็คอาการ</a></div></div></div>`;
-        }
-        function buildDistanceCard(d, help) {
-             let html = '<p class="text-muted text-center">ยังไม่ปักหมุดบ้าน</p>';
-             let cls = 'card';
-             if(d) {
-                 const min = parseInt(d.duration);
-                 cls += min < 120 ? ' bg-success-subtle' : min < 270 ? ' bg-warning-subtle' : ' bg-danger-subtle';
-                 html = `<div class="text-center"><h1>${parseFloat(d.distance).toFixed(1)} กม.</h1><h3>${Math.floor(min/60)} ชม. ${min%60} นาที</h3></div>`;
-             }
-             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-hospital-fill"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<button class="btn btn-secondary w-100 btn-lg mt-2" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด/แก้ไข</button></div></div></div>`;
-        }
-        function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
-        function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore}/10</h1><small>สอบไป ${s.testCount} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
-        function buildCommunityLeadersCard(l) { 
-            if(!l) return '';
-            let html = '<ul class="list-group list-group-flush fs-5">';
-            if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between"><span>รพ.สต.: ${l.pcu}</span>${l.pcu_tel?`<a href="tel:${l.pcu_tel}" class="btn-call">โทร</a>`:''}</li>`;
-            if(l.volunteer1) html += `<li class="list-group-item d-flex justify-content-between"><span>อสม.1: ${l.volunteer1}</span><a href="tel:${l.volunteer1_tel}" class="btn-call">โทร</a></li>`;
-            html += '</ul>';
-            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-people-fill"></i>อสม.ใกล้ฉัน</h5>${html}</div></div></div>`;
-        }
-        function buildVhvPatientListCard(pts) {
-            if(!pts || pts.length===0) return '';
-            const list = pts.map(p => `<li class="list-group-item d-flex justify-content-between align-items-center"><span>${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></span><a href="tel:${p.telephone}" class="btn-call"><i class="bi bi-telephone"></i></a></li>`).join('');
-            return `<div class="card"><div class="card-body p-0"><div class="p-3 bg-light"><b>รายชื่อกลุ่มเสี่ยง (${pts.length})</b></div><ul class="list-group list-group-flush fs-5">${list}</ul></div></div>`;
-        }
-
-        // --- Logic Functions ---
-
-        function openEditProfile() {
-            document.getElementById('editName').value = ALL_USER_DATA.userProfile.name;
-            document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone ? ALL_USER_DATA.userProfile.telephone.replace(/'/g,'') : '';
-            document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl;
-            EDIT_PROFILE_MODAL.show();
-        }
-
-        function saveUserProfile() {
-            const name = document.getElementById('editName').value;
-            const phone = document.getElementById('editPhone').value;
-            if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ");
-            
-            showLoading(true, "กำลังอัปเดต...");
-            fetch(WEB_APP_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } })
-            }).then(() => {
-                alert("บันทึกสำเร็จ");
-                window.location.reload();
-            }).catch(handleFailure);
-        }
-
-        function openVhvModal() {
-            // Populate Districts
-            const distSelect = document.getElementById('vhvDistrict');
-            distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>';
-            for (const d in SAWEE_LOCATIONS) {
-                const opt = document.createElement('option');
-                opt.value = d;
-                opt.textContent = d;
-                distSelect.appendChild(opt);
-            }
-
-            // Fill Data if exists
-            const vhv = ALL_USER_DATA.vhvProfile || {};
-            const user = ALL_USER_DATA.userProfile || {};
-            
-            document.getElementById('vhvName').value = vhv.name || user.name || '';
-            document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : '');
-            document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || '';
-            document.getElementById('vhvAsmHome').value = vhv.asm_home || '';
-
-            // Handle Area (Split District and Village)
-            if (vhv.area) {
-                // สมมติ format: "ต.นาโพธิ์ ม.1"
-                const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/);
-                if (parts && parts[1] && parts[2]) {
-                    distSelect.value = parts[1].trim();
-                    updateVillages(); // Populate village
-                    document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim();
+// 6. Sync Profile Logic
+function syncProfilePicture(ss, userId, newUrl) {
+    // Check Database
+    const dbSheet = ss.getSheetByName(DATABASE_SHEET_NAME);
+    const dbData = dbSheet.getDataRange().getValues();
+    const dbHeaders = dbData[0].map(h => h.trim());
+    const dbUIdx = dbHeaders.indexOf('userId');
+    const dbPIdx = dbHeaders.indexOf('pictureUrl');
+    
+    if(dbUIdx > -1 && dbPIdx > -1) {
+        for(let i=1; i<dbData.length; i++) {
+            if(dbData[i][dbUIdx] === userId) {
+                if(dbData[i][dbPIdx] !== newUrl) {
+                    dbSheet.getRange(i+1, dbPIdx+1).setValue(newUrl);
                 }
-            }
-
-            VHV_REG_MODAL.show();
-        }
-
-        function updateVillages() {
-            const dist = document.getElementById('vhvDistrict').value;
-            const villSelect = document.getElementById('vhvVillage');
-            villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>';
-            villSelect.disabled = true;
-            
-            if (SAWEE_LOCATIONS[dist]) {
-                villSelect.disabled = false;
-                SAWEE_LOCATIONS[dist].forEach(v => {
-                    const opt = document.createElement('option');
-                    opt.value = v; // "หมู่ 1"
-                    opt.textContent = v;
-                    villSelect.appendChild(opt);
-                });
+                break;
             }
         }
-
-        function handleVhvRegistration() {
-            const name = document.getElementById('vhvName').value;
-            const phone = document.getElementById('vhvPhone').value;
-            const line = document.getElementById('vhvLineId').value;
-            const dist = document.getElementById('vhvDistrict').value;
-            const vill = document.getElementById('vhvVillage').value;
-            const home = document.getElementById('vhvAsmHome').value;
-            
-            if (!name || !phone || !dist || !vill) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            
-            // Format Area: "ต.xxx ม.yy"
-            const villNum = vill.replace('หมู่ ', '');
-            const areaString = `ต.${dist} ม.${villNum}`;
-
-            showLoading(true, "กำลังบันทึก...");
-            const data = {
-                userId: LIFF_PROFILE.userId, displayName: LIFF_PROFILE.displayName, profilePicture: LIFF_PROFILE.pictureUrl,
-                name: name, phone: phone, line_id: line,
-                areas: [areaString], // Send as array for backend compatibility
-                pdpa: "ยินยอม", asm_home: home, asm_test: ALL_USER_DATA.vhvProfile?.asm_test || ''
-            };
-            
-            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) })
-                .then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }).catch(handleFailure);
-        }
-
-        async function handleShareProfile() {
-            // เรียก Backend เพื่อขอ Flex JSON (เพื่อความปลอดภัยและข้อมูลครบถ้วน)
-            showLoading(true, "กำลังสร้างนามบัตร...");
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`);
-                const data = await res.json();
-                showLoading(false);
-                
-                if (data.success && data.flex) {
-                    SHARE_PROFILE_MODAL.hide();
-                    await liff.shareTargetPicker([data.flex]);
-                } else {
-                    alert("ไม่สามารถสร้างนามบัตรได้: " + data.message);
+    }
+    
+    // Check ASM Database
+    const asmSheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    const asmData = asmSheet.getDataRange().getValues();
+    const asmHeaders = asmData[0].map(h => h.trim());
+    const asmUIdx = asmHeaders.indexOf('userId');
+    const asmPIdx = asmHeaders.indexOf('profilePicture');
+    
+    if(asmUIdx > -1 && asmPIdx > -1) {
+        for(let i=1; i<asmData.length; i++) {
+            if(asmData[i][asmUIdx] === userId) {
+                if(asmData[i][asmPIdx] !== newUrl) {
+                    asmSheet.getRange(i+1, asmPIdx+1).setValue(newUrl);
                 }
-            } catch (err) { handleFailure(err); }
-        }
-
-        function scrollToId(id) {
-            const el = document.getElementById(id);
-            if(el) {
-                // Switch tab if needed
-                const tabBtn = document.getElementById('health-tab-btn');
-                const tab = new bootstrap.Tab(tabBtn);
-                tab.show();
-                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
+                break;
             }
         }
+    }
+}
 
-        function showQrModal() { QR_MODAL.show(); }
-        function handlePinNewLocation() {
-            // (Use existing logic)
-             showLoading(true);
-             navigator.geolocation.getCurrentPosition(p => {
-                 fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
-                 .then(r=>r.json()).then(d=> {
-                     fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'saveNewLocation',data:{userId:LIFF_PROFILE.userId,type:document.getElementById('locationType').value,latlong:`${p.coords.latitude},${p.coords.longitude}`,distance:d.distance_km,duration:d.duration_mins}})})
-                     .then(()=>{alert("บันทึกสำเร็จ"); window.location.reload();});
-                 });
-             }, e=>handleFailure(e));
+// ... [Existing Functions: handleVhvRegistration, updateUserProfile, getVhvTotalCount, getUserProfile, etc. remain unchanged] ...
+// (Keeping existing standard functions to save space, assuming they exist as per previous context)
+
+function handleVhvRegistration(ss, regData) {
+    const asmSheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    const asmData = asmSheet.getDataRange().getValues();
+    const asmHeaders = asmData[0].map(h => h.trim());
+    const userIdCol = asmHeaders.indexOf('userId');
+    const areasAsString = Array.isArray(regData.areas) ? regData.areas.join(',') : regData.areas;
+    
+    let existingRowIndex = -1;
+    for (let i = 1; i < asmData.length; i++) {
+        if (asmData[i][userIdCol] === regData.userId) {
+            existingRowIndex = i + 1;
+            break;
         }
-        function pinVhvHomeInForm() {
-            showLoading(true);
-            navigator.geolocation.getCurrentPosition(p => {
-                document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`;
-                showLoading(false);
-            }, e=>handleFailure(e));
+    }
+    const rowData = {
+        'timestamp': new Date(), 'displayName': regData.displayName, 'profilePicture': regData.profilePicture,
+        'name': regData.name, 'phone': `'${String(regData.phone)}`, 'line_id': regData.line_id,
+        'area': areasAsString, 'pdpa': regData.pdpa, 'asm_home': regData.asm_home, 'asm_test': regData.asm_test
+    };
+    if (existingRowIndex > -1) { 
+        asmHeaders.forEach((header, index) => { if (header in rowData) asmSheet.getRange(existingRowIndex, index + 1).setValue(rowData[header]); });
+    } else { 
+        const newRow = asmHeaders.map(h => rowData[h] || '');
+        newRow[userIdCol] = regData.userId;
+        asmSheet.appendRow(newRow);
+    }
+    return { success: true, message: "บันทึกข้อมูลสำเร็จ" };
+}
+
+function updateUserProfile(ss, userData) {
+    const sheet = ss.getSheetByName(DATABASE_SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => h.toString().trim());
+    const userIdCol = headers.indexOf('userId');
+    let found = false;
+    for(let i=1; i<data.length; i++) {
+        if(data[i][userIdCol] === userData.userId) {
+            if(userData.name) sheet.getRange(i+1, headers.indexOf('name')+1).setValue(userData.name);
+            if(userData.phone) sheet.getRange(i+1, headers.indexOf('telephone')+1).setValue(`'${userData.phone}`);
+            if(userData.pictureUrl) sheet.getRange(i+1, headers.indexOf('pictureUrl')+1).setValue(userData.pictureUrl);
+            found = true; break;
         }
-        function classifyRisk(r) { return r<0.1?{text:"เสี่ยงต่ำ",color:"#28a745"}:r<0.2?{text:"ปานกลาง",color:"#ffc107"}:r<0.3?{text:"สูง",color:"#fd7e14"}:{text:"สูงมาก",color:"#dc3545"}; }
-        function showLoading(s, t="Loading...") { document.getElementById('loading').style.display=s?'flex':'none'; document.getElementById('loading-text').innerText=t; }
-        function handleFailure(e) { alert("Error: "+e.message); showLoading(false); }
-    </script>
-</body>
-</html>
+    }
+    const vhvSheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    const vhvData = vhvSheet.getDataRange().getValues();
+    const vhvHeaders = vhvData[0].map(h => h.trim());
+    const vUserIdCol = vhvHeaders.indexOf('userId');
+    for(let i=1; i<vhvData.length; i++) {
+        if(vhvData[i][vUserIdCol] === userData.userId) {
+            if(userData.name) vhvSheet.getRange(i+1, vhvHeaders.indexOf('name')+1).setValue(userData.name);
+            if(userData.phone) vhvSheet.getRange(i+1, vhvHeaders.indexOf('phone')+1).setValue(`'${userData.phone}`);
+            if(userData.pictureUrl) vhvSheet.getRange(i+1, vhvHeaders.indexOf('profilePicture')+1).setValue(userData.pictureUrl);
+            break;
+        }
+    }
+    return found ? { success: true } : { success: false };
+}
+
+function getVhvTotalCount(ss) {
+    const sheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    return Math.max(0, sheet.getLastRow() - 1);
+}
+
+function getUserProfile(ss, userId) {
+  const sheet = ss.getSheetByName(DATABASE_SHEET_NAME);
+  if (!sheet) return null;
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0].map(h => h.toString().trim());
+  const userIdColIndex = headers.indexOf('userId');
+  if (userIdColIndex === -1) return null;
+  for (let i = data.length - 1; i > 0; i--) {
+    if (data[i][userIdColIndex] === userId) {
+      const record = {};
+      headers.forEach((header, index) => { if (header) record[header] = data[i][index]; });
+      return record;
+    }
+  }
+  return null;
+}
+function getVhvProfile(ss, userId) {
+    const sheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    if (!sheet || sheet.getLastRow() < 2) return null;
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => h.trim());
+    const userIdCol = headers.indexOf('userId');
+    if (userIdCol === -1) return null;
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][userIdCol] === userId) {
+            const vhv = {};
+            headers.forEach((h, index) => { if (h) vhv[h] = data[i][index]; });
+            return vhv;
+        }
+    }
+    return null;
+}
+function getCommunityLeaders(ss, userDistrict, userVillage, userLatLon) {
+    const sheet = ss.getSheetByName(VOLUNTEER_LIST_SHEET_NAME);
+    const asmSheet = ss.getSheetByName(ASM_DATABASE_SHEET_NAME);
+    if (!sheet || !asmSheet) return null;
+    const asmData = asmSheet.getDataRange().getValues();
+    const asmHeaders = asmData[0].map(h => h.trim());
+    const asmAreaCol = asmHeaders.indexOf('area');
+    const userAreaString = `ต.${userDistrict} ม.${userVillage}`;
+    let volunteer1 = null; let volunteer2 = null;
+    for(let i=1; i<asmData.length; i++) {
+        const areas = String(asmData[i][asmAreaCol]).split(',').map(s=>s.trim());
+        if(areas.includes(userAreaString)) {
+            const vhv = {};
+            asmHeaders.forEach((h, idx) => vhv[h] = asmData[i][idx]);
+            vhv.distance_km = calculateHaversineDistance(userLatLon, vhv.asm_home);
+            if(!volunteer1) volunteer1 = vhv; else if(!volunteer2) volunteer2 = vhv;
+        }
+    }
+    const volData = sheet.getDataRange().getValues();
+    const volHeaders = volData[0].map(h => h.trim());
+    let leaders = {};
+    for (let i = 1; i < volData.length; i++) {
+        if (volData[i][0] === userAreaString) {
+            volHeaders.forEach((h, index) => { if (h) leaders[h] = volData[i][index]; });
+            break;
+        }
+    }
+    if(volunteer1) {
+        leaders.volunteer1 = volunteer1.name; leaders.volunteer1_tel = volunteer1.phone.replace(/'/g, '');
+        leaders.volunteer1_line_id = volunteer1.line_id; leaders.volunteer1_distance_km = volunteer1.distance_km;
+    }
+    if(volunteer2) {
+        leaders.volunteer2 = volunteer2.name; leaders.volunteer2_tel = volunteer2.phone.replace(/'/g, '');
+        leaders.volunteer2_line_id = volunteer2.line_id; leaders.volunteer2_distance_km = volunteer2.distance_km;
+    }
+    return leaders;
+}
+function getVhvPatientDetails(ss, vhvAreaString, vhvHomeLocation) {
+    if (!vhvAreaString) return [];
+    const dbSheet = ss.getSheetByName(DATABASE_SHEET_NAME);
+    const distanceSheet = ss.getSheetByName(TEST_DISTANCE_SHEET_NAME);
+    const dailyCheckSheet = ss.getSheetByName(DAILY_CHECK_SHEET_NAME);
+    const distanceData = distanceSheet.getDataRange().getValues();
+    const patientLocationMap = new Map();
+    for(let i = distanceData.length - 1; i > 0; i--) {
+      if (distanceData[i][2] === 'บ้าน') patientLocationMap.set(distanceData[i][1], distanceData[i][3]);
+    }
+    const dailyCheckData = dailyCheckSheet.getDataRange().getValues();
+    const lastCheckMap = new Map();
+    const checkUserIdCol = dailyCheckData[0].indexOf('userId');
+    const checkTimestampCol = dailyCheckData[0].indexOf('timestamp');
+    for (let i = 1; i < dailyCheckData.length; i++) {
+        const userId = dailyCheckData[i][checkUserIdCol];
+        const timestamp = dailyCheckData[i][checkTimestampCol];
+        if (userId && timestamp instanceof Date) {
+            if (!lastCheckMap.has(userId) || timestamp > lastCheckMap.get(userId)) lastCheckMap.set(userId, timestamp);
+        }
+    }
+    const vhvAreas = vhvAreaString.split(',').map(a => a.trim());
+    const dbData = dbSheet.getDataRange().getValues();
+    const dbHeaders = dbData[0].map(h => h.trim());
+    const riskScoreColName = 'thai_cv_risk_score';
+    const patients = [];
+    for (let i = 1; i < dbData.length; i++) {
+        const patient = {};
+        dbHeaders.forEach((h, index) => patient[h] = dbData[i][index]);
+        if (patient.allow_tel) {
+            const patientArea = `ต.${patient.district} ม.${patient.village}`;
+            if (vhvAreas.includes(patientArea)) {
+                const patientHomeLocation = patientLocationMap.get(patient.userId);
+                patient.distanceFromVhv_km = vhvHomeLocation ? calculateHaversineDistance(vhvHomeLocation, patientHomeLocation) : null;
+                patient.latlong = patientHomeLocation || null; 
+                const lastCheck = lastCheckMap.get(patient.userId);
+                patient.latestCheckTimestamp = lastCheck ? lastCheck.toISOString() : null;
+                patients.push(patient);
+            }
+        }
+    }
+    patients.sort((a, b) => (b[riskScoreColName] || 0) - (a[riskScoreColName] || 0));
+    return patients;
+}
+function getDailyCheckInfo(ss, userId) {
+    const sheet = ss.getSheetByName(DAILY_CHECK_SHEET_NAME);
+    const info = { symptomCount: 0, noSymptomCount: 0, latestCheckTimestamp: null };
+    if (!sheet || sheet.getLastRow() < 2) return info;
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => String(h).trim());
+    const userIdCol = headers.indexOf('userId');
+    const eventIdCol = headers.indexOf('eventId'); 
+    const timestampCol = headers.indexOf('timestamp');
+    if(userIdCol === -1 || eventIdCol === -1 || timestampCol === -1) return info;
+    let latestDate = null;
+    for (let i = 1; i < data.length; i++) {
+        if (data[i][userIdCol] === userId) {
+            if (data[i][eventIdCol]) info.symptomCount++; else info.noSymptomCount++;
+            if (data[i][timestampCol] instanceof Date && (!latestDate || data[i][timestampCol] > latestDate)) latestDate = data[i][timestampCol];
+        }
+    }
+    info.latestCheckTimestamp = latestDate ? latestDate.toISOString() : null;
+    return info;
+}
+function getAvailableVhvAreas(ss) {
+  const sheet = ss.getSheetByName(VOLUNTEER_LIST_SHEET_NAME);
+  if (!sheet) return [];
+  const data = sheet.getDataRange().getValues();
+  const availableAreas = [];
+  for (let i = 1; i < data.length; i++) { if(data[i][0]) availableAreas.push(data[i][0]); }
+  return availableAreas;
+}
+function getHomeDistance(ss, userId) {
+  const sheet = ss.getSheetByName(TEST_DISTANCE_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return null;
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0].map(h => h.toString().trim());
+  const userIdCol = headers.indexOf('userId');
+  const typeCol = headers.indexOf('type');
+  if (userIdCol === -1 || typeCol === -1) return null;
+  for (let i = data.length - 1; i > 0; i--) {
+    if (data[i][userIdCol] === userId && data[i][typeCol] === 'บ้าน') {
+      const record = {}; headers.forEach((h, index) => { record[h] = data[i][index]; }); return record;
+    }
+  }
+  return null;
+}
+function getStickerShareCount(ss, userId) {
+  const sheet = ss.getSheetByName(STICKER_SHARE_SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return 0;
+  const data = sheet.getRange("B:B").getValues(); 
+  return data.filter(row => row[0] === userId).length;
+}
+function getKnowledgeTestStats(ss, userId) {
+  const sheet = ss.getSheetByName(KNOWLEDGE_TEST_SHEET_NAME);
+  const stats = { testCount: 0, maxScore: 0 };
+  if (!sheet || sheet.getLastRow() < 2) return stats;
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0].map(h => h.trim());
+  const userIdCol = headers.indexOf('userId');
+  const levelCol = headers.indexOf('level');
+  const scoreCol = headers.indexOf('get_score');
+  if (userIdCol === -1 || levelCol === -1 || scoreCol === -1) return stats;
+  let userScores = [];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][userIdCol] === userId && data[i][levelCol] === 'general') {
+      const score = parseFloat(data[i][scoreCol]); if (!isNaN(score)) userScores.push(score);
+    }
+  }
+  stats.testCount = userScores.length;
+  if (userScores.length > 0) stats.maxScore = Math.max(...userScores);
+  return stats;
+}
+function calculateHaversineDistance(coords1Str, coords2Str) {
+    if (!coords1Str || !coords2Str) return null;
+    try {
+        const [lat1, lon1] = coords1Str.split(',').map(Number);
+        const [lat2, lon2] = coords2Str.split(',').map(Number);
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return (R * c).toFixed(1);
+    } catch (e) { return null; }
+}
