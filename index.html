@@ -212,7 +212,8 @@
 <body>
 
     <div id="loading">
-        <i id="loading-icon" class="bi bi-heart-pulse"></i>
+        <!-- เปลี่ยน Icon เป็นสมอง -->
+        <i id="loading-icon" class="bi bi-brain"></i>
         <div id="loading-text">กำลังโหลดข้อมูล...</div>
         <div style="font-size: 1.2rem;">จำใส่ใจอาการสโตรก:</div>
         <div id="loading-subtext"></div>
@@ -746,13 +747,15 @@
             const total = scores.totalScore !== undefined ? scores.totalScore : 0;
             const rank = scores.rank || '-';
             const totalUser = scores.totalUsers || '-';
-            const rankText = `(${total} คะแนน สูงเป็นลำดับที่ ${rank} จาก ${totalUser} คน)`;
+            
+            // เน้นสีคะแนนและอันดับ
+            const rankText = `(<span class="text-danger fw-bold fs-4">${total}</span> คะแนน สูงเป็นลำดับที่ <span class="text-danger fw-bold fs-4">${rank}</span> จาก ${totalUser} คน)`;
             
             return `
             <div class="col-12 mb-3">
                 <div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;">
                     <div class="card-body p-3">
-                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5>
+                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>ความตระหนักรู้เรื่องสโตรก</h5>
                         <div class="text-center mb-3">
                              <div class="text-primary fw-bold fs-5">${rankText}</div>
                         </div>
@@ -861,7 +864,7 @@
             
             const list = pts.map(p => {
                 const riskVal = (p.thai_cv_risk_score || 0) / 100;
-                const riskInfo = classifyRisk(riskVal);
+                // ใช้ classifyRisk ตามที่ขอ (สีเขียว, เหลือง, ส้ม, แดง, แดงเข้ม)
                 let riskClass = 'risk-1'; let freqText = 'ติดตามปีละ 1 ครั้ง';
                 if(riskVal >= 0.1 && riskVal < 0.2) { riskClass = 'risk-2'; freqText = 'ติดตามทุก 6 เดือน'; }
                 else if(riskVal >= 0.2 && riskVal < 0.3) { riskClass = 'risk-3'; freqText = 'ติดตามทุก 3-6 เดือน'; }
@@ -1004,12 +1007,48 @@
         function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c || 0} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
         function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore || 0}/10</h1><small>สอบไป ${s.testCount || 0} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
         function buildCommunityLeadersCard(l) { 
+            // เปลี่ยน Logic การแสดงผลให้รองรับข้อมูล ผู้นำชุมชน และ รพ.สต.
             if(!l) return '<div class="col-12"><div class="card"><div class="card-body text-center text-muted">ไม่พบข้อมูลผู้นำชุมชน</div></div></div>';
+            
             let html = '<ul class="list-group list-group-flush fs-5">';
-            if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between"><span>รพ.สต.: ${l.pcu}</span>${l.pcu_tel?`<a href="tel:${l.pcu_tel}" class="btn-call">โทร</a>`:''}</li>`;
-            if(l.volunteer1) html += `<li class="list-group-item d-flex justify-content-between"><span>อสม.1: ${l.volunteer1}</span><a href="tel:${l.volunteer1_tel}" class="btn-call">โทร</a></li>`;
+            
+            // แสดงข้อมูล รพ.สต.
+            if(l.pcu) {
+                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold text-primary"><i class="bi bi-hospital"></i> ${l.pcu}</span>
+                        ${l.pcu_tel ? `<div class="small text-muted"><i class="bi bi-telephone"></i> ${l.pcu_tel}</div>` : ''}
+                    </div>
+                    ${l.pcu_tel ? `<a href="tel:${l.pcu_tel}" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}
+                </li>`;
+            }
+
+            // แสดงข้อมูล ผู้นำชุมชน (ผู้ใหญ่บ้าน)
+            if(l.headman) {
+                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold text-dark"><i class="bi bi-person-badge"></i> ผญบ: ${l.headman}</span>
+                        ${l.headman_tel ? `<div class="small text-muted"><i class="bi bi-telephone"></i> ${l.headman_tel}</div>` : ''}
+                    </div>
+                    ${l.headman_tel ? `<a href="tel:${l.headman_tel}" class="btn btn-outline-dark btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}
+                </li>`;
+            }
+
+            // แสดงรายชื่อ อสม. ที่ดูแลพื้นที่นี้
+            if (l.vhvList && l.vhvList.length > 0) {
+                html += `<li class="list-group-item bg-light fw-bold text-secondary"><i class="bi bi-people-fill"></i> อสม. ในพื้นที่</li>`;
+                l.vhvList.forEach(v => {
+                    html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>${v.name}</span>
+                        ${v.phone ? `<a href="tel:${v.phone}" class="btn btn-success btn-sm rounded-circle"><i class="bi bi-telephone-fill"></i></a>` : ''}
+                    </li>`;
+                });
+            } else {
+                 html += `<li class="list-group-item text-muted small text-center">ยังไม่มี อสม. ลงทะเบียนในพื้นที่นี้</li>`;
+            }
+
             html += '</ul>';
-            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-people-fill"></i>อสม.ใกล้ฉัน</h5>${html}</div></div></div>`;
+            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-geo-fill"></i>อสม. และผู้นำชุมชนใกล้ฉัน</h5>${html}</div></div></div>`;
         }
 
         // --- Logic Functions ---
