@@ -9,110 +9,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root { 
-            --bs-primary-rgb: 13, 110, 253; 
-            --vhv-bg: #ffc107; 
-            --vhv-dark: #b88a00; 
-            --base-size: 22px; 
-        }
-        body { 
-            font-family: "Noto Sans Thai", sans-serif; 
-            font-size: var(--base-size); 
-            background-color: #f0f2f5; 
-            margin: 0; 
-            padding-bottom: 5rem; 
-        }
-        
+        :root { --bs-primary-rgb: 13, 110, 253; --vhv-bg: #ffc107; --vhv-dark: #b88a00; --base-size: 22px; }
+        body { font-family: "Noto Sans Thai", sans-serif; font-size: var(--base-size); background-color: #f0f2f5; margin: 0; padding-bottom: 4rem; }
         h1, h2, h3, h4, h5 { font-weight: 700 !important; }
         .h5, h5 { font-size: 1.6rem; }
         .small, small { font-size: 1rem; }
         .btn { font-size: 1.2rem; }
         
-        /* Tabs */
-        .nav-tabs .nav-link { 
-            font-size: 1.3rem; 
-            font-weight: bold; 
-            color: #6c757d; 
-            padding: 15px 10px; 
-            background: #e9ecef; 
-        }
-        .nav-tabs .nav-link.active { 
-            color: #0d6efd; 
-            background: #fff; 
-        }
-        .nav-tabs .nav-link.vhv-tab.active { 
-            background: var(--vhv-bg); 
-            color: #000; 
-        }
-        .bg-vhv-theme { 
-            background-color: var(--vhv-bg); 
-            min-height: 100vh; 
-            padding-bottom: 40px; 
-        }
+        .nav-tabs .nav-link { font-size: 1.3rem; font-weight: bold; color: #6c757d; padding: 15px 10px; background: #e9ecef; }
+        .nav-tabs .nav-link.active { color: #0d6efd; background: #fff; }
+        .nav-tabs .nav-link.vhv-tab.active { background: var(--vhv-bg); color: #000; }
+        .bg-vhv-theme { background-color: var(--vhv-bg); min-height: 100vh; padding-bottom: 40px; }
         
-        /* Cards */
-        .card { 
-            border: none; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-            margin-bottom: 1.5rem; 
-            border-radius: 15px; 
-        }
-        .section-title { 
-            font-size: 1.5rem; 
-            font-weight: 700; 
-            margin-bottom: 1rem; 
-            color: #333; 
-            display: flex; 
-            align-items: center; 
-        }
-        .section-title i { 
-            margin-right: 0.8rem; 
-            color: #0d6efd; 
-            font-size: 1.8rem; 
-        }
+        .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 1.5rem; border-radius: 15px; }
+        .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #333; display: flex; align-items: center; }
+        .section-title i { margin-right: 0.8rem; color: #0d6efd; font-size: 1.8rem; }
         
-        /* Loading Screen (Updated No Spinner, Color Cycling) */
-        #loading { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: #000000; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 9999; 
-            color: white; 
-            text-align: center; 
-            font-family: "Noto Sans Thai", sans-serif; 
-        }
-        #loading-text { 
-            font-size: 1.5rem; 
-            color: #aaaaaa; 
-            margin-bottom: 30px; 
-            position: absolute;
-            top: 50px;
-        }
-        .loading-prefix { 
-            font-size: 1.5rem; 
-            color: #ffffff; 
-            margin-bottom: 10px; 
-        }
-        #loading-icon {
-            font-size: 6rem;
-            margin-bottom: 20px;
-            transition: all 0.5s ease-in-out;
-            opacity: 1;
-        }
-        #loading-subtext { 
-            font-size: 3.5rem; 
-            font-weight: 800; 
-            min-height: 100px; 
-            line-height: 1.2; 
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2); 
-            transition: all 0.5s ease-in-out; 
-            opacity: 1;
-        }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; color: white; text-align: center; }
+        #loading-text { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
+        #loading-subtext { font-size: 3.5rem; font-weight: 800; color: #ffc107; min-height: 100px; line-height: 1.2; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5); opacity: 1; transition: opacity 0.5s ease-in-out; }
+        #loading-icon { font-size: 6rem; margin-bottom: 20px; animation: pulse 1s infinite; opacity: 1; transition: opacity 0.5s ease-in-out; }
+        .loading-prefix { font-size: 1.5rem; color: #aaa; margin-bottom: 5px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         
         .game-score-box { background: #fff; border-radius: 15px; padding: 15px 5px; text-align: center; border: 2px solid #fff; height: 100%; cursor: pointer; }
         .game-score-box h3 { margin: 5px 0; font-weight: 800; color: #0d6efd; font-size: 2.2rem; }
@@ -134,20 +52,19 @@
         .highlight-alert { background-color: #ffebee; border: 2px solid red; }
         .form-section-title { background: #f8f9fa; padding: 10px; font-weight: bold; margin-bottom: 10px; border-left: 5px solid #0d6efd; }
         
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .info-item { display: flex; align-items: center; font-size: 1.2rem; }
-        .info-item i { font-size: 2rem; color: #0d6efd; min-width: 50px; }
-        .info-item .label { font-size: 0.9em; color: #6c757d; font-weight: normal; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .info-item { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px 10px; display: flex; align-items: center; font-size: 1rem; }
+        .info-item i { font-size: 1.8rem; color: #0d6efd; margin-right: 10px; width: 30px; text-align: center; }
+        .info-item .label { display: block; font-size: 0.85rem; color: #6c757d; line-height: 1; }
+        .info-item b { font-size: 1.2rem; color: #333; }
     </style>
 </head>
 <body>
 
     <div id="loading">
         <div id="loading-text">กำลังโหลดข้อมูล...</div>
-        <!-- Icon ที่จะเปลี่ยนไปเรื่อยๆ -->
         <i id="loading-icon" class="bi"></i>
         <div class="loading-prefix">จำใส่ใจอาการสโตรก:</div>
-        <!-- ข้อความที่จะเปลี่ยนไปเรื่อยๆ -->
         <div id="loading-subtext"></div>
     </div>
 
@@ -169,9 +86,7 @@
         <!-- Tab 1: Health -->
         <div class="tab-pane fade show active" id="health-tab-content">
             <div class="container tab-content-container">
-                <div class="row" id="dynamic-content-container">
-                    <!-- Cards will be injected here -->
-                </div>
+                <div class="row" id="dynamic-content-container"></div>
             </div>
         </div>
         <!-- Tab 2: VHV -->
@@ -324,17 +239,13 @@
                         </div>
                         <div class="mb-3 p-3 bg-light border rounded">
                             <label class="form-label text-danger fw-bold">📍 ปักหมุดบ้าน อสม.</label>
-                            <p class="small text-muted mb-2">* กรุณากดปักหมุดเมื่อท่านอยู่ที่บ้านพักอาศัยของท่านเท่านั้น</p>
+                            <p class="small text-muted mb-2">* กดเมื่ออยู่ที่บ้านพักอาศัยเท่านั้น</p>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="vhvAsmHome" placeholder="ยังไม่มีพิกัด" readonly>
                                 <button class="btn btn-primary" type="button" onclick="pinVhvHomeInForm()">
-                                    <i class="bi bi-geo-alt-fill"></i> ปักหมุดที่นี่
+                                    <i class="bi bi-geo-alt-fill"></i> ปักหมุด
                                 </button>
                             </div>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="vhvPdpa" checked>
-                            <label class="form-check-label" for="vhvPdpa">ยินยอมเปิดเผยข้อมูลติดต่อ</label>
                         </div>
                     </form>
                 </div>
@@ -355,7 +266,7 @@
                 </div>
                 <div class="modal-body d-flex flex-column justify-content-center align-items-center">
                     <h2 class="mb-4">สวีรู้ทันสโตรก</h2>
-                    <!-- QR Code Generated via API for the specific link -->
+                    <!-- QR Code with correct link -->
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://lin.ee/qRgD07N" alt="QR Code" style="max-width:90%;width:350px;border:15px solid white;border-radius:15px;">
                     <p class="mt-4 fs-3">ให้ชาวบ้านสแกนเพื่อเพิ่มเพื่อน</p>
                     <a href="https://lin.ee/qRgD07N" class="btn btn-success btn-lg mt-3 rounded-pill px-5 fs-4">
@@ -561,7 +472,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT (Placed at bottom, functions defined before use) -->
+    <!-- MAIN SCRIPT (Loading functions defined BEFORE use) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
@@ -587,7 +498,7 @@
         let loadingInterval;
         let EDIT_PROFILE_MODAL, VHV_REG_MODAL, QR_MODAL, RTPA_MODAL, SHARE_PROFILE_MODAL, STROKE_REPORT_MODAL, HOME_VISIT_MODAL, RISK_INFO_MODAL, DISTANCE_MODAL;
 
-        // --- 2. Loading Animation Functions (Defined First) ---
+        // --- 2. Loading Animation Functions (Defined First to prevent ReferenceError) ---
         function startLoadingAnimation() {
             const msgs = [
                 {t:"เซมึนหัว", i:"bi-person-walking", c:"#ffc107"}, 
@@ -612,8 +523,9 @@
                 icon.style.opacity = 1;
             }
 
-            // Loop
+            // Loop every 2.5s
             loadingInterval = setInterval(() => {
+                // Fade out
                 if(sub) sub.style.opacity = 0;
                 if(icon) icon.style.opacity = 0;
                 
@@ -630,7 +542,7 @@
                         icon.style.opacity = 1;
                     }
                 }, 500); // Wait for fade out
-            }, 2500); // Total cycle time
+            }, 2500); // Total cycle
         }
 
         function toggleLoading(show) {
@@ -653,7 +565,7 @@
             // Start Loading immediately
             startLoadingAnimation();
             
-            // Initialize Modals
+            // Init Modals
             EDIT_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('editProfileModal'));
             VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
             QR_MODAL = new bootstrap.Modal(document.getElementById('qrModal'));
@@ -673,18 +585,13 @@
                 const ref = new URLSearchParams(window.location.search).get('ref');
                 if(ref) url += `&ref=${ref}`;
                 
-                fetch(url)
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.error) throw new Error(data.error);
-                        ALL_USER_DATA = data;
-                        updatePage(data);
-                    })
-                    .catch(err => alert("Error: " + err.message))
-                    .finally(() => {
-                        stopLoadingAnimation();
-                    });
-                    
+                fetch(url).then(r => r.json()).then(data => {
+                    if (data.error) throw new Error(data.error);
+                    ALL_USER_DATA = data;
+                    updatePage(data);
+                }).catch(err => alert("Error: " + err.message)).finally(() => {
+                    stopLoadingAnimation();
+                });
             } catch (err) { alert(err.message); }
         });
 
@@ -742,44 +649,127 @@
 
         // --- 5. Builders --- 
         function buildGamificationCard(scores) {
-            if (!scores || !scores.totalScore) return '';
+            // FIX: Show card even if score is 0
+            if (!scores) return '';
             const rankText = `(${scores.totalScore || 0} คะแนน สูงเป็นลำดับที่ ${scores.rank || '-'} จาก ${scores.totalUsers || '-'} คน)`;
-            return `<div class="col-12 mb-3"><div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;"><div class="card-body p-3"><h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5><div class="text-center mb-3"><div class="text-primary fw-bold fs-5">${rankText}</div></div><div class="row g-3"><div class="col-6 col-md-3" onclick="scrollToId('card-check')"><div class="game-score-box"><div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div><h3>${scores.checkScore || 0}</h3><span>ความใส่ใจอาการ(ครั้ง)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-emergency')"><div class="game-score-box"><div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div><h3>${scores.emergencyScore || 0}</h3><span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-sticker')"><div class="game-score-box"><div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div><h3>${scores.stickerScore || 0}</h3><span>แชร์สติกเกอร์(ครั้ง)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-exam')"><div class="game-score-box"><div class="game-icon text-success"><i class="bi bi-book"></i></div><h3>${scores.knowledgeScore || 0}</h3><span>ความรู้เรื่องสโตรก(เต็ม10)</span></div></div></div><div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div></div></div></div>`;
+            
+            return `
+            <div class="col-12 mb-3">
+                <div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;">
+                    <div class="card-body p-3">
+                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5>
+                        <div class="text-center mb-3">
+                             <div class="text-primary fw-bold fs-5">${rankText}</div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3" onclick="scrollToId('card-check')">
+                                <div class="game-score-box">
+                                    <div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div>
+                                    <h3>${scores.checkScore || 0}</h3>
+                                    <span>ความใส่ใจอาการ(ครั้ง)</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
+                                <div class="game-score-box">
+                                    <div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div>
+                                    <h3>${scores.emergencyScore || 0}</h3>
+                                    <span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span>
+                                </div>
+                            </div>
+                             <div class="col-6 col-md-3" onclick="scrollToId('card-sticker')">
+                                <div class="game-score-box">
+                                    <div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div>
+                                    <h3>${scores.stickerScore || 0}</h3>
+                                    <span>แชร์สติกเกอร์(ครั้ง)</span>
+                                </div>
+                            </div>
+                             <div class="col-6 col-md-3" onclick="scrollToId('card-exam')">
+                                <div class="game-score-box">
+                                    <div class="game-icon text-success"><i class="bi bi-book"></i></div>
+                                    <h3>${scores.knowledgeScore || 0}</h3>
+                                    <span>ความรู้เรื่องสโตรก(เต็ม10)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div>
+                    </div>
+                </div>
+            </div>`;
         }
 
         function buildProfileCard(p, riskOnly = false) {
             if (!p) return '';
             const riskValue = (p.thai_cv_risk_score || 0) / 100;
             const riskInfo = classifyRisk(riskValue);
+            
             if (riskOnly) {
-                const factors = [ 
-                    {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'}, 
-                    {i: 'bi-calendar-event', l:'อายุ', v: `${p.age || '-'} ปี`}, 
-                    {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'}, 
-                    {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'}, 
-                    {i: 'bi-speedometer2', l:'ความดัน', v: `${p.sbp || 'ไม่มี'}`}, 
-                    {i: 'bi-droplet', l:'ไขมัน', v: `${p.cholesterol || 'ไม่มี'}`}, 
-                    {i: 'bi-arrows-expand', l:'รอบเอว', v: `${p.waist || 'ไม่มี'}`}, 
-                    {i: 'bi-rulers', l:'ส่วนสูง', v: `${p.height || 'ไม่มี'}`} 
+                const factors = [
+                    {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'},
+                    {i: 'bi-calendar-event', l:'อายุ', v: `${p.age || 'ไม่มี'} ปี`},
+                    {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'},
+                    {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'},
+                    {i: 'bi-speedometer2', l:'ความดัน', v: `${p.sbp || 'ไม่มี'}`},
+                    {i: 'bi-droplet', l:'ไขมัน', v: `${p.cholesterol || 'ไม่มี'}`},
+                    {i: 'bi-arrows-expand', l:'รอบเอว', v: `${p.waist || 'ไม่มี'}`},
+                    {i: 'bi-rulers', l:'ส่วนสูง', v: `${p.height || 'ไม่มี'}`}
                 ];
-                let factorHtml = ''; factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
-                return `<div class="col-12"><div class="card"><div class="card-body"><div class="d-flex justify-content-between align-items-center mb-2"><h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6><button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button></div><div class="d-flex align-items-center justify-content-center mb-3"><div class="text-center"><div style="color: ${riskInfo.color};"><div class="display-3 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'ไม่มี'}</div><div class="fw-bold fs-4">${riskInfo.text}</div></div></div><a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a></div><hr><h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6><div class="info-grid">${factorHtml}</div></div></div></div>`;
+                let factorHtml = '';
+                factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
+
+                return `
+                <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                         <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6>
+                            <button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button>
+                         </div>
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                             <div class="text-center">
+                                <div style="color: ${riskInfo.color};">
+                                    <div class="display-3 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'ไม่มี'}</div>
+                                    <div class="fw-bold fs-4">${riskInfo.text}</div>
+                                </div>
+                            </div>
+                            <a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a>
+                        </div>
+                        <hr>
+                        <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6>
+                         <div class="info-grid">${factorHtml}</div>
+                    </div>
+                </div>
+                </div>`;
             }
+
             const regDate = p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : '-';
-            return `<div class="col-12"><div class="card bg-white"><div class="card-body position-relative"><button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button><div class="d-flex align-items-center"><img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;"><div><h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3><div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'ไม่ระบุ'}</div><span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span></div></div></div></div></div>`;
+            return `
+            <div class="col-12">
+                <div class="card bg-white">
+                    <div class="card-body position-relative">
+                        <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
+                        <div class="d-flex align-items-center">
+                            <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;">
+                            <div>
+                                <h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3>
+                                <div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'ไม่ระบุ'}</div>
+                                <span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         }
 
         function buildVhvPatientListCard(pts) {
             if(!pts || pts.length===0) return '<div class="card"><div class="card-body text-center p-4">ยังไม่มีรายชื่อกลุ่มเสี่ยงในพื้นที่</div></div>';
             
-            const list = pts.map(p => {
+            const groups = { 'risk-5': [], 'risk-4': [], 'risk-3': [], 'risk-2': [], 'risk-1': [] };
+            const titles = { 'risk-5': 'สีแดงเข้ม (อันตราย)', 'risk-4': 'สีแดง (สูงมาก)', 'risk-3': 'สีส้ม (สูง)', 'risk-2': 'สีเหลือง (ปานกลาง)', 'risk-1': 'สีเขียว (เสี่ยงต่ำ)' };
+            
+            pts.forEach(p => {
                 const riskVal = (p.thai_cv_risk_score || 0) / 100;
-                const riskInfo = classifyRisk(riskVal);
-                let riskClass = 'risk-1'; let freqText = 'ติดตามปีละ 1 ครั้ง';
-                if(riskVal >= 0.1 && riskVal < 0.2) { riskClass = 'risk-2'; freqText = 'ติดตามทุก 6 เดือน'; }
-                else if(riskVal >= 0.2 && riskVal < 0.3) { riskClass = 'risk-3'; freqText = 'ติดตามทุก 3-6 เดือน'; }
-                else if(riskVal >= 0.3 && riskVal < 0.4) { riskClass = 'risk-4'; freqText = 'ติดตามทุก 1-3 เดือน'; }
-                else if(riskVal >= 0.4) { riskClass = 'risk-5'; freqText = 'พบแพทย์ทันที/ทุกเดือน'; }
+                let c = 'risk-1';
+                if(riskVal>=0.4) c='risk-5'; else if(riskVal>=0.3) c='risk-4'; else if(riskVal>=0.2) c='risk-3'; else if(riskVal>=0.1) c='risk-2';
 
                 const distHtml = (p.distanceFromVhv_km) ? 
                     `<small class="text-muted ms-2"><i class="bi bi-geo-alt"></i> ห่าง ${p.distanceFromVhv_km} กม.</small>` : '';
@@ -794,12 +784,12 @@
 
                 const lineBtn = p.line_id && p.line_id !== 'null' ? `<span class="text-line-id ms-2" onclick="copyToClipboard('${p.line_id}')"><i class="bi bi-line"></i> ${p.line_id}</span>` : '';
 
-                return `<li class="list-group-item ${alertClass} ${riskClass}">
+                const itemHtml = `<li class="list-group-item ${alertClass} ${c}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></h5>
                             <div class="small">${distHtml}</div>
-                            <div class="small text-muted">${lastCheckText} | ${freqText}</div>
+                            <div class="small text-muted">${lastCheckText}</div>
                             <div class="mt-1">${lineBtn}</div>
                         </div>
                         <div class="d-flex flex-column gap-2">
@@ -808,18 +798,33 @@
                         </div>
                     </div>
                 </li>`;
-            }).join('');
+                
+                groups[c].push(itemHtml);
+            });
 
-            return `<div class="card bg-white shadow-sm"><div class="card-body p-0">
-                <div class="p-3 border-bottom d-flex justify-content-between">
-                    <h5 class="mb-0 fw-bold">รายชื่อกลุ่มเสี่ยง (${pts.length})</h5>
-                    <button class="btn btn-danger btn-sm" onclick="STROKE_REPORT_MODAL.show()">แจ้งเหตุสโตรก!</button>
-                </div>
-                <ul class="list-group list-group-flush fs-5">${list}</ul>
-            </div></div>`;
+            let fullHtml = '';
+            for(const key in groups) {
+                if(groups[key].length > 0) {
+                     fullHtml += `<div class="card mb-3"><div class="card-header fw-bold text-white" style="background-color: ${getColor(key)}">${titles[key]} (${groups[key].length})</div><ul class="list-group list-group-flush">${groups[key].join('')}</ul></div>`;
+                }
+            }
+
+            return `<div class="mb-3">
+                <div class="d-grid gap-2 mb-3"><button class="btn btn-danger btn-lg py-3 shadow" onclick="STROKE_REPORT_MODAL.show()"><i class="bi bi-ambulance fs-1"></i><br>แจ้งเหตุเคสสโตรก (Fast Track)</button></div>
+                <h5 class="section-title">ผู้ประเมินในเขตรับผิดชอบ</h5>
+                ${fullHtml}
+            </div>`;
+        }
+        
+        function getColor(riskClass) {
+            if(riskClass==='risk-5') return '#8B0000';
+            if(riskClass==='risk-4') return '#dc3545';
+            if(riskClass==='risk-3') return '#fd7e14';
+            if(riskClass==='risk-2') return '#ffc107';
+            return '#28a745';
         }
 
-        // ... [Reused Builders] ...
+        // ... [Reused Builders: buildTopVhvCard, buildVhvInstructions, buildVhvInfoCard, buildVhvRegistrationButton, buildDistanceCard, etc.] ...
         
         function buildTopVhvCard(total, topList) {
             let listHtml = '';
@@ -852,7 +857,8 @@
 
         function buildVhvInfoCard(vhv) {
             const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
-            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร อสม.</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
+            // Corrected Update Pin Button Action: opens openVhvModal()
+            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร อสม.</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล/ปักหมุด</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
         }
 
         function buildVhvRegistrationButton() {
@@ -903,7 +909,7 @@
                  html = `<div class="alert alert-light mt-2">กดปุ่มปักหมุดเพื่อตรวจสอบระยะทางและเวลาเดินทางไป รพ.สวี</div>`;
              }
 
-             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div></div></div>`;
+             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ทดลองปักหมุดไปรพ.</button></div></div></div></div>`;
         }
 
         function buildDailyCheckCard(info) {
@@ -915,7 +921,6 @@
             } else { daysSinceCheck = `<p class="text-center text-danger mt-2">ยังไม่เคยประเมิน</p>`; }
             return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-calendar-check-fill"></i>ใส่ใจประเมินอาการ</h5><div class="d-flex justify-content-around text-center"><div><div class="display-3 fw-bold text-danger">${info.symptomCount || 0}</div><div class="small">มีอาการ</div></div><div><div class="display-3 fw-bold text-success">${info.noSymptomCount || 0}</div><div class="small">ปกติ</div></div></div>${daysSinceCheck}<p class="small text-center text-muted">ไม่มีอาการก็เช็คอินได้ (เพิ่มคะแนน)</p><a href="${LINKS.DAILY}" class="btn btn-primary w-100 btn-lg mt-1">เช็คอาการ</a></div></div></div>`;
         }
-        
         function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c || 0} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
         function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore || 0}/10</h1><small>สอบไป ${s.testCount || 0} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
         function buildCommunityLeadersCard(l) { 
@@ -926,178 +931,48 @@
             html += '</ul>';
             return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-people-fill"></i>อสม.ใกล้ฉัน</h5>${html}</div></div></div>`;
         }
-
-        // --- Logic Functions ---
-        function openEditProfile() {
-            document.getElementById('editName').value = ALL_USER_DATA.userProfile.name;
-            document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone ? ALL_USER_DATA.userProfile.telephone.replace(/'/g,'') : '';
-            document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl;
-            EDIT_PROFILE_MODAL.show();
+        function openEditProfile() { document.getElementById('editName').value = ALL_USER_DATA.userProfile.name; document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone ? ALL_USER_DATA.userProfile.telephone.replace(/'/g,'') : ''; document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl; EDIT_PROFILE_MODAL.show(); }
+        function saveUserProfile() { const name = document.getElementById('editName').value; const phone = document.getElementById('editPhone').value; if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ"); toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } }) }).then(() => { alert("บันทึกสำเร็จ"); window.location.reload(); }).catch(handleFailure); }
+        function openVhvModal() { const distSelect = document.getElementById('vhvDistrict'); distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>'; for (const d in SAWEE_LOCATIONS) { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; distSelect.appendChild(opt); } const vhv = ALL_USER_DATA.vhvProfile || {}; const user = ALL_USER_DATA.userProfile || {}; document.getElementById('vhvName').value = vhv.name || user.name || ''; document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : ''); document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || ''; document.getElementById('vhvAsmHome').value = vhv.asm_home || ''; if (vhv.area) { const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/); if (parts && parts[1] && parts[2]) { distSelect.value = parts[1].trim(); updateVillages(); document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim(); } } VHV_REG_MODAL.show(); }
+        
+        // ** FIX: Force 1-20 for all districts **
+        function updateVillages() { 
+            const dist = document.getElementById('vhvDistrict').value; 
+            const villSelect = document.getElementById('vhvVillage'); 
+            villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>'; 
+            villSelect.disabled = false; 
+            for(let i=1; i<=20; i++) { 
+                const v = "หมู่ " + i; 
+                const opt = document.createElement('option'); 
+                opt.value = v; opt.textContent = v; 
+                villSelect.appendChild(opt); 
+            } 
         }
-        function saveUserProfile() {
-            const name = document.getElementById('editName').value;
-            const phone = document.getElementById('editPhone').value;
-            if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ");
+        
+        function showQrModal() { fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`); QR_MODAL.show(); }
+        function scrollToId(id) { const el = document.getElementById(id); if(el) { const tabBtn = document.getElementById('health-tab-btn'); const tab = new bootstrap.Tab(tabBtn); tab.show(); setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300); } }
+        function handlePinNewLocation() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`).then(r=>r.json()).then(d=> { fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'saveNewLocation',data:{userId:LIFF_PROFILE.userId,type:document.getElementById('locationType').value,latlong:`${p.coords.latitude},${p.coords.longitude}`,distance:d.distance_km,duration:d.duration_mins}})}).then(()=>{alert("บันทึกสำเร็จ"); window.location.reload();}); }); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
+        function pinVhvHomeInForm() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
+        function getLocationForReport() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e)); }
+        function submitStrokeReport() { const pn = document.getElementById('srPatientName').value; const ph = document.getElementById('srPhone').value; const ot = document.getElementById('srOnsetTime').value; const loc = document.getElementById('srLocation').value; if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); let sym = []; ['B','E','F','A','S'].forEach(k => { if(document.getElementById('sym'+k).checked) sym.push(document.getElementById('sym'+k).value); }); toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveStrokeReport', data: { reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName, patientName: pn, patientPhone: ph, onsetTime: ot, location: loc, symptoms: sym.join(',') }}) }).then(() => { alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); window.location.reload(); }).catch(handleFailure); }
+        function openHomeVisit(name) { document.getElementById('hvPatientName').value = name; document.getElementById('hvTitle').textContent = "เยี่ยม: " + name; HOME_VISIT_MODAL.show(); }
+        function submitHomeVisit(type) { const pname = document.getElementById('hvPatientName').value; let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' }; if (type === 'Advice') { let adv = []; if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; } else { data.adl = { feeding: document.getElementById('adlFeeding').value, transfer: document.getElementById('adlTransfer').value, grooming: document.getElementById('adlGrooming').value, toilet: document.getElementById('adlToilet').value, bathing: document.getElementById('adlBathing').value, mobility: document.getElementById('adlMobility').value }; } toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) }).then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }).catch(handleFailure); }
+        function handleVhvRegistration() { const name = document.getElementById('vhvName').value; const phone = document.getElementById('vhvPhone').value; const line = document.getElementById('vhvLineId').value; const dist = document.getElementById('vhvDistrict').value; const vill = document.getElementById('vhvVillage').value; const home = document.getElementById('vhvAsmHome').value; if(!name || !phone || !dist || !vill) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); const villNum = vill.replace('หมู่ ', ''); const areaString = `ต.${dist} ม.${villNum}`; toggleLoading(true); const data = { userId: LIFF_PROFILE.userId, displayName: LIFF_PROFILE.displayName, profilePicture: LIFF_PROFILE.pictureUrl, name: name, phone: phone, line_id: line, areas: [areaString], pdpa: "ยินยอม", asm_home: home, asm_test: ALL_USER_DATA.vhvProfile?.asm_test || '' }; fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) }).then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }).catch(handleFailure); }
+        
+        // ** Updated Share Function for Client-Side **
+        async function handleShareProfile() { 
             toggleLoading(true); 
-            fetch(WEB_APP_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } })
-            }).then(() => { alert("บันทึกสำเร็จ"); window.location.reload(); }).catch(handleFailure);
-        }
-        function openVhvModal() {
-            const distSelect = document.getElementById('vhvDistrict');
-            distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>';
-            for (const d in SAWEE_LOCATIONS) {
-                const opt = document.createElement('option');
-                opt.value = d; opt.textContent = d; distSelect.appendChild(opt);
-            }
-            const vhv = ALL_USER_DATA.vhvProfile || {};
-            const user = ALL_USER_DATA.userProfile || {};
-            document.getElementById('vhvName').value = vhv.name || user.name || '';
-            document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : '');
-            document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || '';
-            document.getElementById('vhvAsmHome').value = vhv.asm_home || '';
-            if (vhv.area) {
-                const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/);
-                if (parts && parts[1] && parts[2]) {
-                    distSelect.value = parts[1].trim();
-                    updateVillages(); 
-                    document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim();
-                }
-            }
-            VHV_REG_MODAL.show();
-        }
-        function updateVillages() {
-            const dist = document.getElementById('vhvDistrict').value;
-            const villSelect = document.getElementById('vhvVillage');
-            villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>';
-            villSelect.disabled = true;
-            if (SAWEE_LOCATIONS[dist]) {
-                villSelect.disabled = false;
-                const count = SAWEE_LOCATIONS[dist]; 
-                if (typeof count === 'number') {
-                    for(let i=1; i<=count; i++) {
-                        const v = "หมู่ " + i;
-                        const opt = document.createElement('option');
-                        opt.value = v; opt.textContent = v; villSelect.appendChild(opt);
-                    }
-                }
-            }
-        }
-        function handleVhvRegistration() {
-            const name = document.getElementById('vhvName').value;
-            const phone = document.getElementById('vhvPhone').value;
-            const line = document.getElementById('vhvLineId').value;
-            const dist = document.getElementById('vhvDistrict').value;
-            const vill = document.getElementById('vhvVillage').value;
-            const home = document.getElementById('vhvAsmHome').value;
-            if (!name || !phone || !dist || !vill) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            const villNum = vill.replace('หมู่ ', '');
-            const areaString = `ต.${dist} ม.${villNum}`;
-            toggleLoading(true);
-            const data = {
-                userId: LIFF_PROFILE.userId, displayName: LIFF_PROFILE.displayName, profilePicture: LIFF_PROFILE.pictureUrl,
-                name: name, phone: phone, line_id: line,
-                areas: [areaString], pdpa: "ยินยอม", asm_home: home, asm_test: ALL_USER_DATA.vhvProfile?.asm_test || ''
-            };
-            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) })
-                .then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }).catch(handleFailure);
-        }
-        async function handleShareProfile() {
-            toggleLoading(true);
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`);
-                const data = await res.json();
-                toggleLoading(false);
-                if (data.success && data.flex) {
-                    SHARE_PROFILE_MODAL.hide();
-                    await liff.shareTargetPicker([data.flex]);
-                } else { alert("สร้างนามบัตรไม่ได้: " + data.message); }
-            } catch (err) { handleFailure(err); }
-        }
-        function showQrModal() { 
-            fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`);
-            QR_MODAL.show(); 
-        }
-        function scrollToId(id) {
-            const el = document.getElementById(id);
-            if(el) {
-                const tabBtn = document.getElementById('health-tab-btn');
-                const tab = new bootstrap.Tab(tabBtn);
-                tab.show();
-                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-            }
-        }
-        function handlePinNewLocation() {
-             toggleLoading(true);
-             navigator.geolocation.getCurrentPosition(p => {
-                 fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
-                 .then(r=>r.json()).then(d=> {
-                     fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'saveNewLocation',data:{userId:LIFF_PROFILE.userId,type:document.getElementById('locationType').value,latlong:`${p.coords.latitude},${p.coords.longitude}`,distance:d.distance_km,duration:d.duration_mins}})})
-                     .then(()=>{alert("บันทึกสำเร็จ"); window.location.reload();});
-                 });
-             }, e=>handleFailure(e), {enableHighAccuracy: true});
-        }
-        function pinVhvHomeInForm() {
-            toggleLoading(true);
-            navigator.geolocation.getCurrentPosition(p => {
-                document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`;
-                toggleLoading(false);
-            }, e=>handleFailure(e), {enableHighAccuracy: true});
-        }
-        function getLocationForReport() {
-            toggleLoading(true);
-            navigator.geolocation.getCurrentPosition(p => {
-                document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`;
-                toggleLoading(false);
-            }, e=>handleFailure(e));
-        }
-        function submitStrokeReport() {
-            const pn = document.getElementById('srPatientName').value;
-            const ph = document.getElementById('srPhone').value;
-            const ot = document.getElementById('srOnsetTime').value;
-            const loc = document.getElementById('srLocation').value;
-            if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            
-            // Get checked symptoms
-            let sym = [];
-            ['B','E','F','A','S'].forEach(k => { if(document.getElementById('sym'+k).checked) sym.push(document.getElementById('sym'+k).value); });
-            
-            toggleLoading(true);
-            fetch(WEB_APP_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'saveStrokeReport', data: {
-                    reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName,
-                    patientName: pn, patientPhone: ph, onsetTime: ot, location: loc, symptoms: sym.join(',')
-                }})
-            }).then(() => { alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); window.location.reload(); }).catch(handleFailure);
-        }
-        function openHomeVisit(name) {
-            document.getElementById('hvPatientName').value = name;
-            document.getElementById('hvTitle').textContent = "เยี่ยม: " + name;
-            HOME_VISIT_MODAL.show();
-        }
-        function submitHomeVisit(type) {
-            const pname = document.getElementById('hvPatientName').value;
-            let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' };
-            if (type === 'Advice') {
-                let adv = [];
-                if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน");
-                if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว");
-                data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value;
-            } else {
-                data.adl = {
-                    feeding: document.getElementById('adlFeeding').value,
-                    transfer: document.getElementById('adlTransfer').value,
-                    grooming: document.getElementById('adlGrooming').value,
-                    toilet: document.getElementById('adlToilet').value,
-                    bathing: document.getElementById('adlBathing').value,
-                    mobility: document.getElementById('adlMobility').value
-                };
-            }
-            toggleLoading(true);
-            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) })
-            .then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }).catch(handleFailure);
+            try { 
+                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); 
+                const data = await res.json(); 
+                toggleLoading(false); 
+                if (data.success && data.flex) { 
+                    SHARE_PROFILE_MODAL.hide(); 
+                    await liff.shareTargetPicker([data.flex]); 
+                } else { 
+                    alert("สร้างนามบัตรไม่ได้: " + data.message); 
+                } 
+            } catch (err) { handleFailure(err); } 
         }
         
         function trackTelCall(tel) { if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); }
