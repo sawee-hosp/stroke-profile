@@ -22,11 +22,13 @@
             margin: 0; 
             padding-bottom: 5rem; 
         }
+        
         h1, h2, h3, h4, h5 { font-weight: 700 !important; }
         .h5, h5 { font-size: 1.6rem; }
         .small, small { font-size: 1rem; }
         .btn { font-size: 1.2rem; }
         
+        /* Tabs */
         .nav-tabs .nav-link { 
             font-size: 1.3rem; 
             font-weight: bold; 
@@ -48,6 +50,7 @@
             padding-bottom: 40px; 
         }
         
+        /* Cards */
         .card { 
             border: none; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
@@ -68,154 +71,83 @@
             font-size: 1.8rem; 
         }
         
+        /* Loading Screen (Updated No Spinner, Color Cycling) */
         #loading { 
             position: fixed; 
             top: 0; left: 0; 
             width: 100%; height: 100%; 
-            background: #000; 
+            background: #000000; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
-            z-index: 2000; 
+            z-index: 9999; 
             color: white; 
             text-align: center; 
+            font-family: "Noto Sans Thai", sans-serif; 
         }
         #loading-text { 
-            font-size: 2rem; 
-            font-weight: bold; 
-            margin-bottom: 20px; 
+            font-size: 1.5rem; 
+            color: #aaaaaa; 
+            margin-bottom: 30px; 
+            position: absolute;
+            top: 50px;
+        }
+        .loading-prefix { 
+            font-size: 1.5rem; 
+            color: #ffffff; 
+            margin-bottom: 10px; 
+        }
+        #loading-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            transition: all 0.5s ease-in-out;
+            opacity: 1;
         }
         #loading-subtext { 
-            font-size: 4rem; 
+            font-size: 3.5rem; 
             font-weight: 800; 
-            color: #ffc107; 
             min-height: 100px; 
             line-height: 1.2; 
-            text-shadow: 2px 2px 10px rgba(255,193,7,0.5); 
-            opacity: 1; 
-            transition: opacity 0.5s ease-in-out; 
-        }
-        #loading-icon { 
-            font-size: 5rem; 
-            color: #ffc107; 
-            margin-bottom: 30px; 
-            animation: pulse 1s infinite; 
-            opacity: 1; 
-            transition: opacity 0.5s ease-in-out; 
-        }
-        @keyframes pulse { 
-            0% { transform: scale(1); } 
-            50% { transform: scale(1.2); } 
-            100% { transform: scale(1); } 
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2); 
+            transition: all 0.5s ease-in-out; 
+            opacity: 1;
         }
         
-        .game-score-box { 
-            background: #fff; 
-            border-radius: 15px; 
-            padding: 15px 5px; 
-            text-align: center; 
-            border: 2px solid #fff; 
-            height: 100%; 
-            cursor: pointer; 
-        }
-        .game-score-box h3 { 
-            margin: 5px 0; 
-            font-weight: 800; 
-            color: #0d6efd; 
-            font-size: 2.2rem; 
-        }
-        .game-score-box span { 
-            font-size: 1.1rem; 
-            color: #666; 
-            line-height: 1.2; 
-            display: block; 
-        }
+        .game-score-box { background: #fff; border-radius: 15px; padding: 15px 5px; text-align: center; border: 2px solid #fff; height: 100%; cursor: pointer; }
+        .game-score-box h3 { margin: 5px 0; font-weight: 800; color: #0d6efd; font-size: 2.2rem; }
+        .game-score-box span { font-size: 1.1rem; color: #666; line-height: 1.2; display: block; }
         
-        .profile-edit-btn { 
-            position: absolute; 
-            top: 15px; right: 15px; 
-            background: rgba(255,255,255,0.9); 
-            border: none; 
-            border-radius: 50%; 
-            width: 50px; height: 50px; 
-            color: #0d6efd; 
-            font-size: 1.5rem; 
-        }
+        .profile-edit-btn { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 50px; height: 50px; color: #0d6efd; font-size: 1.5rem; }
         
         .check-icon { font-size: 1.8rem; margin-right: 10px; }
         .check-ok { color: #198754; }
         .check-no { color: #dc3545; opacity: 0.5; }
         
-        /* Updated Risk Colors */
         .risk-1 { border-left: 15px solid #28a745; }
         .risk-2 { border-left: 15px solid #ffc107; }
         .risk-3 { border-left: 15px solid #fd7e14; }
         .risk-4 { border-left: 15px solid #dc3545; }
         .risk-5 { border-left: 15px solid #8B0000; }
         
-        .text-line-id { 
-            font-size: 1rem; 
-            color: #0d6efd; 
-            cursor: pointer; 
-            background: #e3f2fd; 
-            padding: 2px 8px; 
-            border-radius: 5px; 
-            display: inline-block; 
-        }
-        .highlight-alert { 
-            background-color: #ffebee; 
-            border: 2px solid red; 
-        }
-        .form-section-title { 
-            background: #f8f9fa; 
-            padding: 10px; 
-            font-weight: bold; 
-            margin-bottom: 10px; 
-            border-left: 5px solid #0d6efd; 
-        }
+        .text-line-id { font-size: 1rem; color: #0d6efd; cursor: pointer; background: #e3f2fd; padding: 2px 8px; border-radius: 5px; display: inline-block; }
+        .highlight-alert { background-color: #ffebee; border: 2px solid red; }
+        .form-section-title { background: #f8f9fa; padding: 10px; font-weight: bold; margin-bottom: 10px; border-left: 5px solid #0d6efd; }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .info-item {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            padding: 12px 10px; /* Increased padding */
-            display: flex;
-            align-items: center;
-            font-size: 1rem; /* Base font size */
-        }
-        .info-item i {
-            font-size: 1.8rem; /* Larger icon */
-            color: #0d6efd;
-            margin-right: 10px;
-            width: 30px;
-            text-align: center;
-        }
-        .info-item .label {
-            display: block;
-            font-size: 0.85rem; /* Larger label */
-            color: #6c757d;
-            line-height: 1;
-        }
-        .info-item b {
-            font-size: 1.2rem; /* Larger value */
-            color: #333;
-        }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .info-item { display: flex; align-items: center; font-size: 1.2rem; }
+        .info-item i { font-size: 2rem; color: #0d6efd; min-width: 50px; }
+        .info-item .label { font-size: 0.9em; color: #6c757d; font-weight: normal; }
     </style>
 </head>
 <body>
 
     <div id="loading">
-        <!-- เปลี่ยน Icon เป็นสมอง -->
-        <i id="loading-icon" class="bi bi-brain"></i>
         <div id="loading-text">กำลังโหลดข้อมูล...</div>
-        <div style="font-size: 1.2rem;">จำใส่ใจอาการสโตรก:</div>
+        <!-- Icon ที่จะเปลี่ยนไปเรื่อยๆ -->
+        <i id="loading-icon" class="bi"></i>
+        <div class="loading-prefix">จำใส่ใจอาการสโตรก:</div>
+        <!-- ข้อความที่จะเปลี่ยนไปเรื่อยๆ -->
         <div id="loading-subtext"></div>
     </div>
 
@@ -252,7 +184,7 @@
         </div>
     </div>
 
-    <!-- Modals (All Modals remain same structure) -->
+    <!-- Modals -->
     <!-- Edit Profile -->
     <div class="modal fade" id="editProfileModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -629,9 +561,11 @@
         </div>
     </div>
 
+    <!-- SCRIPT (Placed at bottom, functions defined before use) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
+        // --- 1. Global Configurations & Variables ---
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
         const LIFF_ID_MAIN = "2005789397-RLAGXrBJ";
         
@@ -653,8 +587,73 @@
         let loadingInterval;
         let EDIT_PROFILE_MODAL, VHV_REG_MODAL, QR_MODAL, RTPA_MODAL, SHARE_PROFILE_MODAL, STROKE_REPORT_MODAL, HOME_VISIT_MODAL, RISK_INFO_MODAL, DISTANCE_MODAL;
 
+        // --- 2. Loading Animation Functions (Defined First) ---
+        function startLoadingAnimation() {
+            const msgs = [
+                {t:"เซมึนหัว", i:"bi-person-walking", c:"#ffc107"}, 
+                {t:"ตามัวมาก", i:"bi-eye-slash-fill", c:"#9C27B0"}, 
+                {t:"มุมปากตก", i:"bi-emoji-dizzy-fill", c:"#dc3545"}, 
+                {t:"ยกแขนยาก", i:"bi-person-arms-up", c:"#0d6efd"}, 
+                {t:"ลำบากพูด", i:"bi-mic-mute-fill", c:"#198754"}
+            ];
+            let i = 0;
+            const sub = document.getElementById('loading-subtext');
+            const icon = document.getElementById('loading-icon');
+            
+            // Initial State
+            if(sub) {
+                sub.textContent = msgs[0].t;
+                sub.style.color = msgs[0].c;
+                sub.style.opacity = 1;
+            }
+            if(icon) {
+                icon.className = `bi ${msgs[0].i}`;
+                icon.style.color = msgs[0].c;
+                icon.style.opacity = 1;
+            }
+
+            // Loop
+            loadingInterval = setInterval(() => {
+                if(sub) sub.style.opacity = 0;
+                if(icon) icon.style.opacity = 0;
+                
+                setTimeout(() => {
+                    i = (i + 1) % msgs.length;
+                    if(sub) {
+                        sub.textContent = msgs[i].t;
+                        sub.style.color = msgs[i].c;
+                        sub.style.opacity = 1;
+                    }
+                    if(icon) {
+                        icon.className = `bi ${msgs[i].i}`;
+                        icon.style.color = msgs[i].c;
+                        icon.style.opacity = 1;
+                    }
+                }, 500); // Wait for fade out
+            }, 2500); // Total cycle time
+        }
+
+        function toggleLoading(show) {
+            const el = document.getElementById('loading');
+            if(el) el.style.display = show ? 'flex' : 'none';
+        }
+
+        function stopLoadingAnimation() {
+            if(loadingInterval) clearInterval(loadingInterval);
+            toggleLoading(false);
+        }
+
+        function handleFailure(e) { 
+            alert("Error: "+e.message); 
+            stopLoadingAnimation(); 
+        }
+
+        // --- 3. Main Execution ---
         document.addEventListener('DOMContentLoaded', async () => {
+            // Start Loading immediately
             startLoadingAnimation();
+            
+            // Initialize Modals
             EDIT_PROFILE_MODAL = new bootstrap.Modal(document.getElementById('editProfileModal'));
             VHV_REG_MODAL = new bootstrap.Modal(document.getElementById('vhvRegisterModal'));
             QR_MODAL = new bootstrap.Modal(document.getElementById('qrModal'));
@@ -683,13 +682,13 @@
                     })
                     .catch(err => alert("Error: " + err.message))
                     .finally(() => {
-                        clearInterval(loadingInterval);
-                        toggleLoading(false);
+                        stopLoadingAnimation();
                     });
                     
             } catch (err) { alert(err.message); }
         });
 
+        // --- 4. Page Logic ---
         function updatePage(data) {
             const hContainer = document.getElementById('dynamic-content-container');
             if (hContainer) {
@@ -741,122 +740,33 @@
             }
         }
 
-        // --- Builders --- 
+        // --- 5. Builders --- 
         function buildGamificationCard(scores) {
-            if (!scores) return ''; 
-            const total = scores.totalScore !== undefined ? scores.totalScore : 0;
-            const rank = scores.rank || '-';
-            const totalUser = scores.totalUsers || '-';
-            
-            // เน้นสีคะแนนและอันดับ
-            const rankText = `(<span class="text-danger fw-bold fs-4">${total}</span> คะแนน สูงเป็นลำดับที่ <span class="text-danger fw-bold fs-4">${rank}</span> จาก ${totalUser} คน)`;
-            
-            return `
-            <div class="col-12 mb-3">
-                <div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;">
-                    <div class="card-body p-3">
-                        <h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>ความตระหนักรู้เรื่องสโตรก</h5>
-                        <div class="text-center mb-3">
-                             <div class="text-primary fw-bold fs-5">${rankText}</div>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-check')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div>
-                                    <h3>${scores.checkScore || 0}</h3>
-                                    <span>ความใส่ใจอาการ(ครั้ง)</span>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3" onclick="scrollToId('card-emergency')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div>
-                                    <h3>${scores.emergencyScore || 0}</h3>
-                                    <span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-sticker')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div>
-                                    <h3>${scores.stickerScore || 0}</h3>
-                                    <span>แชร์สติกเกอร์(ครั้ง)</span>
-                                </div>
-                            </div>
-                             <div class="col-6 col-md-3" onclick="scrollToId('card-exam')">
-                                <div class="game-score-box">
-                                    <div class="game-icon text-success"><i class="bi bi-book"></i></div>
-                                    <h3>${scores.knowledgeScore || 0}</h3>
-                                    <span>ความรู้เรื่องสโตรก(เต็ม10)</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-2 small text-muted">* ประเมินซ้ำทุกสัปดาห์เพื่อเพิ่มคะแนน</div>
-                    </div>
-                </div>
-            </div>`;
+            if (!scores || !scores.totalScore) return '';
+            const rankText = `(${scores.totalScore || 0} คะแนน สูงเป็นลำดับที่ ${scores.rank || '-'} จาก ${scores.totalUsers || '-'} คน)`;
+            return `<div class="col-12 mb-3"><div class="card bg-light-blue shadow-sm" style="background-color: #e3f2fd;"><div class="card-body p-3"><h5 class="section-title mb-2 text-primary"><i class="bi bi-trophy-fill text-warning"></i>คะแนนสุขภาพสโตรก</h5><div class="text-center mb-3"><div class="text-primary fw-bold fs-5">${rankText}</div></div><div class="row g-3"><div class="col-6 col-md-3" onclick="scrollToId('card-check')"><div class="game-score-box"><div class="game-icon text-primary"><i class="bi bi-clipboard-check"></i></div><h3>${scores.checkScore || 0}</h3><span>ความใส่ใจอาการ(ครั้ง)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-emergency')"><div class="game-score-box"><div class="game-icon text-danger"><i class="bi bi-truck-front-fill"></i></div><h3>${scores.emergencyScore || 0}</h3><span>การเข้าถึงฉุกเฉิน(รพ.สวี)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-sticker')"><div class="game-score-box"><div class="game-icon text-info"><i class="bi bi-emoji-smile"></i></div><h3>${scores.stickerScore || 0}</h3><span>แชร์สติกเกอร์(ครั้ง)</span></div></div><div class="col-6 col-md-3" onclick="scrollToId('card-exam')"><div class="game-score-box"><div class="game-icon text-success"><i class="bi bi-book"></i></div><h3>${scores.knowledgeScore || 0}</h3><span>ความรู้เรื่องสโตรก(เต็ม10)</span></div></div></div><div class="text-center mt-2 small text-muted">* คลิกที่กล่องคะแนนเพื่อดูรายละเอียด</div></div></div></div>`;
         }
 
         function buildProfileCard(p, riskOnly = false) {
             if (!p) return '';
-            const riskRaw = p.thai_cv_risk_score !== undefined && p.thai_cv_risk_score !== "" ? p.thai_cv_risk_score : 0;
-            const riskValue = riskRaw / 100;
+            const riskValue = (p.thai_cv_risk_score || 0) / 100;
             const riskInfo = classifyRisk(riskValue);
-            
             if (riskOnly) {
-                const factors = [
-                    {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'},
-                    {i: 'bi-calendar-event', l:'อายุ', v: p.age ? `${p.age} ปี` : '-'},
-                    {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'},
-                    {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'},
-                    {i: 'bi-speedometer2', l:'ความดัน', v: p.sbp ? `${p.sbp}` : '-'},
-                    {i: 'bi-droplet', l:'ไขมัน', v: p.cholesterol ? `${p.cholesterol}` : '-'},
-                    {i: 'bi-arrows-expand', l:'รอบเอว', v: p.waist ? `${p.waist}` : '-'},
-                    {i: 'bi-rulers', l:'ส่วนสูง', v: p.height ? `${p.height}` : '-'}
+                const factors = [ 
+                    {i: 'bi-gender-ambiguous', l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง'}, 
+                    {i: 'bi-calendar-event', l:'อายุ', v: `${p.age || '-'} ปี`}, 
+                    {i: 'bi-fire', l:'สูบบุหรี่', v: p.smoke == 1 ? 'สูบ' : 'ไม่สูบ'}, 
+                    {i: 'bi-bandaid', l:'เบาหวาน', v: p.dm == 1 ? 'เป็น' : 'ไม่เป็น'}, 
+                    {i: 'bi-speedometer2', l:'ความดัน', v: `${p.sbp || 'ไม่มี'}`}, 
+                    {i: 'bi-droplet', l:'ไขมัน', v: `${p.cholesterol || 'ไม่มี'}`}, 
+                    {i: 'bi-arrows-expand', l:'รอบเอว', v: `${p.waist || 'ไม่มี'}`}, 
+                    {i: 'bi-rulers', l:'ส่วนสูง', v: `${p.height || 'ไม่มี'}`} 
                 ];
-                let factorHtml = '';
-                factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
-
-                return `
-                <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6>
-                            <button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button>
-                         </div>
-                        <div class="d-flex align-items-center justify-content-center mb-3">
-                             <div class="text-center">
-                                <div style="color: ${riskInfo.color};">
-                                    <div class="display-3 fw-bolder">${riskRaw}%</div>
-                                    <div class="fw-bold fs-4">${riskInfo.text}</div>
-                                </div>
-                            </div>
-                            <a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a>
-                        </div>
-                        <hr>
-                        <h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6>
-                         <div class="info-grid">${factorHtml}</div>
-                    </div>
-                </div>
-                </div>`;
+                let factorHtml = ''; factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
+                return `<div class="col-12"><div class="card"><div class="card-body"><div class="d-flex justify-content-between align-items-center mb-2"><h6 class="section-title mb-0"><i class="bi bi-activity"></i>ความเสี่ยงสโตรก</h6><button class="btn btn-warning btn-sm fw-bold" onclick="RISK_INFO_MODAL.show()">สำคัญอย่างไร?</button></div><div class="d-flex align-items-center justify-content-center mb-3"><div class="text-center"><div style="color: ${riskInfo.color};"><div class="display-3 fw-bolder">${p.thai_cv_risk_score !== undefined ? `${p.thai_cv_risk_score}%` : 'ไม่มี'}</div><div class="fw-bold fs-4">${riskInfo.text}</div></div></div><a href="${LINKS.REGIS}" class="btn btn-outline-primary ms-4 align-self-center btn-lg">ประเมินใหม่</a></div><hr><h6 class="section-title"><i class="bi bi-person-check"></i>ปัจจัยเสี่ยงของคุณ</h6><div class="info-grid">${factorHtml}</div></div></div></div>`;
             }
-
             const regDate = p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : '-';
-            return `
-            <div class="col-12">
-                <div class="card bg-white">
-                    <div class="card-body position-relative">
-                        <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
-                        <div class="d-flex align-items-center">
-                            <img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;">
-                            <div>
-                                <h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3>
-                                <div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || '-'}</div>
-                                <span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
+            return `<div class="col-12"><div class="card bg-white"><div class="card-body position-relative"><button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button><div class="d-flex align-items-center"><img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;"><div><h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3><div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'ไม่ระบุ'}</div><span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span></div></div></div></div></div>`;
         }
 
         function buildVhvPatientListCard(pts) {
@@ -864,7 +774,7 @@
             
             const list = pts.map(p => {
                 const riskVal = (p.thai_cv_risk_score || 0) / 100;
-                // ใช้ classifyRisk ตามที่ขอ (สีเขียว, เหลือง, ส้ม, แดง, แดงเข้ม)
+                const riskInfo = classifyRisk(riskVal);
                 let riskClass = 'risk-1'; let freqText = 'ติดตามปีละ 1 ครั้ง';
                 if(riskVal >= 0.1 && riskVal < 0.2) { riskClass = 'risk-2'; freqText = 'ติดตามทุก 6 เดือน'; }
                 else if(riskVal >= 0.2 && riskVal < 0.3) { riskClass = 'risk-3'; freqText = 'ติดตามทุก 3-6 เดือน'; }
@@ -887,7 +797,7 @@
                 return `<li class="list-group-item ${alertClass} ${riskClass}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score || 0}%)</small></h5>
+                            <h5 class="fw-bold mb-1">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></h5>
                             <div class="small">${distHtml}</div>
                             <div class="small text-muted">${lastCheckText} | ${freqText}</div>
                             <div class="mt-1">${lineBtn}</div>
@@ -902,8 +812,8 @@
 
             return `<div class="card bg-white shadow-sm"><div class="card-body p-0">
                 <div class="p-3 border-bottom d-flex justify-content-between">
-                    <h5 class="mb-0 fw-bold">ผู้ประเมินในเขตที่ดูแล (${pts.length})</h5>
-                    <button class="btn btn-danger btn-sm" onclick="STROKE_REPORT_MODAL.show()">รายงานเคสสโตรก</button>
+                    <h5 class="mb-0 fw-bold">รายชื่อกลุ่มเสี่ยง (${pts.length})</h5>
+                    <button class="btn btn-danger btn-sm" onclick="STROKE_REPORT_MODAL.show()">แจ้งเหตุสโตรก!</button>
                 </div>
                 <ul class="list-group list-group-flush fs-5">${list}</ul>
             </div></div>`;
@@ -942,7 +852,7 @@
 
         function buildVhvInfoCard(vhv) {
             const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
-            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร อสม.</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="openVhvModal()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
+            return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร อสม.</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
         }
 
         function buildVhvRegistrationButton() {
@@ -952,14 +862,16 @@
         function buildDistanceCard(d, help) {
              let html = '<p class="text-muted text-center">ยังไม่ปักหมุดบ้าน</p>';
              let cls = 'card';
+             // Card visual graphic
              let graphic = '';
              let advice = '';
 
              if(d) {
-                 const min = parseInt(d.duration_mins); 
+                 const min = parseInt(d.duration_mins); // Corrected property name from backend
                  const dist = parseFloat(d.distance_km).toFixed(1);
                  cls += min < 150 ? ' bg-success-subtle' : min < 210 ? ' bg-warning-subtle' : ' bg-danger-subtle';
                  
+                 // Advice logic
                  if(min < 150) {
                      advice = `<div class="alert alert-success mt-2"><b>ทันเวลา!</b> สามารถสแกนสมองและรับยาได้ทัน แต่ต้องรีบที่สุด</div>`;
                  } else if (min < 210) {
@@ -976,7 +888,7 @@
                     </div>
                     <div class="flex-grow-1 text-center px-2 position-relative">
                         <div style="border-top: 3px dashed #666; width: 100%; position: absolute; top: 50%;"></div>
-                        <i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: transparent; z-index: 1;"></i>
+                        <i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: #fff; z-index: 1;"></i>
                         <div class="small fw-bold mt-1">${dist} กม.</div>
                         <div class="small text-muted">${Math.floor(min/60)} ชม. ${min%60} นาที</div>
                     </div>
@@ -991,7 +903,7 @@
                  html = `<div class="alert alert-light mt-2">กดปุ่มปักหมุดเพื่อตรวจสอบระยะทางและเวลาเดินทางไป รพ.สวี</div>`;
              }
 
-             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ทดลองปักหมุดไปรพ.</button></div></div></div></div>`;
+             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${html}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="DISTANCE_MODAL.show()"><i class="bi bi-geo-alt-fill"></i> ปักหมุด</button></div></div></div></div>`;
         }
 
         function buildDailyCheckCard(info) {
@@ -1007,48 +919,12 @@
         function buildStickerCard(c) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-send-check-fill"></i>แชร์สติกเกอร์ไลน์</h5><div class="text-center"><h1>${c || 0} ครั้ง</h1></div><a href="${LINKS.STICKER}" class="btn btn-info w-100 btn-lg text-white mt-2">ส่งสติกเกอร์</a></div></div></div>`; }
         function buildKnowledgeTestCard(s) { return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-book-half"></i>ความรู้เรื่องสโตรก</h5><div class="text-center"><h1>${s.maxScore || 0}/10</h1><small>สอบไป ${s.testCount || 0} ครั้ง</small></div><a href="${LINKS.KNOWLEDGE}" class="btn btn-success w-100 btn-lg mt-2">ทำแบบทดสอบ</a></div></div></div>`; }
         function buildCommunityLeadersCard(l) { 
-            // เปลี่ยน Logic การแสดงผลให้รองรับข้อมูล ผู้นำชุมชน และ รพ.สต.
             if(!l) return '<div class="col-12"><div class="card"><div class="card-body text-center text-muted">ไม่พบข้อมูลผู้นำชุมชน</div></div></div>';
-            
             let html = '<ul class="list-group list-group-flush fs-5">';
-            
-            // แสดงข้อมูล รพ.สต.
-            if(l.pcu) {
-                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-bold text-primary"><i class="bi bi-hospital"></i> ${l.pcu}</span>
-                        ${l.pcu_tel ? `<div class="small text-muted"><i class="bi bi-telephone"></i> ${l.pcu_tel}</div>` : ''}
-                    </div>
-                    ${l.pcu_tel ? `<a href="tel:${l.pcu_tel}" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}
-                </li>`;
-            }
-
-            // แสดงข้อมูล ผู้นำชุมชน (ผู้ใหญ่บ้าน)
-            if(l.headman) {
-                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-bold text-dark"><i class="bi bi-person-badge"></i> ผญบ: ${l.headman}</span>
-                        ${l.headman_tel ? `<div class="small text-muted"><i class="bi bi-telephone"></i> ${l.headman_tel}</div>` : ''}
-                    </div>
-                    ${l.headman_tel ? `<a href="tel:${l.headman_tel}" class="btn btn-outline-dark btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}
-                </li>`;
-            }
-
-            // แสดงรายชื่อ อสม. ที่ดูแลพื้นที่นี้
-            if (l.vhvList && l.vhvList.length > 0) {
-                html += `<li class="list-group-item bg-light fw-bold text-secondary"><i class="bi bi-people-fill"></i> อสม. ในพื้นที่</li>`;
-                l.vhvList.forEach(v => {
-                    html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>${v.name}</span>
-                        ${v.phone ? `<a href="tel:${v.phone}" class="btn btn-success btn-sm rounded-circle"><i class="bi bi-telephone-fill"></i></a>` : ''}
-                    </li>`;
-                });
-            } else {
-                 html += `<li class="list-group-item text-muted small text-center">ยังไม่มี อสม. ลงทะเบียนในพื้นที่นี้</li>`;
-            }
-
+            if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between"><span>รพ.สต.: ${l.pcu}</span>${l.pcu_tel?`<a href="tel:${l.pcu_tel}" class="btn-call">โทร</a>`:''}</li>`;
+            if(l.volunteer1) html += `<li class="list-group-item d-flex justify-content-between"><span>อสม.1: ${l.volunteer1}</span><a href="tel:${l.volunteer1_tel}" class="btn-call">โทร</a></li>`;
             html += '</ul>';
-            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-geo-fill"></i>อสม. และผู้นำชุมชนใกล้ฉัน</h5>${html}</div></div></div>`;
+            return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-people-fill"></i>อสม.ใกล้ฉัน</h5>${html}</div></div></div>`;
         }
 
         // --- Logic Functions ---
@@ -1067,31 +943,6 @@
                 method: 'POST', mode: 'no-cors',
                 body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } })
             }).then(() => { alert("บันทึกสำเร็จ"); window.location.reload(); }).catch(handleFailure);
-        }
-        function startLoadingAnimation() {
-            const msgs = ["เซมึนหัว", "ตามัวมาก", "มุมปากตก", "ยกแขนยาก", "ลำบากพูด"];
-            let i = 0;
-            const sub = document.getElementById('loading-subtext');
-            const icon = document.getElementById('loading-icon');
-            if(sub) sub.textContent = msgs[0];
-            
-            // Set initial state
-            if(sub) sub.style.opacity = 1;
-            if(icon) icon.style.opacity = 1;
-
-            loadingInterval = setInterval(() => {
-                // Fade out
-                if(sub) sub.style.opacity = 0;
-                if(icon) icon.style.opacity = 0;
-                
-                setTimeout(() => {
-                    i = (i + 1) % msgs.length;
-                    if(sub) sub.textContent = msgs[i];
-                    // Fade in
-                    if(sub) sub.style.opacity = 1;
-                    if(icon) icon.style.opacity = 1;
-                }, 500); // 0.5s fade out duration before changing text
-            }, 2500); // Total cycle
         }
         function openVhvModal() {
             const distSelect = document.getElementById('vhvDistrict');
@@ -1152,33 +1003,18 @@
             fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) })
                 .then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }).catch(handleFailure);
         }
-        
         async function handleShareProfile() {
             toggleLoading(true);
             try {
                 const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`);
                 const data = await res.json();
                 toggleLoading(false);
-                
                 if (data.success && data.flex) {
                     SHARE_PROFILE_MODAL.hide();
-                    try {
-                        const result = await liff.shareTargetPicker([data.flex]);
-                        if (result) {
-                            alert("ส่งนามบัตรเรียบร้อยแล้ว");
-                        }
-                    } catch (liffErr) {
-                        console.error(liffErr);
-                        alert("ไม่สามารถเปิดหน้าต่างแชร์ได้ หรือผู้ใช้ยกเลิก (ลองกดใหม่อีกครั้ง)");
-                    }
-                } else { 
-                    alert("สร้างนามบัตรไม่ได้: " + (data.message || "ข้อมูลไม่ครบถ้วน")); 
-                }
-            } catch (err) { 
-                handleFailure(err); 
-            }
+                    await liff.shareTargetPicker([data.flex]);
+                } else { alert("สร้างนามบัตรไม่ได้: " + data.message); }
+            } catch (err) { handleFailure(err); }
         }
-        
         function showQrModal() { 
             fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`);
             QR_MODAL.show(); 
@@ -1273,10 +1109,16 @@
             const el = document.getElementById('loading');
             if(el) el.style.display = show ? 'flex' : 'none';
         }
+
+        // ** 3. Define stopLoadingAnimation (wrapper for toggleLoading(false)) **
+        function stopLoadingAnimation() {
+            if(loadingInterval) clearInterval(loadingInterval);
+            toggleLoading(false);
+        }
         
         function handleFailure(e) { 
             alert("Error: "+e.message); 
-            toggleLoading(false); 
+            stopLoadingAnimation(); 
         }
     </script>
 </body>
