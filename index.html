@@ -15,12 +15,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        /* CSS Variables - Increased Base Size to 24px */
+        /* CSS Variables - Increased Base Size to 20px (Readable for elderly) */
         :root { 
             --bs-primary-rgb: 13, 110, 253; 
             --vhv-bg: #ffc107; 
             --vhv-dark: #b88a00; 
-            --base-size: 24px; 
+            --base-size: 20px; 
         }
 
         /* Important: Set Base Font on HTML for REM scaling */
@@ -295,13 +295,10 @@
 </head>
 <body>
 
-    <!-- Loading Screen (Corrected: No Spinner) -->
     <div id="loading">
         <div id="loading-text">กำลังโหลดข้อมูล...</div>
-        
-        <!-- Fading Wrapper Content -->
+        <!-- Wrapper for fading content -->
         <div id="loading-content" class="loading-content">
-            <!-- Icon will be injected by JS -->
             <i id="loading-icon" class="bi"></i>
             <div class="loading-prefix">จำใส่ใจอาการสโตรก:</div>
             <div id="loading-subtext"></div>
@@ -962,7 +959,23 @@
                      advice = `<div class="alert alert-danger mt-2"><b>อาจไม่ทันยา!</b> แต่ต้องรีบมาเพื่อรักษาอาการฉุกเฉิน</div>`;
                  }
 
-                 graphic = `<div class="d-flex align-items-center justify-content-center my-3"><div class="text-center"><i class="bi bi-person-fill-exclamation text-danger" style="font-size: 3rem;"></i><div>ผู้ป่วย</div></div><div class="flex-grow-1 text-center px-2 position-relative"><div style="border-top: 3px dashed #666; width: 100%; position: absolute; top: 50%;"></div><i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: #fff; z-index: 1;"></i><div class="small fw-bold mt-1">${dist} กม.</div><div class="small text-muted">${Math.floor(min/60)} ชม. ${min%60} นาที</div></div><div class="text-center"><i class="bi bi-hospital-fill text-success" style="font-size: 3rem;"></i><div>รพ.สวี</div></div></div>`;
+                 graphic = `
+                 <div class="d-flex align-items-center justify-content-center my-3">
+                    <div class="text-center">
+                        <i class="bi bi-person-fill-exclamation text-danger" style="font-size: 3rem;"></i>
+                        <div>ผู้ป่วย</div>
+                    </div>
+                    <div class="flex-grow-1 text-center px-2 position-relative">
+                        <div style="border-top: 3px dashed #666; width: 100%; position: absolute; top: 50%;"></div>
+                        <i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: #fff; z-index: 1;"></i>
+                        <div class="small fw-bold mt-1">${dist} กม.</div>
+                        <div class="small text-muted">${Math.floor(min/60)} ชม. ${min%60} นาที</div>
+                    </div>
+                    <div class="text-center">
+                        <i class="bi bi-hospital-fill text-success" style="font-size: 3rem;"></i>
+                        <div>รพ.สวี</div>
+                    </div>
+                 </div>`;
                  
                  html = graphic + advice;
              } else {
