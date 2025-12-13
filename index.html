@@ -15,16 +15,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
+        /* CSS Variables - Increased Base Size to 24px */
         :root { 
             --bs-primary-rgb: 13, 110, 253; 
             --vhv-bg: #ffc107; 
             --vhv-dark: #b88a00; 
-            --base-size: 22px; 
+            --base-size: 24px; 
+        }
+
+        /* Important: Set Base Font on HTML for REM scaling */
+        html { 
+            font-size: var(--base-size);
         }
 
         body { 
             font-family: "Noto Sans Thai", sans-serif; 
-            font-size: var(--base-size); 
+            font-size: 1rem; 
             background-color: #f0f2f5; 
             margin: 0; 
             padding-bottom: 5rem; 
@@ -33,12 +39,12 @@
         /* Typography overrides */
         h1, h2, h3, h4, h5 { font-weight: 700 !important; }
         .h5, h5 { font-size: 1.6rem; }
-        .small, small { font-size: 1rem; }
-        .btn { font-size: 1.2rem; }
+        .small, small { font-size: 0.85rem; }
+        .btn { font-size: 1.1rem; }
         
         /* Navigation Tabs Customization */
         .nav-tabs .nav-link { 
-            font-size: 1.3rem; 
+            font-size: 1.2rem; 
             font-weight: bold; 
             color: #6c757d; 
             padding: 15px 10px; 
@@ -70,7 +76,7 @@
         }
         
         .section-title { 
-            font-size: 1.5rem; 
+            font-size: 1.4rem; 
             font-weight: 700; 
             margin-bottom: 1rem; 
             color: #333; 
@@ -81,10 +87,10 @@
         .section-title i { 
             margin-right: 0.8rem; 
             color: #0d6efd; 
-            font-size: 1.8rem; 
+            font-size: 1.6rem; 
         }
         
-        /* --- Loading Screen Styles (Final) --- */
+        /* --- Loading Screen Styles (Final Fixed) --- */
         #loading { 
             position: fixed; 
             top: 0; 
@@ -102,10 +108,9 @@
             font-family: "Noto Sans Thai", sans-serif; 
         }
         
-        /* Removed Spinner Class */
-        
+        /* Text at Top */
         #loading-text { 
-            font-size: 2rem; 
+            font-size: 1.8rem; 
             font-weight: bold; 
             margin-bottom: 40px; 
             color: #aaaaaa;
@@ -113,32 +118,37 @@
             top: 15%;
         }
 
+        /* Container for Animation */
         .loading-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: opacity 0.5s ease-in-out;
-            opacity: 1;
+            transition: opacity 0.5s ease-in-out; 
+            opacity: 1; 
         }
 
+        /* Large Icon */
         #loading-icon {
-            font-size: 8rem;
+            font-size: 7rem;
             margin-bottom: 20px;
             transition: all 0.5s ease-in-out;
+            display: block;
         }
 
+        /* Prefix Text */
         .loading-prefix { 
-            font-size: 1.4rem; 
+            font-size: 1.3rem; 
             color: #dddddd; 
             margin-bottom: 10px; 
         }
         
+        /* Symptom Text */
         #loading-subtext { 
-            font-size: 3.5rem; 
+            font-size: 3.2rem; 
             font-weight: 800; 
             line-height: 1.2; 
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.3); 
-            transition: all 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out; 
         }
         
         /* Game Score Box */
@@ -156,11 +166,11 @@
             margin: 5px 0; 
             font-weight: 800; 
             color: #0d6efd; 
-            font-size: 2.2rem; 
+            font-size: 2rem; 
         }
         
         .game-score-box span { 
-            font-size: 1.1rem; 
+            font-size: 0.9rem; 
             color: #666; 
             line-height: 1.2; 
             display: block; 
@@ -191,7 +201,7 @@
         .risk-5 { border-left: 15px solid #8B0000; }
         
         .text-line-id { 
-            font-size: 1rem; 
+            font-size: 0.9rem; 
             color: #0d6efd; 
             cursor: pointer; 
             background: #e3f2fd; 
@@ -213,6 +223,7 @@
             border-left: 5px solid #0d6efd; 
         }
         
+        /* Info Grid for Profile */
         .info-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -227,11 +238,11 @@
             padding: 12px 10px; 
             display: flex; 
             align-items: center; 
-            font-size: 1rem; 
+            font-size: 0.9rem; 
         }
         
         .info-item i { 
-            font-size: 1.8rem; 
+            font-size: 1.6rem; 
             color: #0d6efd; 
             margin-right: 10px; 
             width: 30px; 
@@ -240,13 +251,13 @@
         
         .info-item .label { 
             display: block; 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
             color: #6c757d; 
             line-height: 1; 
         }
         
         .info-item b { 
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             color: #333; 
         }
         
@@ -578,26 +589,6 @@
                             <label>ชื่อ-นามสกุลผู้ป่วย</label>
                             <input type="text" class="form-control" id="srName">
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label>อายุ (ปี)</label>
-                                <input type="number" class="form-control" id="srAge">
-                            </div>
-                            <div class="col-6">
-                                <label>เพศ</label>
-                                <select class="form-select" id="srSex">
-                                    <option value="ชาย">ชาย</option>
-                                    <option value="หญิง">หญิง</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label>โรคประจำตัว</label><br>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="ความดัน" name="srUD"><label class="form-check-label">ความดันฯ</label></div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="เบาหวาน" name="srUD"><label class="form-check-label">เบาหวาน</label></div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="ไขมัน" name="srUD"><label class="form-check-label">ไขมันฯ</label></div>
-                            <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="โรคหัวใจ" name="srUD"><label class="form-check-label">โรคหัวใจ</label></div>
-                        </div>
                         <div class="mb-3">
                             <label>เบอร์โทรศัพท์ญาติ (สำคัญ)</label>
                             <input type="tel" class="form-control border-danger" id="srRelPhone" required>
@@ -607,67 +598,6 @@
                         <div class="mb-3">
                             <label>เวลาที่เริ่มมีอาการ (Onset)</label>
                             <input type="time" class="form-control form-control-lg border-danger" id="srOnsetTime">
-                        </div>
-                        <div class="mb-3">
-                            <label>เวลาปกติครั้งสุดท้าย</label>
-                            <input type="time" class="form-control" id="srLastSeen">
-                        </div>
-
-                        <div class="form-section-title">3. ประเมินอาการ (F.A.S.T.)</div>
-                        <div class="mb-3">
-                            <label>F - ใบหน้า</label>
-                            <select class="form-select" id="srFace">
-                                <option value="ปกติ">ปกติ</option>
-                                <option value="ปากเบี้ยวซ้าย">ปากเบี้ยวซ้าย</option>
-                                <option value="ปากเบี้ยวขวา">ปากเบี้ยวขวา</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>A - แขนขา</label>
-                            <select class="form-select" id="srArm">
-                                <option value="ปกติ">ปกติ</option>
-                                <option value="อ่อนแรงซ้าย">อ่อนแรงซ้าย</option>
-                                <option value="อ่อนแรงขวา">อ่อนแรงขวา</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label>S - การพูด</label>
-                            <select class="form-select" id="srSpeech">
-                                <option value="ปกติ">ปกติ</option>
-                                <option value="พูดไม่ชัด">พูดไม่ชัด/ลิ้นแข็ง</option>
-                                <option value="พูดไม่ออก">พูดไม่ออก/ไม่เข้าใจ</option>
-                            </select>
-                        </div>
-
-                        <div class="form-section-title">4. อาการร่วมอื่นๆ</div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="ปวดหัวรุนแรง" name="srOther"><label class="form-check-label">ปวดศีรษะรุนแรงเฉียบพลัน</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="เวียนศีรษะ/เดินเซ" name="srOther"><label class="form-check-label">เวียนศีรษะ / เดินเซ</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="ตามัว" name="srOther"><label class="form-check-label">ตามัวทันทีทันใด</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="ซึม/หมดสติ" name="srOther"><label class="form-check-label">ซึมลง / หมดสติ</label></div>
-
-                        <div class="form-section-title">5. สัญญาณชีพ (ถ้ามี)</div>
-                        <div class="row mb-3">
-                            <div class="col-4"><input type="text" class="form-control" id="srBP" placeholder="BP (mmHg)"></div>
-                            <div class="col-4"><input type="text" class="form-control" id="srPR" placeholder="Pulse"></div>
-                            <div class="col-4"><input type="text" class="form-control" id="srDTX" placeholder="DTX (mg%)"></div>
-                        </div>
-
-                        <div class="form-section-title">6. การปฐมพยาบาล</div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="ศีรษะสูง 30" name="srFirstAid"><label class="form-check-label">จัดท่านอนศีรษะสูง 30 องศา</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="นอนตะแคง" name="srFirstAid"><label class="form-check-label">จัดท่านอนตะแคง (ถ้าหมดสติ)</label></div>
-                        <div class="form-check"><input class="form-check-input" type="checkbox" value="NPO" name="srFirstAid"><label class="form-check-label">งดน้ำ งดอาหาร</label></div>
-
-                        <div class="form-section-title">7. การนำส่ง</div>
-                        <div class="mb-2">
-                            <label>วิธีการนำส่ง</label>
-                            <select class="form-select" id="srTransferMethod">
-                                <option value="1669">โทรแจ้ง 1669 แล้ว</option>
-                                <option value="รถส่วนตัว">นำส่งเองโดยรถส่วนตัว</option>
-                                <option value="รอรถพยาบาล">รอรถพยาบาลมารับ</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="srTransferDetail" placeholder="ระบุทะเบียนรถ / จุดนัดพบ">
                         </div>
                         
                         <div class="d-grid gap-2 mt-4">
@@ -679,7 +609,6 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button>
                     <button type="button" class="btn btn-danger btn-lg flex-grow-1" onclick="submitStrokeReport()">ส่งข้อมูล</button>
                 </div>
             </div>
@@ -859,7 +788,7 @@
             const hContainer = document.getElementById('dynamic-content-container');
             if (hContainer) {
                 if (!data.userProfile) {
-                    hContainer.innerHTML = `<div class="col-12 text-center p-5"><h2 class="mb-3">ไม่พบข้อมูลผู้ใช้</h2><p class="text-muted">กรุณาลงทะเบียน</p><a href="${LINKS.REGIS}" class="btn btn-primary btn-lg rounded-pill px-5">ลงทะเบียน</a></div>`;
+                    hContainer.innerHTML = `<div class="col-12 text-center p-5"><h2 class="mb-3">ไม่พบข้อมูลผู้ใช้</h2><p class="text-muted">กรุณาลงทะเบียนเพื่อใช้งาน</p><a href="${LINKS.REGIS}" class="btn btn-primary btn-lg rounded-pill px-5">ลงทะเบียน</a></div>`;
                 } else {
                     const gamification = data.gamification || {};
                     const dailyCheck = data.dailyCheckInfo || {};
@@ -990,15 +919,21 @@
 
         function buildVhvInstructions(isRegistered, cl) {
             const getIcon = (status) => status ? '<i class="bi bi-check-circle-fill check-icon check-ok"></i>' : '<i class="bi bi-x-circle-fill check-icon check-no"></i>';
-            return `<div class="card mb-4"><div class="card-body"><h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-check"></i> ขั้นตอนการทำงาน</h5><ul class="list-group list-group-flush fs-5">
-                <li class="list-group-item">${getIcon(true)} ลงทะเบียน อสม.</li>
-                <li class="list-group-item">${getIcon(cl?.hasPinned)} ปักหมุดบ้านตนเอง</li>
-                <li class="list-group-item">${getIcon(cl?.hasSharedSticker)} แชร์ความรู้ (สติกเกอร์)</li>
-            </ul></div></div>`;
+            const items = [
+                { txt: "สมัครเป็น อสม.สโตรก", ok: isRegistered },
+                { txt: "ทำแบบทดสอบความรู้ได้คะแนนเต็ม", ok: cl?.hasExam },
+                { txt: "ปักหมุดบ้านของท่าน", ok: cl?.hasPinned },
+                { txt: "แชร์ QR Code ให้ชาวบ้านสแกน", ok: cl?.hasSharedQr },
+                { txt: "แนะนำให้ชาวบ้านทำแบบทดสอบ", ok: cl?.hasRecommended },
+                { txt: "ส่งสติกเกอร์ให้กลุ่มเสี่ยง", ok: cl?.hasSharedSticker }
+            ];
+            const listHtml = items.map(it => `<li class="list-group-item bg-transparent d-flex align-items-start border-0 px-0 py-2">${getIcon(it.ok)}<span>${it.txt}</span></li>`).join('');
+            return `<div class="card mb-4"><div class="card-body"><h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-check"></i> ขั้นตอนการทำงาน</h5><ul class="list-group list-group-flush fs-5">${listHtml}</ul></div></div>`;
         }
 
         function buildVhvInfoCard(vhv) {
             const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
+            // Corrected Update Pin Button Action: opens openVhvModal()
             return `<div class="card border-warning shadow"><div class="card-body"><div class="text-center mb-3"><button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button></div><hr><h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5><p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p><p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p><div class="row mt-3 g-2"><div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร อสม.</button></div><div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล/ปักหมุด</button></div><div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div><div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div></div></div></div>`;
         }
 
@@ -1009,14 +944,16 @@
         function buildDistanceCard(d, help) {
              let html = '<p class="text-muted text-center">ยังไม่ปักหมุดบ้าน</p>';
              let cls = 'card';
+             // Card visual graphic
              let graphic = '';
              let advice = '';
 
              if(d) {
-                 const min = parseInt(d.duration_mins); 
+                 const min = parseInt(d.duration_mins); // Corrected property name from backend
                  const dist = parseFloat(d.distance_km).toFixed(1);
                  cls += min < 150 ? ' bg-success-subtle' : min < 210 ? ' bg-warning-subtle' : ' bg-danger-subtle';
                  
+                 // Advice logic
                  if(min < 150) {
                      advice = `<div class="alert alert-success mt-2"><b>ทันเวลา!</b> สามารถสแกนสมองและรับยาได้ทัน แต่ต้องรีบที่สุด</div>`;
                  } else if (min < 210) {
