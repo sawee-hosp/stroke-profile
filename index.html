@@ -957,19 +957,16 @@
                 let c = 'vhv-risk-1';
                 if(riskVal>=0.4) c='vhv-risk-5'; else if(riskVal>=0.3) c='vhv-risk-4'; else if(riskVal>=0.2) c='vhv-risk-3'; else if(riskVal>=0.1) c='vhv-risk-2';
                 
-                html += `<div class="card vhv-patient-item ${c} p-2 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold fs-5">${p.name} <span class="badge bg-secondary">${p.thai_cv_risk_score}%</span></div>
-                            <div class="small text-muted">ประเมินล่าสุด: ${p.latestCheckTimestamp ? p.latestCheckTimestamp.split('T')[0] : 'ยังไม่เคย'}</div>
-                            <div class="small text-muted">ระยะห่าง: ${p.distanceFromVhv_km || '?'} กม.</div>
-                        </div>
-                        <div class="d-flex flex-column gap-2">
-                             <a href="tel:${p.telephone}" class="btn btn-outline-success btn-sm rounded-circle"><i class="bi bi-telephone-fill"></i></a>
-                             <button class="btn btn-sm btn-warning rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยมบ้าน/ปักหมุด</button>
-                        </div>
+                html += `<li class="list-group-item ${c}"><div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-bold">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></div>
+                        <div class="small text-muted">ประเมินล่าสุด: ${p.latestCheckTimestamp ? p.latestCheckTimestamp.split('T')[0] : 'ยังไม่เคย'}</div>
+                        <div class="small text-muted">ระยะห่าง: ${p.distanceFromVhv_km || '?'} กม.</div>
                     </div>
-                </div>`;
+                    <div>
+                        <button class="btn btn-sm btn-primary rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยมบ้าน/ปักหมุด</button>
+                    </div>
+                </div></li>`;
             });
             return `<div class="card"><div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center"><span>ชาวบ้านในเขตรับผิดชอบ</span> <button class="btn btn-sm btn-danger" onclick="STROKE_REPORT_MODAL.show()">รายงานเคสสโตรก</button></div><div class="card-body bg-light">${html}<div class="d-grid mt-3"><a href="https://sawee-hosp.github.io/stroke-risk/" target="_blank" class="btn btn-success">บันทึกการประเมินผู้ป่วย (Web)</a></div></div></div>`;
         }
@@ -1031,6 +1028,7 @@
              return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${graphic}${advice}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()"><i class="bi bi-geo-alt-fill"></i> แก้ไขหมุด</button></div></div></div></div>`;
         }
 
+        // *** Function Definitions (Added missing ones) ***
         function buildDailyCheckCard(info) {
              let daysSinceCheck = '';
              if (info.latestCheckTimestamp) {
@@ -1091,123 +1089,12 @@
         function handlePinNewLocation() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`).then(r=>r.json()).then(d=> { fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'saveNewLocation',data:{userId:LIFF_PROFILE.userId,type:document.getElementById('locationType').value,latlong:`${p.coords.latitude},${p.coords.longitude}`,distance:d.distance_km,duration:d.duration_mins}})}).then(()=>{alert("บันทึกสำเร็จ"); window.location.reload();}); }); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
         function pinVhvHomeInForm() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
         function getLocationForReport() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e)); }
-        
-        // ** FIXED SUBMIT STROKE REPORT FUNCTION **
-        function submitStrokeReport() { 
-            const pn = document.getElementById('srName').value; 
-            const ph = document.getElementById('srRelPhone').value; 
-            const ot = document.getElementById('srOnsetTime').value; 
-            const loc = document.getElementById('srLocation').value; 
-            if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); 
-            
-            // Explicitly gather values from the form
-            const face = document.getElementById('srFace').value;
-            const arm = document.getElementById('srArm').value;
-            const speech = document.getElementById('srSpeech').value;
-            
-            // Checkboxes
-            const ud = Array.from(document.querySelectorAll('input[name="srUD"]:checked')).map(cb => cb.value).join(', ');
-            const otherSym = Array.from(document.querySelectorAll('input[name="srOther"]:checked')).map(cb => cb.value).join(', ');
-            const firstAid = Array.from(document.querySelectorAll('input[name="srFirstAid"]:checked')).map(cb => cb.value).join(', ');
-            
-            const data = { 
-                reporterId: LIFF_PROFILE.userId, 
-                reporterName: LIFF_PROFILE.displayName, 
-                patientName: pn, 
-                age: document.getElementById('srAge').value,
-                sex: document.getElementById('srSex').value,
-                ud: ud,
-                relativePhone: ph, 
-                onsetTime: ot, 
-                lastSeenNormal: document.getElementById('srLastSeen').value,
-                fastFace: face,
-                fastArm: arm,
-                fastSpeech: speech,
-                otherSymptoms: otherSym,
-                bp: document.getElementById('srBP').value,
-                pr: document.getElementById('srPR').value,
-                dtx: document.getElementById('srDTX').value,
-                firstAid: firstAid,
-                transferMethod: document.getElementById('srTransferMethod').value,
-                transferDetail: document.getElementById('srTransferDetail').value,
-                location: loc 
-            };
-
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', mode: 'no-cors', 
-                body: JSON.stringify({ action: 'saveStrokeReport', data: data }) 
-            }).then(() => { 
-                alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
-
-        function openHomeVisit(uid, name) {
-            document.getElementById('hvPatientId').value = uid;
-            document.getElementById('hvPatientNameVal').value = name;
-            document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`;
-            HOME_VISIT_MODAL.show();
-        }
-        function pinForCurrentPatient() {
-            const uid = document.getElementById('hvPatientId').value;
-            const name = document.getElementById('hvPatientNameVal').value;
-            if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return;
-            toggleLoading(true);
-             navigator.geolocation.getCurrentPosition(p => {
-                 const latlong = `${p.coords.latitude},${p.coords.longitude}`;
-                 fetch(WEB_APP_URL, {
-                     method: 'POST', mode: 'no-cors',
-                     body: JSON.stringify({
-                         action: 'saveNewLocation',
-                         data: { userId: uid, type: 'บ้าน_โดย_อสม', latlong: latlong, distance: 0, duration: 0, recorderId: LIFF_PROFILE.userId }
-                     })
-                 }).then(() => { alert("บันทึกพิกัดแล้ว"); toggleLoading(false); });
-             }, handleFailure);
-        }
-        function submitHomeVisit(type) {
-            const pname = document.getElementById('hvPatientNameVal').value;
-            let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' };
-            if (type === 'Advice') {
-                let adv = [];
-                if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน");
-                if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว");
-                data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value;
-            } else {
-                data.adl = {
-                    feeding: document.getElementById('adlFeeding').value,
-                    transfer: document.getElementById('adlTransfer').value,
-                    grooming: document.getElementById('adlGrooming').value,
-                    toilet: document.getElementById('adlToilet').value,
-                    bathing: document.getElementById('adlBathing').value,
-                    mobility: document.getElementById('adlMobility').value
-                };
-            }
-            toggleLoading(true);
-            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) })
-            .then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }).catch(handleFailure);
-        }
-        function pinOfflineLocation() {
-            navigator.geolocation.getCurrentPosition(p => {
-                document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`;
-            });
-        }
-        function submitOfflinePatient() {
-            const data = {
-                 vhvId: LIFF_PROFILE.userId, vhvName: ALL_USER_DATA.vhvProfile.name,
-                 name: document.getElementById('offName').value,
-                 age: document.getElementById('offAge').value,
-                 gender: document.getElementById('offSex').value,
-                 phone: document.getElementById('offPhone').value,
-                 riskScore: document.getElementById('offRisk').value,
-                 latlong: document.getElementById('offLocation').value,
-                 district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''),
-                 village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '')
-            };
-            toggleLoading(true);
-            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) })
-            .then(() => { alert("ลงทะเบียนเรียบร้อย"); window.location.reload(); }).catch(handleFailure);
-        }
+        function submitStrokeReport() { const pn = document.getElementById('srName').value; const ph = document.getElementById('srRelPhone').value; const ot = document.getElementById('srOnsetTime').value; const loc = document.getElementById('srLocation').value; if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); let sym = []; ['B','E','F','A','S'].forEach(k => { if(document.getElementById('sym'+k) && document.getElementById('sym'+k).checked) sym.push(document.getElementById('sym'+k).value); }); toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveStrokeReport', data: { reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName, patientName: pn, patientPhone: ph, onsetTime: ot, location: loc, symptoms: sym.join(',') }}) }).then(() => { alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); window.location.reload(); }).catch(handleFailure); }
+        function openHomeVisit(uid, name) { document.getElementById('hvPatientId').value = uid; document.getElementById('hvPatientNameVal').value = name; document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`; HOME_VISIT_MODAL.show(); }
+        function pinForCurrentPatient() { const uid = document.getElementById('hvPatientId').value; const name = document.getElementById('hvPatientNameVal').value; if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return; toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { const latlong = `${p.coords.latitude},${p.coords.longitude}`; fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveNewLocation', data: { userId: uid, type: 'บ้าน_โดย_อสม', latlong: latlong, distance: 0, duration: 0, recorderId: LIFF_PROFILE.userId } }) }).then(() => { alert("บันทึกพิกัดแล้ว"); toggleLoading(false); }); }, handleFailure); }
+        function submitHomeVisit(type) { const pname = document.getElementById('hvPatientNameVal').value; let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' }; if (type === 'Advice') { let adv = []; if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; } else { data.adl = { feeding: document.getElementById('adlFeeding').value, transfer: document.getElementById('adlTransfer').value, grooming: document.getElementById('adlGrooming').value, toilet: document.getElementById('adlToilet').value, bathing: document.getElementById('adlBathing').value, mobility: document.getElementById('adlMobility').value }; } toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) }).then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }).catch(handleFailure); }
+        function pinOfflineLocation() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`; }); }
+        function submitOfflinePatient() { const data = { vhvId: LIFF_PROFILE.userId, vhvName: ALL_USER_DATA.vhvProfile.name, name: document.getElementById('offName').value, age: document.getElementById('offAge').value, gender: document.getElementById('offSex').value, phone: document.getElementById('offPhone').value, riskScore: document.getElementById('offRisk').value, latlong: document.getElementById('offLocation').value, district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''), village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '') }; toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) }).then(() => { alert("ลงทะเบียนเรียบร้อย"); window.location.reload(); }).catch(handleFailure); }
         
         async function handleShareProfile() { toggleLoading(true); try { const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); const data = await res.json(); toggleLoading(false); if (data.success && data.flex) { SHARE_PROFILE_MODAL.hide(); await liff.shareTargetPicker([data.flex]); } else { alert("สร้างนามบัตรไม่ได้: " + data.message); } } catch (err) { handleFailure(err); } }
         function trackTelCall(tel) { if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); }
@@ -1229,36 +1116,6 @@
         function handleFailure(e) { 
             alert("Error: "+e.message); 
             stopLoadingAnimation(); 
-        }
-
-        // --- NEW: Pin for Patient Function ---
-        function pinForPatient(patientId, patientName) {
-            if(!confirm(`คุณกำลังอยู่ที่บ้านของ "${patientName}" ใช่หรือไม่? \n(กดตกลงเพื่อบันทึกพิกัด)`)) return;
-            
-            toggleLoading(true);
-            navigator.geolocation.getCurrentPosition(p => {
-                 fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
-                 .then(r=>r.json()).then(d=> {
-                     // Note: We send patientId as 'userId' so it saves under their record
-                     fetch(WEB_APP_URL,{
-                         method:'POST',
-                         mode:'no-cors',
-                         body:JSON.stringify({
-                             action:'saveNewLocation',
-                             data:{
-                                 userId: patientId, // <-- Key change: Use Patient ID
-                                 type:'บ้าน', // Force type 'บ้าน' for patients
-                                 latlong:`${p.coords.latitude},${p.coords.longitude}`,
-                                 distance:d.distance_km,
-                                 duration:d.duration_mins
-                             }
-                         })
-                     }).then(()=>{
-                         alert(`บันทึกพิกัดบ้านของ ${patientName} เรียบร้อยแล้ว`); 
-                         window.location.reload();
-                     });
-                 });
-             }, e=>handleFailure(e), {enableHighAccuracy: true});
         }
     </script>
 </body>
