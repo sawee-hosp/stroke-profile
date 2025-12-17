@@ -154,22 +154,10 @@
             color: #b88a00; 
         }
 
-        /* Loading Spinner */
-        #loading { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: #000000; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 9999; 
-            color: white; 
-            text-align: center; 
-            font-family: "Noto Sans Thai", sans-serif; 
+        /* Loading Spinner (No Fullscreen) */
+        .loading-container {
+            text-align: center;
+            padding: 40px;
         }
         
         .spinner-border { 
@@ -177,11 +165,6 @@
             height: 4rem; 
             color: #ffc107; 
             margin-bottom: 20px; 
-        }
-
-        #loading-text { 
-            font-size: 1.5rem; 
-            font-weight: bold; 
         }
 
         /* Game Score Box */
@@ -233,19 +216,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
         
-        .check-icon { 
-            font-size: 1.8rem; 
-            margin-right: 10px; 
-        }
-
-        .check-ok { 
-            color: #198754; 
-        }
-
-        .check-no { 
-            color: #dc3545; 
-            opacity: 0.5; 
-        }
+        .check-icon { font-size: 1.8rem; margin-right: 10px; }
+        .check-ok { color: #198754; }
+        .check-no { color: #dc3545; opacity: 0.5; }
         
         /* Risk Levels Colors */
         .risk-1 { border-left: 15px solid #28a745; }
@@ -392,12 +365,6 @@
 </head>
 <body>
 
-    <!-- Loading Screen (Simple Spinner) -->
-    <div id="loading">
-        <div class="spinner-border" role="status"></div>
-        <div id="loading-text">กำลังโหลดข้อมูล...</div>
-    </div>
-
     <!-- Fixed Header Tabs -->
     <div class="nav-tabs-container">
         <ul class="nav nav-tabs" id="mainTabs" role="tablist">
@@ -422,7 +389,7 @@
             <div class="container tab-content-container">
                 <div class="row" id="dynamic-content-container">
                      <!-- Initial Loading Spinner in Card -->
-                     <div class="col-12 mt-5 text-center">
+                     <div class="col-12 mt-5 text-center loading-container">
                          <div class="spinner-border text-light" role="status"></div>
                          <div class="text-white mt-2">กำลังโหลดข้อมูลส่วนตัว...</div>
                      </div>
@@ -436,7 +403,7 @@
                 <div class="container pt-3">
                     <div id="vhv-dashboard-area">
                         <!-- Initial Loading Spinner in VHV Area -->
-                         <div class="col-12 mt-5 text-center">
+                         <div class="col-12 mt-5 text-center loading-container">
                              <div class="spinner-border text-warning" role="status"></div>
                              <div class="text-dark mt-2">กำลังโหลดข้อมูล อสม...</div>
                          </div>
@@ -475,8 +442,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-primary" onclick="saveUserProfile()">บันทึก</button>
+                    <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="saveUserProfile()">บันทึก</button>
                 </div>
             </div>
         </div>
@@ -795,6 +762,39 @@
             </div>
         </div>
     </div>
+    
+    <!-- 12. Edit Emergency Modal (Missing one restored) -->
+    <div class="modal fade" id="editEmergencyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">แก้ไขข้อมูลฉุกเฉิน</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">คนดูแล (Help)</label>
+                        <select class="form-select" id="editHelp">
+                            <option value="อยู่ตัวคนเดียว">อยู่ตัวคนเดียว</option>
+                            <option value="อยู่กับผู้สูงอายุ/เด็กเล็ก">อยู่กับผู้สูงอายุ/เด็กเล็ก</option>
+                            <option value="อยู่กับญาติผู้ใหญ่/คนวัยทำงาน">อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">การตัดสินใจ (Decision)</label>
+                        <select class="form-select" id="editDecision">
+                            <option value="รอดูอาการ">รอดูอาการ</option>
+                            <option value="โทรให้ญาติมาดู">โทรให้ญาติมาดู</option>
+                            <option value="ไปคลินิก-อนามัย">ไปคลินิก-อนามัย</option>
+                            <option value="รีบไป รพ.เอง">รีบไป รพ.เอง</option>
+                            <option value="โทร 1669 ให้รถมารับ">โทร 1669 ให้รถมารับ</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="submitEmergencyEdit()">บันทึกการแก้ไข</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -822,16 +822,19 @@
         let loadingInterval;
         
         // Modal Variables
-        let EDIT_PROFILE_MODAL, VHV_REG_MODAL, STROKE_REPORT_MODAL, HOME_VISIT_MODAL, REGISTER_OFFLINE_MODAL, QR_MODAL, SHARE_PROFILE_MODAL, RTPA_MODAL, RISK_INFO_MODAL, DISTANCE_MODAL, SCORE_INFO_MODAL;
+        let EDIT_PROFILE_MODAL, VHV_REG_MODAL, STROKE_REPORT_MODAL, HOME_VISIT_MODAL, REGISTER_OFFLINE_MODAL, QR_MODAL, SHARE_PROFILE_MODAL, RTPA_MODAL, RISK_INFO_MODAL, DISTANCE_MODAL, SCORE_INFO_MODAL, EDIT_EMERGENCY_MODAL;
 
         function toggleLoading(show) {
             const el = document.getElementById('loading');
-            if (el) el.style.display = show ? 'flex' : 'none';
+            // Remove 'none' if showing, add 'flex'
+            if(show) {
+                 // In the new design, we don't use full screen loading except initial
+                 // But kept for compatibility if needed
+            }
         }
 
         function handleFailure(e) { 
             alert("Error: " + e.message); 
-            toggleLoading(false);
         }
 
         // --- Mode Switching ---
@@ -862,6 +865,7 @@
             DISTANCE_MODAL = initModal('distanceModal');
             REGISTER_OFFLINE_MODAL = initModal('registerOfflineModal');
             SCORE_INFO_MODAL = initModal('scoreInfoModal');
+            EDIT_EMERGENCY_MODAL = initModal('editEmergencyModal');
             
             // Tab Listeners
             document.getElementById('health-tab-btn').addEventListener('shown.bs.tab', () => setAppMode(false));
@@ -880,11 +884,11 @@
                     if (data.error) throw new Error(data.error);
                     ALL_USER_DATA = data;
                     updatePage(data);
-                    toggleLoading(false); // Hide loading when done
                 }).catch(err => handleFailure(err));
             } catch (err) { handleFailure(err); }
         });
 
+        // --- Page Updates ---
         function updatePage(data) {
             const hContainer = document.getElementById('dynamic-content-container');
             if (hContainer) {
@@ -898,11 +902,12 @@
                     const sticker = data.stickerShareCount || 0;
                     const exam = data.knowledgeTestStats || {};
 
+                    // Reordered Cards as requested: Score -> Risk -> Emergency -> Others
                     hContainer.innerHTML = 
-                        buildProfileCard(data.userProfile) +
                         buildGamificationCard(gamification) +
+                        buildProfileCard(data.userProfile) +
+                        buildEmergencyCard(distance, gamification.details || {}) +
                         `<div id="card-check">` + buildDailyCheckCard(dailyCheck) + `</div>` +
-                        `<div id="card-emergency">` + buildDistanceCard(distance, data.userProfile.help) + `</div>` +
                         `<div id="card-leaders">` + buildCommunityLeadersCard(leaders) + `</div>` +
                         `<div id="card-sticker">` + buildStickerCard(sticker) + `</div>` +
                         `<div id="card-exam">` + buildKnowledgeTestCard(exam) + `</div>`;
@@ -932,8 +937,9 @@
 
         // --- COMPONENTS ---
         function buildGamificationCard(scores) {
-            if (!scores) scores = { totalScore: 0, rank: '-', checkScore:0, emergencyScore:0, stickerScore:0, knowledgeScore:0, totalUsers: '-' };
-            const rankText = `(${scores.totalScore} คะแนน สูงเป็นลำดับที่ ${scores.rank} จาก ${scores.totalUsers} คน)`;
+            if (!scores) scores = { totalScore: 0, rank: '-', checkScore:0, emergencyScore:0, stickerScore:0, knowledgeScore:0, totalUsers: '-', levelName: 'ผู้เริ่มต้นเรียนรู้', levelColor: 'secondary' };
+            const rankText = `อันดับ ${scores.rank} จาก ${scores.totalUsers} คน`;
+            const badgeClass = scores.levelColor === 'warning' ? 'bg-warning text-dark' : (scores.levelColor === 'success' ? 'bg-success text-white' : 'bg-secondary text-white');
             
             return `
             <div class="col-12 mb-3">
@@ -944,7 +950,9 @@
                              <button class="btn btn-sm btn-outline-info rounded-circle" onclick="SCORE_INFO_MODAL.show()"><i class="bi bi-info-lg"></i></button>
                         </div>
                         <div class="text-center mb-3">
-                             <div class="text-primary fw-bold fs-5">${rankText}</div>
+                             <div class="display-3 fw-bold text-primary">${scores.totalScore}</div>
+                             <span class="badge rounded-pill ${badgeClass} fs-6 mb-2">${scores.levelName}</span>
+                             <div class="small text-muted">${rankText}</div>
                         </div>
                         <div class="row g-2 text-center">
                            <div class="col-3"><div class="game-score-box"><h3>${scores.checkScore || 0}</h3><span>ใส่ใจ</span></div></div>
@@ -952,7 +960,6 @@
                            <div class="col-3"><div class="game-score-box"><h3>${scores.stickerScore || 0}</h3><span>บอกต่อ</span></div></div>
                            <div class="col-3"><div class="game-score-box"><h3>${scores.knowledgeScore || 0}</h3><span>ความรู้</span></div></div>
                         </div>
-                        <div class="text-center mt-2 small text-muted">* ประเมินซ้ำทุกสัปดาห์เพื่อเพิ่มคะแนน</div>
                     </div>
                 </div>
             </div>`;
@@ -960,7 +967,7 @@
 
         function buildProfileCard(p, riskOnly = false) {
              if (!p) return '';
-             const riskValue = (p.thai_cv_risk_score || 0) / 100;
+             const riskValue = parseFloat(p.thai_cv_risk_score || 0);
              const color = classifyRisk(riskValue).color;
              const factors = [
                 {l:'เพศ', v: p.gender == 1 ? 'ชาย' : 'หญิง', i:'bi-gender-ambiguous'},
@@ -974,22 +981,59 @@
             ];
             let factorHtml = '';
             factors.forEach(f => factorHtml += `<div class="info-item"><i class="bi ${f.i}"></i><div><span class="label">${f.l}</span> <b>${f.v}</b></div></div>`);
+            
+            const statsHtml = p.stats ? buildStatsSection(p.stats) : '';
 
-            if(riskOnly) {
-                 return `<div class="col-12"><div class="card"><div class="card-body">
-                    <h6 class="section-title">การประเมินปัจจัยเสี่ยงสโตรก</h6>
-                    <div class="text-center mb-3" style="color: ${color}"><h1>${p.thai_cv_risk_score}%</h1></div>
-                    <div class="info-grid">${factorHtml}</div>
-                </div></div></div>`;
-            } else {
-                 const regDate = p.timestamp ? new Date(p.timestamp).toLocaleDateString('th-TH') : '-';
-                 return `<div class="col-12"><div class="card bg-white"><div class="card-body position-relative"><button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button><div class="d-flex align-items-center"><img src="${p.pictureUrl || 'https://via.placeholder.com/90'}" class="rounded-circle border border-3 border-primary me-3" style="width: 110px; height: 110px; object-fit: cover;"><div><h3 class="fw-bold mb-1">${p.name || 'ไม่ระบุชื่อ'}</h3><div class="text-muted fs-5"><i class="bi bi-telephone"></i> ${p.telephone || 'ไม่ระบุ'}</div><span class="badge bg-secondary fs-6 fw-normal mt-1">ลงทะเบียน: ${regDate}</span></div></div></div></div></div>`;
-            }
+            return `
+            <div class="col-12 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="section-title mb-0"><i class="bi bi-heart-pulse-fill text-danger"></i> การประเมินปัจจัยเสี่ยงสโตรก</h5>
+                            <button class="profile-edit-btn shadow-sm" onclick="openEditProfile()"><i class="bi bi-pencil-fill"></i></button>
+                        </div>
+                        <div class="text-center mb-3">
+                             <div class="display-1 fw-bold" style="color: ${color}">${riskValue}%</div>
+                             <div class="text-muted">ความเสี่ยง 10 ปีข้างหน้า</div>
+                             ${statsHtml}
+                             <div class="mt-3"><a href="${LINKS.REGIS}" class="btn btn-outline-danger rounded-pill px-4">ประเมินใหม่</a></div>
+                        </div>
+                        <div class="info-grid">${factorHtml}</div>
+                    </div>
+                </div>
+            </div>`;
+        }
+        
+        function buildStatsSection(s) {
+            return `<div class="mt-2"><span class="badge bg-light text-dark border">ประเมิน ${s.total_assessments} ครั้ง</span> <span class="badge bg-warning text-dark border">เสี่ยงสูง ${s.high_risk_count} ครั้ง</span><div class="text-muted small mt-1">อัปเดต: ${s.last_updated}</div></div>`;
+        }
+
+        function buildEmergencyCard(d, details) {
+            const h = details.help || 'ไม่ระบุ';
+            const dec = details.decision || 'ไม่ระบุ';
+            const dist = d ? `${d.distance_km} กม. (${d.duration_mins} นาที)` : 'ยังไม่ปักหมุด';
+
+            return `
+            <div class="col-12 mb-3">
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body">
+                        <h5 class="text-danger fw-bold"><i class="bi bi-truck-front-fill"></i> การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item d-flex justify-content-between"><span>คนดูแล:</span> <b>${h}</b></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>การตัดสินใจ:</span> <b>${dec}</b></li>
+                            <li class="list-group-item d-flex justify-content-between"><span>ระยะทาง:</span> <b>${dist}</b></li>
+                        </ul>
+                        <div class="row g-2">
+                             <div class="col-6"><button class="btn btn-outline-secondary w-100" onclick="openEditEmergency('${h}', '${dec}')">แก้ไขข้อมูล</button></div>
+                             <div class="col-6"><button class="btn btn-primary w-100" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()">ปักหมุด</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         }
 
         function buildVhvPatientListCard(pts) {
             if(!pts || pts.length===0) return '<div class="alert alert-secondary">ยังไม่มีชาวบ้านในเขต</div>';
-            
             let html = '';
             pts.forEach(p => {
                 const riskVal = (p.thai_cv_risk_score || 0) / 100;
@@ -998,16 +1042,17 @@
                 
                 html += `<li class="list-group-item ${c}"><div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="fw-bold">${p.name} <small class="text-muted">(${p.thai_cv_risk_score}%)</small></div>
+                        <div class="fw-bold">${p.name} <span class="badge bg-secondary">${p.thai_cv_risk_score}%</span></div>
                         <div class="small text-muted">ประเมินล่าสุด: ${p.latestCheckTimestamp ? p.latestCheckTimestamp.split('T')[0] : 'ยังไม่เคย'}</div>
                         <div class="small text-muted">ระยะห่าง: ${p.distanceFromVhv_km || '?'} กม.</div>
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-primary rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยมบ้าน/ปักหมุด</button>
+                        <a href="tel:${p.telephone}" class="btn btn-sm btn-outline-success rounded-circle me-1"><i class="bi bi-telephone-fill"></i></a>
+                        <button class="btn btn-sm btn-primary rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยมบ้าน</button>
                     </div>
                 </div></li>`;
             });
-            return `<div class="card"><div class="card-header bg-white fw-bold d-flex justify-content-between"><span>ชาวบ้านในเขตรับผิดชอบ</span> <button class="btn btn-sm btn-danger" onclick="STROKE_REPORT_MODAL.show()">รายงานเคสสโตรก</button></div><ul class="list-group list-group-flush">${html}</ul><div class="card-footer bg-light"><a href="https://sawee-hosp.github.io/stroke-risk/" target="_blank" class="btn btn-success w-100">บันทึกการประเมินผู้ป่วย (Web)</a></div></div>`;
+            return `<div class="card"><div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center"><span>ชาวบ้านในเขตรับผิดชอบ</span> <button class="btn btn-sm btn-danger" onclick="STROKE_REPORT_MODAL.show()">รายงานเคส</button></div><ul class="list-group list-group-flush">${html}</ul><div class="card-footer bg-light"><a href="https://sawee-hosp.github.io/stroke-risk/" target="_blank" class="btn btn-success w-100">บันทึกการประเมินผู้ป่วย (Web)</a></div></div>`;
         }
 
         function buildTopVhvCard(total, topList) {
@@ -1048,7 +1093,8 @@
         }
 
         function buildDistanceCard(d, help) {
-             if(!d) return `<div class="card mb-3"><div class="card-body text-center"><h5 class="section-title"><i class="bi bi-geo-alt-fill text-danger"></i> พิกัดบ้าน</h5><p>ยังไม่ปักหมุดบ้าน</p><button class="btn btn-primary" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()">ปักหมุด</button></div></div>`;
+             // ... kept same logic ...
+             if(!d) return `<div class="col-12 mb-3"><div class="card"><div class="card-body text-center"><h5 class="section-title"><i class="bi bi-geo-alt-fill text-danger"></i> พิกัดบ้าน</h5><p>ยังไม่ปักหมุดบ้าน</p><button class="btn btn-primary" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()">ปักหมุด</button></div></div></div>`;
              
              const min = parseInt(d.duration_mins); 
              const dist = parseFloat(d.distance_km).toFixed(1);
@@ -1068,12 +1114,13 @@
 
              const graphic = `<div class="d-flex align-items-center justify-content-center my-3"><div class="text-center"><i class="bi bi-person-fill-exclamation text-danger" style="font-size: 3rem;"></i><div>ผู้ป่วย</div></div><div class="flex-grow-1 text-center px-2 position-relative"><div style="border-top: 3px dashed #666; width: 100%; position: absolute; top: 50%;"></div><i class="bi bi-arrow-right-circle-fill text-primary position-relative" style="font-size: 2rem; background: #fff; z-index: 1;"></i><div class="small fw-bold mt-1">${dist} กม.</div><div class="small text-muted">${Math.floor(min/60)} ชม. ${min%60} นาที</div></div><div class="text-center"><i class="bi bi-hospital-fill text-success" style="font-size: 3rem;"></i><div>รพ.สวี</div></div></div>`;
              
-             return `<div class="col-12"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${graphic}${advice}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()"><i class="bi bi-geo-alt-fill"></i> แก้ไขหมุด</button></div></div></div></div>`;
+             return `<div class="col-12 mb-3"><div class="${cls}"><div class="card-body"><h5 class="section-title"><i class="bi bi-truck-front-fill text-danger"></i>การเข้าถึงฉุกเฉิน (รพ.สวี)</h5>${graphic}${advice}<div class="d-flex gap-2 mt-2"><button class="btn btn-outline-danger w-50" onclick="RTPA_MODAL.show()">ทำไมต้อง 4.5 ชม.?</button><button class="btn btn-secondary w-50" onclick="new bootstrap.Modal(document.getElementById('distanceModal')).show()"><i class="bi bi-geo-alt-fill"></i> แก้ไขหมุด</button></div></div></div></div>`;
         }
 
         function buildDailyCheckCard(info) {
+             // ... same logic ...
              let daysSinceCheck = '';
-             if (info.latestCheckTimestamp) {
+            if (info.latestCheckTimestamp) {
                 const diffDays = Math.ceil(Math.abs(new Date() - new Date(info.latestCheckTimestamp).setHours(0,0,0,0)) / (864e5));
                 if (diffDays > 7) daysSinceCheck = `<p class="text-center text-danger mt-2">ไม่ได้ประเมินมา ${diffDays} วัน (ถูกหักคะแนน)</p>`;
                 else if (diffDays > 0) daysSinceCheck = `<p class="text-center text-muted mt-2">ไม่ได้ประเมินมา ${diffDays} วัน</p>`;
@@ -1107,76 +1154,17 @@
         }
 
         // --- Logic Functions ---
-        function openEditProfile() { 
-            document.getElementById('editName').value = ALL_USER_DATA.userProfile.name; 
-            document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone ? ALL_USER_DATA.userProfile.telephone.replace(/'/g,'') : ''; 
-            document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl; 
-            EDIT_PROFILE_MODAL.show(); 
-        }
-
-        function saveUserProfile() { 
-            const name = document.getElementById('editName').value; 
-            const phone = document.getElementById('editPhone').value; 
-            
-            if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ"); 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ 
-                    action: 'updateUserProfile', 
-                    data: { 
-                        userId: LIFF_PROFILE.userId, 
-                        name: name, 
-                        phone: phone, 
-                        pictureUrl: LIFF_PROFILE.pictureUrl 
-                    } 
-                }) 
-            }).then(() => { 
-                alert("บันทึกสำเร็จ"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
-
-        function openVhvModal() { 
-            const distSelect = document.getElementById('vhvDistrict'); 
-            distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>'; 
-            
-            for (const d in SAWEE_LOCATIONS) { 
-                const opt = document.createElement('option'); 
-                opt.value = d; 
-                opt.textContent = d; 
-                distSelect.appendChild(opt); 
-            } 
-            
-            const vhv = ALL_USER_DATA.vhvProfile || {}; 
-            const user = ALL_USER_DATA.userProfile || {}; 
-            
-            document.getElementById('vhvName').value = vhv.name || user.name || ''; 
-            document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : ''); 
-            document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || ''; 
-            document.getElementById('vhvAsmHome').value = vhv.asm_home || ''; 
-            
-            if (vhv.area) { 
-                const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/); 
-                if (parts && parts[1] && parts[2]) { 
-                    distSelect.value = parts[1].trim(); 
-                    updateVillages(); 
-                    document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim(); 
-                } 
-            } 
-            
-            VHV_REG_MODAL.show(); 
-        }
+        function openEditProfile() { document.getElementById('editName').value = ALL_USER_DATA.userProfile.name; document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone ? ALL_USER_DATA.userProfile.telephone.replace(/'/g,'') : ''; document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl; EDIT_PROFILE_MODAL.show(); }
+        function saveUserProfile() { const name = document.getElementById('editName').value; const phone = document.getElementById('editPhone').value; if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ"); toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } }) }).then(() => { alert("บันทึกสำเร็จ"); window.location.reload(); }).catch(handleFailure); }
+        function openVhvModal() { const distSelect = document.getElementById('vhvDistrict'); distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>'; for (const d in SAWEE_LOCATIONS) { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; distSelect.appendChild(opt); } const vhv = ALL_USER_DATA.vhvProfile || {}; const user = ALL_USER_DATA.userProfile || {}; document.getElementById('vhvName').value = vhv.name || user.name || ''; document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : ''); document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || ''; document.getElementById('vhvAsmHome').value = vhv.asm_home || ''; if (vhv.area) { const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/); if (parts && parts[1] && parts[2]) { distSelect.value = parts[1].trim(); updateVillages(); document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim(); } } VHV_REG_MODAL.show(); }
         
         function updateVillages() { 
             const dist = document.getElementById('vhvDistrict').value; 
             const villSelect = document.getElementById('vhvVillage'); 
             villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>'; 
             villSelect.disabled = false; 
-            
             for(let i=1; i<=20; i++) { 
+                const v = "หมู่ " + i; 
                 const opt = document.createElement('option'); 
                 opt.value = "หมู่ " + i; 
                 opt.textContent = "หมู่ " + i; 
@@ -1184,231 +1172,81 @@
             } 
         }
         
-        function showQrModal() { 
-            fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`); 
-            QR_MODAL.show(); 
-        }
-
-        function scrollToId(id) { 
-            const el = document.getElementById(id); 
-            if(el) { 
-                const tabBtn = document.getElementById('health-tab-btn'); 
-                const tab = new bootstrap.Tab(tabBtn); 
-                tab.show(); 
-                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300); 
-            } 
-        }
-
-        function handlePinNewLocation() { 
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
-                .then(r=>r.json()).then(d=> { 
-                    fetch(WEB_APP_URL, {
-                        method:'POST',
-                        mode:'no-cors',
-                        body:JSON.stringify({
-                            action:'saveNewLocation',
-                            data: {
-                                userId:LIFF_PROFILE.userId,
-                                type:document.getElementById('locationType').value,
-                                latlong:`${p.coords.latitude},${p.coords.longitude}`,
-                                distance:d.distance_km,
-                                duration:d.duration_mins
-                            }
-                        })
-                    }).then(()=>{
-                        alert("บันทึกสำเร็จ"); 
-                        window.location.reload();
-                    }); 
-                }); 
-            }, e=>handleFailure(e), {enableHighAccuracy: true}); 
-        }
-
-        function pinVhvHomeInForm() { 
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; 
-                toggleLoading(false); 
-            }, e=>handleFailure(e), {enableHighAccuracy: true}); 
-        }
-
-        function getLocationForReport() { 
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; 
-                toggleLoading(false); 
-            }, e=>handleFailure(e)); 
-        }
-
+        function showQrModal() { fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`); QR_MODAL.show(); }
+        function scrollToId(id) { const el = document.getElementById(id); if(el) { const tabBtn = document.getElementById('health-tab-btn'); const tab = new bootstrap.Tab(tabBtn); tab.show(); setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300); } }
+        function handlePinNewLocation() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`).then(r=>r.json()).then(d=> { fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'saveNewLocation',data:{userId:LIFF_PROFILE.userId,type:document.getElementById('locationType').value,latlong:`${p.coords.latitude},${p.coords.longitude}`,distance:d.distance_km,duration:d.duration_mins}})}).then(()=>{alert("บันทึกสำเร็จ"); window.location.reload();}); }); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
+        function pinVhvHomeInForm() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e), {enableHighAccuracy: true}); }
+        function getLocationForReport() { toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; toggleLoading(false); }, e=>handleFailure(e)); }
+        
         function submitStrokeReport() { 
             const pn = document.getElementById('srName').value; 
             const ph = document.getElementById('srRelPhone').value; 
             const ot = document.getElementById('srOnsetTime').value; 
             const loc = document.getElementById('srLocation').value; 
-            
             if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); 
             
             let sym = []; 
-            // Correct way to get checkboxes
-            // Assuming IDs like symB, symE, etc exist in form or checkByName
-            // Based on previous code, let's assume standard checkbox collection if IDs aren't explicit in HTML block
-            // But let's stick to the visible form logic. The form has no checkboxes with IDs sym... shown in previous block
-            // It uses <select> for FAST. Let's adapt if needed or use general form data
-            // Actually, the modal HTML shows selects for Face/Arm/Speech.
+            // Manual gathering to be safe
+            // (Assuming form inputs exist as in previous versions)
             
-            toggleLoading(true); 
-            
-            // Collect form data manually for robustness
-            const reportData = {
+            const data = { 
                 reporterId: LIFF_PROFILE.userId, 
                 reporterName: LIFF_PROFILE.displayName, 
                 patientName: pn, 
                 patientPhone: ph, 
                 onsetTime: ot, 
-                location: loc,
-                // Add other fields from modal
+                location: loc, 
             };
 
+            toggleLoading(true); 
             fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'saveStrokeReport', data: reportData })
+                method: 'POST', mode: 'no-cors', 
+                body: JSON.stringify({ action: 'saveStrokeReport', data: data }) 
             }).then(() => { 
                 alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); 
                 window.location.reload(); 
             }).catch(handleFailure); 
         }
 
-        function openHomeVisit(uid, name) { 
-            document.getElementById('hvPatientId').value = uid; 
-            document.getElementById('hvPatientNameVal').value = name; 
-            document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`; 
-            HOME_VISIT_MODAL.show(); 
-        }
-
-        function pinForCurrentPatient() { 
-            const uid = document.getElementById('hvPatientId').value; 
-            const name = document.getElementById('hvPatientNameVal').value; 
-            
-            if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return; 
-            
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                const latlong = `${p.coords.latitude},${p.coords.longitude}`; 
-                fetch(WEB_APP_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify({ 
-                        action: 'saveNewLocation', 
-                        data: { 
-                            userId: uid, 
-                            type: 'บ้าน_โดย_อสม', 
-                            latlong: latlong, 
-                            distance: 0, 
-                            duration: 0, 
-                            recorderId: LIFF_PROFILE.userId 
-                        } 
-                    }) 
-                }).then(() => { 
-                    alert("บันทึกพิกัดแล้ว"); 
-                    toggleLoading(false); 
-                }); 
-            }, handleFailure); 
-        }
-
-        function submitHomeVisit(type) { 
-            const pname = document.getElementById('hvPatientNameVal').value; 
-            let data = { 
-                vhvId: LIFF_PROFILE.userId, 
-                patientName: pname, 
-                activityType: type, 
-                note: '' 
-            }; 
-            
-            if (type === 'Advice') { 
-                let adv = []; 
-                if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); 
-                if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); 
-                data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; 
-            } else { 
-                // ADL Logic would go here
-            } 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'saveHomeVisit', data: data }) 
-            }).then(() => { 
-                alert("บันทึกการเยี่ยมสำเร็จ"); 
-                HOME_VISIT_MODAL.hide(); 
-                toggleLoading(false); 
-            }).catch(handleFailure); 
-        }
-
-        function pinOfflineLocation() { 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`; 
-            }); 
-        }
-
-        function submitOfflinePatient() { 
-            const data = { 
-                 vhvId: LIFF_PROFILE.userId, 
-                 vhvName: ALL_USER_DATA.vhvProfile.name, 
-                 name: document.getElementById('offName').value, 
-                 age: document.getElementById('offAge').value, 
-                 gender: document.getElementById('offSex').value, 
-                 phone: document.getElementById('offPhone').value, 
-                 riskScore: document.getElementById('offRisk').value, 
-                 latlong: document.getElementById('offLocation').value, 
-                 district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''), 
-                 village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '') 
-            }; 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) 
-            }).then(() => { 
-                alert("ลงทะเบียนเรียบร้อย"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
+        function openHomeVisit(uid, name) { document.getElementById('hvPatientId').value = uid; document.getElementById('hvPatientNameVal').value = name; document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`; HOME_VISIT_MODAL.show(); }
+        function pinForCurrentPatient() { const uid = document.getElementById('hvPatientId').value; const name = document.getElementById('hvPatientNameVal').value; if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return; toggleLoading(true); navigator.geolocation.getCurrentPosition(p => { const latlong = `${p.coords.latitude},${p.coords.longitude}`; fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveNewLocation', data: { userId: uid, type: 'บ้าน_โดย_อสม', latlong: latlong, distance: 0, duration: 0, recorderId: LIFF_PROFILE.userId } }) }).then(() => { alert("บันทึกพิกัดแล้ว"); toggleLoading(false); }); }, handleFailure); }
+        function submitHomeVisit(type) { const pname = document.getElementById('hvPatientNameVal').value; let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' }; if (type === 'Advice') { let adv = []; if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; } else { data.adl = { feeding: document.getElementById('adlFeeding').value, transfer: document.getElementById('adlTransfer').value, grooming: document.getElementById('adlGrooming').value, toilet: document.getElementById('adlToilet').value, bathing: document.getElementById('adlBathing').value, mobility: document.getElementById('adlMobility').value }; } toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) }).then(() => { alert("บันทึกการเยี่ยมสำเร็จ"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }).catch(handleFailure); }
+        function pinOfflineLocation() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`; }); }
+        function submitOfflinePatient() { const data = { vhvId: LIFF_PROFILE.userId, vhvName: ALL_USER_DATA.vhvProfile.name, name: document.getElementById('offName').value, age: document.getElementById('offAge').value, gender: document.getElementById('offSex').value, phone: document.getElementById('offPhone').value, riskScore: document.getElementById('offRisk').value, latlong: document.getElementById('offLocation').value, district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''), village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '') }; toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) }).then(() => { alert("ลงทะเบียนเรียบร้อย"); window.location.reload(); }).catch(handleFailure); }
         
-        async function handleShareProfile() { 
-            toggleLoading(true); 
-            try { 
-                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); 
-                const data = await res.json(); 
-                toggleLoading(false); 
-                if (data.success && data.flex) { 
-                    SHARE_PROFILE_MODAL.hide(); 
-                    await liff.shareTargetPicker([data.flex]); 
-                } else { 
-                    alert("สร้างนามบัตรไม่ได้: " + data.message); 
-                } 
-            } catch (err) { handleFailure(err); } 
+        async function handleShareProfile() { toggleLoading(true); try { const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); const data = await res.json(); toggleLoading(false); if (data.success && data.flex) { SHARE_PROFILE_MODAL.hide(); await liff.shareTargetPicker([data.flex]); } else { alert("สร้างนามบัตรไม่ได้: " + data.message); } } catch (err) { handleFailure(err); } }
+        function trackTelCall(tel) { if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); }
+        function copyToClipboard(txt) { navigator.clipboard.writeText(txt).then(()=>alert("คัดลอก Line ID แล้ว")).catch(()=>alert("คัดลอกไม่ได้")); }
+        function classifyRisk(r) { return r<0.1?{text:"เสี่ยงต่ำ",color:"#28a745"}:r<0.2?{text:"ปานกลาง",color:"#ffc107"}:r<0.3?{text:"สูง",color:"#fd7e14"}:r<0.4?{text:"สูงมาก",color:"#dc3545"}:{text:"อันตราย",color:"#8B0000"}; }
+        
+        function openEditEmergency(h, d) {
+            document.getElementById('editHelp').value = h;
+            document.getElementById('editDecision').value = d;
+            EDIT_EMERGENCY_MODAL.show();
         }
 
-        function trackTelCall(tel) { 
-            if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); 
+        function submitEmergencyEdit() {
+            const h = document.getElementById('editHelp').value;
+            const d = document.getElementById('editDecision').value;
+            toggleLoading(true);
+            fetch(WEB_APP_URL, {
+                method: 'POST', mode: 'no-cors',
+                body: JSON.stringify({ action: 'updateEmergencyInfo', data: { userId: LIFF_PROFILE.userId, help: h, decision: d } })
+            }).then(() => { 
+                alert('บันทึกเรียบร้อย'); 
+                location.reload(); 
+            }).catch(handleFailure);
         }
 
-        function copyToClipboard(txt) { 
-            navigator.clipboard.writeText(txt)
-                .then(()=>alert("คัดลอก Line ID แล้ว"))
-                .catch(()=>alert("คัดลอกไม่ได้")); 
+        // --- Safe Toggle Loading Function ---
+        function toggleLoading(show) {
+            const el = document.getElementById('loading');
+            if(el) el.style.display = show ? 'flex' : 'none';
         }
 
-        function classifyRisk(r) { 
-            return r<0.1 ? {text:"เสี่ยงต่ำ",color:"#28a745"} : 
-                   r<0.2 ? {text:"ปานกลาง",color:"#ffc107"} : 
-                   r<0.3 ? {text:"สูง",color:"#fd7e14"} : 
-                   r<0.4 ? {text:"สูงมาก",color:"#dc3545"} : 
-                   {text:"อันตราย",color:"#8B0000"}; 
+        function handleFailure(e) { 
+            alert("Error: "+e.message); 
+            toggleLoading(false);
         }
     </script>
 </body>
