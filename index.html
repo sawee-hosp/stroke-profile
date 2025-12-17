@@ -16,7 +16,7 @@
     
     <style>
         /* =========================================
-           1. GLOBAL VARIABLES
+           GLOBAL VARIABLES
            ========================================= */
         :root { 
             --bs-primary-rgb: 13, 110, 253; 
@@ -44,9 +44,7 @@
             background: linear-gradient(180deg, #FFD700 0%, #ffffff 400px);
         }
 
-        /* =========================================
-           2. TYPOGRAPHY
-           ========================================= */
+        /* Typography Overrides */
         h1, h2, h3, h4, h5 { 
             font-weight: 700 !important; 
         }
@@ -64,9 +62,7 @@
             font-weight: 600; 
         }
         
-        /* =========================================
-           3. HEADER & TABS
-           ========================================= */
+        /* Floating Header */
         .app-header { 
             text-align: center; 
             padding: 110px 20px 20px; 
@@ -85,6 +81,7 @@
             text-shadow: 1px 1px 2px rgba(255,255,255,0.5); 
         }
 
+        /* Fixed Tabs Container */
         .nav-tabs-container {
             position: fixed; 
             top: 0; 
@@ -120,7 +117,7 @@
             width: 100%;
         }
 
-        /* Separator line for the first tab */
+        /* Separator line */
         .nav-item:first-child .nav-link {
             border-right: 1px solid #ddd;
         }
@@ -139,9 +136,7 @@
             padding-bottom: 40px; 
         }
         
-        /* =========================================
-           4. CARD STYLES
-           ========================================= */
+        /* Card Styles */
         .card { 
             border: none; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
@@ -169,9 +164,7 @@
             color: #b88a00; 
         }
 
-        /* =========================================
-           5. LOADING COMPONENTS
-           ========================================= */
+        /* Loading Spinner (No Fullscreen) */
         .loading-container {
             text-align: center;
             padding: 40px;
@@ -205,10 +198,6 @@
             color: white;
         }
 
-        /* =========================================
-           6. SPECIFIC COMPONENT STYLES
-           ========================================= */
-        
         /* Game Score Box */
         .game-score-card { 
             border: 2px solid #fff; 
@@ -244,16 +233,6 @@
             display: block; 
         }
         
-        /* Profile Image */
-        .profile-img-lg { 
-            width: 100px; 
-            height: 100px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            border: 4px solid #fff; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-
         .profile-edit-btn { 
             position: absolute; 
             top: 15px; 
@@ -268,28 +247,27 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
         
-        /* Risk & Status Colors */
+        /* Profile Image */
+        .profile-img-lg { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 4px solid #fff; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+
         .check-icon { font-size: 1.8rem; margin-right: 10px; }
         .check-ok { color: #198754; }
         .check-no { color: #dc3545; opacity: 0.5; }
         
+        /* Risk Levels Colors */
         .risk-1 { border-left: 15px solid #28a745; }
         .risk-2 { border-left: 15px solid #ffc107; }
         .risk-3 { border-left: 15px solid #fd7e14; }
         .risk-4 { border-left: 15px solid #dc3545; }
         .risk-5 { border-left: 15px solid #8B0000; }
         
-        .risk-score-display { 
-            font-size: 4rem; 
-            font-weight: 900; 
-            line-height: 1; 
-        }
-        .risk-label { 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            opacity: 0.8; 
-        }
-
         /* VHV Patient List Styles */
         .vhv-patient-item { 
             border-left: 8px solid #ccc; 
@@ -328,7 +306,7 @@
             border-left: 5px solid #0d6efd; 
         }
         
-        /* Info Grid */
+        /* Info Grid for Profile */
         .info-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -430,6 +408,18 @@
             color: #888; 
             font-size: 0.8rem; 
             margin-top: 30px; 
+        }
+
+        /* Risk Score Display */
+        .risk-score-display { 
+            font-size: 4rem; 
+            font-weight: 900; 
+            line-height: 1; 
+        }
+        .risk-label { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            opacity: 0.8; 
         }
     </style>
 </head>
@@ -644,7 +634,7 @@
                 </div>
                 <div class="modal-body d-flex flex-column justify-content-center align-items-center">
                     <h2 class="mb-4">สวีรู้ทันสโตรก</h2>
-                    <!-- QR Code Generated via API -->
+                    <!-- QR Code Generated via API for the specific link -->
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://lin.ee/qRgD07N" alt="QR Code" style="max-width:90%;width:350px;border:15px solid white;border-radius:15px;">
                     <p class="mt-4 fs-3">ให้ชาวบ้านสแกนเพื่อเพิ่มเพื่อน</p>
                     <a href="https://lin.ee/qRgD07N" class="btn btn-success btn-lg mt-3 rounded-pill px-5 fs-4">
@@ -881,7 +871,7 @@
         // =========================================
         
         // Configuration
-        const WEB_APP_URL = '<?!= ScriptApp.getService().getUrl() ?>'; // AUTO URL
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
         const LIFF_ID_MAIN = "2005789397-RLAGXrBJ";
         
         const LINKS = {
@@ -1145,6 +1135,44 @@
             </div>`;
         }
 
+        function buildVhvLeaderboards(lb) {
+             const row = (t, l) => {
+                 let content = l && l.length > 0 ? l.map((x,i)=>`<div class="leaderboard-row"><div class="leaderboard-rank">${i+1}</div><img src="${x.pic||'https://via.placeholder.com/40'}" class="leaderboard-img"><div class="small text-truncate" style="max-width:80px;">${x.name}</div><div class="leaderboard-score">${x.score}</div></div>`).join('') : '<div class="text-center text-muted small py-2">-</div>';
+                 return `<div class="col-6 mb-2"><div class="card leaderboard-card"><div class="card-header bg-light small fw-bold text-center">${t}</div><div class="card-body p-2">${content}</div></div></div>`;
+             };
+             return `<div class="row g-2 mb-3">${row('เยี่ยมบ้าน', lb.visits)}${row('แจ้งเหตุ', lb.reports)}${row('แนะนำไลน์', lb.exams)}${row('ปักหมุด', lb.pins)}</div>`;
+        }
+
+        function buildVhvPatientListCard(pts) {
+            if(!pts || pts.length===0) return '<div class="alert alert-secondary">ยังไม่มีชาวบ้านในเขต</div>';
+            let html = pts.map(p => `
+                <div class="vhv-patient-item vhv-risk-${Math.ceil(p.thai_cv_risk_score/10)}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold fs-5">${p.name} <span class="badge bg-secondary">${p.thai_cv_risk_score}%</span></div>
+                            <div class="small text-muted">ประเมิน: ${p.latestCheckTimestamp ? p.latestCheckTimestamp.split('T')[0] : 'ยังไม่เคย'}</div>
+                            <div class="small text-muted">ระยะห่าง: ${p.distanceFromVhv_km || '?'} กม.</div>
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                             <a href="tel:${p.telephone}" class="btn btn-sm btn-outline-success rounded-circle"><i class="bi bi-telephone-fill"></i></a>
+                             <button class="btn btn-sm btn-warning rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยม</button>
+                        </div>
+                    </div>
+                    ${p.isReferred ? '<div class="mt-1 badge bg-info text-dark"><i class="bi bi-link-45deg"></i> แนะนำมา</div>' : ''}
+                </div>`).join('');
+            return `<div class="card"><div class="card-header bg-white fw-bold d-flex justify-content-between"><span>ชาวบ้านในเขต</span> <button class="btn btn-sm btn-danger" onclick="STROKE_REPORT_MODAL.show()">รายงานเคส</button></div><div class="card-body bg-light">${html}<div class="d-grid mt-3"><a href="https://sawee-hosp.github.io/stroke-risk/" target="_blank" class="btn btn-success">บันทึกการประเมินผู้ป่วย (Web)</a></div></div></div>`;
+        }
+        
+        function buildCommunityLeadersCard(l) { 
+             if(!l) return '';
+             let html = '<ul class="list-group list-group-flush">';
+             if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between"><span>${l.pcu}</span><a href="tel:${l.pcu_tel}" class="btn btn-sm btn-outline-primary"><i class="bi bi-telephone"></i></a></li>`;
+             if(l.headman) html += `<li class="list-group-item d-flex justify-content-between"><span>ผญบ. ${l.headman}</span><a href="tel:${l.headman_tel}" class="btn btn-sm btn-outline-dark"><i class="bi bi-telephone"></i></a></li>`;
+             html += '</ul>';
+             return `<div class="col-12 mb-3"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-people-fill"></i> ผู้นำชุมชน</h5>${html}</div></div></div>`;
+        }
+
+        // Additional Builders for completeness (Daily Check, Sticker, Knowledge)
         function buildDailyCheckCard(info) {
              let daysSinceCheck = '';
              if (info.latestCheckTimestamp) {
@@ -1197,454 +1225,25 @@
             </div>`; 
         }
 
-        function buildCommunityLeadersCard(l) { 
-             if(!l) return '<div class="col-12"><div class="card"><div class="card-body text-center text-muted">ไม่พบข้อมูลผู้นำชุมชน</div></div></div>';
-             let html = '<ul class="list-group list-group-flush fs-5">';
-             if(l.pcu) html += `<li class="list-group-item d-flex justify-content-between align-items-center"><div><span class="fw-bold text-primary"><i class="bi bi-hospital"></i> ${l.pcu}</span></div>${l.pcu_tel ? `<a href="tel:${l.pcu_tel}" class="btn btn-outline-primary btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}</li>`;
-             if(l.headman) html += `<li class="list-group-item d-flex justify-content-between align-items-center"><div><span class="fw-bold text-dark"><i class="bi bi-person-badge"></i> ผญบ: ${l.headman}</span></div>${l.headman_tel ? `<a href="tel:${l.headman_tel}" class="btn btn-outline-dark btn-sm rounded-pill"><i class="bi bi-telephone-fill"></i> โทร</a>` : ''}</li>`;
-             
-             // Show VHV List in user area
-             if (l.vhvList && l.vhvList.length > 0) {
-                  html += `<li class="list-group-item bg-light fw-bold text-secondary"><i class="bi bi-people-fill"></i> อสม. ในพื้นที่</li>`;
-                  l.vhvList.forEach(v => {
-                      html += `<li class="list-group-item d-flex justify-content-between align-items-center"><span>${v.name}</span>${v.phone ? `<a href="tel:${v.phone}" class="btn btn-success btn-sm rounded-circle"><i class="bi bi-telephone-fill"></i></a>` : ''}</li>`;
-                  });
-             }
-             html += '</ul>';
-             return `<div class="col-12"><div class="card"><div class="card-body"><h5 class="section-title"><i class="bi bi-geo-fill"></i>อสม. และผู้นำชุมชนใกล้ฉัน</h5>${html}</div></div></div>`;
-        }
-
-        function buildTopVhvCard(total, topList) {
-            let listHtml = '';
-            if(topList && topList.length > 0) {
-                topList.forEach((t, i) => {
-                    listHtml += `<div class="d-flex align-items-center mb-2"><div class="me-2 fw-bold text-primary">#${i+1}</div><img src="${t.picture}" class="rounded-circle me-2" style="width:40px;height:40px;"><div class="small fw-bold text-truncate" style="max-width:100px;">${t.name}</div><div class="ms-auto badge bg-success">${t.score} แชร์</div></div>`;
-                });
-            } else { listHtml = '<small class="text-muted">ยังไม่มีข้อมูล</small>'; }
-            
-            return `
-            <div class="card mb-3 border-primary shadow">
-                <div class="card-body p-3">
-                    <div class="row">
-                        <div class="col-5 text-center border-end">
-                            <div class="text-muted small fw-bold">อสม.ทั้งหมด</div>
-                            <div class="display-3 fw-bold text-primary">${total || 0}</div>
-                            <div class="small">ท่าน</div>
-                        </div>
-                        <div class="col-7">
-                            <div class="text-muted small fw-bold mb-2"><i class="bi bi-award-fill text-warning"></i> อสม. ยอดเยี่ยม (7 วัน)</div>
-                            ${listHtml}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }
-        
-        function buildVhvLeaderboards(lb) {
-             const row = (t, l) => {
-                 let content = l && l.length > 0 ? l.map((x,i)=>`<div class="leaderboard-row"><div class="leaderboard-rank">${i+1}</div><img src="${x.pic||'https://via.placeholder.com/40'}" class="leaderboard-img"><div class="small text-truncate" style="max-width:80px;">${x.name}</div><div class="leaderboard-score">${x.score}</div></div>`).join('') : '<div class="text-center text-muted small py-2">-</div>';
-                 return `<div class="col-6 mb-2"><div class="card leaderboard-card"><div class="card-header bg-light small fw-bold text-center">${t}</div><div class="card-body p-2">${content}</div></div></div>`;
-             };
-             return `<div class="row g-2 mb-3">${row('เยี่ยมบ้าน', lb.visits)}${row('แจ้งเหตุ', lb.reports)}${row('แนะนำไลน์', lb.exams)}${row('ปักหมุด', lb.pins)}</div>`;
-        }
-
-        function buildVhvPatientListCard(pts) {
-            if(!pts || pts.length===0) return '<div class="alert alert-secondary">ยังไม่มีชาวบ้านในเขต</div>';
-            
-            let html = pts.map(p => `
-                <div class="vhv-patient-item vhv-risk-${Math.ceil(p.thai_cv_risk_score/10)}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold fs-5">${p.name} <span class="badge bg-secondary">${p.thai_cv_risk_score}%</span></div>
-                            <div class="small text-muted">ประเมิน: ${p.latestCheckTimestamp ? p.latestCheckTimestamp.split('T')[0] : 'ยังไม่เคย'}</div>
-                            <div class="small text-muted">ระยะห่าง: ${p.distanceFromVhv_km || '?'} กม.</div>
-                        </div>
-                        <div class="d-flex flex-column gap-2">
-                             <a href="tel:${p.telephone}" class="btn btn-sm btn-outline-success rounded-circle"><i class="bi bi-telephone-fill"></i></a>
-                             <button class="btn btn-sm btn-warning rounded-pill" onclick="openHomeVisit('${p.userId}', '${p.name}')">เยี่ยม</button>
-                        </div>
-                    </div>
-                    ${p.isReferred ? '<div class="mt-1 badge bg-info text-dark"><i class="bi bi-link-45deg"></i> แนะนำมา</div>' : ''}
-                </div>`).join('');
-                
-            return `<div class="card"><div class="card-header bg-white fw-bold d-flex justify-content-between"><span>ชาวบ้านในเขต</span> <button class="btn btn-sm btn-danger" onclick="STROKE_REPORT_MODAL.show()">รายงานเคส</button></div><div class="card-body bg-light">${html}<div class="d-grid mt-3"><a href="https://sawee-hosp.github.io/stroke-risk/" target="_blank" class="btn btn-success">บันทึกการประเมินผู้ป่วย (Web)</a></div></div></div>`;
-        }
-
-        function buildVhvInstructions(isRegistered, cl) {
-            const getIcon = (status) => status ? '<i class="bi bi-check-circle-fill check-icon check-ok"></i>' : '<i class="bi bi-x-circle-fill check-icon check-no"></i>';
-            return `
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-check"></i> ขั้นตอนการทำงาน</h5>
-                    <ul class="list-group list-group-flush fs-5">
-                        <li class="list-group-item">${getIcon(true)} ลงทะเบียน อสม.</li>
-                        <li class="list-group-item">${getIcon(cl?.hasPinned)} ปักหมุดบ้านตนเอง</li>
-                        <li class="list-group-item">${getIcon(cl?.hasSharedSticker)} แชร์ความรู้ (สติกเกอร์)</li>
-                    </ul>
-                </div>
-            </div>`;
-        }
-
-        function buildVhvInfoCard(vhv) {
-            const pinBtnText = vhv.asm_home ? 'อัปเดตหมุดบ้าน' : 'ปักหมุดบ้าน อสม.';
-            return `
-            <div class="card border-warning shadow">
-                <div class="card-body">
-                    <div class="text-center mb-3">
-                        <button class="btn btn-dark btn-lg w-100 shadow rounded-pill py-3" onclick="showQrModal()"><i class="bi bi-qr-code fs-2"></i> แสดง QR Code</button>
-                    </div>
-                    <hr>
-                    <h5 class="section-title text-dark">ข้อมูลส่วนตัว อสม.</h5>
-                    <p class="mb-1 fs-5"><b>ชื่อ:</b> ${vhv.name || ''}</p>
-                    <p class="mb-1 fs-5"><b>พื้นที่:</b> ${vhv.area || ''}</p>
-                    <div class="row mt-3 g-2">
-                        <div class="col-6"><button class="btn btn-primary w-100 btn-lg" onclick="handleShareProfile()"><i class="bi bi-share-fill"></i> แชร์นามบัตร</button></div>
-                        <div class="col-6"><button class="btn btn-outline-dark w-100 btn-lg" onclick="openVhvModal()">แก้ไขข้อมูล/ปักหมุด</button></div>
-                        <div class="col-12 mt-2"><button class="btn btn-secondary w-100" onclick="pinVhvHomeInForm()"><i class="bi bi-geo-alt-fill"></i> ${pinBtnText}</button></div>
-                        <div class="col-12 mt-2"><a href="${LINKS.KNOWLEDGE}" class="btn btn-info w-100 text-white">ทำแบบทดสอบเรื่องสโตรก</a></div>
-                    </div>
-                </div>
-            </div>`;
-        }
-        
-        function buildVhvRegistrationButton() {
-            return `<div class="card bg-white text-center p-4"><i class="bi bi-person-plus-fill display-1 text-warning mb-3"></i><h3>สมัครเป็น อสม.สโตรก</h3><p class="text-muted">สำหรับ อสม. รพ.สวี เท่านั้น</p><button class="btn btn-lg btn-warning fw-bold w-100" onclick="openVhvModal()">ลงทะเบียน</button></div>`;
-        }
-
-        // =========================================
-        // LOGIC & ACTIONS
-        // =========================================
-        
-        function openEditProfile() { 
-            document.getElementById('editName').value = ALL_USER_DATA.userProfile.name; 
-            document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone.replace(/'/g,''); 
-            document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl; 
-            EDIT_PROFILE_MODAL.show(); 
-        }
-
-        function saveUserProfile() { 
-            const name = document.getElementById('editName').value; 
-            const phone = document.getElementById('editPhone').value; 
-            
-            if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ"); 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ 
-                    action: 'updateUserProfile', 
-                    data: { 
-                        userId: LIFF_PROFILE.userId, 
-                        name: name, 
-                        phone: phone, 
-                        pictureUrl: LIFF_PROFILE.pictureUrl 
-                    } 
-                }) 
-            }).then(() => { 
-                alert("บันทึกสำเร็จ"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
-
-        function openVhvModal() { 
-            const distSelect = document.getElementById('vhvDistrict'); 
-            distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>'; 
-            
-            for (const d in SAWEE_LOCATIONS) { 
-                const opt = document.createElement('option'); 
-                opt.value = d; 
-                opt.textContent = d; 
-                distSelect.appendChild(opt); 
-            } 
-            
-            const vhv = ALL_USER_DATA.vhvProfile || {}; 
-            const user = ALL_USER_DATA.userProfile || {}; 
-            
-            document.getElementById('vhvName').value = vhv.name || user.name || ''; 
-            document.getElementById('vhvPhone').value = vhv.phone ? vhv.phone.replace(/'/g,'') : (user.telephone ? user.telephone.replace(/'/g,'') : ''); 
-            document.getElementById('vhvLineId').value = vhv.line_id || user.line_id || ''; 
-            document.getElementById('vhvAsmHome').value = vhv.asm_home || ''; 
-            
-            if (vhv.area) { 
-                const parts = vhv.area.match(/ต\.(.*?) ม\.(.*)/); 
-                if (parts && parts[1] && parts[2]) { 
-                    distSelect.value = parts[1].trim(); 
-                    updateVillages(); 
-                    document.getElementById('vhvVillage').value = "หมู่ " + parts[2].trim(); 
-                } 
-            } 
-            
-            VHV_REG_MODAL.show(); 
-        }
-        
-        function updateVillages() { 
-            const dist = document.getElementById('vhvDistrict').value; 
-            const villSelect = document.getElementById('vhvVillage'); 
-            villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>'; 
-            villSelect.disabled = false; 
-            
-            for(let i=1; i<=20; i++) { 
-                const v = "หมู่ " + i; 
-                const opt = document.createElement('option'); 
-                opt.value = "หมู่ " + i; 
-                opt.textContent = "หมู่ " + i; 
-                villSelect.appendChild(opt); 
-            } 
-        }
-        
-        function handleVhvRegistration() { 
-            const name = document.getElementById('vhvName').value; 
-            const phone = document.getElementById('vhvPhone').value; 
-            const dist = document.getElementById('vhvDistrict').value; 
-            const vill = document.getElementById('vhvVillage').value; 
-            
-            if(!name || !phone || !dist || !vill) return alert("กรุณากรอกข้อมูลให้ครบ"); 
-            
-            toggleLoading(true); 
-            const data = { 
-                userId: LIFF_PROFILE.userId, 
-                displayName: LIFF_PROFILE.displayName, 
-                profilePicture: LIFF_PROFILE.pictureUrl, 
-                name: name, 
-                phone: phone, 
-                line_id: document.getElementById('vhvLineId').value, 
-                areas: [`ต.${dist} ${vill}`], 
-                pdpa: "ยินยอม", 
-                asm_home: document.getElementById('vhvAsmHome').value 
-            }; 
-            
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'registerVhv', data: data }) 
-            }).then(() => { 
-                alert("ลงทะเบียนสำเร็จ"); 
-                window.location.reload(); 
-            }); 
-        }
-
-        function showQrModal() { 
-            fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`); 
-            QR_MODAL.show(); 
-        }
-
-        function handlePinNewLocation() { 
-            const type = document.querySelector('input[name="locType"]:checked').value;
-            toggleLoading(true); 
-            
-            navigator.geolocation.getCurrentPosition(p => { 
-                fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`)
-                .then(r=>r.json()).then(d=> { 
-                    fetch(WEB_APP_URL, {
-                        method:'POST',
-                        mode:'no-cors',
-                        body:JSON.stringify({
-                            action:'saveNewLocation',
-                            data: {
-                                userId:LIFF_PROFILE.userId,
-                                type: type,
-                                latlong:`${p.coords.latitude},${p.coords.longitude}`,
-                                distance:d.distance_km,
-                                duration:d.duration_mins
-                            }
-                        })
-                    }).then(()=>{
-                        alert("บันทึกสำเร็จ"); 
-                        window.location.reload();
-                    }); 
-                }); 
-            }, e=>handleFailure(e), {enableHighAccuracy: true}); 
-        }
-
-        function pinVhvHomeInForm() { 
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; 
-                toggleLoading(false); 
-            }, e=>handleFailure(e), {enableHighAccuracy: true}); 
-        }
-
-        function getLocationForReport() { 
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; 
-                toggleLoading(false); 
-            }, e=>handleFailure(e)); 
-        }
-
-        function submitStrokeReport() { 
-            const pn = document.getElementById('srName').value; 
-            const ph = document.getElementById('srRelPhone').value; 
-            const ot = document.getElementById('srOnsetTime').value; 
-            const loc = document.getElementById('srLocation').value; 
-            
-            if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', mode: 'no-cors', 
-                body: JSON.stringify({ action: 'saveStrokeReport', data: { reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName, patientName: pn, patientPhone: ph, onsetTime: ot, location: loc }}) 
-            }).then(() => { 
-                alert("ส่งข้อมูลเรียบร้อยแล้ว ทีมสโตรกจะรีบดำเนินการ"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
-
-        function openHomeVisit(uid, name) { 
-            document.getElementById('hvPatientId').value = uid; 
-            document.getElementById('hvPatientNameVal').value = name; 
-            document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`; 
-            HOME_VISIT_MODAL.show(); 
-        }
-
-        function pinForCurrentPatient() { 
-            const uid = document.getElementById('hvPatientId').value; 
-            const name = document.getElementById('hvPatientNameVal').value; 
-            
-            if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return; 
-            
-            toggleLoading(true); 
-            navigator.geolocation.getCurrentPosition(p => { 
-                const latlong = `${p.coords.latitude},${p.coords.longitude}`; 
-                fetch(WEB_APP_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify({ 
-                        action: 'saveNewLocation', 
-                        data: { 
-                            userId: uid, 
-                            type: 'บ้าน_โดย_อสม', 
-                            latlong: latlong, 
-                            distance: 0, 
-                            duration: 0, 
-                            recorderId: LIFF_PROFILE.userId 
-                        } 
-                    }) 
-                }).then(() => { 
-                    alert("บันทึกพิกัดแล้ว"); 
-                    toggleLoading(false); 
-                }); 
-            }, handleFailure); 
-        }
-
-        function submitHomeVisit(type) { 
-            const pname = document.getElementById('hvPatientNameVal').value; 
-            let data = { 
-                vhvId: LIFF_PROFILE.userId, 
-                patientName: pname, 
-                activityType: type, 
-                note: '' 
-            }; 
-            
-            if (type === 'Advice') { 
-                let adv = []; 
-                if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); 
-                if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); 
-                data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; 
-            } else { 
-                data.adl = {
-                    feeding: document.getElementById('adlFeeding')?.value,
-                    transfer: document.getElementById('adlTransfer')?.value,
-                    grooming: document.getElementById('adlGrooming')?.value,
-                    toilet: document.getElementById('adlToilet')?.value,
-                    bathing: document.getElementById('adlBathing')?.value,
-                    mobility: document.getElementById('adlMobility')?.value
-                };
-            }
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'saveHomeVisit', data: data }) 
-            }).then(() => { 
-                alert("บันทึกการเยี่ยมสำเร็จ"); 
-                HOME_VISIT_MODAL.hide(); 
-                toggleLoading(false); 
-            }).catch(handleFailure); 
-        }
-
-        function pinOfflineLocation() { 
-            navigator.geolocation.getCurrentPosition(p => { 
-                document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`; 
-            }); 
-        }
-
-        function submitOfflinePatient() { 
-            const data = { 
-                 vhvId: LIFF_PROFILE.userId, 
-                 vhvName: ALL_USER_DATA.vhvProfile.name, 
-                 name: document.getElementById('offName').value, 
-                 age: document.getElementById('offAge').value, 
-                 gender: document.getElementById('offSex').value, 
-                 phone: document.getElementById('offPhone').value, 
-                 riskScore: document.getElementById('offRisk').value, 
-                 latlong: document.getElementById('offLocation').value, 
-                 district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''), 
-                 village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '') 
-            }; 
-            
-            toggleLoading(true); 
-            fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) 
-            }).then(() => { 
-                alert("ลงทะเบียนเรียบร้อย"); 
-                window.location.reload(); 
-            }).catch(handleFailure); 
-        }
-        
-        async function handleShareProfile() { 
-            toggleLoading(true); 
-            try { 
-                const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); 
-                const data = await res.json(); 
-                toggleLoading(false); 
-                if (data.success && data.flex) { 
-                    SHARE_PROFILE_MODAL.hide(); 
-                    await liff.shareTargetPicker([data.flex]); 
-                } else { 
-                    alert("สร้างนามบัตรไม่ได้: " + data.message); 
-                } 
-            } catch (err) { handleFailure(err); } 
-        }
-
-        function trackTelCall(tel) { 
-            if(confirm("โทรออก?")) window.location.href = 'tel:'+tel.replace(/'/g,''); 
-        }
-
-        function copyToClipboard(txt) { 
-            navigator.clipboard.writeText(txt).then(()=>alert("คัดลอก Line ID แล้ว")).catch(()=>alert("คัดลอกไม่ได้")); 
-        }
-
-        function classifyRisk(r) { 
-            return r<0.1 ? {text:"เสี่ยงต่ำ",color:"#28a745"} : 
-                   r<0.2 ? {text:"ปานกลาง",color:"#ffc107"} : 
-                   r<0.3 ? {text:"สูง",color:"#fd7e14"} : 
-                   r<0.4 ? {text:"สูงมาก",color:"#dc3545"} : 
-                   {text:"อันตราย",color:"#8B0000"}; 
-        }
-        
-        function openEditEmergency(h, d) {
-            document.getElementById('editHelp').value = h;
-            document.getElementById('editDecision').value = d;
-            EDIT_EMERGENCY_MODAL.show();
-        }
-
-        function submitEmergencyEdit() {
-            const h = document.getElementById('editHelp').value;
-            const d = document.getElementById('editDecision').value;
-            toggleLoading(true);
-            fetch(WEB_APP_URL, {
-                method: 'POST', mode: 'no-cors',
-                body: JSON.stringify({ action: 'updateEmergencyInfo', data: { userId: LIFF_PROFILE.userId, help: h, decision: d } })
-            }).then(() => { 
-                alert('บันทึกเรียบร้อย'); 
-                location.reload(); 
-            }).catch(handleFailure);
-        }
+        // Actions
+        function openEditProfile() { document.getElementById('editName').value = ALL_USER_DATA.userProfile.name; document.getElementById('editPhone').value = ALL_USER_DATA.userProfile.telephone.replace(/'/g,''); document.getElementById('edit-preview-img').src = ALL_USER_DATA.userProfile.pictureUrl; EDIT_PROFILE_MODAL.show(); }
+        function saveUserProfile() { const name = document.getElementById('editName').value; const phone = document.getElementById('editPhone').value; if(!name || !phone) return alert("กรุณากรอกข้อมูลให้ครบ"); toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateUserProfile', data: { userId: LIFF_PROFILE.userId, name: name, phone: phone, pictureUrl: LIFF_PROFILE.pictureUrl } }) }).then(() => { alert("บันทึกสำเร็จ"); window.location.reload(); }).catch(e => alert(e.message)); }
+        function openVhvModal() { const distSelect = document.getElementById('vhvDistrict'); distSelect.innerHTML = '<option value="" disabled selected>เลือกตำบล</option>'; for (const d in SAWEE_LOCATIONS) { const opt = document.createElement('option'); opt.value = d; opt.textContent = d; distSelect.appendChild(opt); } VHV_REG_MODAL.show(); }
+        function updateVillages() { const villSelect = document.getElementById('vhvVillage'); villSelect.innerHTML = '<option value="" disabled selected>เลือกหมู่</option>'; villSelect.disabled = false; for(let i=1; i<=20; i++) { const opt = document.createElement('option'); opt.value = "หมู่ " + i; opt.textContent = "หมู่ " + i; villSelect.appendChild(opt); } }
+        function handleVhvRegistration() { const name = document.getElementById('vhvName').value; const phone = document.getElementById('vhvPhone').value; const dist = document.getElementById('vhvDistrict').value; const vill = document.getElementById('vhvVillage').value; if(!name || !phone || !dist || !vill) return alert("กรุณากรอกข้อมูลให้ครบ"); toggleLoading(true); const data = { userId: LIFF_PROFILE.userId, displayName: LIFF_PROFILE.displayName, profilePicture: LIFF_PROFILE.pictureUrl, name: name, phone: phone, line_id: document.getElementById('vhvLineId').value, areas: [`ต.${dist} ${vill}`], pdpa: "ยินยอม", asm_home: document.getElementById('vhvAsmHome').value }; fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerVhv', data: data }) }).then(() => { alert("ลงทะเบียนสำเร็จ"); window.location.reload(); }); }
+        function openEditEmergency(h, d) { document.getElementById('editHelp').value = h; document.getElementById('editDecision').value = d; EDIT_EMERGENCY_MODAL.show(); }
+        function submitEmergencyEdit() { const h = document.getElementById('editHelp').value; const d = document.getElementById('editDecision').value; toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'updateEmergencyInfo', data: { userId: LIFF_PROFILE.userId, help: h, decision: d } }) }).then(() => { alert('บันทึกเรียบร้อย'); location.reload(); }).catch(handleFailure); }
+        function handlePinNewLocation() { const type = document.querySelector('input[name="locType"]:checked').value; navigator.geolocation.getCurrentPosition(p => { fetch(`${WEB_APP_URL}?action=calculateDistance&lat=${p.coords.latitude}&lon=${p.coords.longitude}`).then(r=>r.json()).then(d=> { fetch(WEB_APP_URL, { method:'POST', mode:'no-cors', body:JSON.stringify({ action:'saveNewLocation', data: { userId:LIFF_PROFILE.userId, type: type, latlong:`${p.coords.latitude},${p.coords.longitude}`, distance:d.distance_km, duration:d.duration_mins } }) }).then(()=>{ alert("บันทึกสำเร็จ"); window.location.reload(); }); }); }); }
+        function pinOfflineLocation() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('offLocation').value = `${p.coords.latitude},${p.coords.longitude}`; }); }
+        function submitOfflinePatient() { const data = { vhvId: LIFF_PROFILE.userId, vhvName: ALL_USER_DATA.vhvProfile.name, name: document.getElementById('offName').value, age: document.getElementById('offAge').value, gender: document.getElementById('offSex').value, phone: document.getElementById('offPhone').value, riskScore: document.getElementById('offRisk').value, latlong: document.getElementById('offLocation').value, district: ALL_USER_DATA.vhvProfile.area.split(' ')[0].replace('ต.', ''), village: ALL_USER_DATA.vhvProfile.area.split(' ')[1].replace('ม.', '') }; toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'registerOfflinePatient', data: data }) }).then(() => { alert("ลงทะเบียนเรียบร้อย"); window.location.reload(); }).catch(handleFailure); }
+        async function handleShareProfile() { toggleLoading(true); const res = await fetch(`${WEB_APP_URL}?action=getShareCard&userId=${LIFF_PROFILE.userId}`); const data = await res.json(); toggleLoading(false); if (data.success) liff.shareTargetPicker([data.flex]); else alert(data.message); }
+        function pinVhvHomeInForm() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('vhvAsmHome').value = `${p.coords.latitude},${p.coords.longitude}`; }); }
+        function getLocationForReport() { navigator.geolocation.getCurrentPosition(p => { document.getElementById('srLocation').value = `${p.coords.latitude},${p.coords.longitude}`; }); }
+        function submitStrokeReport() { const pn = document.getElementById('srName').value; const ph = document.getElementById('srRelPhone').value; const ot = document.getElementById('srOnsetTime').value; const loc = document.getElementById('srLocation').value; if(!pn || !ph || !ot || !loc) return alert("กรุณากรอกข้อมูลให้ครบถ้วน"); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveStrokeReport', data: { reporterId: LIFF_PROFILE.userId, reporterName: LIFF_PROFILE.displayName, patientName: pn, patientPhone: ph, onsetTime: ot, location: loc }}) }).then(() => { alert("ส่งข้อมูลเรียบร้อย"); window.location.reload(); }).catch(handleFailure); }
+        function openHomeVisit(uid, name) { document.getElementById('hvPatientId').value = uid; document.getElementById('hvPatientNameVal').value = name; document.getElementById('hvTitle').textContent = `เยี่ยม: ${name}`; HOME_VISIT_MODAL.show(); }
+        function pinForCurrentPatient() { const uid = document.getElementById('hvPatientId').value; const name = document.getElementById('hvPatientNameVal').value; if(!confirm(`ยืนยันพิกัดบ้านของ ${name} ที่นี่?`)) return; navigator.geolocation.getCurrentPosition(p => { const latlong = `${p.coords.latitude},${p.coords.longitude}`; fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveNewLocation', data: { userId: uid, type: 'บ้าน_โดย_อสม', latlong: latlong, distance: 0, duration: 0, recorderId: LIFF_PROFILE.userId } }) }).then(() => { alert("บันทึกพิกัดแล้ว"); }); }, handleFailure); }
+        function submitHomeVisit(type) { const pname = document.getElementById('hvPatientNameVal').value; let data = { vhvId: LIFF_PROFILE.userId, patientName: pname, activityType: type, note: '' }; if (type === 'Advice') { let adv = []; if(document.getElementById('chkAdvice1').checked) adv.push("5 สัญญาณเตือน"); if(document.getElementById('chkAdvice2').checked) adv.push("การปฏิบัติตัว"); data.note = adv.join(', ') + " : " + document.getElementById('hvNoteAdvice').value; } toggleLoading(true); fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveHomeVisit', data: data }) }).then(() => { alert("บันทึกเรียบร้อย"); HOME_VISIT_MODAL.hide(); toggleLoading(false); }); }
+        function showQrModal() { fetch(`${WEB_APP_URL}?action=logQrShare&userId=${LIFF_PROFILE.userId}`); QR_MODAL.show(); }
     </script>
 </body>
 </html>
