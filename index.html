@@ -5,54 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>สวีรู้ทันสโตรก</title>
     
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
         :root {
-            --theme-red: #d32f2f;
-            --theme-gold: #876029;
-            --theme-cream: #eae2cd;
-            --bg-gold-soft: #fffaf0;
-            --border-gold: #f0e6d2;
-            --text-dark: #333;
+            --theme-red: #d32f2f; 
+            --theme-red-soft: #ffebee;
+            --theme-gold: #876029;   
+            --theme-gold-text: #eae2cd; 
+            --bg-card: #fffbf0; /* Soft Gold */
+            --border-gold: #f2e6d0;
             --base-font: 20px;
+            --border-radius: 25px;
         }
         
         html { font-size: var(--base-font); }
-        body { font-family: "Noto Sans Thai", sans-serif; background: #fff; margin: 0; padding-bottom: 80px; color: var(--text-dark); -webkit-tap-highlight-color: transparent; }
-        
-        /* TABS */
-        .nav-tabs { position: fixed; top: 0; width: 100%; z-index: 1000; display: flex; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 60px; }
-        .nav-item { width: 50%; text-align: center; }
-        .nav-link { width: 100%; height: 100%; border: none; border-radius: 0; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
-        
+        body { 
+            font-family: "Noto Sans Thai", sans-serif; 
+            background: linear-gradient(180deg, var(--theme-red) 0%, #ffffff 400px);
+            margin: 0; padding-bottom: 80px; 
+            color: #333; transition: background 0.5s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body.vhv-mode { background: linear-gradient(180deg, var(--theme-gold) 0%, #ffffff 400px); }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700 !important; margin-bottom: 0.5rem; }
+
+        /* TABS (Reduced height, 50%) */
+        .nav-tabs-container { position: fixed; top: 0; width: 100%; z-index: 1000; display: flex; height: 55px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-item { width: 50%; }
+        .nav-link { 
+            width: 100%; height: 100%; border: none; border-radius: 0; 
+            font-weight: 700; font-size: 1.1rem; 
+            display: flex; align-items: center; justify-content: center; 
+            color: #aaa; background: #fff; transition: 0.3s;
+        }
         /* Active States */
         #tab-health.active { background-color: var(--theme-red); color: white; }
-        #tab-health { background-color: white; color: #aaa; }
-        #tab-vhv.active { background-color: var(--theme-gold); color: var(--theme-cream); }
-        #tab-vhv { background-color: white; color: #aaa; }
+        #tab-vhv.active { background-color: var(--theme-gold); color: var(--theme-gold-text); }
         
-        .content-area { margin-top: 75px; padding: 0 10px; } /* Reduced margins */
-        
+        .app-header-spacer { height: 70px; }
+        .content-area { padding: 0 10px; }
+
         /* CARDS */
         .card-box { 
-            background-color: var(--bg-gold-soft); 
+            background-color: var(--bg-card); 
             border: 1px solid var(--border-gold); 
-            border-radius: 20px; 
-            padding: 15px; 
-            margin-bottom: 15px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            border-radius: var(--border-radius); 
+            padding: 15px; margin-bottom: 15px; /* Reduced space */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
         }
-        .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .card-title { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 8px; margin: 0; }
-        
+        .card-title { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .card-title i { font-size: 1.6rem; color: var(--theme-red); }
+        body.vhv-mode .card-title i { color: var(--theme-gold); }
+
         /* BUTTONS */
         .btn-pill { border-radius: 50px; font-weight: 700; padding: 8px 20px; }
-        .btn-red { background-color: var(--theme-red); color: white; border: none; }
-        .btn-gold { background-color: var(--theme-gold); color: var(--theme-cream); border: none; }
+        .btn-red { background: var(--theme-red); color: white; border: none; }
+        .btn-gold { background: var(--theme-gold); color: var(--theme-gold-text); border: none; }
         .btn-outline { border: 1px solid #ccc; background: white; color: #333; }
         
         /* ICONS */
@@ -61,71 +73,76 @@
         /* PROFILE */
         .profile-pic { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .badge-regis { font-size: 0.8rem; background: #eee; padding: 3px 10px; border-radius: 10px; color: #555; }
-        
-        /* SCORE BAR */
-        .level-track { height: 20px; background: #ddd; border-radius: 10px; position: relative; margin: 15px 0; overflow: hidden; }
-        .level-fill { height: 100%; transition: width 1s; }
-        .level-text { position: absolute; width: 100%; text-align: center; line-height: 20px; font-size: 0.7rem; color: white; text-shadow: 0 0 2px black; font-weight: bold; top:0;}
-        
+        .badge-vhv { background-color: var(--theme-gold); color: white; border-radius: 20px; padding: 5px 15px; font-weight: normal; }
+
+        /* SCORE CARD */
+        .level-bar { height: 25px; background: #e0e0e0; border-radius: 12px; position: relative; margin: 15px 0; overflow: hidden; display: flex; }
+        .level-segment { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: bold; text-shadow: 0 0 2px black; opacity: 0.4; }
+        .level-segment.active { opacity: 1; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .score-box { text-align: center; cursor: pointer; transition: 0.2s; }
+        .score-box:active { transform: scale(0.95); }
+
         /* RISK */
         .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .risk-box { background: white; padding: 8px; border-radius: 10px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
-        .risk-box i { font-size: 1.2rem; color: #777; }
-        
+        .risk-item { background: white; padding: 8px; border-radius: 10px; border: 1px solid #eee; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; }
+        .risk-item i { font-size: 1.3rem; color: #777; }
+
         /* HOSPITAL */
         .hospital-flow { display: flex; align-items: center; justify-content: space-between; margin: 20px 0; }
-        .arrow-line { flex-grow: 1; height: 3px; background: #333; margin: 0 10px; position: relative; }
-        .arrow-line::after { content: '>'; position: absolute; right: -5px; top: -13px; font-size: 20px; }
-        
-        /* HELPERS */
+        .arrow-long { flex-grow: 1; height: 3px; background: #333; margin: 0 15px; position: relative; }
+        .arrow-long::after { content: ''; position: absolute; right: -5px; top: -5px; border: 6px solid transparent; border-left-color: #333; }
+
+        /* HELPER */
         .scan-anim { animation: pulse 1.5s infinite; color: var(--theme-red); }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-        
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+
         /* VHV */
-        .vhv-stat { background: white; border-radius: 10px; padding: 8px; text-align: center; border: 1px solid #eee; height: 100%; }
-        .vhv-rank-card { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
-        .vhv-rank-num { font-weight: 900; font-size: 1.2rem; color: #ccc; width: 30px; }
-        .risk-group { margin-top: 15px; border-left: 5px solid #ccc; padding-left: 10px; font-weight: bold; color: #555; }
-        .patient-item { display: flex; align-items: center; background: white; padding: 10px; border-radius: 10px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .vhv-stat-box { background: white; border: 1px solid #eee; border-radius: 10px; padding: 8px; text-align: center; height: 100%; }
+        .vhv-rank-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .risk-group-head { font-size: 1rem; font-weight: 800; margin: 15px 0 5px; padding-left: 10px; border-left: 5px solid; color: #555; }
         
+        .patient-row { display: flex; align-items: center; background: white; padding: 10px; border-radius: 10px; margin-bottom: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .risk-5 { border-left: 5px solid #dc3545; background: #fff5f5; }
+        .risk-4 { border-left: 5px solid #fd7e14; }
+        .risk-2 { border-left: 5px solid #ffc107; }
+        .risk-1 { border-left: 5px solid #28a745; }
+
         /* FOOTER */
-        .footer { text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 30px; }
+        .footer { text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 30px; }
         
-        /* LOADING */
-        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:white; }
+        #loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:white; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="spinner-border mb-2"></div><div>กำลังประมวลผล...</div></div>
+<div id="loader"><div class="spinner-border mb-3" style="width: 3rem; height: 3rem;"></div><div class="fs-4">กำลังประมวลผล...</div></div>
 
-<!-- TABS -->
-<div class="nav-tabs">
+<div class="nav-tabs-container">
     <div class="nav-item"><div id="tab-health" class="nav-link active" onclick="setTab('health')">ข้อมูลสุขภาพ</div></div>
     <div class="nav-item"><div id="tab-vhv" class="nav-link" onclick="setTab('vhv')">สำหรับ อสม.</div></div>
 </div>
+<div class="app-header-spacer"></div>
 
 <div class="content-area">
 
-    <!-- === HEALTH TAB === -->
+    <!-- HEALTH TAB -->
     <div id="view-health">
         
-        <!-- 1. Profile Card -->
+        <!-- 1. Profile -->
         <div id="card-profile" class="card-box" style="margin-top: 10px;">
-            <!-- Loading Skeleton -->
-            <div class="text-center py-4"><span class="spinner-border text-secondary"></span></div>
+            <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
         </div>
 
-        <!-- 2. Awareness Score -->
-        <div id="card-score" class="card-box"></div>
+        <!-- 2. Score -->
+        <div id="card-score"></div>
 
-        <!-- 3. Risk Assessment -->
-        <div id="card-risk"></div> <!-- ID target for scroll -->
-        
-        <!-- 4. Hospital Prep -->
+        <!-- 3. Risk -->
+        <div id="card-risk"></div>
+
+        <!-- 4. Hospital -->
         <div id="card-hospital"></div>
 
-        <!-- 5. Helpers -->
+        <!-- 5. Helper -->
         <div id="card-helper"></div>
 
         <!-- 6. Sticker -->
@@ -136,72 +153,48 @@
 
     </div>
 
-    <!-- === VHV TAB === -->
+    <!-- VHV TAB -->
     <div id="view-vhv" style="display:none;">
-        
-        <!-- 1. VHV Profile -->
         <div id="vhv-profile" class="card-box" style="margin-top: 10px;"></div>
-
-        <!-- 2. Performance -->
         <div id="vhv-perf" class="card-box"></div>
-
-        <!-- 3. Leaderboard -->
         <div id="vhv-leader" class="card-box"></div>
-
-        <!-- 4. Patient List -->
         <div id="vhv-patients" class="card-box">
             <div class="text-center py-5 text-muted">กำลังโหลดข้อมูลลูกบ้าน...</div>
         </div>
-
     </div>
 
     <div class="footer">จัดทำโดย สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร</div>
-
 </div>
 
 <!-- MODALS -->
 
-<!-- Edit User Profile (Emergency) -->
+<!-- Edit User Emg -->
 <div class="modal fade" id="modalEditEmg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4"><div class="modal-header border-0"><h5 class="modal-title fw-bold">แก้ไขข้อมูลฉุกเฉิน</h5></div><div class="modal-body">
-    <label class="form-label text-muted">คนดูแลที่บ้าน</label>
-    <select class="form-select mb-3" id="inpHelp">
-        <option>อยู่ตัวคนเดียว</option><option>อยู่กับผู้สูงอายุ/เด็กเล็ก</option><option>อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</option>
-    </select>
-    <label class="form-label text-muted">การตัดสินใจ</label>
-    <select class="form-select mb-4" id="inpDec">
-        <option>รอดูอาการ</option><option>โทรให้ญาติมาดู</option><option>ไปคลินิก-อนามัย</option><option>รีบไป รพ.เอง</option><option>โทร 1669 ให้รถมารับ</option>
-    </select>
-    <button class="btn btn-red btn-pill w-100" onclick="saveEmergency()">บันทึกข้อมูล</button>
+    <div class="mb-3"><label class="text-muted">คนดูแลที่บ้าน</label><select class="form-select" id="inpHelp"><option>อยู่ตัวคนเดียว</option><option>อยู่กับผู้สูงอายุ/เด็กเล็ก</option><option>อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</option></select></div>
+    <div class="mb-4"><label class="text-muted">การตัดสินใจ</label><select class="form-select" id="inpDec"><option>รอดูอาการ</option><option>โทรให้ญาติมาดู</option><option>ไปคลินิก-อนามัย</option><option>รีบไป รพ.เอง</option><option>โทร 1669 ให้รถมารับ</option></select></div>
+    <button class="btn btn-red btn-pill w-100" onclick="saveEmg()">บันทึกข้อมูล</button>
 </div></div></div></div>
 
-<!-- Edit VHV Profile -->
-<div class="modal fade" id="modalEditVhv" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4"><div class="modal-header border-0"><h5 class="modal-title fw-bold text-gold-dark">แก้ไขประวัติ อสม.</h5></div><div class="modal-body">
+<!-- Edit VHV -->
+<div class="modal fade" id="modalEditVhv" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4"><div class="modal-header border-0"><h5 class="modal-title fw-bold text-gold">แก้ไขประวัติ อสม.</h5></div><div class="modal-body">
     <div class="mb-2"><label>ชื่อ-สกุล</label><input type="text" class="form-control" id="vhvName"></div>
     <div class="mb-2"><label>เบอร์โทร</label><input type="text" class="form-control" id="vhvPhone"></div>
     <div class="mb-4"><label>พื้นที่รับผิดชอบ (ตำบล+หมู่)</label><input type="text" class="form-control" id="vhvArea" placeholder="ต.นาโพธิ์ ม.1"></div>
     <button class="btn btn-gold btn-pill w-100" onclick="saveVhvProfile()">บันทึก</button>
 </div></div></div></div>
 
-<!-- Call Confirm -->
+<!-- Call -->
 <div class="modal fade" id="modalCall" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 text-center p-4">
-    <i class="bi bi-telephone-fill text-danger display-4 mb-3"></i>
-    <h4>ยืนยันการโทร</h4>
-    <p class="text-muted small">ระบบจะบันทึกประวัติการโทรของท่าน</p>
-    <div class="d-grid gap-2 mt-3">
-        <button class="btn btn-red btn-pill" onclick="execCall()">โทรออก</button>
-        <button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยกเลิก</button>
-    </div>
+    <i class="bi bi-telephone-fill text-danger display-4 mb-3"></i><h4>ยืนยันการโทร</h4>
+    <p class="text-muted small">ระบบจะบันทึกประวัติการโทร</p>
+    <div class="d-grid gap-2 mt-3"><button class="btn btn-red btn-pill" onclick="execCall()">โทรออก</button><button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยกเลิก</button></div>
 </div></div></div>
 
 <!-- Pin Alert -->
 <div class="modal fade" id="modalPin" data-bs-backdrop="static" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 text-center p-4">
-    <i class="bi bi-geo-alt-fill text-danger display-3 mb-2"></i>
-    <h4>กรุณาปักหมุดบ้าน</h4>
+    <i class="bi bi-geo-alt-fill text-danger display-3 mb-2"></i><h4>กรุณาปักหมุดบ้าน</h4>
     <p class="text-muted small">เพื่อความแม่นยำในการช่วยเหลือ</p>
-    <div class="d-grid gap-2 mt-3">
-        <button class="btn btn-red btn-pill" onclick="pinHome(false)">ปักหมุดเลย</button>
-        <button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยังไม่ได้อยู่บ้าน</button>
-    </div>
+    <div class="d-grid gap-2 mt-3"><button class="btn btn-red btn-pill" onclick="pinHome(false)">ปักหมุดเลย</button><button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยังไม่ได้อยู่บ้าน</button></div>
 </div></div></div>
 
 <!-- QR -->
@@ -214,8 +207,7 @@
 
 <!-- Info -->
 <div class="modal fade" id="modalInfo" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4">
-    <h5>วิธีคิดคะแนน</h5>
-    <ul class="small text-muted ps-3"><li>บอกต่อ = 1</li><li>สติกเกอร์ = 10</li><li>เยี่ยมบ้าน = 5</li><li>รายงาน = 50</li></ul>
+    <h5>วิธีคิดคะแนน</h5><ul class="small text-muted ps-3"><li>บอกต่อ = 1</li><li>สแกน QR = 10</li><li>เยี่ยมบ้าน = 5</li><li>รายงานเคส = 50</li></ul>
     <button class="btn btn-outline w-100 btn-sm" data-bs-dismiss="modal">ปิด</button>
 </div></div></div>
 
@@ -224,272 +216,192 @@
 <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
     const LIFF_ID = '2005789397-RLAGXrBJ';
-    const LINKS = {
-        REGIS: 'https://liff.line.me/2005789397-nebQ8oJy',
-        STICKER: 'https://liff.line.me/2005789397-37lemBgX',
-        KNOWLEDGE: 'https://liff.line.me/2005789397-ROQvjpYk'
-    };
-
-    let PROFILE = {}, DATA = {}, TARGET_TEL = '', MODALS = {};
+    const LINKS = { REGIS: 'https://liff.line.me/2005789397-nebQ8oJy', STICKER: 'https://liff.line.me/2005789397-37lemBgX', KNOWLEDGE: 'https://liff.line.me/2005789397-ROQvjpYk' };
+    
+    let PROFILE={}, DATA={}, TARGET_TEL='', MODALS={};
 
     window.onload = async () => {
-        ['modalEditEmg', 'modalEditVhv', 'modalCall', 'modalPin', 'modalQR', 'modalInfo'].forEach(i => MODALS[i] = new bootstrap.Modal(document.getElementById(i)));
+        ['modalEditEmg','modalEditVhv','modalCall','modalPin','modalQR','modalInfo'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
         
         try {
-            await liff.init({ liffId: LIFF_ID });
-            if (!liff.isLoggedIn()) { liff.login(); return; }
+            await liff.init({liffId:LIFF_ID});
+            if(!liff.isLoggedIn()){liff.login();return;}
             PROFILE = await liff.getProfile();
             
-            // Step 1: Basic Info
             const p = new URLSearchParams(location.search);
             const res = await fetch(`${API_URL}?action=getBasicInfo&userId=${PROFILE.userId}&ref=${p.get('ref')||''}`);
             DATA = await res.json();
             
             renderHealthTab();
-            if (DATA.isVhv) renderVhvTab();
+            if(DATA.isVhv) renderVhvTab();
             
-            // Check Pin (User only)
-            if (!DATA.isVhv && (!DATA.homeDistance || !DATA.homeDistance.latlong)) MODALS['modalPin'].show();
+            // Initial Pin Check
+            if(!DATA.isVhv && (!DATA.homeDistance || !DATA.homeDistance.latlong)) MODALS['modalPin'].show();
 
-            // Step 2 & 3: Lazy Load
             loadGamification();
-            if (DATA.isVhv) loadVhvData();
+            if(DATA.isVhv) loadVhvData();
 
-        } catch(e) { alert("Error: " + e); }
+        } catch(e){ alert("Err: "+e); }
     };
 
     function setTab(t) {
-        document.getElementById('view-health').style.display = t==='health'?'block':'none';
-        document.getElementById('view-vhv').style.display = t==='vhv'?'block':'none';
-        document.getElementById('tab-health').className = `nav-link ${t==='health'?'active':''}`;
-        document.getElementById('tab-vhv').className = `nav-link ${t==='vhv'?'active':''}`;
+        document.getElementById('view-health').style.display=t==='health'?'block':'none';
+        document.getElementById('view-vhv').style.display=t==='vhv'?'block':'none';
+        document.getElementById('tab-health').className=`nav-link ${t==='health'?'active':''}`;
+        document.getElementById('tab-vhv').className=`nav-link ${t==='vhv'?'active':''}`;
         window.scrollTo(0,0);
     }
 
+    // --- RENDERERS ---
     function renderHealthTab() {
         const p = DATA.userProfile;
         
         // 1. Profile
-        let pfHtml = '';
         if(!p) {
-            pfHtml = `<div class="text-center py-3"><h5 class="mb-2">ไม่พบข้อมูล</h5><a href="${LINKS.REGIS}" class="btn btn-red btn-pill">ลงทะเบียน</a></div>`;
+            document.getElementById('card-profile').innerHTML=`<div class="text-center py-3"><h5>ไม่พบข้อมูล</h5><a href="${LINKS.REGIS}" class="btn btn-red btn-pill">ลงทะเบียน</a></div>`;
         } else {
-            pfHtml = `
+            document.getElementById('card-profile').innerHTML=`
             <div class="d-flex align-items-center">
                 <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-                <div>
-                    <h4 class="fw-bold mb-1">${p.name}</h4>
-                    <div class="text-muted small"><i class="bi bi-telephone"></i> ${p.telephone}</div>
-                    <div class="badge-regis mt-1">ลงทะเบียน: ${p.regisDate}</div>
-                </div>
-                <button class="btn btn-outline btn-sm ms-auto rounded-circle" onclick="window.location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
+                <div><h4 class="fw-bold mb-1">${p.name}</h4><div class="text-muted small"><i class="bi bi-telephone"></i> ${p.telephone}</div><div class="badge-regis mt-1">ลงทะเบียน: ${p.regisDate}</div></div>
+                <button class="btn btn-outline btn-sm ms-auto rounded-circle" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
             </div>`;
         }
-        document.getElementById('card-profile').innerHTML = pfHtml;
 
-        // 4. Hospital
         renderHospitalCard(DATA.homeDistance, DATA.emergencyInfo);
-
-        // 5. Helper
         renderHelperCard(DATA.communityLeaders);
     }
 
     async function loadGamification() {
-        const r = await fetch(`${API_URL}?action=getGamification&userId=${PROFILE.userId}`).then(res => res.json());
+        const r = await fetch(`${API_URL}?action=getGamification&userId=${PROFILE.userId}`).then(res=>res.json());
         const g = r.gamification;
         
         // 2. Score
-        const pct = Math.min(100, Math.max(0, ((g.total-g.min)/(g.max-g.min))*100));
-        let col = g.color === 'info' ? '#0dcaf0' : (g.color === 'primary' ? '#0d6efd' : '#198754');
-        const bg = `linear-gradient(90deg, #ccc 0%, ${col} 100%)`; // Gradient Bar
-
-        document.getElementById('card-score').innerHTML = `
-        <div class="card-header-flex">
-            <h5 class="card-title"><i class="bi bi-trophy-fill text-warning"></i> คะแนนตระหนักรู้</h5>
-            <i class="bi bi-info-circle text-muted" onclick="MODALS['modalInfo'].show()"></i>
-        </div>
-        <div class="text-center my-3">
-            <div class="display-3 fw-bold" style="color:${col}">${g.total}</div>
-            <div class="text-muted small">คะแนนรวม</div>
-        </div>
-        <div class="level-track"><div class="level-fill" style="width:${pct}%; background:${bg}"></div><div class="level-text">${g.level}</div></div>
-        <div class="row text-center mt-3">
-            <div class="col-3 score-icon-box" onclick="scroll2('card-risk')"><div class="icon-circle"><i class="bi bi-heart-pulse text-danger"></i></div><small>ใส่ใจ<br>${g.check}</small></div>
-            <div class="col-3 score-icon-box" onclick="scroll2('card-hospital')"><div class="icon-circle"><i class="bi bi-backpack text-primary"></i></div><small>เตรียม<br>${g.prep}</small></div>
-            <div class="col-3 score-icon-box" onclick="scroll2('card-sticker')"><div class="icon-circle"><i class="bi bi-share text-success"></i></div><small>บอกต่อ<br>${g.sticker}</small></div>
-            <div class="col-3 score-icon-box" onclick="scroll2('card-knowledge')"><div class="icon-circle"><i class="bi bi-book text-warning"></i></div><small>ความรู้<br>${g.know}</small></div>
+        const lv = g.level;
+        document.getElementById('card-score').innerHTML=`
+        <div class="card-box">
+            <div class="d-flex justify-content-between"><h5 class="card-title m-0"><i class="bi bi-trophy-fill text-warning"></i> คะแนนตระหนักรู้</h5><i class="bi bi-info-circle text-muted" onclick="MODALS['modalInfo'].show()"></i></div>
+            <div class="text-center my-3"><div class="display-3 fw-black text-danger" style="line-height:1">${g.total}</div><div class="text-muted small">คะแนนรวม</div></div>
+            
+            <div class="level-bar">
+                <div class="level-segment ${lv.includes('ประถม')?'active':''}" style="width:33%; background:#28a745;">ประถม</div>
+                <div class="level-segment ${lv.includes('มัธยม')?'active':''}" style="width:33%; background:#0d6efd;">มัธยม</div>
+                <div class="level-segment ${lv.includes('ปริญญา')?'active':''}" style="width:34%; background:#0dcaf0;">ปริญญา</div>
+            </div>
+            <div class="d-flex justify-content-between text-muted small mb-3"><span>Level: ${lv}</span><span>อันดับ #${g.rank}</span></div>
+            
+            <div class="row text-center">
+                <div class="col-3 score-box" onclick="scroll2('card-risk')"><div class="icon-circle"><i class="bi bi-heart-pulse text-danger"></i></div><small>ใส่ใจ<br>${g.check}</small></div>
+                <div class="col-3 score-box" onclick="scroll2('card-hospital')"><div class="icon-circle"><i class="bi bi-backpack text-primary"></i></div><small>เตรียม<br>${g.prep}</small></div>
+                <div class="col-3 score-box" onclick="scroll2('card-sticker')"><div class="icon-circle"><i class="bi bi-share text-success"></i></div><small>บอกต่อ<br>${g.sticker}</small></div>
+                <div class="col-3 score-box" onclick="scroll2('card-knowledge')"><div class="icon-circle"><i class="bi bi-book text-warning"></i></div><small>ความรู้<br>${g.know}</small></div>
+            </div>
         </div>`;
 
-        // 3. Risk
         renderRiskCard(DATA.userProfile, r.assessmentCount);
 
         // 6. Sticker
-        document.getElementById('card-sticker').innerHTML = `
-        <div class="card-box text-center">
-            <h5 class="card-title justify-content-center mb-3"><i class="bi bi-line text-success"></i> แชร์สติกเกอร์</h5>
-            <div class="display-4 fw-bold text-success mb-2">${r.stickerCount}</div>
-            <p class="text-muted small">ครั้งที่ส่งต่อความห่วงใย</p>
-            <a href="${LINKS.STICKER}" class="btn btn-red btn-pill w-100">แชร์ใหม่</a>
-        </div>`;
+        document.getElementById('card-sticker').innerHTML=`<div class="card-box text-center"><h5 class="card-title justify-content-center mb-3"><i class="bi bi-line text-success"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${r.stickerCount}</div><a href="${LINKS.STICKER}" class="btn btn-red btn-pill w-100">แชร์ใหม่</a></div>`;
 
         // 7. Knowledge
         const k = r.knowledgeData;
-        document.getElementById('card-knowledge').innerHTML = `
-        <div class="card-box">
-            <h5 class="card-title"><i class="bi bi-journal-text text-primary"></i> ประวัติการเรียนรู้</h5>
-            <div class="row text-center my-3">
-                <div class="col-4 border-end"><small class="text-muted">ก่อนเรียน</small><div class="fs-4 fw-bold">${k.pre}</div></div>
-                <div class="col-4 border-end"><small class="text-muted">หลังเรียน</small><div class="fs-4 fw-bold text-success">${k.post}</div></div>
-                <div class="col-4"><small class="text-muted">ทบทวน</small><div class="fs-4 fw-bold text-warning">${k.review}</div></div>
-            </div>
-            <div class="text-center bg-white border rounded p-2 mb-3">คะแนนรวมสูงสุด: <span class="fw-bold text-danger">${k.total}</span> / 40</div>
-            <a href="${LINKS.KNOWLEDGE}" class="btn btn-outline w-100 btn-pill">ทบทวนบทเรียน</a>
-        </div>`;
+        document.getElementById('card-knowledge').innerHTML=`<div class="card-box"><h5 class="card-title"><i class="bi bi-journal-text text-primary"></i> ประวัติการเรียนรู้</h5><div class="row text-center my-3"><div class="col-4 border-end"><small class="text-muted">ก่อน</small><div class="fs-4 fw-bold">${k.pre}</div></div><div class="col-4 border-end"><small class="text-muted">หลัง</small><div class="fs-4 fw-bold text-success">${k.post}</div></div><div class="col-4"><small class="text-muted">ทบทวน</small><div class="fs-4 fw-bold text-warning">${k.review}</div></div></div><div class="text-center bg-white border rounded p-2 mb-3">คะแนนรวมสูงสุด: <span class="fw-bold text-danger">${k.total}</span> / 40</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline w-100 btn-pill">ทบทวนบทเรียน</a></div>`;
     }
 
-    function renderRiskCard(p, count) {
+    function renderRiskCard(p, cnt) {
         if(!p) return;
         const s = parseFloat(p.thai_cv_risk_score||0);
         let c='#28a745', t='เสี่ยงต่ำ';
         if(s>=10){c='#ffc107';t='ปานกลาง';} if(s>=20){c='#fd7e14';t='สูง';} if(s>=30){c='#dc3545';t='อันตราย';}
         
-        const rHtml = `
+        const its = [
+            {i:'bi-gender-ambiguous',v:p.gender==1?'ชาย':'หญิง'}, {i:'bi-calendar',v:p.age+' ปี'},
+            {i:'bi-fire',v:p.smoke?'สูบ':'ไม่'}, {i:'bi-droplet',v:p.dm?'เบาหวาน':'ไม่เป็น'},
+            {i:'bi-speedometer2',v:p.sbp+' mmHg'}, {i:'bi-heart',v:p.cholesterol+' mg'},
+            {i:'bi-arrows-expand',v:p.waist+' cm'}, {i:'bi-rulers',v:p.height+' cm'}
+        ].map(x=>`<div class="risk-item"><i class="bi ${x.i}"></i> ${x.v}</div>`).join('');
+
+        document.getElementById('card-risk').innerHTML=`
         <div class="card-box" style="border-top: 5px solid ${c}">
-            <div class="d-flex justify-content-between mb-2">
-                <h5 class="card-title"><i class="bi bi-activity text-danger"></i> ประเมินความเสี่ยง</h5>
-                <span class="badge bg-secondary rounded-pill pt-2">${count} ครั้ง</span>
-            </div>
-            <div class="text-center my-3">
-                <div class="display-3 fw-bold" style="color:${c}">${s.toFixed(1)}%</div>
-                <div class="fs-4 fw-bold" style="color:${c}">${t}</div>
-            </div>
-            <div class="risk-grid">
-                <div class="risk-box"><i class="bi bi-gender-ambiguous"></i> ${p.gender==1?'ชาย':'หญิง'}</div>
-                <div class="risk-box"><i class="bi bi-calendar"></i> อายุ ${p.age}</div>
-                <div class="risk-box"><i class="bi bi-fire"></i> ${p.smoke?'สูบ':'ไม่'}</div>
-                <div class="risk-box"><i class="bi bi-droplet"></i> เบาหวาน: ${p.dm?'เป็น':'ไม่'}</div>
-                <div class="risk-box"><i class="bi bi-speedometer2"></i> SBP: ${p.sbp}</div>
-                <div class="risk-box"><i class="bi bi-heart"></i> Chol: ${p.cholesterol}</div>
-                <div class="risk-box"><i class="bi bi-arrows-expand"></i> เอว: ${p.waist}</div>
-                <div class="risk-box"><i class="bi bi-rulers"></i> สูง: ${p.height}</div>
-                <div class="risk-box col-span-2 w-100"><i class="bi bi-hospital"></i> U/D: ${p['u/d']||'-'}</div>
-            </div>
-            <a href="${LINKS.REGIS}" class="btn btn-red btn-pill w-100 mt-3" style="background:${c}; border:none;">ประเมินใหม่</a>
+            <div class="d-flex justify-content-between mb-2"><h5 class="card-title m-0"><i class="bi bi-activity text-danger"></i> ประเมินความเสี่ยง</h5><span class="badge bg-secondary rounded-pill pt-2">${cnt} ครั้ง</span></div>
+            <div class="text-center my-3"><div class="display-3 fw-bold" style="color:${c}">${s.toFixed(1)}%</div><div class="fs-4 fw-bold" style="color:${c}">${t}</div></div>
+            <div class="risk-grid">${its}<div class="risk-item col-span-2 w-100"><i class="bi bi-hospital"></i> U/D: ${p.ud||'-'}</div></div>
+            <a href="${LINKS.REGIS}" class="btn btn-red btn-pill w-100 mt-3" style="background:${c};border:none;">ประเมินใหม่</a>
         </div>`;
-        document.getElementById('card-risk').innerHTML = rHtml;
     }
 
     function renderHospitalCard(d, emg) {
         const km = d ? d.km : '?';
         const tm = d ? d.time : '?';
-        document.getElementById('card-hospital').innerHTML = `
+        document.getElementById('card-hospital').innerHTML=`
         <div class="card-box">
             <h5 class="card-title"><i class="bi bi-hospital text-danger"></i> การเตรียมพร้อม (รพ.สวี)</h5>
-            <div class="hospital-flow">
-                <div class="text-center"><i class="bi bi-person-wheelchair display-4 text-dark"></i></div>
-                <div class="arrow-line"></div>
-                <div class="text-center"><i class="bi bi-hospital display-4 text-danger"></i><div class="small fw-bold">รพ.สวี</div></div>
-            </div>
+            <div class="hospital-flow"><div class="text-center"><i class="bi bi-person-wheelchair display-4 text-dark"></i></div><div class="arrow-long"></div><div class="text-center"><i class="bi bi-hospital display-4 text-danger"></i><div class="small fw-bold">รพ.สวี</div></div></div>
             <div class="text-center mb-3 fw-bold fs-5">${km} กม. / ${tm} นาที</div>
-            <div class="bg-white p-3 rounded border mb-3">
-                <div class="d-flex justify-content-between mb-2"><span>คนดูแล:</span> <b class="text-primary">${emg.help||'-'}</b></div>
-                <div class="d-flex justify-content-between"><span>ตัดสินใจ:</span> <b class="text-primary">${emg.decision||'-'}</b></div>
-            </div>
-            <div class="row g-2">
-                <div class="col-6"><button class="btn btn-outline btn-pill w-100" onclick="openEditEmg('${emg.help}','${emg.decision}')">แก้ไขข้อมูล</button></div>
-                <div class="col-6"><button class="btn btn-red btn-pill w-100" onclick="pinHome(false)">ปักหมุดใหม่</button></div>
-            </div>
+            <div class="bg-white p-3 rounded border mb-3"><div class="d-flex justify-content-between mb-2"><span>คนดูแล:</span> <b class="text-primary">${emg.help||'-'}</b></div><div class="d-flex justify-content-between"><span>ตัดสินใจ:</span> <b class="text-primary">${emg.decision||'-'}</b></div></div>
+            <div class="row g-2"><div class="col-6"><button class="btn btn-outline btn-pill w-100" onclick="openEditEmg('${emg.help}','${emg.decision}')">แก้ไขข้อมูล</button></div><div class="col-6"><button class="btn btn-red btn-pill w-100" onclick="pinHome(false)">ปักหมุดใหม่</button></div></div>
         </div>`;
     }
 
     function renderHelperCard(l) {
         if(!l) return;
-        document.getElementById('card-helper').innerHTML = `
+        document.getElementById('card-helper').innerHTML=`
         <div class="card-box">
-            <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือ</h5>
-            <div class="d-flex align-items-center py-3 border-bottom">
-                <i class="bi bi-hospital text-danger fs-1 me-3"></i>
-                <div><div class="fw-bold">${l.pcu}</div></div>
-            </div>
-            <div class="d-flex align-items-center py-3 border-bottom">
-                <i class="bi bi-person-badge text-dark fs-1 me-3"></i>
-                <div class="flex-grow-1"><div class="fw-bold">ผู้ใหญ่บ้าน ${l.area}</div></div>
-                <button class="btn btn-success rounded-circle" onclick="call('${l.headman_tel}')"><i class="bi bi-telephone"></i></button>
-            </div>
-            <div class="d-flex align-items-center py-3">
-                <i class="bi bi-heart-pulse text-warning fs-1 me-3 scan-anim"></i>
-                <div><div class="fw-bold">อสม. ในเขต ${l.area}</div><div class="text-muted small">จำนวน ${l.vhvCount} ท่าน</div></div>
-            </div>
+            <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
+            <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital text-danger fs-1 me-3"></i><div class="fs-5 fw-bold">${l.pcu}</div></div>
+            <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge text-dark fs-1 me-3"></i><div class="flex-grow-1 fs-5 fw-bold">ผู้ใหญ่บ้าน ${l.area}</div><button class="btn btn-success rounded-circle" onclick="call('${l.headman_tel}')"><i class="bi bi-telephone"></i></button></div>
+            <div class="d-flex align-items-center py-3"><i class="bi bi-heart-pulse text-warning fs-1 me-3 scan-anim"></i><div class="fs-5 fw-bold">อสม. ในเขต (${l.vhvCount} ท่าน)</div></div>
         </div>`;
     }
 
-    // VHV RENDER
+    // VHV TAB
     function renderVhvTab() {
         const v = DATA.vhvProfile;
-        const verify = v.verified ? '<i class="bi bi-patch-check-fill text-primary ms-1"></i>' : '';
+        const vf = v.verified ? '<i class="bi bi-patch-check-fill text-primary ms-1"></i>' : '';
         const warn = (!v.asm_home || v.asm_home.length < 5) ? '<div class="alert alert-danger mt-3 py-2 text-center small">⚠ ท่านยังไม่ปักหมุดบ้าน</div>' : '';
         
-        document.getElementById('vhv-profile').innerHTML = `
+        document.getElementById('vhv-profile').innerHTML=`
         <div class="d-flex align-items-center mb-3">
             <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-            <div>
-                <h4 class="mb-1 text-gold-dark fw-bold">อสม. ${v.name} ${verify}</h4>
-                <span class="badge-vhv">${v.area}</span>
-                <div class="text-muted small mt-1">ลงทะเบียน: ${DATA.userProfile.regisDate}</div>
-            </div>
+            <div><h4 class="mb-1 text-warning fw-bold">อสม. ${v.name} ${vf}</h4><span class="badge-vhv">${v.area}</span><div class="text-muted small mt-1">ลงทะเบียน: ${DATA.userProfile.regisDate}</div></div>
             <div class="ms-auto" onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-4 text-muted"></i></div>
         </div>
-        ${warn}
-        <button class="btn btn-outline btn-pill w-100" onclick="pinAsm()">ปักหมุดบ้าน อสม.</button>`;
+        ${warn} <button class="btn btn-outline btn-pill w-100" onclick="pinAsm()">ปักหมุดบ้าน อสม.</button>`;
     }
 
     async function loadVhvData() {
         const r = await fetch(`${API_URL}?action=getVhvData&userId=${PROFILE.userId}`).then(res=>res.json());
         const s = r.vhvScore;
         
-        // Perf
-        document.getElementById('vhv-perf').innerHTML = `
-        <div class="card-header-flex"><h5 class="card-title">ผลงาน อสม.</h5><i class="bi bi-info-circle text-muted" onclick="MODALS['modalInfo'].show()"></i></div>
-        <div class="text-center my-3"><div class="display-3 fw-bold text-gold-dark">${s.total}</div><small>คะแนนรวม</small></div>
+        document.getElementById('vhv-perf').innerHTML=`
+        <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0 text-warning">ผลงาน อสม.</h5><i class="bi bi-info-circle text-muted" onclick="MODALS['modalInfo'].show()"></i></div>
+        <div class="text-center my-3"><div class="display-3 fw-black text-warning">${s.total}</div><small>คะแนนรวม</small></div>
         <div class="row g-2 text-center">
-            <div class="col-3"><div class="vhv-stat"><small>บอกต่อ</small><div class="fw-bold">${s.breakdown.s}</div></div></div>
-            <div class="col-3"><div class="vhv-stat"><small>สติกเกอร์</small><div class="fw-bold">${s.breakdown.q}</div></div></div>
-            <div class="col-3"><div class="vhv-stat"><small>เยี่ยมบ้าน</small><div class="fw-bold">${s.breakdown.v}</div></div></div>
-            <div class="col-3"><div class="vhv-stat"><small>รายงาน</small><div class="fw-bold">${s.breakdown.r}</div></div></div>
+            <div class="col-3"><div class="vhv-stat-box"><small>บอกต่อ</small><div class="fw-bold">${s.breakdown.s}</div></div></div>
+            <div class="col-3"><div class="vhv-stat-box"><small>สติกเกอร์</small><div class="fw-bold">${s.breakdown.q}</div></div></div>
+            <div class="col-3"><div class="vhv-stat-box"><small>เยี่ยมบ้าน</small><div class="fw-bold">${s.breakdown.v}</div></div></div>
+            <div class="col-3"><div class="vhv-stat-box"><small>รายงาน</small><div class="fw-bold">${s.breakdown.r}</div></div></div>
         </div>`;
 
-        // Leader
-        let lHtml = '';
+        let lb = '';
         r.leaderboards.slice(0,3).forEach((u,i) => {
-            lHtml += `<div class="vhv-rank-card"><div class="vhv-rank-num">#${i+1}</div><img src="${u.pic||'https://placehold.co/40'}" class="rounded-circle me-3" style="width:40px;height:40px;"><div class="flex-grow-1"><div class="fw-bold">${u.name}</div><div class="badge-vhv" style="font-size:0.7rem;padding:2px 8px;">${u.area}</div></div><div class="fw-bold text-gold-dark">${u.score}</div></div>`;
+            lb += `<div class="vhv-rank-row"><div class="vhv-rank-num">#${i+1}</div><img src="${u.pic||'https://placehold.co/40'}" class="rounded-circle me-3" style="width:40px;height:40px;"><div class="flex-grow-1"><div class="fw-bold">${u.name}</div><div class="badge-vhv" style="font-size:0.7rem;padding:2px 8px;">${u.area}</div></div><div class="fw-bold text-warning">${u.score}</div></div>`;
         });
-        document.getElementById('vhv-leader').innerHTML = `<h5 class="card-title mb-3">อันดับ อสม.ดีเด่น</h5>${lHtml}`;
+        document.getElementById('vhv-leader').innerHTML = `<h5 class="card-title mb-3">อันดับ อสม.ดีเด่น</h5><div style="max-height:200px;overflow-y:auto;">${lb}</div>`;
 
-        // Patients
-        let pHtml = `
-        <h5 class="card-title text-gold-dark mb-3">เยี่ยมบ้านปักหมุด</h5>
-        <div class="d-flex gap-2 mb-3"><button class="btn btn-success w-50 btn-pill" onclick="MODALS['modalQR'].show()"><i class="bi bi-qr-code"></i> มีไลน์</button><button class="btn btn-outline w-50 btn-pill" onclick="location.href='${LINKS.REGIS}?ref=${PROFILE.userId}'"><i class="bi bi-link"></i> ไม่มีไลน์</button></div>`;
-        
-        pHtml += renderGroup(r.patientList, 30, 'อันตราย (แดง)', '#dc3545');
-        pHtml += renderGroup(r.patientList, 20, 'สูง (ส้ม)', '#fd7e14');
-        pHtml += renderGroup(r.patientList, 10, 'ปานกลาง (เหลือง)', '#ffc107');
-        pHtml += renderGroup(r.patientList, 0, 'ต่ำ (เขียว)', '#28a745');
-        
-        document.getElementById('vhv-patients').innerHTML = pHtml;
+        let ph = `<h5 class="card-title text-warning mb-3">เยี่ยมบ้านปักหมุด</h5><div class="d-flex gap-2 mb-3"><button class="btn btn-success w-50 btn-pill" onclick="MODALS['modalQR'].show()"><i class="bi bi-qr-code"></i> มีไลน์</button><button class="btn btn-outline w-50 btn-pill" onclick="location.href='${LINKS.REGIS}?ref=${PROFILE.userId}'"><i class="bi bi-link"></i> ไม่มีไลน์</button></div>`;
+        ph += renderG(r.patientList, 30, 'อันตราย (แดง)', 'risk-5');
+        ph += renderG(r.patientList, 20, 'สูง (ส้ม)', 'risk-4');
+        ph += renderG(r.patientList, 10, 'ปานกลาง (เหลือง)', 'risk-2');
+        ph += renderG(r.patientList, 0, 'ต่ำ (เขียว)', 'risk-1');
+        document.getElementById('vhv-patients').innerHTML = ph;
     }
 
-    function renderGroup(list, min, label, col) {
-        const fil = list.filter(p => {
-            if(min==30) return p.risk>=30;
-            if(min==20) return p.risk>=20 && p.risk<30;
-            if(min==10) return p.risk>=10 && p.risk<20;
-            return p.risk<10;
-        });
-        if(fil.length==0) return '';
-        let h = `<div class="risk-group" style="border-color:${col}">${label}</div>`;
-        fil.forEach(p => {
-            h += `<div class="patient-item"><img src="${p.pic||'https://placehold.co/50'}" class="rounded-circle me-3" style="width:50px;height:50px;"><div class="flex-grow-1"><div class="fw-bold">${p.name}</div><div class="small text-muted">เสี่ยง ${p.risk}% | ห่าง ${p.dist} กม.</div><div class="small text-muted">อัพเดท ${p.update} วันก่อน</div></div></div>`;
-        });
+    function renderG(l, min, txt, cls) {
+        const f = l.filter(p => { if(min==30)return p.risk>=30; if(min==20)return p.risk>=20&&p.risk<30; if(min==10)return p.risk>=10&&p.risk<20; return p.risk<10; });
+        if(f.length==0) return '';
+        let h = `<div class="risk-group-head" style="border-color:${min>=30?'#dc3545':min>=20?'#fd7e14':min>=10?'#ffc107':'#28a745'}">${txt}</div>`;
+        f.forEach(p => { h += `<div class="patient-row ${cls}"><img src="${p.pic}" class="rounded-circle me-3" style="width:50px;height:50px;"><div class="flex-grow-1"><div class="fw-bold">${p.name}</div><small class="text-muted">เสี่ยง ${p.risk}% | ห่าง ${p.dist} กม.</small><br><small class="text-muted" style="font-size:0.75rem">อัพเดท ${p.update} วันก่อน</small></div></div>`; });
         return h;
     }
 
@@ -503,29 +415,19 @@
         }, ()=>window.location.href=`tel:${TARGET_TEL}`);
     }
     function openEditEmg(h,d){ document.getElementById('inpHelp').value=h||'อยู่ตัวคนเดียว'; document.getElementById('inpDec').value=d||'รอดูอาการ'; MODALS['modalEditEmg'].show(); }
-    function saveEmergency(){
+    function saveEmg(){
         showLoad(true);
         const d = { userId:PROFILE.userId, help:document.getElementById('inpHelp').value, decision:document.getElementById('inpDec').value };
         fetch(API_URL, {method:'POST', mode:'no-cors', body:JSON.stringify({action:'updateEmergencyInfo', data:d})})
-        .then(()=>{ 
-            showLoad(false); 
-            MODALS['modalEditEmg'].hide();
-            // Partial Update UI
-            renderHospitalCard(DATA.homeDistance, d);
-        });
+        .then(()=>{ showLoad(false); MODALS['modalEditEmg'].hide(); renderHospitalCard(DATA.homeDistance, d); });
     }
-    function pinHome(save){
-        if(save) MODALS['modalPin'].hide();
+    function pinHome(s){
+        if(s) MODALS['modalPin'].hide();
         showLoad(true);
         navigator.geolocation.getCurrentPosition(p=>{
             const d = { userId:PROFILE.userId, type:'บ้าน', latlong:`${p.coords.latitude},${p.coords.longitude}`, distance:0, duration:0 };
             fetch(API_URL, {method:'POST', body:JSON.stringify({action:'saveNewLocation', data:d})})
-            .then(r=>r.json()).then(res=>{
-                showLoad(false);
-                alert('ปักหมุดเรียบร้อย');
-                // Partial update
-                renderHospitalCard({km:res.newDist, time:res.newDur}, DATA.emergencyInfo);
-            });
+            .then(r=>r.json()).then(res=>{ showLoad(false); alert('ปักหมุดเรียบร้อย'); renderHospitalCard({km:res.newDist, time:res.newDur}, DATA.emergencyInfo); });
         }, ()=>{ showLoad(false); alert('ไม่สามารถระบุพิกัดได้'); });
     }
     function pinAsm(){
