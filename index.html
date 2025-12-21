@@ -61,7 +61,7 @@
         }
         .card-box.vhv-style { background-color: var(--bg-card); border: 1px solid var(--border-gold); }
         
-        /* Titles Black as requested */
+        /* Titles Black */
         .card-title { font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #333; }
         .card-title i { font-size: 1.6rem; }
 
@@ -80,7 +80,7 @@
         .lvl-3 { background: linear-gradient(90deg, #28a745, #ffc107, #fd7e14); } 
         .lvl-4 { background: linear-gradient(90deg, #28a745, #ffc107, #fd7e14, #dc3545); } 
 
-        /* Mini Cards for Scores */
+        /* Mini Cards for Scores (Fixed Height & Alignment) */
         .score-item-box { background: #f8f9fa; border-radius: 15px; padding: 10px 5px; text-align: center; height: 100%; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .score-icon { font-size: 1.8rem; margin-bottom: 2px; }
         .score-num { font-weight: 900; font-size: 1.4rem; line-height: 1.1; }
@@ -102,7 +102,7 @@
         .info-time { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 0.9rem; color: #d32f2f; white-space: nowrap; }
 
         /* VHV */
-        .vhv-header-sticky { position: sticky; top: 55px; background: var(--bg-card); z-index: 10; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .vhv-header-sticky { position: sticky; top: 0; background: var(--bg-card); z-index: 10; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
         .vhv-rank-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
         .rank-badge { width: 25px; height: 25px; background: #ccc; color: white; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold; }
         .rank-1 { background: #FFD700; } .rank-2 { background: #C0C0C0; } .rank-3 { background: #CD7F32; }
@@ -189,7 +189,7 @@
             <div class="card-loader text-gold"><div class="spinner-border"></div></div>
         </div>
         
-        <div id="vhv-leader" class="card-box vhv-style" style="max-height:400px; overflow-y:auto; position:relative;">
+        <div id="vhv-leader" class="card-box vhv-style" style="max-height:400px; overflow-y:auto;">
              <div class="vhv-header-sticky"><h5 class="card-title m-0"><i class="bi bi-award-fill text-gold"></i> อันดับ อสม.ดีเด่น</h5></div>
              <div id="vhv-leader-content"><div class="card-loader text-gold"><div class="spinner-border"></div></div></div>
         </div>
@@ -230,8 +230,6 @@
 
 <div class="modal fade" id="modalCall" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 text-center p-4 border-0"><i class="bi bi-shield-lock-fill text-secondary display-4 mb-2"></i><h4 class="fw-bold">ขออนุญาตโทรออก</h4><p class="text-muted small mb-4">ระบบจะบันทึกประวัติการโทรเพื่อเป็นข้อมูลการช่วยเหลือ (PDPA)</p><div class="d-grid gap-2"><button class="btn btn-success btn-pill" onclick="execCall()">ยินยอมและโทรออก</button><button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยกเลิก</button></div></div></div></div>
 
-<!-- (Other modals like EditEmg, EditVhv, PinUser, PinAsm, QR, Info are similar to before, just styling updates) -->
-<!-- For brevity, keeping them but assuming they are present in final implementation with updated styles -->
 <div class="modal fade" id="modalEditEmg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">แก้ไขข้อมูลฉุกเฉิน</h5></div><div class="modal-body pt-2"><div class="mb-3"><label class="text-muted mb-1">คนดูแลที่บ้าน</label><select class="form-select" id="inpHelp"></select></div><div class="mb-4"><label class="text-muted mb-1">การตัดสินใจ</label><select class="form-select" id="inpDec"><option>รอดูอาการ</option><option>โทรให้ญาติมาดู</option><option>ไปคลินิก-อนามัย</option><option>รีบไป รพ.เอง</option><option>โทร 1669 ให้รถมารับ</option></select></div><button class="btn btn-red btn-pill w-100" onclick="saveEmg()">บันทึกข้อมูล</button></div></div></div></div>
 <div class="modal fade" id="modalPinUser" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-4 text-center"><i class="bi bi-geo-alt-fill text-danger display-3 mb-3"></i><h4 class="fw-bold">ยืนยันการปักหมุด</h4><p class="text-muted">เลือกประเภทสถานที่</p><div class="d-flex justify-content-center gap-2 mb-3"><input type="radio" class="btn-check" name="pt" id="pt1" value="บ้าน" checked><label class="btn btn-outline-danger" for="pt1">บ้าน</label><input type="radio" class="btn-check" name="pt" id="pt2" value="ทางผ่าน"><label class="btn btn-outline-secondary" for="pt2">ทางผ่าน</label></div><button class="btn btn-red btn-pill w-100" onclick="execPinUser()">ยืนยัน</button></div></div></div>
 <div class="modal fade" id="modalScoreInfo" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 rounded-4 text-center"><i class="bi bi-trophy-fill text-danger display-4 mb-3"></i><h5 class="fw-bold">คะแนนความตระหนักรู้</h5><p class="text-muted">เราอยากให้ชาวสวีมีความตระหนักถึงอาการของสโตรก ร่วมกิจกรรมกับเราเพื่อเพิ่มคะแนน</p><button class="btn btn-outline w-100 btn-pill" data-bs-dismiss="modal">ปิด</button></div></div></div>
@@ -252,13 +250,26 @@
     window.onload = async () => {
         initDropdowns();
         ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
+        
         try {
             await liff.init({liffId:LIFF_ID});
-            if(!liff.isLoggedIn()){ liff.login(); return; }
+            if(!liff.isLoggedIn()){ 
+                liff.login(); 
+                return; 
+            }
             PROFILE = await liff.getProfile();
             USER_ID = PROFILE.userId;
-            loadBasicInfo(); loadGamification();
-        } catch(e){ console.error(e); }
+        } catch(e){ 
+            console.error("LIFF Error:", e);
+            // Fallback: Use mock data if LIFF initialization fails
+            USER_ID = 'TEST_USER_ID'; 
+            PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
+            alert("โหมดทดสอบ: ไม่สามารถเชื่อมต่อ LINE ได้");
+        }
+        
+        // Proceed even if LIFF fails (using mock or real USER_ID)
+        loadBasicInfo(); 
+        loadGamification();
     };
 
     function setTab(t) {
@@ -271,92 +282,98 @@
     }
 
     async function loadBasicInfo() {
-        const res = await fetch(`${API_URL}?action=getBasicInfo&userId=${USER_ID}`).then(r=>r.json());
-        DATA = {...DATA, ...res};
-        const u = DATA.userProfile;
+        try {
+            const res = await fetch(`${API_URL}?action=getBasicInfo&userId=${USER_ID}`).then(r=>r.json());
+            DATA = {...DATA, ...res};
+            const u = DATA.userProfile;
 
-        document.getElementById('card-profile').innerHTML = `
-            <div class="d-flex align-items-center">
-                <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-                <div class="flex-grow-1"><h4 class="fw-bold mb-1">${u.name}</h4><div class="text-muted small">${u.telephone||'-'}</div><span class="badge-regis"><i class="bi bi-clock"></i> ลงทะเบียน: ${u.regisDate}</span></div>
-                <button class="btn btn-outline rounded-circle" style="width:45px;height:45px;" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
-            </div>`;
+            document.getElementById('card-profile').innerHTML = `
+                <div class="d-flex align-items-center">
+                    <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
+                    <div class="flex-grow-1"><h4 class="fw-bold mb-1">${u.name}</h4><div class="text-muted small">${u.telephone||'-'}</div><span class="badge-regis"><i class="bi bi-clock"></i> ลงทะเบียน: ${u.regisDate}</span></div>
+                    <button class="btn btn-outline rounded-circle" style="width:45px;height:45px;" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
+                </div>`;
 
-        renderRiskCard(u, DATA.assessmentCount);
-        renderHospitalCard();
-        
-        const l = DATA.communityLeaders;
-        document.getElementById('card-helper').innerHTML = `
-            <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
-            <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital fs-1 text-danger me-3"></i><div><div class="fw-bold fs-5">${l.pcu}</div><div class="small text-muted">รพ.สต. ในพื้นที่</div>${l.pcuTel?`<button class="btn btn-sm btn-outline-success rounded-pill mt-1" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone"></i> โทร</button>`:''}</div></div>
-            <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">ผู้ใหญ่บ้าน</div><div class="small text-muted">${l.area} (${l.village_name})</div><div class="small text-muted">${l.village_headman||'-'}</div></div><button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button></div>
-            <div class="d-flex align-items-center py-3"><div class="me-3 fw-bold fs-2 text-warning">${l.vhvCount}</div><div class="fw-bold text-secondary">ท่าน<br>อสม. ในเขต</div></div>`;
+            renderRiskCard(u, DATA.assessmentCount);
+            renderHospitalCard();
+            
+            const l = DATA.communityLeaders;
+            document.getElementById('card-helper').innerHTML = `
+                <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
+                <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital fs-1 text-danger me-3"></i><div><div class="fw-bold fs-5">${l.pcu}</div><div class="small text-muted">รพ.สต. ในพื้นที่</div>${l.pcuTel?`<button class="btn btn-sm btn-outline-success rounded-pill mt-1" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone"></i> โทร</button>`:''}</div></div>
+                <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">ผู้ใหญ่บ้าน</div><div class="small text-muted">${l.area} (${l.village_name})</div><div class="small text-muted">${l.village_headman||'-'}</div></div><button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button></div>
+                <div class="d-flex align-items-center py-3"><div class="me-3 fw-bold fs-2 text-warning">${l.vhvCount}</div><div class="fw-bold text-secondary">ท่าน<br>อสม. ในเขต</div></div>`;
 
-        if(!DATA.isVhv && (!DATA.homeDistance || DATA.homeDistance.km == 0)) MODALS.modalPinUser.show();
-        if(DATA.isVhv) loadVhvData();
+            if(!DATA.isVhv && (!DATA.homeDistance || DATA.homeDistance.km == 0)) MODALS.modalPinUser.show();
+            if(DATA.isVhv) loadVhvData();
+        } catch(e) { console.error(e); }
     }
 
     async function loadGamification() {
-        const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
-        DATA = {...DATA, ...res};
-        const g = DATA.gamification;
-        let w = Math.min(100, Math.max(5, g.total));
-        let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
+        try {
+            const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
+            DATA = {...DATA, ...res};
+            const g = DATA.gamification;
+            let w = Math.min(100, Math.max(5, g.total));
+            let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
 
-        document.getElementById('card-score').innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-1"><h5 class="card-title m-0"><i class="bi bi-trophy-fill text-red"></i> คะแนนความตระหนักรู้สู้สโตรก</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalScoreInfo.show()"></i></div>
-            <div class="level-bar"><div class="level-fill ${lvlC}" style="width:${w}%"></div><div class="level-segment" style="width:20%">อนุบาล<br>สโตรก</div><div class="level-segment" style="width:20%">ประถม<br>สโตรก</div><div class="level-segment" style="width:20%">มัธยม<br>สโตรก</div><div class="level-segment" style="width:40%">ปริญญา<br>สโตรก</div></div>
-            <div class="text-center fw-bold text-muted mb-4 fs-5">คะแนนรวม ${g.total}</div>
-            <div class="row g-2">
-                <div class="col-3"><div class="score-item-box"><i class="bi bi-heart-fill score-icon text-danger"></i><div class="score-num">${g.care}</div><div class="score-label">ใส่ใจ</div></div></div>
-                <div class="col-3"><div class="score-item-box"><i class="bi bi-truck-front-fill score-icon text-primary"></i><div class="score-num">${g.prep}</div><div class="score-label">เตรียมพร้อม</div></div></div>
-                <div class="col-3"><div class="score-item-box"><i class="bi bi-share-fill score-icon text-success"></i><div class="score-num">${g.share}</div><div class="score-label">บอกต่อ</div></div></div>
-                <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
-            </div>`;
+            document.getElementById('card-score').innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-1"><h5 class="card-title m-0"><i class="bi bi-trophy-fill text-red"></i> คะแนนความตระหนักรู้สู้สโตรก</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalScoreInfo.show()"></i></div>
+                <div class="level-bar"><div class="level-fill ${lvlC}" style="width:${w}%"></div><div class="level-segment" style="width:20%">อนุบาล<br>สโตรก</div><div class="level-segment" style="width:20%">ประถม<br>สโตรก</div><div class="level-segment" style="width:20%">มัธยม<br>สโตรก</div><div class="level-segment" style="width:40%">ปริญญา<br>สโตรก</div></div>
+                <div class="text-center fw-bold text-muted mb-4 fs-5">คะแนนรวม ${g.total}</div>
+                <div class="row g-2">
+                    <div class="col-3"><div class="score-item-box"><i class="bi bi-heart-fill score-icon text-danger"></i><div class="score-num">${g.care}</div><div class="score-label">ใส่ใจ</div></div></div>
+                    <div class="col-3"><div class="score-item-box"><i class="bi bi-truck-front-fill score-icon text-primary"></i><div class="score-num">${g.prep}</div><div class="score-label">เตรียมพร้อม</div></div></div>
+                    <div class="col-3"><div class="score-item-box"><i class="bi bi-share-fill score-icon text-success"></i><div class="score-num">${g.share}</div><div class="score-label">บอกต่อ</div></div></div>
+                    <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
+                </div>`;
 
-        document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
-        document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${DATA.knowledgeData.total}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
+            document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
+            document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${DATA.knowledgeData.total}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
+        } catch(e) { console.error(e); }
     }
 
     async function loadVhvData() {
-        const res = await fetch(`${API_URL}?action=getVhvData&userId=${USER_ID}`).then(r=>r.json());
-        DATA = {...DATA, ...res};
-        const v = DATA.vhvProfile;
-        const s = DATA.vhvScore;
+        try {
+            const res = await fetch(`${API_URL}?action=getVhvData&userId=${USER_ID}`).then(r=>r.json());
+            DATA = {...DATA, ...res};
+            const v = DATA.vhvProfile;
+            const s = DATA.vhvScore;
 
-        let pinBtn = (!v.asm_home || v.asm_home.length<5) ? 
-            `<button class="btn btn-warning btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">⚠ ท่านยังไม่ปักหมุดบ้าน อสม. โปรดคลิก</button>` : 
-            `<button class="btn btn-outline-secondary btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">แก้ไขหมุดบ้าน อสม.</button>`;
+            let pinBtn = (!v.asm_home || v.asm_home.length<5) ? 
+                `<button class="btn btn-warning btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">⚠ ท่านยังไม่ปักหมุดบ้าน อสม. โปรดคลิก</button>` : 
+                `<button class="btn btn-outline-secondary btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">แก้ไขหมุดบ้าน อสม.</button>`;
 
-        document.getElementById('vhv-profile').innerHTML = `
-            <div class="d-flex align-items-center">
-                <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-                <div class="flex-grow-1"><h5 class="fw-bold text-gold mb-1">อสม. ${v.name} ${v.verified?'<i class="bi bi-patch-check-fill text-primary"></i>':''}</h5><span class="badge-area">${v.area}</span></div>
-                <div onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-3 text-secondary"></i></div>
-            </div>
-            ${pinBtn}
-            <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()">แชร์นามบัตร อสม.</button>`;
+            document.getElementById('vhv-profile').innerHTML = `
+                <div class="d-flex align-items-center">
+                    <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
+                    <div class="flex-grow-1"><h5 class="fw-bold text-gold mb-1">อสม. ${v.name} ${v.verified?'<i class="bi bi-patch-check-fill text-primary"></i>':''}</h5><span class="badge-area">${v.area}</span></div>
+                    <div onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-3 text-secondary"></i></div>
+                </div>
+                ${pinBtn}
+                <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()">แชร์นามบัตร อสม.</button>`;
 
-        document.getElementById('vhv-perf').innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0"><i class="bi bi-star-fill text-gold"></i> ผลงาน อสม.</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalVhvInfo.show()"></i></div>
-            <div class="text-center mb-4"><div class="display-3 fw-bold text-gold" style="line-height:1">${s.total}</div><small class="text-muted">คะแนนรวม</small></div>
-            <div class="row g-2 text-center">
-                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-qr-code text-gold fs-4"></i><div class="fw-bold">${s.breakdown.s}</div><small class="text-muted">บอกต่อ</small></div></div>
-                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-line text-gold fs-4"></i><div class="fw-bold">${s.breakdown.q}</div><small class="text-muted">สติกเกอร์</small></div></div>
-                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-geo-alt text-gold fs-4"></i><div class="fw-bold">${s.breakdown.v}</div><small class="text-muted">เยี่ยมบ้าน</small></div></div>
-                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-file-earmark-text text-gold fs-4"></i><div class="fw-bold">${s.breakdown.r}</div><small class="text-muted">รายงาน</small></div></div>
-            </div>`;
+            document.getElementById('vhv-perf').innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0"><i class="bi bi-star-fill text-gold"></i> ผลงาน อสม.</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalVhvInfo.show()"></i></div>
+                <div class="text-center mb-4"><div class="display-3 fw-bold text-gold" style="line-height:1">${s.total}</div><small class="text-muted">คะแนนรวม</small></div>
+                <div class="row g-2 text-center">
+                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-qr-code text-gold fs-4"></i><div class="fw-bold">${s.breakdown.s}</div><small class="text-muted">บอกต่อ</small></div></div>
+                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-line text-gold fs-4"></i><div class="fw-bold">${s.breakdown.q}</div><small class="text-muted">สติกเกอร์</small></div></div>
+                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-geo-alt text-gold fs-4"></i><div class="fw-bold">${s.breakdown.v}</div><small class="text-muted">เยี่ยมบ้าน</small></div></div>
+                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-file-earmark-text text-gold fs-4"></i><div class="fw-bold">${s.breakdown.r}</div><small class="text-muted">รายงาน</small></div></div>
+                </div>`;
 
-        let lb = DATA.leaderboards.map((u,i)=>`
-            <div class="vhv-rank-row">
-                <div class="rank-badge ${i<3?'rank-'+(i+1):'bg-light text-muted'}">${i+1}</div>
-                <img src="${u.pic||'https://placehold.co/40'}" class="rounded-circle me-3" style="width:35px;height:35px;">
-                <div class="flex-grow-1"><div class="fw-bold small">${u.name}</div><div class="text-muted" style="font-size:0.7rem;">${u.area}</div></div>
-                <div class="fw-bold text-gold small">${u.score} คะแนน</div>
-            </div>`).join('');
-        document.getElementById('vhv-leader-content').innerHTML = lb;
+            let lb = DATA.leaderboards.map((u,i)=>`
+                <div class="vhv-rank-row">
+                    <div class="rank-badge ${i<3?'rank-'+(i+1):'bg-light text-muted'}">${i+1}</div>
+                    <img src="${u.pic||'https://placehold.co/40'}" class="rounded-circle me-3" style="width:35px;height:35px;">
+                    <div class="flex-grow-1"><div class="fw-bold small">${u.name}</div><div class="text-muted" style="font-size:0.7rem;">${u.area}</div></div>
+                    <div class="fw-bold text-gold small">${u.score} คะแนน</div>
+                </div>`).join('');
+            document.getElementById('vhv-leader-content').innerHTML = lb;
 
-        renderPatientList(false);
+            renderPatientList(false);
+        } catch(e) { console.error(e); }
     }
 
     function renderPatientList(showAll) {
@@ -370,15 +387,13 @@
                 else groups['ต่ำ (เขียว)'].push(p);
             });
 
-            // Button to toggle
             if(!showAll && groups['ต่ำ (เขียว)'].length > 0) {
-                document.getElementById('patient-list-container').innerHTML = ''; // Clear first
-                // Append logic handled below
+                document.getElementById('patient-list-container').innerHTML = '';
             }
 
             Object.keys(groups).forEach(k=>{
                 if(groups[k].length>0){
-                    if(!showAll && k.includes('เขียว')) return; // Skip low risk if not toggled
+                    if(!showAll && k.includes('เขียว')) return;
                     
                     let bgBadge = k.includes('แดง')?'badge-danger':k.includes('ส้ม')?'badge-high':k.includes('เหลือง')?'badge-med':'badge-low';
                     let cardClass = k.includes('แดง')?'card-bg-danger':k.includes('ส้ม')?'card-bg-high':k.includes('เหลือง')?'card-bg-med':'card-bg-low';
