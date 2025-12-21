@@ -71,6 +71,11 @@
         .btn-gold { background: var(--theme-gold); color: var(--theme-gold-text); border: none; }
         .btn-outline { border: 2px solid #ddd; background: white; color: #555; }
         
+        /* PROFILE */
+        .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .badge-regis { font-size: 0.85rem; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 10px; color: #666; display: inline-block; margin-top: 5px; }
+        .badge-area { background-color: var(--theme-gold); color: white; border-radius: 15px; padding: 4px 12px; font-size: 0.9rem; }
+
         /* SCORE CARD */
         .level-bar { height: 35px; background: #e0e0e0; border-radius: 20px; position: relative; margin: 20px 0; overflow: hidden; display: flex; }
         .level-segment { position: relative; border-right: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #fff; font-weight: 800; height: 100%; z-index: 2;}
@@ -80,7 +85,7 @@
         .lvl-3 { background: linear-gradient(90deg, #28a745, #ffc107, #fd7e14); } 
         .lvl-4 { background: linear-gradient(90deg, #28a745, #ffc107, #fd7e14, #dc3545); } 
 
-        /* Mini Cards for Scores (Fixed Height & Alignment) */
+        /* Mini Cards for Scores */
         .score-item-box { background: #f8f9fa; border-radius: 15px; padding: 10px 5px; text-align: center; height: 100%; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .score-icon { font-size: 1.8rem; margin-bottom: 2px; }
         .score-num { font-weight: 900; font-size: 1.4rem; line-height: 1.1; }
@@ -125,6 +130,7 @@
 
         /* Loader */
         .card-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 100px; }
+        .spinner-border { width: 3rem; height: 3rem; }
         #action-loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:#333; }
         .text-red { color: var(--theme-red); } .text-gold { color: var(--theme-gold); }
     </style>
@@ -250,7 +256,6 @@
     window.onload = async () => {
         initDropdowns();
         ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
-        
         try {
             await liff.init({liffId:LIFF_ID});
             if(!liff.isLoggedIn()){ 
@@ -261,13 +266,11 @@
             USER_ID = PROFILE.userId;
         } catch(e){ 
             console.error("LIFF Error:", e);
-            // Fallback: Use mock data if LIFF initialization fails
             USER_ID = 'TEST_USER_ID'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
             alert("โหมดทดสอบ: ไม่สามารถเชื่อมต่อ LINE ได้");
         }
         
-        // Proceed even if LIFF fails (using mock or real USER_ID)
         loadBasicInfo(); 
         loadGamification();
     };
