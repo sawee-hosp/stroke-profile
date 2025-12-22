@@ -660,6 +660,14 @@
                     let cardClass = k.includes('แดง')?'card-bg-danger':k.includes('ส้ม')?'card-bg-high':k.includes('เหลือง')?'card-bg-med':'card-bg-low';
                     
                     groups[k].forEach(p=>{
+                        // Check phone permission
+                        let phoneBtn = '';
+                        if (p.phone && p.phone.length > 8) {
+                            phoneBtn = `<button class="btn-action text-success" onclick="call('${p.phone}')"><i class="bi bi-telephone-fill"></i> โทรออก</button>`;
+                        } else {
+                            phoneBtn = `<button class="btn-action text-muted" disabled><i class="bi bi-telephone-x"></i> ไม่ระบุ</button>`;
+                        }
+
                         ph += `
                         <div class="patient-card ${cardClass}">
                             <div class="patient-top">
@@ -674,7 +682,7 @@
                             </div>
                             <div class="patient-actions">
                                 <button class="btn-action text-primary" onclick="openVisitModal('${p.userId}','${p.name}')"><i class="bi bi-geo-fill"></i> ปักหมุด/เยี่ยมบ้าน</button>
-                                <button class="btn-action text-success" onclick="call('${p.phone||'1669'}')"><i class="bi bi-telephone-fill"></i> โทรออก</button>
+                                ${phoneBtn}
                             </div>
                         </div>`;
                     });
@@ -695,28 +703,36 @@
     // --- STICKER WIDGET LOGIC (ROBUST VERSION) ---
     async function loadStickerWidget() {
         try {
+            // Attempt to fetch API
             const res = await fetch(`${API_URL}?action=getStickers`);
             const stickers = await res.json();
             
+            // Get Today (Thai)
             const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
             const today = days[new Date().getDay()];
             
+            // Filter by day
             const filtered = stickers.filter(s => s.category && s.category.includes(today));
             
             if(filtered.length > 0) {
+                // Randomly select one for today
                 SELECTED_STICKER = filtered[Math.floor(Math.random() * filtered.length)];
             } else {
+                // FALLBACK LEVEL 1: If no specific day found, pick ANY from API
                 if(stickers.length > 0) {
                      SELECTED_STICKER = stickers[0]; 
                 } else {
+                     // FALLBACK LEVEL 2: Hardcoded if API empty
                      SELECTED_STICKER = FALLBACK_STICKER;
                 }
             }
         } catch(e) { 
             console.log('Sticker API load error, using fallback', e);
+            // FALLBACK LEVEL 3: Network Error
             SELECTED_STICKER = FALLBACK_STICKER;
         }
 
+        // FORCE DISPLAY if we have a sticker (which we should have due to fallback)
         if(SELECTED_STICKER) {
             document.getElementById('widget-img-src').src = SELECTED_STICKER.previewURL || SELECTED_STICKER.imageURL;
             document.getElementById('sticker-widget').style.display = 'block';
@@ -909,16 +925,26 @@
         const name = v.name || "ไม่ระบุชื่อ";
         const area = v.area || "-";
         
-        // Clean phone number for URI (remove spaces, dashes)
-        let phoneUri = "https://line.me";
-        let phoneLabel = "ไม่มีเบอร์โทร";
-        let btnColor = "#cccccc"; // Grey for disabled-look
-        
+        // Dynamic Contents Array
+        let mainContents = [
+            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" },
+            { type: "separator", margin: "sm", color: "#90caf9" },
+            { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" },
+            { type: "text", text: area, size: "xs", color: "#555555", wrap: true }
+        ];
+
+        // Add button ONLY if phone is valid
         if(v.phone && v.phone.length > 8) {
             const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
-            phoneUri = "tel:" + cleanPhone;
-            phoneLabel = "📞 " + v.phone;
-            btnColor = "#198754"; // Green for call
+            mainContents.push({ 
+                type: "button", 
+                action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, 
+                style: "primary", 
+                color: "#198754", 
+                height: "sm", 
+                margin: "md" 
+            });
         }
 
         const flex = {
@@ -933,21 +959,7 @@
                     },
                     { 
                         type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center",
-                        contents: [
-                            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" },
-                            { type: "separator", margin: "sm", color: "#90caf9" },
-                            { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" },
-                            { type: "text", text: area, size: "xs", color: "#555555", wrap: true },
-                            { 
-                                type: "button", 
-                                action: { type: "uri", label: phoneLabel, uri: phoneUri }, 
-                                style: "primary", 
-                                color: btnColor, 
-                                height: "sm", 
-                                margin: "md" 
-                            }
-                        ]
+                        contents: mainContents
                     }
                 ]
             }
