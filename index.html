@@ -71,8 +71,8 @@
         .btn-gold { background: var(--theme-gold); color: var(--theme-gold-text); border: none; }
         .btn-outline { border: 2px solid #ddd; background: white; color: #555; }
         
-        /* PROFILE */
-        .profile-pic { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        /* PROFILE PIC */
+        .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .badge-regis { font-size: 0.85rem; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 10px; color: #666; display: inline-block; margin-top: 5px; }
         .badge-area { background-color: var(--theme-gold); color: white; border-radius: 15px; padding: 4px 12px; font-size: 0.9rem; }
 
@@ -316,7 +316,10 @@
         try {
             const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
             DATA = {...DATA, ...res};
-            const g = DATA.gamification;
+            
+            // Safety Check: If gamification is missing, default it
+            const g = DATA.gamification || { total:0, level:'-', care:0, prep:0, share:0, know:0 };
+            
             let w = Math.min(100, Math.max(5, g.total));
             let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
 
@@ -331,8 +334,9 @@
                     <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
                 </div>`;
 
-            document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
-            document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${DATA.knowledgeData.total}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
+            document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount||0}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
+            const kTotal = DATA.knowledgeData ? DATA.knowledgeData.total : 0;
+            document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${kTotal}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
         } catch(e) { console.error(e); }
     }
 
