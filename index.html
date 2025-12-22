@@ -128,11 +128,18 @@
         .patient-actions { display: flex; gap: 5px; margin-top: 10px; }
         .btn-action { flex: 1; font-size: 0.85rem; padding: 5px; border-radius: 10px; border: 1px solid #ccc; background: white; }
 
-        /* Loader */
+        /* Loader & Status */
         .card-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 100px; }
         .spinner-border { width: 3rem; height: 3rem; }
         #action-loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:#333; }
         .text-red { color: var(--theme-red); } .text-gold { color: var(--theme-gold); }
+        
+        #update-toast { 
+            position: fixed; top: 70px; right: 10px; z-index: 999; 
+            background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; 
+            border-radius: 20px; font-size: 0.7rem; display: none;
+            align-items: center; gap: 5px;
+        }
 
         /* FOOTER */
         .footer { text-align: center; color: #999; font-size: 0.8rem; margin-top: 20px; padding-bottom: 20px; }
@@ -173,6 +180,7 @@
 <body>
 
 <div id="action-loader"><div class="spinner-border text-danger mb-2"></div><div>กำลังบันทึก...</div></div>
+<div id="update-toast"><div class="spinner-border spinner-border-sm"></div> กำลังอัปเดตข้อมูล...</div>
 
 <div class="nav-tabs-container">
     <div class="nav-item"><div id="tab-health" class="nav-link active" onclick="setTab('health')"><i class="bi bi-heart-pulse-fill"></i> ข้อมูลสุขภาพ</div></div>
@@ -346,8 +354,13 @@
         initDropdowns();
         ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
         
+        // 1. Load from cache IMMEDIATELY
+        loadFromCache();
+
+        // 2. Load Sticker 
         loadStickerWidget();
 
+        // 3. Init LIFF & Fetch Fresh Data
         try {
             await liff.init({liffId:LIFF_ID});
             if(!liff.isLoggedIn()){ 
@@ -356,12 +369,18 @@
             }
             PROFILE = await liff.getProfile();
             USER_ID = PROFILE.userId;
+            
+            // Render profile immediately if we have it
+            renderBasicInfoUI(); 
         } catch(e){ 
             console.error("LIFF Error:", e);
+            // Fallback for testing/dev
             USER_ID = 'TEST_USER_ID'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
+            renderBasicInfoUI();
         }
         
+        // Fetch background updates
         loadBasicInfo(); 
         loadGamification();
     };
@@ -375,24 +394,110 @@
         window.scrollTo(0,0);
     }
 
+    // --- CACHING LOGIC ---
+    function loadFromCache() {
+        const cached = localStorage.getItem('stroke_app_data');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                // Simple validation to check if it's our data
+                if (parsed && (parsed.userProfile || parsed.gamification)) {
+                    DATA = parsed;
+                    console.log("Loaded from cache");
+                    
+                    // Render available parts
+                    if (DATA.userProfile) renderBasicInfoUI();
+                    if (DATA.gamification) renderGamificationUI();
+                    if (DATA.vhvProfile) renderVhvDataUI();
+                    
+                    // Show updating toast
+                    document.getElementById('update-toast').style.display = 'flex';
+                }
+            } catch (e) {
+                console.log("Cache parse error", e);
+                localStorage.removeItem('stroke_app_data');
+            }
+        }
+    }
+
+    function saveToCache() {
+        if(DATA && Object.keys(DATA).length > 0) {
+            localStorage.setItem('stroke_app_data', JSON.stringify(DATA));
+        }
+    }
+
     async function loadBasicInfo() {
         try {
             const res = await fetch(`${API_URL}?action=getBasicInfo&userId=${USER_ID}`).then(r=>r.json());
             DATA = {...DATA, ...res};
-            const u = DATA.userProfile;
-
-            document.getElementById('card-profile').innerHTML = `
-                <div class="d-flex align-items-center">
-                    <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-                    <div class="flex-grow-1"><h4 class="fw-bold mb-1">${u.name}</h4><div class="text-muted small">${u.telephone||'-'}</div><span class="badge-regis"><i class="bi bi-clock"></i> ลงทะเบียน: ${u.regisDate}</span></div>
-                    <button class="btn btn-outline rounded-circle" style="width:45px;height:45px;" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
-                </div>`;
-
-            renderRiskCard(u, DATA.assessmentCount);
-            renderHospitalCard();
             
+            // Re-render with fresh data
+            renderBasicInfoUI();
+            
+            // Handle VHV logic
+            if (DATA.isVhv) {
+                // If we didn't have VHV data before, fetch it now
+                if (!DATA.patientList) {
+                    loadVhvData();
+                } else {
+                    // We might have stale VHV data from cache, fetch fresh in background
+                    loadVhvData();
+                }
+            } else {
+                // Not VHV, maybe hide the tab or ensure UI reflects it
+                if (!DATA.homeDistance || DATA.homeDistance.km == 0) MODALS.modalPinUser.show();
+            }
+            
+            saveToCache();
+            // Hide global loader if it was showing (optional logic, mostly handled by rendering overwriting content)
+        } catch(e) { console.error(e); }
+        finally {
+             // Hide update toast if gamification is also done or strictly here
+             // Ideally counting requests, but simple hide works for UX
+             document.getElementById('update-toast').style.display = 'none';
+        }
+    }
+
+    async function loadGamification() {
+        try {
+            const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
+            DATA = {...DATA, ...res};
+            
+            renderGamificationUI();
+            saveToCache();
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadVhvData() {
+        try {
+            const res = await fetch(`${API_URL}?action=getVhvData&userId=${USER_ID}`).then(r=>r.json());
+            DATA = {...DATA, ...res};
+            
+            renderVhvDataUI();
+            saveToCache();
+        } catch(e) { console.error(e); }
+    }
+
+    // --- RENDER FUNCTIONS (Decoupled from fetch) ---
+    
+    function renderBasicInfoUI() {
+        const u = DATA.userProfile || { name: 'Guest', role: 'General', regisDate: '-' };
+        
+        // Use LIFF profile pic if available, else DB pic, else placeholder
+        const pic = PROFILE.pictureUrl || u.pictureUrl || 'https://placehold.co/100';
+        
+        document.getElementById('card-profile').innerHTML = `
+            <div class="d-flex align-items-center">
+                <img src="${pic}" class="profile-pic me-3">
+                <div class="flex-grow-1"><h4 class="fw-bold mb-1">${u.name}</h4><div class="text-muted small">${u.telephone||'-'}</div><span class="badge-regis"><i class="bi bi-clock"></i> ลงทะเบียน: ${u.regisDate}</span></div>
+                <button class="btn btn-outline rounded-circle" style="width:45px;height:45px;" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
+            </div>`;
+
+        renderRiskCard(u, DATA.assessmentCount || 0);
+        renderHospitalCard();
+        
+        if (DATA.communityLeaders) {
             const l = DATA.communityLeaders;
-            
             let pcuHtml = `
                 <div class="d-flex align-items-center py-3 border-bottom">
                     <i class="bi bi-hospital fs-1 text-danger me-3"></i>
@@ -430,69 +535,63 @@
                         <div class="fw-bold text-warning fs-4">${l.vhvCount} คน</div>
                     </div>
                 </div>`;
-
-            if(!DATA.isVhv && (!DATA.homeDistance || DATA.homeDistance.km == 0)) MODALS.modalPinUser.show();
-            if(DATA.isVhv) loadVhvData();
-        } catch(e) { console.error(e); }
+        }
     }
 
-    async function loadGamification() {
-        try {
-            const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
-            DATA = {...DATA, ...res};
-            
-            const g = DATA.gamification || { total:0, level:'-', care:0, prep:0, share:0, know:0 };
-            
-            let w = Math.min(100, Math.max(5, g.total));
-            let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
+    function renderGamificationUI() {
+        const g = DATA.gamification || { total:0, level:'-', care:0, prep:0, share:0, know:0 };
+        
+        let w = Math.min(100, Math.max(5, g.total));
+        let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
 
-            document.getElementById('card-score').innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-1"><h5 class="card-title m-0"><i class="bi bi-trophy-fill text-red"></i> คะแนนความตระหนักรู้สู้สโตรก</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalScoreInfo.show()"></i></div>
-                <div class="level-bar"><div class="level-fill ${lvlC}" style="width:${w}%"></div><div class="level-segment" style="width:20%">อนุบาล<br>สโตรก</div><div class="level-segment" style="width:20%">ประถม<br>สโตรก</div><div class="level-segment" style="width:20%">มัธยม<br>สโตรก</div><div class="level-segment" style="width:40%">ปริญญา<br>สโตรก</div></div>
-                <div class="text-center fw-bold text-muted mb-4 fs-5">คะแนนรวม ${g.total}</div>
-                <div class="row g-2">
-                    <div class="col-3"><div class="score-item-box"><i class="bi bi-heart-fill score-icon text-danger"></i><div class="score-num">${g.care}</div><div class="score-label">ใส่ใจ</div></div></div>
-                    <div class="col-3"><div class="score-item-box"><i class="bi bi-truck-front-fill score-icon text-primary"></i><div class="score-num">${g.prep}</div><div class="score-label">เตรียมพร้อม</div></div></div>
-                    <div class="col-3"><div class="score-item-box"><i class="bi bi-share-fill score-icon text-success"></i><div class="score-num">${g.share}</div><div class="score-label">บอกต่อ</div></div></div>
-                    <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
-                </div>`;
+        document.getElementById('card-score').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-1"><h5 class="card-title m-0"><i class="bi bi-trophy-fill text-red"></i> คะแนนความตระหนักรู้สู้สโตรก</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalScoreInfo.show()"></i></div>
+            <div class="level-bar"><div class="level-fill ${lvlC}" style="width:${w}%"></div><div class="level-segment" style="width:20%">อนุบาล<br>สโตรก</div><div class="level-segment" style="width:20%">ประถม<br>สโตรก</div><div class="level-segment" style="width:20%">มัธยม<br>สโตรก</div><div class="level-segment" style="width:40%">ปริญญา<br>สโตรก</div></div>
+            <div class="text-center fw-bold text-muted mb-4 fs-5">คะแนนรวม ${g.total}</div>
+            <div class="row g-2">
+                <div class="col-3"><div class="score-item-box"><i class="bi bi-heart-fill score-icon text-danger"></i><div class="score-num">${g.care}</div><div class="score-label">ใส่ใจ</div></div></div>
+                <div class="col-3"><div class="score-item-box"><i class="bi bi-truck-front-fill score-icon text-primary"></i><div class="score-num">${g.prep}</div><div class="score-label">เตรียมพร้อม</div></div></div>
+                <div class="col-3"><div class="score-item-box"><i class="bi bi-share-fill score-icon text-success"></i><div class="score-num">${g.share}</div><div class="score-label">บอกต่อ</div></div></div>
+                <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
+            </div>`;
 
-            document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount||0}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
-            const kTotal = DATA.knowledgeData ? DATA.knowledgeData.total : 0;
-            document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${kTotal}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
-        } catch(e) { console.error(e); }
+        document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount||0}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
+        const kTotal = DATA.knowledgeData ? DATA.knowledgeData.total : 0;
+        document.getElementById('card-knowledge').innerHTML = `<h5 class="card-title justify-content-center text-warning mb-2"><i class="bi bi-journal-text"></i> คะแนนสอบความรู้</h5><div class="display-4 fw-bold text-warning mb-2">${kTotal}</div><a href="${LINKS.KNOWLEDGE}" class="btn btn-outline btn-pill w-100">ทบทวนบทเรียน</a>`;
     }
 
-    async function loadVhvData() {
-        try {
-            const res = await fetch(`${API_URL}?action=getVhvData&userId=${USER_ID}`).then(r=>r.json());
-            DATA = {...DATA, ...res};
-            const v = DATA.vhvProfile;
-            const s = DATA.vhvScore;
+    function renderVhvDataUI() {
+        if (!DATA.vhvProfile) return;
+        const v = DATA.vhvProfile;
+        const s = DATA.vhvScore || { total:0, breakdown:{s:0,q:0,v:0,r:0} };
 
-            let pinBtn = (!v.asm_home || v.asm_home.length<5) ? 
-                `<button class="btn btn-warning btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">⚠ ท่านยังไม่ปักหมุดบ้าน อสม. โปรดคลิก</button>` : 
-                `<button class="btn btn-outline-secondary btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">แก้ไขหมุดบ้าน อสม.</button>`;
+        let pinBtn = (!v.asm_home || v.asm_home.length<5) ? 
+            `<button class="btn btn-warning btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">⚠ ท่านยังไม่ปักหมุดบ้าน อสม. โปรดคลิก</button>` : 
+            `<button class="btn btn-outline-secondary btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">แก้ไขหมุดบ้าน อสม.</button>`;
 
-            document.getElementById('vhv-profile').innerHTML = `
-                <div class="d-flex align-items-center">
-                    <img src="${PROFILE.pictureUrl}" class="profile-pic me-3">
-                    <div class="flex-grow-1"><h5 class="fw-bold text-gold mb-1">อสม. ${v.name} ${v.verified?'<i class="bi bi-patch-check-fill text-primary"></i>':''}</h5><span class="badge-area">${v.area}</span></div>
-                    <div onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-3 text-secondary"></i></div>
-                </div>
-                ${pinBtn}
-                <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()">แชร์นามบัตร อสม.</button>`;
+        // Use LIFF pic if VHV profile doesn't have specific one? Usually use LIFF.
+        const pic = PROFILE.pictureUrl || 'https://placehold.co/100';
 
-            document.getElementById('vhv-perf').innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0"><i class="bi bi-star-fill text-gold"></i> ผลงาน อสม.</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalVhvInfo.show()"></i></div>
-                <div class="text-center mb-4"><div class="display-3 fw-bold text-gold" style="line-height:1">${s.total}</div><small class="text-muted">คะแนนรวม</small></div>
-                <div class="row g-2 text-center">
-                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-qr-code text-gold fs-4"></i><div class="fw-bold">${s.breakdown.s}</div><small class="text-muted">บอกต่อ</small></div></div>
-                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-line text-gold fs-4"></i><div class="fw-bold">${s.breakdown.q}</div><small class="text-muted">สติกเกอร์</small></div></div>
-                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-geo-alt text-gold fs-4"></i><div class="fw-bold">${s.breakdown.v}</div><small class="text-muted">เยี่ยมบ้าน</small></div></div>
-                    <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-file-earmark-text text-gold fs-4"></i><div class="fw-bold">${s.breakdown.r}</div><small class="text-muted">รายงาน</small></div></div>
-                </div>`;
+        document.getElementById('vhv-profile').innerHTML = `
+            <div class="d-flex align-items-center">
+                <img src="${pic}" class="profile-pic me-3">
+                <div class="flex-grow-1"><h5 class="fw-bold text-gold mb-1">อสม. ${v.name} ${v.verified?'<i class="bi bi-patch-check-fill text-primary"></i>':''}</h5><span class="badge-area">${v.area}</span></div>
+                <div onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-3 text-secondary"></i></div>
+            </div>
+            ${pinBtn}
+            <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()">แชร์นามบัตร อสม.</button>`;
 
+        document.getElementById('vhv-perf').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0"><i class="bi bi-star-fill text-gold"></i> ผลงาน อสม.</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalVhvInfo.show()"></i></div>
+            <div class="text-center mb-4"><div class="display-3 fw-bold text-gold" style="line-height:1">${s.total}</div><small class="text-muted">คะแนนรวม</small></div>
+            <div class="row g-2 text-center">
+                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-qr-code text-gold fs-4"></i><div class="fw-bold">${s.breakdown.s}</div><small class="text-muted">บอกต่อ</small></div></div>
+                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-line text-gold fs-4"></i><div class="fw-bold">${s.breakdown.q}</div><small class="text-muted">สติกเกอร์</small></div></div>
+                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-geo-alt text-gold fs-4"></i><div class="fw-bold">${s.breakdown.v}</div><small class="text-muted">เยี่ยมบ้าน</small></div></div>
+                <div class="col-6 col-md-3"><div class="bg-white border p-2 rounded"><i class="bi bi-file-earmark-text text-gold fs-4"></i><div class="fw-bold">${s.breakdown.r}</div><small class="text-muted">รายงาน</small></div></div>
+            </div>`;
+
+        if (DATA.leaderboards) {
             let lb = DATA.leaderboards.map((u,i)=>`
                 <div class="vhv-rank-row">
                     <div class="rank-badge ${i<3?'rank-'+(i+1):'bg-light text-muted'}">${i+1}</div>
@@ -501,16 +600,17 @@
                     <div class="fw-bold text-gold small">${u.score} คะแนน</div>
                 </div>`).join('');
             document.getElementById('vhv-leader-content').innerHTML = lb;
+        }
 
-            renderPatientList(false);
-        } catch(e) { console.error(e); }
+        renderPatientList(false);
     }
 
     function renderPatientList(showAll) {
         let ph = '';
-        if(DATA.patientList.length > 0) {
+        const list = DATA.patientList || [];
+        if(list.length > 0) {
             const groups = {'สูงอันตราย (แดง)':[],'สูง (ส้ม)':[],'ปานกลาง (เหลือง)':[],'ต่ำ (เขียว)':[]};
-            DATA.patientList.forEach(p=>{
+            list.forEach(p=>{
                 if(p.risk>=30) groups['สูงอันตราย (แดง)'].push(p);
                 else if(p.risk>=20) groups['สูง (ส้ม)'].push(p);
                 else if(p.risk>=10) groups['ปานกลาง (เหลือง)'].push(p);
@@ -553,8 +653,13 @@
             if(!showAll && groups['ต่ำ (เขียว)'].length > 0) {
                 ph += `<button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="renderPatientList(true)">แสดงความเสี่ยงต่ำด้วย (${groups['ต่ำ (เขียว)'].length})</button>`;
             }
-        } else { ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูลกลุ่มเสี่ยง</div>'; }
-        document.getElementById('patient-list-container').innerHTML = ph;
+        } else { 
+            // Only show empty state if list is empty, otherwise we might be appending to cached list
+            if (document.getElementById('patient-list-container').innerHTML.includes('spinner')) {
+                 ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูลกลุ่มเสี่ยง</div>'; 
+            }
+        }
+        if (ph) document.getElementById('patient-list-container').innerHTML = ph;
     }
 
     // --- STICKER WIDGET LOGIC (ROBUST VERSION) ---
@@ -772,47 +877,72 @@
     }
 
     function shareVhvCard() {
+        // ตรวจสอบว่าเปิดใน LINE App หรือไม่
         if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
         
         const v = DATA.vhvProfile;
-        if(!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม."); return; }
+        
+        // Safety Check: ถ้ายังไม่มีข้อมูลโปรไฟล์ (เช่น ยังโหลดไม่เสร็จ) ให้หยุดก่อน
+        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารอสักครู่แล้วลองใหม่"); return; }
+        
+        // กำหนดค่า Default ป้องกัน Error กรณีข้อมูลไม่ครบ
+        const pic = PROFILE.pictureUrl || "https://placehold.co/200"; 
+        const name = v.name || "ไม่ระบุชื่อ";
+        const area = v.area || "-";
+        const phone = v.phone || "";
+        
+        // สร้าง Action สำหรับปุ่มโทร (ถ้าไม่มีเบอร์ ให้ลิ้งค์ไปหน้าหลัก LINE แทน)
+        // ใช้ uri: 'https://line.me' เป็น fallback เพื่อไม่ให้ action ว่าง
+        const telAction = (phone && phone.length > 8) 
+            ? { type: "uri", label: "📞 " + phone, uri: "tel:" + phone } 
+            : { type: "uri", label: "ไม่มีเบอร์โทร", uri: "https://line.me" };
 
-        let footerContents = [
-            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
-            { type: "separator", margin: "sm" },
-            { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "lg", wrap: true },
-            { type: "text", text: v.area || "ไม่ระบุพื้นที่", size: "sm", color: "#555555" }
-        ];
-
-        if(v.phone && v.phone.length >= 9) {
-            footerContents.push({ 
-                type: "button", 
-                action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + v.phone }, 
-                style: "secondary", 
-                height: "sm", 
-                margin: "md" 
-            });
-        }
-
+        // โครงสร้าง JSON ของ Flex Message
         const flex = {
-            type: "bubble", size: "mega",
+            type: "bubble",
+            size: "mega", // ขนาด Card แนวนอน
             body: {
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
-                    { type: "image", url: PROFILE.pictureUrl || "https://placehold.co/150", size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" },
-                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: footerContents }
+                    // ส่วนรูปภาพ (ซ้าย)
+                    { 
+                        type: "image", url: pic, size: "full", aspectMode: "cover", aspectRatio: "2:3", flex: 2, 
+                        backgroundColor: "#ffffff", cornerRadius: "md" 
+                    },
+                    // ส่วนข้อความ (ขวา)
+                    { 
+                        type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center",
+                        contents: [
+                            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+                            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#1565c0" },
+                            { type: "separator", margin: "sm", color: "#90caf9" },
+                            { type: "text", text: name, weight: "bold", size: "xl", wrap: true, margin: "md", color: "#000000" }, // ชื่อตัวใหญ่
+                            { type: "text", text: area, size: "sm", color: "#555555", wrap: true },
+                            // ปุ่มโทรออก
+                            { 
+                                type: "button", 
+                                action: telAction, 
+                                height: "sm", 
+                                margin: "md", 
+                                style: "secondary" // ใช้ secondary ให้ดูนุ่มนวล หรือเปลี่ยนเป็น primary ถ้าอยากให้เด่น
+                            }
+                        ]
+                    }
                 ]
             }
         };
         
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }])
+        // เรียกใช้ LIFF API เพื่อแชร์
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. "+name, contents: flex }])
             .then(res => {
-                if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
+                if (res) {
+                    // ทำงานเมื่อแชร์สำเร็จ
+                    alert("ส่งนามบัตรเรียบร้อยแล้ว!");
+                }
             })
             .catch(e => {
-                console.error(e);
-                alert("ส่งไม่สำเร็จ หรือผู้ใช้ยกเลิก");
+                console.log(e);
+                alert("การส่งถูกยกเลิก หรือเกิดข้อผิดพลาด");
             });
     }
 
