@@ -128,18 +128,22 @@
         .patient-actions { display: flex; gap: 5px; margin-top: 10px; }
         .btn-action { flex: 1; font-size: 0.85rem; padding: 5px; border-radius: 10px; border: 1px solid #ccc; background: white; }
 
-        /* Loader & Status */
+        /* Loader & Status - UPDATED */
         .card-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 100px; }
         .spinner-border { width: 3rem; height: 3rem; }
         #action-loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:#333; }
         .text-red { color: var(--theme-red); } .text-gold { color: var(--theme-gold); }
         
         #update-toast { 
-            position: fixed; top: 70px; right: 10px; z-index: 999; 
-            background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; 
-            border-radius: 20px; font-size: 0.7rem; display: none;
-            align-items: center; gap: 5px;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; 
+            background: rgba(0,0,0,0.85); color: white; padding: 30px; 
+            border-radius: 20px; font-size: 1rem; display: none;
+            flex-direction: column; align-items: center; justify-content: center; gap: 15px;
+            width: 80%; max-width: 300px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        #update-toast-icon { font-size: 3rem; color: #ffc107; margin-bottom: 5px; transition: all 0.3s ease; }
+        #update-toast-text { font-size: 1.2rem; font-weight: bold; }
 
         /* FOOTER */
         .footer { text-align: center; color: #999; font-size: 0.8rem; margin-top: 20px; padding-bottom: 20px; }
@@ -180,7 +184,14 @@
 <body>
 
 <div id="action-loader"><div class="spinner-border text-danger mb-2"></div><div>กำลังบันทึก...</div></div>
-<div id="update-toast"><div class="spinner-border spinner-border-sm"></div> กำลังอัปเดตข้อมูล...</div>
+
+<!-- NEW UPDATING TOAST -->
+<div id="update-toast">
+    <div class="mb-2 text-white-50 small">กำลังอัพเดทข้อมูล....</div>
+    <div id="update-toast-icon"><i class="bi bi-tornado"></i></div>
+    <div id="update-toast-text">เซมึนหัว</div>
+    <div class="spinner-border text-light mt-3" style="width: 1.5rem; height: 1.5rem; border-width: 2px;"></div>
+</div>
 
 <div class="nav-tabs-container">
     <div class="nav-item"><div id="tab-health" class="nav-link active" onclick="setTab('health')"><i class="bi bi-heart-pulse-fill"></i> ข้อมูลสุขภาพ</div></div>
@@ -341,6 +352,8 @@
     
     let USER_ID='', PROFILE={}, DATA={}, TARGET_TEL='', MODALS={};
     let SELECTED_STICKER = null;
+    let STROKE_INTERVAL = null; // Variable for animation interval
+    let isLiffInit = false; // Flag to track LIFF status
 
     const FALLBACK_STICKER = {
         imageURL: "https://img.freepik.com/premium-vector/caring-flat-illustration-vector_1080480-14309.jpg", 
@@ -354,15 +367,19 @@
         initDropdowns();
         ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
         
-        // 1. Load from cache IMMEDIATELY
+        // 1. Load from cache
         loadFromCache();
 
-        // 2. Load Sticker 
+        // 2. Start Animation
+        startStrokeAnimation();
+
+        // 3. Load Sticker 
         loadStickerWidget();
 
-        // 3. Init LIFF & Fetch Fresh Data
+        // 4. Init LIFF & Fetch Fresh Data
         try {
             await liff.init({liffId:LIFF_ID});
+            isLiffInit = true; // Mark as initialized
             if(!liff.isLoggedIn()){ 
                 liff.login(); 
                 return; 
@@ -370,17 +387,15 @@
             PROFILE = await liff.getProfile();
             USER_ID = PROFILE.userId;
             
-            // Render profile immediately if we have it
             renderBasicInfoUI(); 
         } catch(e){ 
-            console.error("LIFF Error:", e);
+            console.warn("LIFF Initialization failed (Offline/Test Mode):", e.message);
             // Fallback for testing/dev
             USER_ID = 'TEST_USER_ID'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
             renderBasicInfoUI();
         }
         
-        // Fetch background updates
         loadBasicInfo(); 
         loadGamification();
     };
@@ -394,27 +409,54 @@
         window.scrollTo(0,0);
     }
 
+    // --- ANIMATION LOGIC ---
+    function startStrokeAnimation() {
+        const symptoms = [
+            { t: "เซมึนหัว", i: "bi-tornado" },
+            { t: "ตามัวมาก", i: "bi-eye-slash-fill" },
+            { t: "มุมปากตก", i: "bi-emoji-dizzy-fill" },
+            { t: "ยกแขนยาก", i: "bi-person-raised-hand" },
+            { t: "ลำบากพูด", i: "bi-mic-mute-fill" }
+        ];
+        let idx = 0;
+        const toast = document.getElementById('update-toast');
+        const icon = document.getElementById('update-toast-icon');
+        const text = document.getElementById('update-toast-text');
+        
+        toast.style.display = 'flex'; // Show loading
+
+        STROKE_INTERVAL = setInterval(() => {
+            idx = (idx + 1) % symptoms.length;
+            // Fade out
+            icon.style.opacity = 0;
+            
+            setTimeout(() => {
+                icon.innerHTML = `<i class="bi ${symptoms[idx].i}"></i>`;
+                text.innerText = symptoms[idx].t;
+                icon.style.opacity = 1;
+            }, 300); // Wait for fade out
+            
+        }, 2000);
+    }
+
+    function stopStrokeAnimation() {
+        if(STROKE_INTERVAL) clearInterval(STROKE_INTERVAL);
+        document.getElementById('update-toast').style.display = 'none';
+    }
+
     // --- CACHING LOGIC ---
     function loadFromCache() {
         const cached = localStorage.getItem('stroke_app_data');
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
-                // Simple validation to check if it's our data
                 if (parsed && (parsed.userProfile || parsed.gamification)) {
                     DATA = parsed;
-                    console.log("Loaded from cache");
-                    
-                    // Render available parts
                     if (DATA.userProfile) renderBasicInfoUI();
                     if (DATA.gamification) renderGamificationUI();
                     if (DATA.vhvProfile) renderVhvDataUI();
-                    
-                    // Show updating toast
-                    document.getElementById('update-toast').style.display = 'flex';
                 }
             } catch (e) {
-                console.log("Cache parse error", e);
                 localStorage.removeItem('stroke_app_data');
             }
         }
@@ -431,30 +473,22 @@
             const res = await fetch(`${API_URL}?action=getBasicInfo&userId=${USER_ID}`).then(r=>r.json());
             DATA = {...DATA, ...res};
             
-            // Re-render with fresh data
             renderBasicInfoUI();
             
-            // Handle VHV logic
             if (DATA.isVhv) {
-                // If we didn't have VHV data before, fetch it now
                 if (!DATA.patientList) {
                     loadVhvData();
                 } else {
-                    // We might have stale VHV data from cache, fetch fresh in background
                     loadVhvData();
                 }
             } else {
-                // Not VHV, maybe hide the tab or ensure UI reflects it
                 if (!DATA.homeDistance || DATA.homeDistance.km == 0) MODALS.modalPinUser.show();
             }
             
             saveToCache();
-            // Hide global loader if it was showing (optional logic, mostly handled by rendering overwriting content)
         } catch(e) { console.error(e); }
         finally {
-             // Hide update toast if gamification is also done or strictly here
-             // Ideally counting requests, but simple hide works for UX
-             document.getElementById('update-toast').style.display = 'none';
+             stopStrokeAnimation(); // Hide loading when done
         }
     }
 
@@ -482,8 +516,6 @@
     
     function renderBasicInfoUI() {
         const u = DATA.userProfile || { name: 'Guest', role: 'General', regisDate: '-' };
-        
-        // Use LIFF profile pic if available, else DB pic, else placeholder
         const pic = PROFILE.pictureUrl || u.pictureUrl || 'https://placehold.co/100';
         
         document.getElementById('card-profile').innerHTML = `
@@ -569,7 +601,6 @@
             `<button class="btn btn-warning btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">⚠ ท่านยังไม่ปักหมุดบ้าน อสม. โปรดคลิก</button>` : 
             `<button class="btn btn-outline-secondary btn-pill w-100 mt-2" onclick="MODALS.modalPinAsm.show()">แก้ไขหมุดบ้าน อสม.</button>`;
 
-        // Use LIFF pic if VHV profile doesn't have specific one? Usually use LIFF.
         const pic = PROFILE.pictureUrl || 'https://placehold.co/100';
 
         document.getElementById('vhv-profile').innerHTML = `
@@ -654,7 +685,6 @@
                 ph += `<button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="renderPatientList(true)">แสดงความเสี่ยงต่ำด้วย (${groups['ต่ำ (เขียว)'].length})</button>`;
             }
         } else { 
-            // Only show empty state if list is empty, otherwise we might be appending to cached list
             if (document.getElementById('patient-list-container').innerHTML.includes('spinner')) {
                  ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูลกลุ่มเสี่ยง</div>'; 
             }
@@ -665,36 +695,28 @@
     // --- STICKER WIDGET LOGIC (ROBUST VERSION) ---
     async function loadStickerWidget() {
         try {
-            // Attempt to fetch API
             const res = await fetch(`${API_URL}?action=getStickers`);
             const stickers = await res.json();
             
-            // Get Today (Thai)
             const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
             const today = days[new Date().getDay()];
             
-            // Filter by day
             const filtered = stickers.filter(s => s.category && s.category.includes(today));
             
             if(filtered.length > 0) {
-                // Randomly select one for today
                 SELECTED_STICKER = filtered[Math.floor(Math.random() * filtered.length)];
             } else {
-                // FALLBACK LEVEL 1: If no specific day found, pick ANY from API
                 if(stickers.length > 0) {
                      SELECTED_STICKER = stickers[0]; 
                 } else {
-                     // FALLBACK LEVEL 2: Hardcoded if API empty
                      SELECTED_STICKER = FALLBACK_STICKER;
                 }
             }
         } catch(e) { 
             console.log('Sticker API load error, using fallback', e);
-            // FALLBACK LEVEL 3: Network Error
             SELECTED_STICKER = FALLBACK_STICKER;
         }
 
-        // FORCE DISPLAY if we have a sticker (which we should have due to fallback)
         if(SELECTED_STICKER) {
             document.getElementById('widget-img-src').src = SELECTED_STICKER.previewURL || SELECTED_STICKER.imageURL;
             document.getElementById('sticker-widget').style.display = 'block';
@@ -709,8 +731,10 @@
     }
 
     function shareSticker() {
-        if(!SELECTED_STICKER) return;
-        if(!liff.isInClient()) { alert("ใช้ได้เฉพาะใน LINE เท่านั้น"); return; }
+        if(!isLiffInit || !liff.isInClient()) { 
+            alert("ฟีเจอร์นี้ใช้งานได้เฉพาะบน LINE Application เท่านั้น (ในโหมดทดสอบจะไม่ทำงาน)"); 
+            return; 
+        }
         
         const userText = document.getElementById('modal-sticker-text').value;
         const separator = SELECTED_STICKER.linkURL.includes('?') ? '&' : '?';
@@ -746,7 +770,6 @@
                 if(res) {
                     MODALS.modalStickerShare.hide();
                     alert("ส่งสติกเกอร์เรียบร้อยแล้ว!");
-                    // Log to Sheet
                     fetch(API_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -877,54 +900,52 @@
     }
 
     function shareVhvCard() {
-        // ตรวจสอบว่าเปิดใน LINE App หรือไม่
-        if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
+        if (!isLiffInit || !liff.isInClient()) { alert('ฟีเจอร์นี้ใช้งานได้เฉพาะบน LINE Application เท่านั้น (ในโหมดทดสอบจะไม่ทำงาน)'); return; }
         
         const v = DATA.vhvProfile;
+        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารีเฟรชแล้วลองใหม่"); return; }
         
-        // Safety Check: ถ้ายังไม่มีข้อมูลโปรไฟล์ (เช่น ยังโหลดไม่เสร็จ) ให้หยุดก่อน
-        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารอสักครู่แล้วลองใหม่"); return; }
-        
-        // กำหนดค่า Default ป้องกัน Error กรณีข้อมูลไม่ครบ
-        const pic = PROFILE.pictureUrl || "https://placehold.co/200"; 
+        const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
         const name = v.name || "ไม่ระบุชื่อ";
         const area = v.area || "-";
-        const phone = v.phone || "";
         
-        // สร้าง Action สำหรับปุ่มโทร (ถ้าไม่มีเบอร์ ให้ลิ้งค์ไปหน้าหลัก LINE แทน)
-        // ใช้ uri: 'https://line.me' เป็น fallback เพื่อไม่ให้ action ว่าง
-        const telAction = (phone && phone.length > 8) 
-            ? { type: "uri", label: "📞 " + phone, uri: "tel:" + phone } 
-            : { type: "uri", label: "ไม่มีเบอร์โทร", uri: "https://line.me" };
+        // Clean phone number for URI (remove spaces, dashes)
+        let phoneUri = "https://line.me";
+        let phoneLabel = "ไม่มีเบอร์โทร";
+        let btnColor = "#cccccc"; // Grey for disabled-look
+        
+        if(v.phone && v.phone.length > 8) {
+            const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
+            phoneUri = "tel:" + cleanPhone;
+            phoneLabel = "📞 " + v.phone;
+            btnColor = "#198754"; // Green for call
+        }
 
-        // โครงสร้าง JSON ของ Flex Message
         const flex = {
             type: "bubble",
-            size: "mega", // ขนาด Card แนวนอน
+            size: "mega",
             body: {
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
-                    // ส่วนรูปภาพ (ซ้าย)
                     { 
                         type: "image", url: pic, size: "full", aspectMode: "cover", aspectRatio: "2:3", flex: 2, 
                         backgroundColor: "#ffffff", cornerRadius: "md" 
                     },
-                    // ส่วนข้อความ (ขวา)
                     { 
                         type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center",
                         contents: [
                             { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#1565c0" },
+                            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" },
                             { type: "separator", margin: "sm", color: "#90caf9" },
-                            { type: "text", text: name, weight: "bold", size: "xl", wrap: true, margin: "md", color: "#000000" }, // ชื่อตัวใหญ่
-                            { type: "text", text: area, size: "sm", color: "#555555", wrap: true },
-                            // ปุ่มโทรออก
+                            { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" },
+                            { type: "text", text: area, size: "xs", color: "#555555", wrap: true },
                             { 
                                 type: "button", 
-                                action: telAction, 
+                                action: { type: "uri", label: phoneLabel, uri: phoneUri }, 
+                                style: "primary", 
+                                color: btnColor, 
                                 height: "sm", 
-                                margin: "md", 
-                                style: "secondary" // ใช้ secondary ให้ดูนุ่มนวล หรือเปลี่ยนเป็น primary ถ้าอยากให้เด่น
+                                margin: "md" 
                             }
                         ]
                     }
@@ -932,17 +953,15 @@
             }
         };
         
-        // เรียกใช้ LIFF API เพื่อแชร์
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. "+name, contents: flex }])
+        console.log("Sending Flex:", JSON.stringify(flex));
+
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }])
             .then(res => {
-                if (res) {
-                    // ทำงานเมื่อแชร์สำเร็จ
-                    alert("ส่งนามบัตรเรียบร้อยแล้ว!");
-                }
+                if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
             })
             .catch(e => {
-                console.log(e);
-                alert("การส่งถูกยกเลิก หรือเกิดข้อผิดพลาด");
+                console.error(e);
+                alert("เกิดข้อผิดพลาดในการส่ง: " + e.message);
             });
     }
 
