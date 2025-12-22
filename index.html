@@ -133,6 +133,39 @@
         .spinner-border { width: 3rem; height: 3rem; }
         #action-loader { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:2000; display:none; flex-direction:column; justify-content:center; align-items:center; color:#333; }
         .text-red { color: var(--theme-red); } .text-gold { color: var(--theme-gold); }
+
+        /* FOOTER */
+        .footer { text-align: center; color: #999; font-size: 0.8rem; margin-top: 20px; padding-bottom: 20px; }
+
+        /* STICKER WIDGET */
+        #sticker-widget {
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+            background: white; border-radius: 15px; 
+            width: 130px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center; padding: 10px;
+            display: none; /* Hidden by default until loaded */
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #sticker-widget:active { transform: scale(0.95); }
+        .widget-close {
+            position: absolute; top: -8px; left: -8px;
+            width: 24px; height: 24px;
+            background: #555; color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; z-index: 10000;
+        }
+        .widget-img { width: 100%; border-radius: 10px; margin-bottom: 5px; }
+        .widget-caption { font-size: 10px; color: #555; line-height: 1.2; font-weight: bold; }
+        
+        /* PULSE ANIMATION */
+        .icon-pulse { animation: pulse-animation 2s infinite; }
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
@@ -169,7 +202,7 @@
             <div class="card-loader text-danger"><div class="spinner-border"></div></div>
         </div>
 
-        <!-- HELPER (FIXED UI) -->
+        <!-- HELPER -->
         <div id="card-helper" class="card-box">
             <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
             <div class="card-loader text-primary"><div class="spinner-border"></div></div>
@@ -202,6 +235,21 @@
         
         <div id="vhv-patients" class="card-box vhv-style">
             <h5 class="card-title mb-3"><i class="bi bi-geo-alt-fill text-gold"></i> เยี่ยมบ้านปักหมุด</h5>
+            
+            <!-- VHV Tools -->
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <button class="btn btn-success w-100 btn-pill py-2" onclick="showQR()">
+                        <i class="bi bi-qr-code"></i> ชาวบ้านมีไลน์
+                    </button>
+                </div>
+                <div class="col-6">
+                     <button class="btn btn-outline-success w-100 btn-pill py-2" onclick="window.location.href='https://liff.line.me/2005789397-nebQ8oJy'">
+                        <i class="bi bi-phone"></i> ประเมินแทน
+                    </button>
+                </div>
+            </div>
+
             <div class="bg-white border rounded p-3 mb-3 small text-secondary">
                 <b>ภารกิจ อสม.:</b> อสม.มีบทบาทในการให้ความรู้และเพิ่มความตระหนักในอาการสโตรก กรุณาสอบถามลูกบ้านว่าสามารถประเมินความเสี่ยงผ่านไลน์ได้หรือไม่ 
                 <ul class="mb-0 ps-3 mt-1">
@@ -218,7 +266,16 @@
     <div class="footer">จัดทำโดย สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร</div>
 </div>
 
+<!-- STICKER WIDGET -->
+<div id="sticker-widget" onclick="openStickerModal()">
+    <div class="widget-close" onclick="event.stopPropagation(); document.getElementById('sticker-widget').remove();"><i class="bi bi-x"></i></div>
+    <img id="widget-img-src" src="" class="widget-img">
+    <div class="widget-caption">แชร์สติกเกอร์<br>สโตรกประจำวันนี้</div>
+</div>
+
 <!-- MODALS -->
+<div class="modal fade" id="modalStickerShare" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4"><div class="modal-header border-0 pb-0"><h5 class="fw-bold"><i class="bi bi-stars text-warning"></i> สติกเกอร์ประจำวัน</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><img id="modal-sticker-img" src="" class="w-100 rounded-3 mb-3 border shadow-sm"><textarea id="modal-sticker-text" class="form-control mb-3 text-center" rows="2"></textarea><button class="btn btn-success btn-pill w-100" onclick="shareSticker()"><i class="bi bi-line"></i> ส่งให้เพื่อน</button></div></div></div></div>
+
 <div class="modal fade" id="modalVisit" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">บันทึกเยี่ยมบ้าน</h5></div><div class="modal-body pt-2">
     <div class="mb-2"><label class="small text-muted">ชื่อลูกบ้าน</label><input type="text" class="form-control" id="visitName" readonly></div>
     <div class="mb-2"><label class="small text-muted">ประเภทกิจกรรม</label><select class="form-select" id="visitType"><option>ให้ความรู้/คำแนะนำ</option><option>ติดตามอาการ</option><option>ส่งต่อรักษา</option></select></div>
@@ -248,14 +305,16 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbz-nmfZUs5zFM8ZGvNnOjPSu77weGpOeNQgkdCLajx0YG3sb5aoHp3xynsByTv90dmT/exec';
+    const STICKER_API = 'https://script.google.com/macros/s/AKfycbzArFnR1FWEU-WNYiRF2PCJLnDnHZhd8cC39g2yiEWdDLTVEo26ha11KEl-I9nQhP6fEg/exec';
     const LIFF_ID = '2005789397-RLAGXrBJ';
     const LINKS = { REGIS:'https://liff.line.me/2005789397-nebQ8oJy', STICKER:'https://liff.line.me/2005789397-37lemBgX', KNOWLEDGE:'https://liff.line.me/2005789397-ROQvjpYk' };
     
     let USER_ID='', PROFILE={}, DATA={}, TARGET_TEL='', MODALS={};
+    let SELECTED_STICKER = null;
 
     window.onload = async () => {
         initDropdowns();
-        ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
+        ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
         try {
             await liff.init({liffId:LIFF_ID});
             if(!liff.isLoggedIn()){ 
@@ -268,11 +327,11 @@
             console.error("LIFF Error:", e);
             USER_ID = 'TEST_USER_ID'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
-            // alert("โหมดทดสอบ: ไม่สามารถเชื่อมต่อ LINE ได้");
         }
         
         loadBasicInfo(); 
         loadGamification();
+        loadStickerWidget();
     };
 
     function setTab(t) {
@@ -300,20 +359,10 @@
             renderRiskCard(u, DATA.assessmentCount);
             renderHospitalCard();
             
-            // --- Helper Card (FIXED) ---
+            // --- Helper Card (UPDATED) ---
             const l = DATA.communityLeaders;
             
-            // Check if village data exists
-            let headmanInfo = '-';
-            let villageTitle = 'ผู้ใหญ่บ้าน';
-            
-            if (l.village_headman && l.village_headman !== '-') {
-                headmanInfo = l.village_headman;
-            }
-            
-            document.getElementById('card-helper').innerHTML = `
-                <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
-                
+            let pcuHtml = `
                 <div class="d-flex align-items-center py-3 border-bottom">
                     <i class="bi bi-hospital fs-1 text-danger me-3"></i>
                     <div class="flex-grow-1">
@@ -321,21 +370,35 @@
                         <div class="small text-muted">รพ.สต. ในพื้นที่</div>
                     </div>
                     ${l.pcuTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}
-                </div>
+                </div>`;
 
+            let headHtml = '';
+            // Only show if headman data exists
+            if (l.village_headman && l.village_headman !== '-' && l.area) {
+                 headHtml = `
                 <div class="d-flex align-items-center py-3 border-bottom">
                     <i class="bi bi-person-badge fs-1 text-dark me-3"></i>
                     <div class="flex-grow-1">
-                        <div class="fw-bold fs-5">${headmanInfo}</div>
-                        <div class="small text-muted">${villageTitle} ${l.village_name}</div>
-                        <div class="small text-secondary">${l.area}</div>
+                        <div class="fw-bold fs-5">${l.village_headman}</div>
+                        <div class="small text-muted">ผู้ใหญ่บ้าน ${l.area} (${l.village_name})</div>
                     </div>
                     ${l.headTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}
-                </div>
+                </div>`;
+            }
 
+            document.getElementById('card-helper').innerHTML = `
+                <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
+                ${pcuHtml}
+                ${headHtml}
                 <div class="d-flex align-items-center py-3">
-                    <div class="me-3 fw-bold fs-2 text-warning">${l.vhvCount}</div>
-                    <div class="fw-bold text-secondary">ท่าน<br>อสม. ในเขต</div>
+                    <div class="me-3 position-relative">
+                        <i class="bi bi-search fs-2 text-warning icon-pulse position-absolute" style="top:-10px;left:-10px;"></i>
+                        <i class="bi bi-person-heart fs-1 text-secondary"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-2">
+                        <div class="fw-bold text-secondary">มี อสม.สโตรกในเขตของท่าน</div>
+                        <div class="fw-bold text-warning fs-4">${l.vhvCount} คน</div>
+                    </div>
                 </div>`;
 
             if(!DATA.isVhv && (!DATA.homeDistance || DATA.homeDistance.km == 0)) MODALS.modalPinUser.show();
@@ -348,7 +411,6 @@
             const res = await fetch(`${API_URL}?action=getGamification&userId=${USER_ID}`).then(r=>r.json());
             DATA = {...DATA, ...res};
             
-            // Safety Check: If gamification is missing, default it
             const g = DATA.gamification || { total:0, level:'-', care:0, prep:0, share:0, know:0 };
             
             let w = Math.min(100, Math.max(5, g.total));
@@ -465,7 +527,85 @@
         document.getElementById('patient-list-container').innerHTML = ph;
     }
 
-    // --- RENDER HELPERS ---
+    // --- STICKER WIDGET LOGIC ---
+    async function loadStickerWidget() {
+        try {
+            const stickers = await fetch(STICKER_API).then(r=>r.json());
+            const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
+            const today = days[new Date().getDay()];
+            
+            // Filter
+            const filtered = stickers.filter(s => s.category.includes(today));
+            if(filtered.length > 0) {
+                // Random
+                SELECTED_STICKER = filtered[Math.floor(Math.random() * filtered.length)];
+                
+                // Setup Widget
+                document.getElementById('widget-img-src').src = SELECTED_STICKER.previewURL || SELECTED_STICKER.imageURL;
+                document.getElementById('sticker-widget').style.display = 'block';
+            }
+        } catch(e) { console.log('Sticker load error', e); }
+    }
+
+    function openStickerModal() {
+        if(!SELECTED_STICKER) return;
+        document.getElementById('modal-sticker-img').src = SELECTED_STICKER.imageURL;
+        document.getElementById('modal-sticker-text').value = SELECTED_STICKER.text;
+        MODALS.modalStickerShare.show();
+    }
+
+    function shareSticker() {
+        if(!SELECTED_STICKER) return;
+        if(!liff.isInClient()) { alert("ใช้ได้เฉพาะใน LINE เท่านั้น"); return; }
+        
+        const userText = document.getElementById('modal-sticker-text').value;
+        const trackingUrl = `${SELECTED_STICKER.linkURL}?ref=${USER_ID}&sticker=${SELECTED_STICKER.stickerID}`;
+        
+        const flexMsg = {
+            type: "flex",
+            altText: "ส่งความห่วงใยถึงคุณ",
+            contents: {
+                type: "bubble",
+                hero: {
+                    type: "image",
+                    url: SELECTED_STICKER.imageURL,
+                    size: "full",
+                    aspectRatio: "1:1",
+                    aspectMode: "cover",
+                    action: { type: "uri", uri: trackingUrl }
+                },
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    backgroundColor: SELECTED_STICKER.flexBG || "#FFFFFF",
+                    contents: [
+                        { type: "text", text: userText, wrap: true, align: "center", weight: "bold", color: "#444444", margin: "md" },
+                        { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "ส่งต่อให้เพื่อน", uri: "https://liff.line.me/2005789397-37lemBgX" }, margin: "md", color: "#28a745" }
+                    ]
+                }
+            }
+        };
+
+        liff.shareTargetPicker([flexMsg])
+            .then(res => {
+                if(res) {
+                    MODALS.modalStickerShare.hide();
+                    alert("ส่งสติกเกอร์เรียบร้อยแล้ว!");
+                    // Log
+                    fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({
+                            action: 'logStickerShare',
+                            data: { userId: USER_ID, stickerID: SELECTED_STICKER.stickerID }
+                        })
+                    });
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    // --- OTHER ACTIONS ---
     function renderRiskCard(p, cnt) {
         if(!p || !p.thai_cv_risk_score) {
             document.getElementById('card-risk').innerHTML = `<div class="card-box text-center py-5"><h5 class="card-title mb-3"><i class="bi bi-activity text-red"></i> ประวัติการประเมินความเสี่ยง</h5><div class="text-muted mb-3">ยังไม่มีข้อมูล</div><a href="${LINKS.REGIS}" class="btn btn-red btn-pill">ประเมินเลย</a></div>`;
@@ -509,7 +649,6 @@
             </div>`;
     }
 
-    // --- ACTIONS ---
     function scroll2(id){ document.getElementById(id).scrollIntoView({behavior:'smooth', block:'center'}); }
     function showLoad(b){ document.getElementById('action-loader').style.display=b?'flex':'none'; }
     
@@ -572,7 +711,11 @@
         }, ()=>window.location.href=`tel:${TARGET_TEL}`);
     }
 
-    function showQR(){ document.getElementById('qrImg').src=`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(LINKS.REGIS+'?ref='+USER_ID)}`; MODALS.modalQR.show(); }
+    function showQR(){ 
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(LINKS.REGIS + '?ref=' + USER_ID)}`;
+        document.getElementById('qrImg').src = qrUrl; 
+        MODALS.modalQR.show(); 
+    }
 
     function shareVhvCard() {
         if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
