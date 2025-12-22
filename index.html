@@ -141,22 +141,24 @@
         #sticker-widget {
             position: fixed; bottom: 20px; right: 20px; z-index: 9999;
             background: white; border-radius: 15px; 
-            width: 130px; 
+            width: 140px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             text-align: center; padding: 10px;
             display: none; /* Hidden by default until loaded */
             cursor: pointer;
             transition: transform 0.2s;
+            border: 2px solid var(--theme-gold);
         }
         #sticker-widget:active { transform: scale(0.95); }
         .widget-close {
-            position: absolute; top: -8px; left: -8px;
-            width: 24px; height: 24px;
-            background: #555; color: white; border-radius: 50%;
+            position: absolute; top: -10px; left: -10px;
+            width: 28px; height: 28px;
+            background: #444; color: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 12px; cursor: pointer; z-index: 10000;
+            font-size: 16px; cursor: pointer; z-index: 10000;
+            border: 2px solid white;
         }
-        .widget-img { width: 100%; border-radius: 10px; margin-bottom: 5px; }
+        .widget-img { width: 100%; border-radius: 10px; margin-bottom: 5px; display: block; }
         .widget-caption { font-size: 10px; color: #555; line-height: 1.2; font-weight: bold; }
         
         /* PULSE ANIMATION */
@@ -266,10 +268,10 @@
     <div class="footer">จัดทำโดย สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร</div>
 </div>
 
-<!-- STICKER WIDGET -->
+<!-- STICKER WIDGET (Visible) -->
 <div id="sticker-widget" onclick="openStickerModal()">
-    <div class="widget-close" onclick="event.stopPropagation(); document.getElementById('sticker-widget').remove();"><i class="bi bi-x"></i></div>
-    <img id="widget-img-src" src="" class="widget-img">
+    <div class="widget-close" onclick="event.stopPropagation(); document.getElementById('sticker-widget').style.display='none';"><i class="bi bi-x-lg"></i></div>
+    <img id="widget-img-src" src="https://placehold.co/100?text=Loading" class="widget-img">
     <div class="widget-caption">แชร์สติกเกอร์<br>สโตรกประจำวันนี้</div>
 </div>
 
@@ -299,7 +301,28 @@
 <div class="modal fade" id="modalVhvInfo" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 rounded-4"><h5 class="fw-bold">เกณฑ์คะแนน อสม.</h5><ul class="text-muted ps-3"><li>บอกต่อ x2</li><li>สติกเกอร์ x1 (30วัน)</li><li>เยี่ยมบ้าน x5</li><li>รายงานเคส x20</li></ul><button class="btn btn-outline w-100 btn-pill" data-bs-dismiss="modal">ปิด</button></div></div></div>
 <div class="modal fade" id="modalPinAsm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 text-center"><h5 class="fw-bold">ปักหมุดบ้าน อสม.</h5><p class="text-muted">โปรดปักหมุดเมื่ออยู่ที่บ้าน</p><button class="btn btn-gold btn-pill w-100" onclick="execPinAsm()">ยืนยัน</button></div></div></div>
 <div class="modal fade" id="modalEditVhv" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-3"><div class="modal-header border-0"><h5 class="fw-bold text-gold">แก้ไขข้อมูล</h5></div><div class="modal-body"><input id="vhvName" class="form-control mb-2" placeholder="ชื่อ"><input id="vhvPhone" class="form-control mb-2" placeholder="โทร"><select id="vhvDistrict" class="form-select mb-2" onchange="updateVillages()"></select><select id="vhvVillage" class="form-select mb-3"></select><button class="btn btn-gold btn-pill w-100" onclick="saveVhvProfile()">บันทึก</button></div></div></div></div>
-<div class="modal fade" id="modalQR" tabindex="-1"><div class="modal-dialog modal-fullscreen"><div class="modal-content bg-dark text-white text-center justify-content-center"><button class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button><div class="bg-white p-3 rounded-4 d-inline-block"><img id="qrImg" src="" style="width:250px;"></div></div></div></div>
+
+<!-- QR MODAL (UPDATED) -->
+<div class="modal fade" id="modalQR" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-white text-dark text-center justify-content-center p-3">
+            <button class="btn-close position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button>
+            <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                <h4 class="fw-bold text-success mb-3">สแกนเพื่อประเมินความเสี่ยง</h4>
+                <p class="mb-4 text-muted px-3" style="font-size: 1.1rem;">
+                    โปรดเปิดตัวอ่านคิวอาร์โค้ดเพื่อสแกนไปยังหน้าประเมินความเสี่ยงสโตรก แล้วเป็นเพื่อนกับไลน์สวีรู้ทันสโตรก เพื่อรับความรู้เพิ่มเติม
+                </p>
+                <div class="bg-white p-2 rounded-4 shadow-sm border mb-3 d-inline-block">
+                    <img id="qrImg" src="" style="width: 80vw; max-width: 350px; height: auto;">
+                </div>
+                <div class="mt-3">
+                    <span class="text-muted small">ผู้แนะนำ</span><br>
+                    <strong class="text-primary fs-5" id="qrReferrer">...</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -312,9 +335,22 @@
     let USER_ID='', PROFILE={}, DATA={}, TARGET_TEL='', MODALS={};
     let SELECTED_STICKER = null;
 
+    // Hardcoded fallback sticker in case API fails or returns nothing
+    const FALLBACK_STICKER = {
+        imageURL: "https://img.freepik.com/premium-vector/caring-flat-illustration-vector_1080480-14309.jpg", 
+        previewURL: "https://img.freepik.com/premium-vector/caring-flat-illustration-vector_1080480-14309.jpg",
+        text: "วันนี้คุณดูแลสุขภาพหรือยังคะ?",
+        stickerID: "FALLBACK_001",
+        linkURL: LINKS.STICKER
+    };
+
     window.onload = async () => {
         initDropdowns();
         ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
+        
+        // Load Sticker IMMEDIATELY (Do not wait for LIFF)
+        loadStickerWidget();
+
         try {
             await liff.init({liffId:LIFF_ID});
             if(!liff.isLoggedIn()){ 
@@ -331,7 +367,6 @@
         
         loadBasicInfo(); 
         loadGamification();
-        loadStickerWidget();
     };
 
     function setTab(t) {
@@ -527,30 +562,49 @@
         document.getElementById('patient-list-container').innerHTML = ph;
     }
 
-    // --- STICKER WIDGET LOGIC ---
+    // --- STICKER WIDGET LOGIC (ROBUST VERSION) ---
     async function loadStickerWidget() {
         try {
-            const stickers = await fetch(STICKER_API).then(r=>r.json());
+            // Attempt to fetch API
+            const res = await fetch(STICKER_API);
+            const stickers = await res.json();
+            
+            // Get Today (Thai)
             const days = ['วันอาทิตย์','วันจันทร์','วันอังคาร','วันพุธ','วันพฤหัสบดี','วันศุกร์','วันเสาร์'];
             const today = days[new Date().getDay()];
             
-            // Filter
-            const filtered = stickers.filter(s => s.category.includes(today));
+            // Filter by day
+            const filtered = stickers.filter(s => s.category && s.category.includes(today));
+            
             if(filtered.length > 0) {
-                // Random
+                // Randomly select one for today
                 SELECTED_STICKER = filtered[Math.floor(Math.random() * filtered.length)];
-                
-                // Setup Widget
-                document.getElementById('widget-img-src').src = SELECTED_STICKER.previewURL || SELECTED_STICKER.imageURL;
-                document.getElementById('sticker-widget').style.display = 'block';
+            } else {
+                // FALLBACK LEVEL 1: If no specific day found, pick ANY from API
+                if(stickers.length > 0) {
+                     SELECTED_STICKER = stickers[0]; 
+                } else {
+                     // FALLBACK LEVEL 2: Hardcoded if API empty
+                     SELECTED_STICKER = FALLBACK_STICKER;
+                }
             }
-        } catch(e) { console.log('Sticker load error', e); }
+        } catch(e) { 
+            console.log('Sticker API load error, using fallback', e);
+            // FALLBACK LEVEL 3: Network Error
+            SELECTED_STICKER = FALLBACK_STICKER;
+        }
+
+        // FORCE DISPLAY if we have a sticker (which we should have due to fallback)
+        if(SELECTED_STICKER) {
+            document.getElementById('widget-img-src').src = SELECTED_STICKER.previewURL || SELECTED_STICKER.imageURL;
+            document.getElementById('sticker-widget').style.display = 'block';
+        }
     }
 
     function openStickerModal() {
         if(!SELECTED_STICKER) return;
         document.getElementById('modal-sticker-img').src = SELECTED_STICKER.imageURL;
-        document.getElementById('modal-sticker-text').value = SELECTED_STICKER.text;
+        document.getElementById('modal-sticker-text').value = SELECTED_STICKER.text || "ขอให้สุขภาพแข็งแรงครับ";
         MODALS.modalStickerShare.show();
     }
 
@@ -591,7 +645,7 @@
                 if(res) {
                     MODALS.modalStickerShare.hide();
                     alert("ส่งสติกเกอร์เรียบร้อยแล้ว!");
-                    // Log
+                    // Log to Sheet
                     fetch(API_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -714,30 +768,59 @@
     function showQR(){ 
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(LINKS.REGIS + '?ref=' + USER_ID)}`;
         document.getElementById('qrImg').src = qrUrl; 
+        
+        // Show VHV name if available
+        const vhvName = (DATA.vhvProfile && DATA.vhvProfile.name) ? `อสม. ${DATA.vhvProfile.name}` : '-';
+        document.getElementById('qrReferrer').innerText = vhvName;
+
         MODALS.modalQR.show(); 
     }
 
     function shareVhvCard() {
         if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
+        
         const v = DATA.vhvProfile;
+        if(!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม."); return; }
+
+        // Logic to construct Button (Only if phone exists)
+        let footerContents = [
+            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
+            { type: "separator", margin: "sm" },
+            { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "lg", wrap: true },
+            { type: "text", text: v.area || "ไม่ระบุพื้นที่", size: "sm", color: "#555555" }
+        ];
+
+        // Add call button ONLY if phone is valid (at least 9 digits)
+        if(v.phone && v.phone.length >= 9) {
+            footerContents.push({ 
+                type: "button", 
+                action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + v.phone }, 
+                style: "secondary", 
+                height: "sm", 
+                margin: "md" 
+            });
+        }
+
         const flex = {
             type: "bubble", size: "mega",
             body: {
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
-                    { type: "image", url: PROFILE.pictureUrl, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" },
-                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: [
-                        { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                        { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
-                        { type: "separator", margin: "sm" },
-                        { type: "text", text: v.name, weight: "bold", size: "lg", wrap: true },
-                        { type: "text", text: v.area, size: "sm", color: "#555555" },
-                        { type: "button", action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + v.phone }, style: "secondary", height: "sm", margin: "md" }
-                    ]}
+                    { type: "image", url: PROFILE.pictureUrl || "https://placehold.co/150", size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" },
+                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: footerContents }
                 ]
             }
         };
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }]).catch(e=>console.log(e));
+        
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }])
+            .then(res => {
+                if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
+            })
+            .catch(e => {
+                console.error(e);
+                alert("ส่งไม่สำเร็จ หรือผู้ใช้ยกเลิก");
+            });
     }
 
     // VISIT LOGIC
