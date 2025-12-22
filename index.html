@@ -169,7 +169,7 @@
             <div class="card-loader text-danger"><div class="spinner-border"></div></div>
         </div>
 
-        <!-- HELPER -->
+        <!-- HELPER (FIXED UI) -->
         <div id="card-helper" class="card-box">
             <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
             <div class="card-loader text-primary"><div class="spinner-border"></div></div>
@@ -268,7 +268,7 @@
             console.error("LIFF Error:", e);
             USER_ID = 'TEST_USER_ID'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
-            alert("โหมดทดสอบ: ไม่สามารถเชื่อมต่อ LINE ได้");
+            // alert("โหมดทดสอบ: ไม่สามารถเชื่อมต่อ LINE ได้");
         }
         
         loadBasicInfo(); 
@@ -300,12 +300,43 @@
             renderRiskCard(u, DATA.assessmentCount);
             renderHospitalCard();
             
+            // --- Helper Card (FIXED) ---
             const l = DATA.communityLeaders;
+            
+            // Check if village data exists
+            let headmanInfo = '-';
+            let villageTitle = 'ผู้ใหญ่บ้าน';
+            
+            if (l.village_headman && l.village_headman !== '-') {
+                headmanInfo = l.village_headman;
+            }
+            
             document.getElementById('card-helper').innerHTML = `
                 <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
-                <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital fs-1 text-danger me-3"></i><div><div class="fw-bold fs-5">${l.pcu}</div><div class="small text-muted">รพ.สต. ในพื้นที่</div>${l.pcuTel?`<button class="btn btn-sm btn-outline-success rounded-pill mt-1" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone"></i> โทร</button>`:''}</div></div>
-                <div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">ผู้ใหญ่บ้าน</div><div class="small text-muted">${l.area} (${l.village_name})</div><div class="small text-muted">${l.village_headman||'-'}</div></div><button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button></div>
-                <div class="d-flex align-items-center py-3"><div class="me-3 fw-bold fs-2 text-warning">${l.vhvCount}</div><div class="fw-bold text-secondary">ท่าน<br>อสม. ในเขต</div></div>`;
+                
+                <div class="d-flex align-items-center py-3 border-bottom">
+                    <i class="bi bi-hospital fs-1 text-danger me-3"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold fs-5">${l.pcu}</div>
+                        <div class="small text-muted">รพ.สต. ในพื้นที่</div>
+                    </div>
+                    ${l.pcuTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}
+                </div>
+
+                <div class="d-flex align-items-center py-3 border-bottom">
+                    <i class="bi bi-person-badge fs-1 text-dark me-3"></i>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold fs-5">${headmanInfo}</div>
+                        <div class="small text-muted">${villageTitle} ${l.village_name}</div>
+                        <div class="small text-secondary">${l.area}</div>
+                    </div>
+                    ${l.headTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}
+                </div>
+
+                <div class="d-flex align-items-center py-3">
+                    <div class="me-3 fw-bold fs-2 text-warning">${l.vhvCount}</div>
+                    <div class="fw-bold text-secondary">ท่าน<br>อสม. ในเขต</div>
+                </div>`;
 
             if(!DATA.isVhv && (!DATA.homeDistance || DATA.homeDistance.km == 0)) MODALS.modalPinUser.show();
             if(DATA.isVhv) loadVhvData();
