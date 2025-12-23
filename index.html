@@ -285,7 +285,7 @@
                 <button class="btn btn-gold" type="button" onclick="searchPatient()"><i class="bi bi-search"></i></button>
             </div>
             <div id="search-reset-btn" class="d-none mb-3">
-                <button class="btn btn-secondary btn-sm w-100 rounded-pill" onclick="resetPatientSearch()">แสดงทุกคนในเขต</button>
+                <button class="btn btn-secondary btn-sm w-100 rounded-pill" onclick="resetPatientSearch()">แสดงทุกคน</button>
             </div>
 
             <div class="bg-white border rounded p-3 mb-3 small text-secondary">
@@ -614,49 +614,67 @@
         renderPatientList(false);
     }
 
-    // UPDATED: Patient Filtering
-    function searchPatient() {
+    // UPDATED: Patient Filtering (Now calls Backend)
+    async function searchPatient() {
         const val = document.getElementById('vhvSearchTel').value.trim();
         if(!val) return;
-        renderPatientList(false, val);
+        
+        // Show Loading State
+        document.getElementById('patient-list-container').innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border text-gold mb-2"></div><br>กำลังค้นหาจากฐานข้อมูล...</div>';
         document.getElementById('search-reset-btn').classList.remove('d-none');
+
+        try {
+            // Call Backend API
+            const res = await fetch(`${API_URL}?action=searchPatient&phone=${val}&userId=${USER_ID}`).then(r=>r.json());
+            
+            // Render Result
+            if(res && res.length > 0) {
+                renderPatientList(true, null, res);
+            } else {
+                document.getElementById('patient-list-container').innerHTML = '<div class="text-center py-5 text-muted">ไม่พบข้อมูลที่ค้นหา</div>';
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('patient-list-container').innerHTML = '<div class="text-center py-5 text-danger">เกิดข้อผิดพลาดในการค้นหา</div>';
+        }
     }
     
     function resetPatientSearch() {
         document.getElementById('vhvSearchTel').value='';
         document.getElementById('search-reset-btn').classList.add('d-none');
-        renderPatientList(false);
+        renderPatientList(false); // Render default list again
     }
 
-    function renderPatientList(showAll, filterTel=null) {
+    function renderPatientList(showAll, filterTel=null, sourceList=null) {
         let ph = '';
-        const list = DATA.patientList || [];
+        // Use sourceList if provided (search results), otherwise use default DATA.patientList
+        const list = sourceList || DATA.patientList || [];
+        
         if(list.length > 0) {
             const groups = {'สูงอันตราย (แดง)':[],'สูง (ส้ม)':[],'ปานกลาง (เหลือง)':[],'ต่ำ (เขียว)':[]};
-            let hasMatch = false;
-
+            
             list.forEach(p=>{
-                if(filterTel && !p.phone.includes(filterTel)) return; // Filter
-                hasMatch = true;
+                // Skip filterTel logic if we are using search results (sourceList)
+                if(!sourceList && filterTel && !p.phone.includes(filterTel)) return; 
+                
                 if(p.risk>=30) groups['สูงอันตราย (แดง)'].push(p);
                 else if(p.risk>=20) groups['สูง (ส้ม)'].push(p);
                 else if(p.risk>=10) groups['ปานกลาง (เหลือง)'].push(p);
                 else groups['ต่ำ (เขียว)'].push(p);
             });
 
-            if (!hasMatch) {
-                document.getElementById('patient-list-container').innerHTML = '<div class="text-center py-4 text-muted">ไม่พบข้อมูลที่ค้นหา</div>';
-                return;
-            }
-
-            if(!showAll && !filterTel && groups['ต่ำ (เขียว)'].length > 0) {
+            // If using default list, hide green by default
+            if(!sourceList && !showAll && !filterTel && groups['ต่ำ (เขียว)'].length > 0) {
                 document.getElementById('patient-list-container').innerHTML = '';
             }
 
+            let foundAny = false;
             Object.keys(groups).forEach(k=>{
                 if(groups[k].length>0){
-                    if(!showAll && !filterTel && k.includes('เขียว')) return;
+                    // If using default list, hide green unless showAll is true
+                    if(!sourceList && !showAll && !filterTel && k.includes('เขียว')) return;
                     
+                    foundAny = true;
                     let bgBadge = k.includes('แดง')?'badge-danger':k.includes('ส้ม')?'badge-high':k.includes('เหลือง')?'badge-med':'badge-low';
                     let cardClass = k.includes('แดง')?'card-bg-danger':k.includes('ส้ม')?'card-bg-high':k.includes('เหลือง')?'card-bg-med':'card-bg-low';
                     
@@ -684,12 +702,18 @@
                 }
             });
             
-            if(!showAll && !filterTel && groups['ต่ำ (เขียว)'].length > 0) {
+            if(!sourceList && !showAll && !filterTel && groups['ต่ำ (เขียว)'].length > 0) {
                 ph += `<button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="renderPatientList(true)">แสดงความเสี่ยงต่ำด้วย (${groups['ต่ำ (เขียว)'].length})</button>`;
+            }
+            
+            if(!foundAny && sourceList) {
+                 ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูล</div>';
             }
         } else { 
             if (document.getElementById('patient-list-container').innerHTML.includes('spinner')) {
                  ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูลกลุ่มเสี่ยง</div>'; 
+            } else if (sourceList) {
+                 ph = '<div class="text-center py-5 text-muted">ไม่พบข้อมูล</div>';
             }
         }
         if (ph) document.getElementById('patient-list-container').innerHTML = ph;
@@ -727,7 +751,6 @@
         const separator = SELECTED_STICKER.linkURL.includes('?') ? '&' : '?';
         const trackingUrl = `${SELECTED_STICKER.linkURL}${separator}ref=${USER_ID}&sticker=${SELECTED_STICKER.stickerID}`;
         
-        // FIXED FLEX MESSAGE STRUCTURE
         const flexMsg = {
             type: "flex",
             altText: "ส่งความห่วงใยถึงคุณ",
@@ -752,9 +775,6 @@
                 }
             }
         };
-
-        // ADDED CONSOLE LOG FOR DEBUGGING
-        console.log("Sharing Sticker Flex:", JSON.stringify(flexMsg)); 
 
         liff.shareTargetPicker([flexMsg]).then(res => {
                 if(res) { MODALS.modalStickerShare.hide(); alert("ส่งสติกเกอร์เรียบร้อยแล้ว!"); fetch(API_URL, {method: 'POST', mode: 'no-cors', body: JSON.stringify({action: 'logStickerShare', data: { userId: USER_ID, stickerID: SELECTED_STICKER.stickerID }})}); }
@@ -918,60 +938,63 @@
     }
 
     function shareVhvCard() {
-        if (!isLiffInit || !liff.isInClient()) { alert('ฟีเจอร์นี้ใช้งานได้เฉพาะบน LINE Application เท่านั้น'); return; }
-        const v = DATA.vhvProfile; if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม."); return; }
-        const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
-        const name = v.name || "ไม่ระบุชื่อ"; const area = v.area || "-";
+        if (!isLiffInit || !liff.isInClient()) { alert('ฟีเจอร์นี้ใช้งานได้เฉพาะบน LINE Application เท่านั้น (ในโหมดทดสอบจะไม่ทำงาน)'); return; }
         
-        let mainContents = [
+        const v = DATA.vhvProfile;
+        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารีเฟรชแล้วลองใหม่"); return; }
+        
+        const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
+        const name = v.name || "ไม่ระบุชื่อ";
+        const area = v.area || "-";
+        
+        let rightColContents = [
             { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
             { type: "separator", margin: "sm", color: "#90caf9" },
-            { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" },
-            { type: "text", text: area, size: "xs", color: "#555555", wrap: true }
+            { type: "text", text: name, weight: "bold", size: "lg", wrap: true },
+            { type: "text", text: area, size: "sm", color: "#555555" }
         ];
 
-        // Validate phone: must be string, not empty, and only digits/plus
-        let phoneBtn = null;
+        // ADD Phone Button ONLY if valid
         if(v.phone && typeof v.phone === 'string' && v.phone.length > 8) {
-            const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
+            const cleanPhone = v.phone.replace(/[^0-9+]/g, ''); // Remove dash, space, etc.
             if(cleanPhone.length > 0) {
-                phoneBtn = { 
+                rightColContents.push({ 
                     type: "button", 
                     action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, 
-                    style: "primary", 
-                    color: "#198754", 
+                    style: "secondary", 
                     height: "sm", 
                     margin: "md" 
-                };
-                mainContents.push(phoneBtn);
+                });
             }
         }
 
         const flex = {
-            type: "bubble",
+            type: "bubble", 
             size: "mega",
             body: {
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
                     { 
-                        type: "image", url: pic, size: "full", aspectMode: "cover", aspectRatio: "2:3", flex: 2, 
+                        type: "image", url: pic, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, 
                         backgroundColor: "#ffffff", cornerRadius: "md" 
                     },
                     { 
-                        type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center",
-                        contents: mainContents
+                        type: "box", layout: "vertical", flex: 4, spacing: "sm",
+                        contents: rightColContents
                     }
                 ]
             }
         };
         
-        // ADDED CONSOLE LOG FOR DEBUGGING
-        console.log("Sharing VHV Flex:", JSON.stringify(flex));
-
         liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }])
-            .then(res => { if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว"); })
-            .catch(e => { console.error(e); alert("เกิดข้อผิดพลาดในการส่ง: " + e.message); });
+            .then(res => {
+                if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
+            })
+            .catch(e => {
+                console.error(e);
+                alert("เกิดข้อผิดพลาดในการส่ง: " + e.message);
+            });
     }
 
     let CURR_PATIENT_ID = '';
