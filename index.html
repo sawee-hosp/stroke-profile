@@ -943,8 +943,7 @@
     function shareVhvCard() {
         try {
             console.log("Starting shareVhvCard...");
-            // Initial Alert to confirm function is called
-            alert("กำลังเตรียมข้อมูลนามบัตร...");
+            // Remove initial alert
 
             const v = DATA.vhvProfile;
             
@@ -956,6 +955,57 @@
                 alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารอโหลดข้อมูลสักครู่"); 
                 return; 
             }
+
+            // Safe String Conversion for Phone
+            const rawPhone = v.phone ? String(v.phone) : "";
+
+            // Prepare contents array
+            const cardContents = [
+                { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "xs", color: "#1565c0", wrap: true },
+                { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none", wrap: true },
+                { type: "separator", margin: "sm" },
+                { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "md", wrap: true, margin: "sm", color: "#000000" },
+                { type: "text", text: v.area || "-", size: "xs", color: "#666666", wrap: true }
+            ];
+            
+            // Add Registration Date if available
+            if (v.date_regist) {
+                cardContents.push({
+                    type: "text",
+                    text: "ลงทะเบียน: " + v.date_regist,
+                    size: "xxs",
+                    color: "#aaaaaa",
+                    wrap: true,
+                    margin: "xs"
+                });
+            }
+
+            // Add phone button ONLY if phone is valid and length is correct
+            // Logic: Must have 9 or 10 digits
+            let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+            if(cleanPhone.length >= 9) {
+                 cardContents.push({ 
+                    type: "button", 
+                    action: { type: "uri", label: "📞 โทรหา อสม.", uri: "tel:" + cleanPhone }, 
+                    style: "secondary", 
+                    height: "sm", 
+                    margin: "md" 
+                });
+            }
+
+            // Add LINE Button
+            cardContents.push({
+                type: "button",
+                style: "primary",
+                color: "#06c755", // LINE Green
+                height: "sm",
+                margin: "sm",
+                action: {
+                    type: "uri",
+                    label: "LINE สวีรู้ทันสโตรก",
+                    uri: "https://line.me/R/ti/p/@325qgicq"
+                }
+            });
 
             // Check Profile Picture Priority
             // 1. From VHV DB (v.profilePicture)
@@ -977,23 +1027,19 @@
                         { 
                             type: "image", 
                             url: picUrl, 
-                            size: "lg", 
+                            size: "full", 
                             aspectMode: "cover", 
                             aspectRatio: "3:4", 
-                            flex: 2, 
+                            flex: 3, 
                             backgroundColor: "#ffffff", 
                             cornerRadius: "md" 
                         },
                         { 
-                            type: "box", layout: "vertical", flex: 4, spacing: "sm", 
-                            contents: [
-                                { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                                { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
-                                { type: "separator", margin: "sm", color: "#90caf9" },
-                                { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "lg", wrap: true },
-                                { type: "text", text: v.area || "-", size: "sm", color: "#555555" },
-                                { type: "button", action: { type: "uri", label: "💬 ไลน์สวีรู้ทันสโตรก", uri: "https://line.me/R/ti/p/@325qgicq" }, style: "primary", color: "#0d6efd", height: "sm", margin: "md" }
-                            ]
+                            type: "box", 
+                            layout: "vertical", 
+                            flex: 5, 
+                            spacing: "xs", 
+                            contents: cardContents
                         }
                     ]
                 }
