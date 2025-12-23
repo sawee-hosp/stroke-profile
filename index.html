@@ -943,6 +943,9 @@
     function shareVhvCard() {
         try {
             console.log("Starting shareVhvCard...");
+            // Initial Alert to confirm function is called
+            alert("กำลังเตรียมข้อมูลนามบัตร...");
+
             const v = DATA.vhvProfile;
             
             if(!liff.isInClient()) { 
@@ -966,22 +969,27 @@
                 { type: "text", text: v.area || "-", size: "sm", color: "#555555" }
             ];
 
-            // Add phone button ONLY if phone is valid
-            if(rawPhone.length > 8) {
-                const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-                if(cleanPhone.length > 0) {
-                    cardContents.push({ 
-                        type: "button", 
-                        action: { type: "uri", label: "📞 " + rawPhone, uri: "tel:" + cleanPhone }, 
-                        style: "secondary", 
-                        height: "sm", 
-                        margin: "md" 
-                    });
-                }
+            // Add phone button ONLY if phone is valid and length is correct
+            // Logic: Must have 9 or 10 digits
+            let cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+            if(cleanPhone.length >= 9) {
+                 cardContents.push({ 
+                    type: "button", 
+                    action: { type: "uri", label: "📞 " + rawPhone, uri: "tel:" + cleanPhone }, 
+                    style: "secondary", 
+                    height: "sm", 
+                    margin: "md" 
+                });
             }
 
-            // Check Profile Picture
-            const picUrl = (PROFILE && PROFILE.pictureUrl) ? PROFILE.pictureUrl : "https://placehold.co/200x300?text=No+Image";
+            // Check Profile Picture Priority
+            // 1. From VHV DB (v.profilePicture) - not implemented in UI yet but good for future
+            // 2. From LINE Profile (PROFILE.pictureUrl)
+            // 3. Default Icon
+            let picUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; 
+            if (PROFILE && PROFILE.pictureUrl) {
+                picUrl = PROFILE.pictureUrl;
+            }
 
             const flex = {
                 type: "bubble",
