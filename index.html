@@ -776,6 +776,9 @@
             }
         };
 
+        // ADDED CONSOLE LOG FOR DEBUGGING
+        console.log("Sharing Sticker Flex:", JSON.stringify(flexMsg)); 
+
         liff.shareTargetPicker([flexMsg]).then(res => {
                 if(res) { MODALS.modalStickerShare.hide(); alert("ส่งสติกเกอร์เรียบร้อยแล้ว!"); fetch(API_URL, {method: 'POST', mode: 'no-cors', body: JSON.stringify({action: 'logStickerShare', data: { userId: USER_ID, stickerID: SELECTED_STICKER.stickerID }})}); }
             }).catch(err => console.error(err));
@@ -956,8 +959,10 @@
         ];
 
         // ADD Phone Button ONLY if valid
-        if(v.phone && typeof v.phone === 'string' && v.phone.length > 8) {
-            const cleanPhone = v.phone.replace(/[^0-9+]/g, ''); // Remove dash, space, etc.
+        // NOTE: User requested removal of button to test display issue. 
+        // Logic commented out to revert to basic display.
+        /* if(v.phone && typeof v.phone === 'string' && v.phone.length > 8) {
+            const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
             if(cleanPhone.length > 0) {
                 rightColContents.push({ 
                     type: "button", 
@@ -967,7 +972,8 @@
                     margin: "md" 
                 });
             }
-        }
+        } 
+        */
 
         const flex = {
             type: "bubble", 
@@ -987,6 +993,8 @@
             }
         };
         
+        console.log("Sharing VHV Flex:", JSON.stringify(flex));
+
         liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }])
             .then(res => {
                 if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
