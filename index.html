@@ -400,7 +400,8 @@
             renderBasicInfoUI(); 
         } catch(e){ 
             console.warn("LIFF Failed:", e.message);
-            USER_ID = 'TEST_USER_ID'; 
+            // UPDATED: Requested Fallback ID
+            USER_ID = 'U2658f60905f670a06ff5bf704e1a4593'; 
             PROFILE = { pictureUrl: 'https://placehold.co/100', userId: USER_ID };
             renderBasicInfoUI();
         }
@@ -726,7 +727,34 @@
         const separator = SELECTED_STICKER.linkURL.includes('?') ? '&' : '?';
         const trackingUrl = `${SELECTED_STICKER.linkURL}${separator}ref=${USER_ID}&sticker=${SELECTED_STICKER.stickerID}`;
         
-        const flexMsg = { type: "flex", altText: "ส่งความห่วงใยถึงคุณ", contents: { type: "bubble", hero: { type: "image", url: SELECTED_STICKER.imageURL, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: trackingUrl } }, footer: { type: "box", layout: "vertical", backgroundColor: SELECTED_STICKER.flexBG || "#FFFFFF", contents: [{ type: "text", text: userText, wrap: true, align: "center", weight: "bold", color: "#444444", margin: "md" }, { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "ส่งต่อให้เพื่อน", uri: "https://liff.line.me/2005789397-37lemBgX" }, margin: "md", color: "#28a745" }] } } };
+        // FIXED FLEX MESSAGE STRUCTURE
+        const flexMsg = {
+            type: "flex",
+            altText: "ส่งความห่วงใยถึงคุณ",
+            contents: {
+                type: "bubble",
+                hero: {
+                    type: "image",
+                    url: SELECTED_STICKER.imageURL,
+                    size: "full",
+                    aspectRatio: "1:1",
+                    aspectMode: "cover",
+                    action: { type: "uri", uri: trackingUrl }
+                },
+                footer: {
+                    type: "box",
+                    layout: "vertical",
+                    backgroundColor: SELECTED_STICKER.flexBG || "#FFFFFF",
+                    contents: [
+                        { type: "text", text: userText, wrap: true, align: "center", weight: "bold", color: "#444444", margin: "md" },
+                        { type: "button", style: "primary", height: "sm", action: { type: "uri", label: "ส่งต่อให้เพื่อน", uri: "https://liff.line.me/2005789397-37lemBgX" }, margin: "md", color: "#28a745" }
+                    ]
+                }
+            }
+        };
+
+        // ADDED CONSOLE LOG FOR DEBUGGING
+        console.log("Sharing Sticker Flex:", JSON.stringify(flexMsg)); 
 
         liff.shareTargetPicker([flexMsg]).then(res => {
                 if(res) { MODALS.modalStickerShare.hide(); alert("ส่งสติกเกอร์เรียบร้อยแล้ว!"); fetch(API_URL, {method: 'POST', mode: 'no-cors', body: JSON.stringify({action: 'logStickerShare', data: { userId: USER_ID, stickerID: SELECTED_STICKER.stickerID }})}); }
@@ -894,10 +922,56 @@
         const v = DATA.vhvProfile; if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม."); return; }
         const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
         const name = v.name || "ไม่ระบุชื่อ"; const area = v.area || "-";
-        let mainContents = [ { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" }, { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" }, { type: "separator", margin: "sm", color: "#90caf9" }, { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" }, { type: "text", text: area, size: "xs", color: "#555555", wrap: true } ];
-        if(v.phone && v.phone.length > 8) { const cleanPhone = v.phone.replace(/[^0-9+]/g, ''); mainContents.push({ type: "button", action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, style: "primary", color: "#198754", height: "sm", margin: "md" }); }
-        const flex = { type: "bubble", size: "mega", body: { type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg", contents: [ { type: "image", url: pic, size: "full", aspectMode: "cover", aspectRatio: "2:3", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" }, { type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center", contents: mainContents } ] } };
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }]).then(res => { if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว"); }).catch(e => { console.error(e); alert("เกิดข้อผิดพลาดในการส่ง: " + e.message); });
+        
+        let mainContents = [
+            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#64b5f6" },
+            { type: "separator", margin: "sm", color: "#90caf9" },
+            { type: "text", text: name, weight: "bold", size: "lg", wrap: true, margin: "md", color: "#000000" },
+            { type: "text", text: area, size: "xs", color: "#555555", wrap: true }
+        ];
+
+        // Validate phone: must be string, not empty, and only digits/plus
+        let phoneBtn = null;
+        if(v.phone && typeof v.phone === 'string' && v.phone.length > 8) {
+            const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
+            if(cleanPhone.length > 0) {
+                phoneBtn = { 
+                    type: "button", 
+                    action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, 
+                    style: "primary", 
+                    color: "#198754", 
+                    height: "sm", 
+                    margin: "md" 
+                };
+                mainContents.push(phoneBtn);
+            }
+        }
+
+        const flex = {
+            type: "bubble",
+            size: "mega",
+            body: {
+                type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
+                contents: [
+                    { 
+                        type: "image", url: pic, size: "full", aspectMode: "cover", aspectRatio: "2:3", flex: 2, 
+                        backgroundColor: "#ffffff", cornerRadius: "md" 
+                    },
+                    { 
+                        type: "box", layout: "vertical", flex: 4, spacing: "sm", justifyContent: "center",
+                        contents: mainContents
+                    }
+                ]
+            }
+        };
+        
+        // ADDED CONSOLE LOG FOR DEBUGGING
+        console.log("Sharing VHV Flex:", JSON.stringify(flex));
+
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }])
+            .then(res => { if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว"); })
+            .catch(e => { console.error(e); alert("เกิดข้อผิดพลาดในการส่ง: " + e.message); });
     }
 
     let CURR_PATIENT_ID = '';
