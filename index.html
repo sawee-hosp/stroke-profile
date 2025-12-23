@@ -940,69 +940,30 @@
         MODALS.modalQR.show(); 
     }
 
+    // UPDATED: Use the specific requested code for sharing
     function shareVhvCard() {
-        if (!isLiffInit || !liff.isInClient()) { alert('ฟีเจอร์นี้ใช้งานได้เฉพาะบน LINE Application เท่านั้น (ในโหมดทดสอบจะไม่ทำงาน)'); return; }
-        
+        if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
         const v = DATA.vhvProfile;
-        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารีเฟรชแล้วลองใหม่"); return; }
         
-        const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
-        const name = v.name || "ไม่ระบุชื่อ";
-        const area = v.area || "-";
-        
-        let rightColContents = [
-            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
-            { type: "separator", margin: "sm", color: "#90caf9" },
-            { type: "text", text: name, weight: "bold", size: "lg", wrap: true },
-            { type: "text", text: area, size: "sm", color: "#555555" }
-        ];
-
-        // ADD Phone Button ONLY if valid
-        // NOTE: User requested removal of button to test display issue. 
-        // Logic commented out to revert to basic display.
-        /* if(v.phone && typeof v.phone === 'string' && v.phone.length > 8) {
-            const cleanPhone = v.phone.replace(/[^0-9+]/g, '');
-            if(cleanPhone.length > 0) {
-                rightColContents.push({ 
-                    type: "button", 
-                    action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, 
-                    style: "secondary", 
-                    height: "sm", 
-                    margin: "md" 
-                });
-            }
-        } 
-        */
-
+        // This specific JSON structure as requested
         const flex = {
-            type: "bubble", 
-            size: "mega",
+            type: "bubble", size: "mega",
             body: {
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
-                    { 
-                        type: "image", url: pic, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, 
-                        backgroundColor: "#ffffff", cornerRadius: "md" 
-                    },
-                    { 
-                        type: "box", layout: "vertical", flex: 4, spacing: "sm",
-                        contents: rightColContents
-                    }
+                    { type: "image", url: PROFILE.pictureUrl, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" },
+                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: [
+                        { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+                        { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
+                        { type: "separator", margin: "sm" },
+                        { type: "text", text: v.name, weight: "bold", size: "lg", wrap: true },
+                        { type: "text", text: v.area, size: "sm", color: "#555555" },
+                        { type: "button", action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + v.phone }, style: "secondary", height: "sm", margin: "md" }
+                    ]}
                 ]
             }
         };
-        
-        console.log("Sharing VHV Flex:", JSON.stringify(flex));
-
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + name, contents: flex }])
-            .then(res => {
-                if (res) alert("ส่งนามบัตรเรียบร้อยแล้ว");
-            })
-            .catch(e => {
-                console.error(e);
-                alert("เกิดข้อผิดพลาดในการส่ง: " + e.message);
-            });
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }]).catch(e=>console.log(e));
     }
 
     let CURR_PATIENT_ID = '';
