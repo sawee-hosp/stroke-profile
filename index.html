@@ -940,33 +940,92 @@
         MODALS.modalQR.show(); 
     }
 
-    // UPDATED: Use the specific requested code for sharing with button included
     function shareVhvCard() {
-        if(!liff.isInClient()) { alert('ใช้ได้ใน LINE เท่านั้น'); return; }
-        const v = DATA.vhvProfile;
-        if (!v) { alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารีเฟรชแล้วลองใหม่"); return; }
-        
-        const pic = (PROFILE.pictureUrl && PROFILE.pictureUrl.startsWith('http')) ? PROFILE.pictureUrl : "https://via.placeholder.com/200x300?text=No+Image";
-        
-        // This specific JSON structure as requested
-        const flex = {
-            type: "bubble", size: "mega",
-            body: {
-                type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
-                contents: [
-                    { type: "image", url: pic, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff", cornerRadius: "md" },
-                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: [
-                        { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                        { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
-                        { type: "separator", margin: "sm" },
-                        { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "lg", wrap: true },
-                        { type: "text", text: v.area || "-", size: "sm", color: "#555555" },
-                        { type: "button", action: { type: "uri", label: "📞 " + (v.phone || ""), uri: "tel:" + (v.phone || "") }, style: "secondary", height: "sm", margin: "md" }
-                    ]}
-                ]
+        try {
+            console.log("Starting shareVhvCard...");
+            const v = DATA.vhvProfile;
+            
+            if(!liff.isInClient()) { 
+                alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App (มือถือ) เท่านั้น'); 
+                return; 
             }
-        };
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }]).catch(e=>console.log(e));
+            if(!v) { 
+                alert("ไม่พบข้อมูลโปรไฟล์ อสม. กรุณารอโหลดข้อมูลสักครู่"); 
+                return; 
+            }
+
+            // Safe String Conversion for Phone
+            const rawPhone = v.phone ? String(v.phone) : "";
+
+            // Prepare contents array
+            const cardContents = [
+                { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+                { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none" },
+                { type: "separator", margin: "sm" },
+                { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "lg", wrap: true },
+                { type: "text", text: v.area || "-", size: "sm", color: "#555555" }
+            ];
+
+            // Add phone button ONLY if phone is valid
+            if(rawPhone.length > 8) {
+                const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+                if(cleanPhone.length > 0) {
+                    cardContents.push({ 
+                        type: "button", 
+                        action: { type: "uri", label: "📞 " + rawPhone, uri: "tel:" + cleanPhone }, 
+                        style: "secondary", 
+                        height: "sm", 
+                        margin: "md" 
+                    });
+                }
+            }
+
+            // Check Profile Picture
+            const picUrl = (PROFILE && PROFILE.pictureUrl) ? PROFILE.pictureUrl : "https://placehold.co/200x300?text=No+Image";
+
+            const flex = {
+                type: "bubble",
+                size: "mega",
+                body: {
+                    type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
+                    contents: [
+                        { 
+                            type: "image", 
+                            url: picUrl, 
+                            size: "lg", 
+                            aspectMode: "cover", 
+                            aspectRatio: "3:4", 
+                            flex: 2, 
+                            backgroundColor: "#ffffff", 
+                            cornerRadius: "md" 
+                        },
+                        { 
+                            type: "box", 
+                            layout: "vertical", 
+                            flex: 4, 
+                            spacing: "sm", 
+                            contents: cardContents
+                        }
+                    ]
+                }
+            };
+            
+            console.log("Flex Message:", JSON.stringify(flex));
+
+            liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + (v.name||""), contents: flex }])
+                .then(res => { 
+                    if(res){ alert("แชร์นามบัตรเรียบร้อย"); } 
+                    else { console.log("ShareTargetPicker cancelled"); }
+                })
+                .catch(err => { 
+                    console.error("LIFF Error:", err);
+                    alert("เกิดข้อผิดพลาดจาก LINE: " + (err.message || err));
+                });
+
+        } catch (e) {
+            console.error("System Error:", e);
+            alert("เกิดข้อผิดพลาดในระบบ: " + e.message);
+        }
     }
 
     let CURR_PATIENT_ID = '';
