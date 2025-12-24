@@ -13,7 +13,7 @@
         :root {
             --theme-red: #d32f2f; 
             --theme-red-soft: #ffebee;
-            --theme-gold: #876029;   
+            --theme-gold: #876029;    
             --theme-gold-text: #eae2cd; 
             --bg-card: #fffbf0;
             --border-gold: #f2e6d0;
@@ -186,7 +186,6 @@
 
 <div id="action-loader"><div class="spinner-border text-danger mb-2"></div><div>กำลังบันทึก...</div></div>
 
-<!-- UPDATED: Solid black bg via CSS -->
 <div id="update-toast">
     <div class="mb-2 text-white-50 small">กำลังอัพเดทข้อมูล....</div>
     <div id="update-toast-icon"><i class="bi bi-tornado"></i></div>
@@ -241,7 +240,6 @@
             <div class="card-loader text-success"><div class="spinner-border"></div></div>
         </div>
         
-        <!-- UPDATED: Knowledge Card with Separate Scores -->
         <div id="card-knowledge" class="card-box text-center py-4">
             <h5 class="card-title justify-content-center mb-3"><i class="bi bi-journal-text text-warning"></i> คะแนนสอบวัดความรู้</h5>
             <div class="card-loader text-warning"><div class="spinner-border"></div></div>
@@ -273,7 +271,7 @@
                     </button>
                 </div>
                 <div class="col-6">
-                     <button class="btn btn-outline-success w-100 btn-pill py-2" onclick="window.location.href='https://liff.line.me/2005789397-nebQ8oJy'">
+                      <button class="btn btn-outline-success w-100 btn-pill py-2" onclick="window.location.href='https://liff.line.me/2005789397-nebQ8oJy'">
                         <i class="bi bi-phone"></i> ประเมินแทน
                     </button>
                 </div>
@@ -338,10 +336,10 @@
 <div class="modal fade" id="modalPinAsm" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 text-center"><h5 class="fw-bold">ปักหมุดบ้าน อสม.</h5><p class="text-muted">โปรดปักหมุดเมื่ออยู่ที่บ้าน</p><button class="btn btn-gold btn-pill w-100" onclick="execPinAsm()">ยืนยัน</button></div></div></div>
 <div class="modal fade" id="modalEditVhv" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-3"><div class="modal-header border-0"><h5 class="fw-bold text-gold">แก้ไขข้อมูล</h5></div><div class="modal-body"><input id="vhvName" class="form-control mb-2" placeholder="ชื่อ"><input id="vhvPhone" class="form-control mb-2" placeholder="โทร"><select id="vhvDistrict" class="form-select mb-2" onchange="updateVillages()"></select><select id="vhvVillage" class="form-select mb-3"></select><button class="btn btn-gold btn-pill w-100" onclick="saveVhvProfile()">บันทึก</button></div></div></div></div>
 
-<!-- NEW: Stroke History Modal -->
+<!-- Stroke History Modal -->
 <div class="modal fade" id="modalStrokeHistory" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-0" style="overflow:hidden;"><div class="modal-header bg-danger text-white border-0"><h5 class="fw-bold"><i class="bi bi-clock-history"></i> ประวัติการประเมินสโตรก</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" style="max-height:60vh; overflow-y:auto;"><table class="table table-striped table-hover mb-0" style="font-size:0.85rem;"><thead class="table-light sticky-top"><tr><th class="ps-3">วัน-เวลา</th><th>อาการ</th><th class="text-center pe-3">ผล</th></tr></thead><tbody id="strokeHistoryBody"></tbody></table></div></div></div></div>
 
-<!-- NEW: Assessment History Modal (Detailed) -->
+<!-- Assessment History Modal (Detailed) -->
 <div class="modal fade" id="modalAssessmentHistory" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0" style="overflow:hidden;"><div class="modal-header bg-primary text-white border-0"><h5 class="fw-bold"><i class="bi bi-clipboard-data"></i> ประวัติความเสี่ยง (ละเอียด)</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" style="max-height:60vh; overflow-y:auto;"><table class="table table-striped table-hover mb-0" style="font-size:0.8rem;"><thead class="table-light sticky-top"><tr><th class="ps-3">วัน-เวลา</th><th class="text-center">%เสี่ยง</th><th>กลุ่มเสี่ยง</th><th class="pe-2">บทบาท</th></tr></thead><tbody id="assessmentHistoryBody"><tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary"></div></td></tr></tbody></table></div></div></div></div>
 
 <!-- QR MODAL (UPDATED) -->
@@ -511,7 +509,6 @@
         const u = DATA.userProfile || { name: 'Guest', role: 'General', regisDate: '-' };
         const pic = PROFILE.pictureUrl || u.pictureUrl || 'https://placehold.co/100';
         
-        // UPDATED: Name Logic
         const displayName = (u.name === 'Guest') ? 'กำลังค้นหาชื่อ....' : u.name;
 
         document.getElementById('card-profile').innerHTML = `
@@ -557,7 +554,6 @@
 
         document.getElementById('card-sticker').innerHTML = `<h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> แชร์สติกเกอร์</h5><div class="display-4 fw-bold text-success mb-2">${DATA.stickerCount||0}</div><a href="${LINKS.STICKER}" class="btn btn-success btn-pill w-100">แชร์สติกเกอร์ใหม่</a>`;
         
-        // UPDATED: Knowledge Card (3 separate scores)
         document.getElementById('card-knowledge').innerHTML = `
             <h5 class="card-title justify-content-center mb-2"><i class="bi bi-journal-text text-warning"></i> คะแนนสอบวัดความรู้</h5>
              <div class="d-flex justify-content-center gap-2 mt-3 text-center">
@@ -588,6 +584,9 @@
 
         const pic = PROFILE.pictureUrl || 'https://placehold.co/100';
 
+        // REVISED: Remove the "Share Card" Button from here if we want a cleaner UI, or keep it.
+        // User asked to fix the share logic. The button calls shareVhvCard().
+
         document.getElementById('vhv-profile').innerHTML = `
             <div class="d-flex align-items-center">
                 <img src="${pic}" class="profile-pic me-3">
@@ -595,9 +594,8 @@
                 <div onclick="editVhv('${v.name}','${v.phone}','${v.area}')"><i class="bi bi-pencil-square fs-3 text-secondary"></i></div>
             </div>
             ${pinBtn}
-            <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()">แชร์นามบัตร อสม.</button>`;
+            <button class="btn btn-primary btn-pill w-100 mt-2" onclick="shareVhvCard()"><i class="bi bi-person-vcard-fill"></i> แชร์นามบัตร อสม.</button>`;
 
-        // UPDATED: All 4 scores in one row (col-3)
         document.getElementById('vhv-perf').innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3"><h5 class="card-title m-0"><i class="bi bi-star-fill text-gold"></i> ผลงาน อสม.</h5><i class="bi bi-info-circle-fill text-secondary fs-4" onclick="MODALS.modalVhvInfo.show()"></i></div>
             <div class="text-center mb-4"><div class="display-3 fw-bold text-gold" style="line-height:1">${s.total}</div><small class="text-muted">คะแนนรวม</small></div>
@@ -616,20 +614,15 @@
         renderPatientList(false);
     }
 
-    // UPDATED: Patient Filtering (Now calls Backend)
     async function searchPatient() {
         const val = document.getElementById('vhvSearchTel').value.trim();
         if(!val) return;
         
-        // Show Loading State
         document.getElementById('patient-list-container').innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border text-gold mb-2"></div><br>กำลังค้นหาจากฐานข้อมูล...</div>';
         document.getElementById('search-reset-btn').classList.remove('d-none');
 
         try {
-            // Call Backend API
             const res = await fetch(`${API_URL}?action=searchPatient&phone=${val}&userId=${USER_ID}`).then(r=>r.json());
-            
-            // Render Result
             if(res && res.length > 0) {
                 renderPatientList(true, null, res);
             } else {
@@ -644,28 +637,24 @@
     function resetPatientSearch() {
         document.getElementById('vhvSearchTel').value='';
         document.getElementById('search-reset-btn').classList.add('d-none');
-        renderPatientList(false); // Render default list again
+        renderPatientList(false); 
     }
 
     function renderPatientList(showAll, filterTel=null, sourceList=null) {
         let ph = '';
-        // Use sourceList if provided (search results), otherwise use default DATA.patientList
         const list = sourceList || DATA.patientList || [];
         
         if(list.length > 0) {
             const groups = {'สูงอันตราย (แดง)':[],'สูง (ส้ม)':[],'ปานกลาง (เหลือง)':[],'ต่ำ (เขียว)':[]};
             
             list.forEach(p=>{
-                // Skip filterTel logic if we are using search results (sourceList)
                 if(!sourceList && filterTel && !p.phone.includes(filterTel)) return; 
-                
                 if(p.risk>=30) groups['สูงอันตราย (แดง)'].push(p);
                 else if(p.risk>=20) groups['สูง (ส้ม)'].push(p);
                 else if(p.risk>=10) groups['ปานกลาง (เหลือง)'].push(p);
                 else groups['ต่ำ (เขียว)'].push(p);
             });
 
-            // If using default list, hide green by default
             if(!sourceList && !showAll && !filterTel && groups['ต่ำ (เขียว)'].length > 0) {
                 document.getElementById('patient-list-container').innerHTML = '';
             }
@@ -673,7 +662,6 @@
             let foundAny = false;
             Object.keys(groups).forEach(k=>{
                 if(groups[k].length>0){
-                    // If using default list, hide green unless showAll is true
                     if(!sourceList && !showAll && !filterTel && k.includes('เขียว')) return;
                     
                     foundAny = true;
@@ -721,7 +709,6 @@
         if (ph) document.getElementById('patient-list-container').innerHTML = ph;
     }
 
-    // --- STICKER WIDGET LOGIC ---
     async function loadStickerWidget() {
         try {
             const res = await fetch(`${API_URL}?action=getStickers`);
@@ -778,15 +765,11 @@
             }
         };
 
-        // ADDED CONSOLE LOG FOR DEBUGGING
-        console.log("Sharing Sticker Flex:", JSON.stringify(flexMsg)); 
-
         liff.shareTargetPicker([flexMsg]).then(res => {
                 if(res) { MODALS.modalStickerShare.hide(); alert("ส่งสติกเกอร์เรียบร้อยแล้ว!"); fetch(API_URL, {method: 'POST', mode: 'no-cors', body: JSON.stringify({action: 'logStickerShare', data: { userId: USER_ID, stickerID: SELECTED_STICKER.stickerID }})}); }
             }).catch(err => console.error(err));
     }
 
-    // --- OTHER ACTIONS ---
     function renderRiskCard(p, cnt) {
         if(!p || !p.thai_cv_risk_score) {
             document.getElementById('card-risk').innerHTML = `<div class="card-box text-center py-5"><h5 class="card-title mb-3"><i class="bi bi-activity text-red"></i> ประวัติการประเมินความเสี่ยง</h5><div class="text-muted mb-3">ยังไม่มีข้อมูล</div><a href="${LINKS.REGIS}" class="btn btn-red btn-pill">ประเมินเลย</a></div>`;
@@ -829,7 +812,6 @@
             </div>`;
     }
 
-    // NEW: Render Stroke History Card
     function renderStrokeHistoryCard() {
         const sh = DATA.strokeHistory || { total:0, symptom:0, normal:0, history:[] };
         
@@ -875,7 +857,7 @@
         MODALS.modalStrokeHistory.show();
     }
     
-    // NEW: Open Detailed Assessment History Modal
+    // UPDATED: Detailed Assessment History
     async function openHistoryModal() {
         MODALS.modalAssessmentHistory.show();
         const tbody = document.getElementById('assessmentHistoryBody');
@@ -888,20 +870,20 @@
                  tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">ไม่พบข้อมูลประวัติ</td></tr>';
              } else {
                  res.forEach(item => {
-                     let badgeClass = 'bg-secondary';
-                     if(item.group.includes('เขียว')) badgeClass = 'bg-success';
-                     else if(item.group.includes('เหลือง')) badgeClass = 'bg-warning text-dark';
-                     else if(item.group.includes('ส้ม')) badgeClass = 'bg-danger'; // Orange usually close to danger
-                     else if(item.group.includes('แดง')) badgeClass = 'bg-danger';
+                      let badgeClass = 'bg-secondary';
+                      if(item.group.includes('เขียว')) badgeClass = 'bg-success';
+                      else if(item.group.includes('เหลือง')) badgeClass = 'bg-warning text-dark';
+                      else if(item.group.includes('ส้ม')) badgeClass = 'bg-danger'; 
+                      else if(item.group.includes('แดง')) badgeClass = 'bg-danger';
 
-                     tbody.innerHTML += `
+                      tbody.innerHTML += `
                         <tr>
                             <td class="ps-3" style="font-size:0.75rem">${item.date}</td>
                             <td class="text-center fw-bold">${item.score}%</td>
                             <td><span class="badge ${badgeClass} rounded-pill">${item.group}</span></td>
                             <td class="pe-2 small text-muted">${item.role}</td>
                         </tr>
-                     `;
+                      `;
                  });
              }
         } catch(e) {
@@ -979,92 +961,89 @@
         MODALS.modalQR.show(); 
     }
 
-    // REPLACED: Updated shareVhvCard function with the robust version
+    // --- REWRITTEN VHV CARD SHARE FUNCTION (ID Card Style) ---
     function shareVhvCard() {
-        const v = DATA.vhvProfile;
-        
         if(!liff.isInClient()) { alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App'); return; }
+        
+        const v = DATA.vhvProfile;
         if(!v) { alert("ไม่พบข้อมูล อสม."); return; }
+        
+        // 1. Prepare Safe Data (No Nulls)
+        const safeName = v.name || "ไม่ระบุชื่อ";
+        const safeArea = v.area || "-";
+        const safeDate = v.date_regist || "-";
+        
+        // Ensure Pic is HTTPS and Valid, fallback if needed
+        let safePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        if(v.profilePicture && v.profilePicture.startsWith("http")) safePic = v.profilePicture;
+        else if(PROFILE.pictureUrl) safePic = PROFILE.pictureUrl;
 
-        // Prepare contents array
-        const cardContents = [
-            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "xs", color: "#1565c0", wrap: true },
-            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xxs", color: "#1565c0", margin: "none", wrap: true },
-            { type: "separator", margin: "sm" },
-            { type: "text", text: v.name || "ไม่ระบุชื่อ", weight: "bold", size: "md", wrap: true, margin: "sm", color: "#000000" },
-            { type: "text", text: v.area || "-", size: "xs", color: "#666666", wrap: true }
+        // 2. Build Contents Array (Conditional Elements)
+        let contentList = [
+             { "type": "text", "text": "บัตรประจำตัว อสม.", "weight": "bold", "size": "sm", "color": "#876029" },
+             { "type": "text", "text": safeName, "weight": "bold", "size": "md", "wrap": true, "margin": "xs" },
+             { "type": "text", "text": safeArea, "size": "xs", "color": "#666666", "wrap": true },
+             { "type": "text", "text": "ลงทะเบียน: " + safeDate, "size": "xxs", "color": "#aaaaaa", "margin": "xs" },
+             { "type": "separator", "margin": "md" }
         ];
-        
-        // Add date if available
-        if(v.date_regist){
-             cardContents.push({ type: "text", text: "ลงทะเบียน: " + v.date_regist, size: "xxs", color: "#aaaaaa", margin: "xs" });
+
+        // Add Phone Button if valid
+        if(v.phone && v.phone.length > 8) {
+             contentList.push({
+                "type": "button",
+                "style": "secondary",
+                "height": "sm",
+                "action": { "type": "uri", "label": "📞 " + v.phone, "uri": "tel:" + v.phone.replace(/[^0-9]/g, '') },
+                "margin": "sm"
+             });
         }
 
-        // Add phone button ONLY if phone is valid and present
-        if(v.phone) {
-            // Remove non-numeric chars for tel URI
-            const cleanPhone = String(v.phone).replace(/[^0-9]/g, '');
-            if(cleanPhone.length >= 9) {
-                cardContents.push({ 
-                    type: "button", 
-                    action: { type: "uri", label: "📞 " + v.phone, uri: "tel:" + cleanPhone }, 
-                    style: "secondary", 
-                    height: "sm", 
-                    margin: "md" 
-                });
-            }
-        }
-        
-        // Add Line Button
-        cardContents.push({ 
-             type: "button", 
-             action: { type: "uri", label: "ไลน์สวีรู้ทันสโตรก", uri: "https://line.me/R/ti/p/@325qgicq" }, 
-             style: "primary", 
-             color: "#06c755",
-             height: "sm", 
-             margin: "sm" 
+        // Add Line Link Button
+        contentList.push({
+            "type": "button",
+            "style": "primary",
+            "color": "#06c755",
+            "height": "sm",
+            "action": { "type": "uri", "label": "ไลน์สวีรู้ทันสโตรก", "uri": "https://line.me/R/ti/p/@325qgicq" },
+            "margin": "sm"
         });
 
-        // Pic Logic
-        let pic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; // Default
-        if (v.profilePicture && v.profilePicture.startsWith('http')) pic = v.profilePicture;
-        else if (PROFILE && PROFILE.pictureUrl) pic = PROFILE.pictureUrl;
-
-        const flex = {
-            type: "bubble",
-            size: "mega",
-            body: {
-                type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
-                contents: [
-                    { 
-                        type: "image", 
-                        url: pic, 
-                        size: "full", 
-                        aspectMode: "cover", 
-                        aspectRatio: "3:4", 
-                        flex: 3, 
-                        backgroundColor: "#ffffff", 
-                        cornerRadius: "md" 
-                    },
-                    { 
-                        type: "box", 
-                        layout: "vertical", 
-                        flex: 5, 
-                        spacing: "sm", 
-                        contents: cardContents
-                    }
-                ]
+        // 3. Construct ID Card Layout
+        const flexMsg = {
+            "type": "flex",
+            "altText": "นามบัตร อสม. " + safeName,
+            "contents": {
+                "type": "bubble",
+                "size": "mega",
+                "body": {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "spacing": "md",
+                    "contents": [
+                        {
+                            "type": "image",
+                            "url": safePic,
+                            "aspectMode": "cover",
+                            "aspectRatio": "3:4",
+                            "size": "full",
+                            "flex": 2,
+                            "cornerRadius": "md"
+                        },
+                        {
+                            "type": "box",
+                            "layout": "vertical",
+                            "flex": 3,
+                            "contents": contentList
+                        }
+                    ]
+                }
             }
         };
-        
-        console.log("Sharing VHV Flex:", JSON.stringify(flex));
 
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + (v.name||""), contents: flex }])
+        // 4. Send
+        liff.shareTargetPicker([flexMsg])
             .then(res => { if(res){ alert("แชร์นามบัตรเรียบร้อย"); } })
-            .catch(err => { 
-                console.log(err);
-                alert("ไม่สามารถแชร์ได้: " + (err.message || err));
-            });
+            .catch(err => { alert("เกิดข้อผิดพลาด: " + err.message); });
     }
 
     let CURR_PATIENT_ID = '';
