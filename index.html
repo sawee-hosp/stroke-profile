@@ -969,9 +969,9 @@
         if(!v) { alert("ไม่พบข้อมูล อสม."); return; }
         
         // 1. Prepare Safe Data (No Nulls)
-        const safeName = v.name || "ไม่ระบุชื่อ";
-        const safeArea = v.area || "-";
-        const safeDate = v.date_regist || "-";
+        const safeName = v.name;
+        const safeArea = v.area;
+        const safeDate = v.date_regist;
         
         // Ensure Pic is HTTPS and Valid, fallback if needed
         let safePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
@@ -980,25 +980,37 @@
 
         // 2. Build Contents Array (Conditional Elements)
         let contentList = [
-             { "type": "text", "text": "บัตรประจำตัว อสม.", "weight": "bold", "size": "sm", "color": "#876029" },
-             { "type": "text", "text": safeName, "weight": "bold", "size": "md", "wrap": true, "margin": "xs" },
-             { "type": "text", "text": safeArea, "size": "xs", "color": "#666666", "wrap": true },
-             { "type": "text", "text": "ลงทะเบียน: " + safeDate, "size": "xxs", "color": "#aaaaaa", "margin": "xs" },
-             { "type": "separator", "margin": "md" }
+             { "type": "text", "text": "บัตรประจำตัว อสม.", "weight": "bold", "size": "sm", "color": "#876029" }
         ];
 
+        // Conditional Push - Only add if data exists (Strict "Disappear" Logic)
+        if (safeName) {
+            contentList.push({ "type": "text", "text": safeName, "weight": "bold", "size": "md", "wrap": true, "margin": "xs" });
+        }
+
+        if (safeArea) {
+             contentList.push({ "type": "text", "text": safeArea, "size": "xs", "color": "#666666", "wrap": true });
+        }
+
+        if (safeDate) {
+             contentList.push({ "type": "text", "text": "ลงทะเบียน: " + safeDate, "size": "xxs", "color": "#aaaaaa", "margin": "xs" });
+        }
+        
+        // Add Separator only if we have buttons coming next
+        contentList.push({ "type": "separator", "margin": "md" });
+
         // Add Phone Button if valid
-        if(v.phone && v.phone.length > 8) {
+        if(v.phone && String(v.phone).replace(/[^0-9]/g, '').length > 8) {
              contentList.push({
                 "type": "button",
                 "style": "secondary",
                 "height": "sm",
-                "action": { "type": "uri", "label": "📞 " + v.phone, "uri": "tel:" + v.phone.replace(/[^0-9]/g, '') },
+                "action": { "type": "uri", "label": "📞 " + v.phone, "uri": "tel:" + String(v.phone).replace(/[^0-9]/g, '') },
                 "margin": "sm"
              });
         }
 
-        // Add Line Link Button
+        // Add Line Link Button (Always)
         contentList.push({
             "type": "button",
             "style": "primary",
@@ -1011,7 +1023,7 @@
         // 3. Construct ID Card Layout
         const flexMsg = {
             "type": "flex",
-            "altText": "นามบัตร อสม. " + safeName,
+            "altText": "นามบัตร อสม. " + (safeName || "สวีรู้ทันสโตรก"),
             "contents": {
                 "type": "bubble",
                 "size": "mega",
