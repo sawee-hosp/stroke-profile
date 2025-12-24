@@ -345,18 +345,18 @@
 <!-- QR MODAL (UPDATED - BLACK BACKGROUND) -->
 <div class="modal fade" id="modalQR" tabindex="-1">
     <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content bg-black text-white text-center justify-content-center p-3"> <!-- bg-black text-white -->
-            <button class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button> <!-- btn-close-white -->
+        <div class="modal-content bg-black text-white text-center justify-content-center p-3">
+            <button class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button>
             <div class="d-flex flex-column align-items-center justify-content-center h-100">
                 <h4 class="fw-bold text-success mb-3">สแกนเพื่อประเมินความเสี่ยง</h4>
-                <p class="mb-4 text-white-50 px-3" style="font-size: 1.1rem;"> <!-- text-white-50 -->
+                <p class="mb-4 text-white-50 px-3" style="font-size: 1.1rem;">
                     โปรดเปิดตัวอ่านคิวอาร์โค้ดเพื่อสแกนไปยังหน้าประเมินความเสี่ยงสโตรก แล้วเป็นเพื่อนกับไลน์สวีรู้ทันสโตรก เพื่อรับความรู้เพิ่มเติม
                 </p>
                 <div class="bg-white p-2 rounded-4 shadow-sm border mb-3 d-inline-block">
                     <img id="qrImg" src="" style="width: 80vw; max-width: 350px; height: auto;">
                 </div>
                 <div class="mt-3">
-                    <span class="text-white-50 small">ผู้แนะนำ</span><br> <!-- text-white-50 -->
+                    <span class="text-white-50 small">ผู้แนะนำ</span><br>
                     <strong class="text-primary fs-5" id="qrReferrer">...</strong>
                 </div>
             </div>
@@ -968,11 +968,15 @@
         if(!liff.isInClient()) { alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App'); return; }
 
         // 1. Prepare Data safely
-        const safePic = PROFILE.pictureUrl || "https://placehold.co/200";
         const safeName = v.name || "ไม่ระบุชื่อ";
         const safeArea = v.area || "-";
         const safePhone = v.phone || "-";
         const safeDate = v.date_regist || "-";
+        
+        // Ensure Pic is HTTPS and Valid, fallback if needed
+        let safePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        if(v.profilePicture && v.profilePicture.includes("https")) safePic = v.profilePicture;
+        else if(PROFILE.pictureUrl && PROFILE.pictureUrl.includes("https")) safePic = PROFILE.pictureUrl;
 
         // 2. Build Right Column Contents safely (Increased Font Sizes)
         let rightContents = [
