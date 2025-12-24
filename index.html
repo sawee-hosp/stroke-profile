@@ -961,19 +961,55 @@
         MODALS.modalQR.show(); 
     }
 
-    // --- REVERTED TO USER'S VERSION: VHV CARD SHARE FUNCTION ---
+    // --- UPDATED VHV CARD: BASIC VERSION + BUTTONS ---
     function shareVhvCard() {
         const v = DATA.vhvProfile;
         if(!v) { alert("กำลังโหลดข้อมูล อสม. กรุณารอสักครู่"); return; }
         if(!liff.isInClient()) { alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App'); return; }
 
-        // Fallback variables to prevent silent crash in LINE Flex
+        // 1. Prepare Data safely
         const safePic = PROFILE.pictureUrl || "https://placehold.co/200";
         const safeName = v.name || "ไม่ระบุชื่อ";
         const safeArea = v.area || "-";
         const safePhone = v.phone || "-";
         const safeDate = v.date_regist || "-";
 
+        // 2. Build Right Column Contents safely
+        let rightContents = [
+            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#1565c0", margin: "none" },
+            { type: "separator", margin: "sm" },
+            { type: "text", text: safeName, weight: "bold", size: "md", wrap: true },
+            { type: "text", text: safeArea, size: "xs", color: "#555555" },
+            { type: "text", text: "ลงทะเบียน: " + safeDate, size: "xxs", color: "#aaaaaa", margin: "xs" }
+        ];
+
+        // 3. Add Phone Button (Only if valid number exists)
+        // ใช้ String() ครอบเพื่อป้องกัน Error กรณีเบอร์มาเป็นตัวเลข
+        if(v.phone && String(v.phone).replace(/[^0-9]/g, '').length >= 9) {
+             rightContents.push({
+                type: "button", 
+                style: "secondary", 
+                height: "sm", 
+                margin: "md",
+                action: { type: "uri", label: "📞 " + safePhone, uri: "tel:" + String(v.phone).replace(/[^0-9]/g, '') }
+             });
+        } else {
+             // ถ้าไม่มีเบอร์ หรือเบอร์ผิดฟอร์แมต ให้แสดงเป็นข้อความธรรมดาแทน
+             rightContents.push({ type: "text", text: "โทร: " + safePhone, size: "xs", color: "#555555", margin: "sm" });
+        }
+
+        // 4. Add Line OA Button (Always)
+        rightContents.push({
+            type: "button", 
+            style: "primary", 
+            color: "#06c755", 
+            height: "sm", 
+            margin: "sm",
+            action: { type: "uri", label: "ไลน์สวีรู้ทันสโตรก", uri: "https://line.me/R/ti/p/@325qgicq" }
+        });
+
+        // 5. Construct Final Flex
         const flex = {
             type: "bubble",
             size: "mega",
@@ -981,20 +1017,12 @@
                 type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
                 contents: [
                     { type: "image", url: safePic, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff" },
-                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: [
-                        { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
-                        { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#1565c0", margin: "none" },
-                        { type: "separator", margin: "sm" },
-                        { type: "text", text: safeName, weight: "bold", size: "md", wrap: true },
-                        { type: "text", text: safeArea, size: "xs", color: "#555555" },
-                        { type: "text", text: "โทร: " + safePhone, size: "xs", color: "#555555" },
-                        { type: "text", text: "ลงทะเบียน: " + safeDate, size: "xxs", color: "#aaaaaa", margin: "md", align: "end" }
-                    ]}
+                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: rightContents }
                 ]
             }
         };
         
-        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม.", contents: flex }])
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + safeName, contents: flex }])
             .then(res => { if(res){ alert("แชร์นามบัตรเรียบร้อย"); } })
             .catch(err => { 
                 console.error(err); 
