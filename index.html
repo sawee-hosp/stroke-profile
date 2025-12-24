@@ -961,125 +961,71 @@
         MODALS.modalQR.show(); 
     }
 
-    // --- FINAL FIX: ULTRA-SAFE SHARE FUNCTION ---
+    // --- REVERTED BACK TO WORKING VERSION (Vertical Buttons) ---
     function shareVhvCard() {
-        try {
-            const v = DATA.vhvProfile;
-            if(!v) { alert("กำลังโหลดข้อมูล อสม. กรุณารอสักครู่"); return; }
-            if(!liff.isInClient()) { alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App'); return; }
+        const v = DATA.vhvProfile;
+        if(!v) { alert("กำลังโหลดข้อมูล อสม. กรุณารอสักครู่"); return; }
+        if(!liff.isInClient()) { alert('ฟีเจอร์นี้ใช้ได้เฉพาะใน LINE App'); return; }
 
-            // 1. Prepare Data & Force String Type (Crucial for preventing silent crashes)
-            const safeName = String(v.name || "ไม่ระบุชื่อ");
-            const safeArea = String(v.area || "-");
-            const safePhone = v.phone ? String(v.phone) : "";
-            const safeDate = String(v.date_regist || "-");
-            
-            // 2. Image Validation Logic
-            let safePic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-            // Check v.profilePicture (Convert to string first to avoid .includes error on numbers)
-            if(v.profilePicture && String(v.profilePicture).trim().toLowerCase().startsWith("http")) {
-                safePic = v.profilePicture;
-            } 
-            // Fallback to PROFILE.pictureUrl
-            else if(PROFILE.pictureUrl && String(PROFILE.pictureUrl).trim().toLowerCase().startsWith("http")) {
-                safePic = PROFILE.pictureUrl;
-            }
+        // 1. Prepare Data safely
+        const safePic = PROFILE.pictureUrl || "https://placehold.co/200";
+        const safeName = v.name || "ไม่ระบุชื่อ";
+        const safeArea = v.area || "-";
+        const safePhone = v.phone || "-";
+        const safeDate = v.date_regist || "-";
 
-            // 3. Build Text Contents
-            let rightContents = [
-                { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "md", color: "#876029" },
-                { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "sm", color: "#1565c0", margin: "none" },
-                { type: "separator", margin: "sm" },
-                { type: "text", text: safeName, weight: "bold", size: "lg", wrap: true },
-                { type: "text", text: safeArea, size: "sm", color: "#555555", wrap: true },
-                { type: "text", text: "ลงทะเบียน: " + safeDate, size: "xs", color: "#aaaaaa", margin: "xs" }
-            ];
+        // 2. Build Right Column Contents (Standard Font Size)
+        let rightContents = [
+            { type: "text", text: "บัตรประจำตัว อสม.", weight: "bold", size: "sm", color: "#1565c0" },
+            { type: "text", text: "สวีรู้ทันสโตรก", weight: "bold", size: "xs", color: "#1565c0", margin: "none" },
+            { type: "separator", margin: "sm" },
+            { type: "text", text: safeName, weight: "bold", size: "md", wrap: true },
+            { type: "text", text: safeArea, size: "xs", color: "#555555" },
+            { type: "text", text: "ลงทะเบียน: " + safeDate, size: "xxs", color: "#aaaaaa", margin: "xs" }
+        ];
 
-            // 4. Build Buttons (Horizontal Row)
-            let buttonContents = [];
-
-            // Phone Button
-            const cleanPhone = safePhone.replace(/[^0-9]/g, '');
-            if(cleanPhone.length >= 9) {
-                 buttonContents.push({
-                    type: "button", 
-                    style: "secondary", 
-                    height: "sm", 
-                    flex: 1,
-                    action: { type: "uri", label: "โทร", uri: "tel:" + cleanPhone }
-                 });
-            }
-
-            // Line OA Button
-            buttonContents.push({
+        // 3. Add Phone Button (Vertical Stack - 2 Lines)
+        if(v.phone && String(v.phone).replace(/[^0-9]/g, '').length >= 9) {
+             rightContents.push({
                 type: "button", 
-                style: "primary", 
-                color: "#06c755", 
+                style: "secondary", 
                 height: "sm", 
-                flex: 1,
-                action: { type: "uri", label: "เปิดไลน์", uri: "https://line.me/R/ti/p/@325qgicq" }
-            });
-
-            // Add Buttons to Layout
-            rightContents.push({
-                type: "box",
-                layout: "horizontal",
-                spacing: "sm",
                 margin: "md",
-                contents: buttonContents
-            });
-
-            // 5. Construct Flex Message
-            const flex = {
-                type: "bubble",
-                size: "mega",
-                body: {
-                    type: "box", 
-                    layout: "horizontal", 
-                    spacing: "md", 
-                    backgroundColor: "#e3f2fd", 
-                    cornerRadius: "lg", 
-                    paddingAll: "lg",
-                    alignItems: "center", // Vertically Center
-                    contents: [
-                        { 
-                            type: "image", 
-                            url: safePic, 
-                            size: "lg", 
-                            aspectMode: "cover", 
-                            aspectRatio: "3:4", 
-                            flex: 2, 
-                            backgroundColor: "#ffffff", 
-                            cornerRadius: "md" 
-                        },
-                        { 
-                            type: "box", 
-                            layout: "vertical", 
-                            flex: 4, 
-                            spacing: "xs", 
-                            contents: rightContents 
-                        }
-                    ]
-                }
-            };
-            
-            // Debug Log
-            console.log("Generated Flex:", JSON.stringify(flex));
-
-            // 6. Send
-            liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + safeName, contents: flex }])
-                .then(res => { 
-                    if(res){ alert("แชร์นามบัตรเรียบร้อย"); } 
-                })
-                .catch(err => { 
-                    console.error("LIFF Error:", err); 
-                    alert("เกิดข้อผิดพลาด: " + (err.message || err)); 
-                });
-
-        } catch(e) {
-            console.error("Critical Error:", e);
-            alert("ระบบขัดข้อง: " + e.message);
+                action: { type: "uri", label: "📞 โทร", uri: "tel:" + String(v.phone).replace(/[^0-9]/g, '') }
+             });
+        } else {
+             rightContents.push({ type: "text", text: "โทร: " + safePhone, size: "xs", color: "#555555", margin: "sm" });
         }
+
+        // 4. Add Line OA Button (Vertical Stack - 2 Lines)
+        rightContents.push({
+            type: "button", 
+            style: "primary", 
+            color: "#06c755", 
+            height: "sm", 
+            margin: "sm",
+            action: { type: "uri", label: "ไลน์สวีรู้ทันสโตรก", uri: "https://line.me/R/ti/p/@325qgicq" }
+        });
+
+        // 5. Construct Final Flex
+        const flex = {
+            type: "bubble",
+            size: "mega",
+            body: {
+                type: "box", layout: "horizontal", spacing: "md", backgroundColor: "#e3f2fd", cornerRadius: "lg", paddingAll: "lg",
+                contents: [
+                    { type: "image", url: safePic, size: "lg", aspectMode: "cover", aspectRatio: "3:4", flex: 2, backgroundColor: "#ffffff" },
+                    { type: "box", layout: "vertical", flex: 4, spacing: "sm", contents: rightContents }
+                ]
+            }
+        };
+        
+        liff.shareTargetPicker([{ type: "flex", altText: "นามบัตร อสม. " + safeName, contents: flex }])
+            .then(res => { if(res){ alert("แชร์นามบัตรเรียบร้อย"); } })
+            .catch(err => { 
+                console.error(err); 
+                alert("เกิดข้อผิดพลาด: " + (err.message || JSON.stringify(err))); 
+            });
     }
 
     let CURR_PATIENT_ID = '';
