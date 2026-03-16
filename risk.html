@@ -36,20 +36,53 @@
             width: 100vw;
             height: 100vh;
             background: #000;
-            z-index: 1040; /* ให้อยู่เหนือ content ปกติ แต่ต่ำกว่า Modal (1050) */
+            z-index: 1040; 
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             align-items: center;
         }
-        #intro-screen iframe {
+        
+        /* เปลี่ยนเป็นแท็ก Video เพื่อหลีกเลี่ยงการติด Login ของ Iframe */
+        #intro-screen video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
+            object-fit: cover; /* ทำให้วิดีโอแนวตั้งเต็มจอ */
+            z-index: 1040;
         }
+
+        /* ปุ่ม Play กลางจอ */
+        #center-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1042;
+            background: rgba(230, 0, 0, 0.85);
+            color: white;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            animation: pulsePlay 2s infinite;
+        }
+        #center-play-btn .play-icon { font-size: 45px; line-height: 1; margin-left: 8px; }
+        #center-play-btn .play-text { font-size: 16px; font-weight: bold; margin-top: 5px; }
+        
+        @keyframes pulsePlay {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 0 20px rgba(230, 0, 0, 0); }
+            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(230, 0, 0, 0); }
+        }
+
         .intro-buttons-container {
             position: relative;
             z-index: 1041;
@@ -87,8 +120,8 @@
             box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
         }
         .btn-secondary-neon {
-            background-color: rgba(230, 0, 0, 0.7); /* โปร่งแสงเล็กน้อยเพื่อให้ปุ่มหลักเด่นกว่า */
-            animation-delay: 0.5s; /* สลับจังหวะกระพริบ */
+            background-color: rgba(230, 0, 0, 0.7); 
+            animation-delay: 0.5s; 
         }
 
         /* --- Header --- */
@@ -193,9 +226,17 @@
 
     <!-- Intro Video Screen -->
     <div id="intro-screen">
-        <!-- ใช้พารามิเตอร์ autoplay=1 และ mute=1 เพื่อให้สามารถเล่นอัตโนมัติบนมือถือได้ -->
-        <iframe src="https://drive.google.com/file/d/1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3/preview?autoplay=1&mute=1" allow="autoplay; fullscreen" frameborder="0"></iframe>
+        <!-- ใช้ Direct Download Link จาก Google Drive (แทน /view) เพื่อให้ HTML5 Video ดึงมาเล่นได้โดยไม่ติดหน้า Login -->
+        <video id="intro-video" playsinline preload="metadata" poster="https://via.placeholder.com/1080x1920.png?text=สวีรู้ทันสโตรก">
+            <source src="https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3" type="video/mp4">
+        </video>
         
+        <!-- ปุ่ม เล่นวิดีโอ กลางจอ -->
+        <div id="center-play-btn">
+            <div class="play-icon">▶</div>
+            <div class="play-text">เล่นวิดีโอ</div>
+        </div>
+
         <div class="intro-buttons-container">
             <button id="btn-start-eval" class="btn-neon-red">เริ่มประเมิน</button>
             <button id="btn-read-intro" class="btn-neon-red btn-secondary-neon">อ่านคำแนะนำ</button>
@@ -581,15 +622,34 @@
             checkReferrer(); 
             
             // --- Intro Screen Logic ---
+            const videoElement = document.getElementById('intro-video');
+
+            // ปุ่มกดเล่นวิดีโอวงกลมกลางจอ
+            $('#center-play-btn').click(function() {
+                if (videoElement) {
+                    videoElement.muted = false; // เปิดเสียง
+                    videoElement.play().then(() => {
+                        $(this).fadeOut(200); // ซ่อนปุ่มกดเล่น
+                    }).catch(error => {
+                        console.error("Playback failed:", error);
+                        alert("ขออภัย ไม่สามารถเล่นวิดีโอได้ กรุณากดใหม่อีกครั้ง");
+                    });
+                }
+            });
+
+            // ปุ่มเริ่มประเมิน (ปิดหน้า Intro)
             $('#btn-start-eval').click(function() {
-                // ปิดวิดีโอแบบค่อยๆ เฟดออก แล้วลบออกจาก DOM เพื่อหยุดการเล่นเสียง(ถ้ามี)
                 $('#intro-screen').fadeOut(500, function() {
+                    if(videoElement) {
+                        videoElement.pause(); // หยุดเล่น
+                        videoElement.src = ""; // ล้างแหล่งที่มาเพื่อหยุดโหลดข้อมูลเบื้องหลัง
+                    }
                     $(this).remove();
                 });
             });
 
+            // ปุ่มอ่านคำแนะนำ
             $('#btn-read-intro').click(function() {
-                // เรียก Modal คำแนะนำขึ้นมาโดยที่วิดีโอยังอยู่เป็นพื้นหลัง
                 $('#disclaimerModal').modal('show');
             });
             // --------------------------
