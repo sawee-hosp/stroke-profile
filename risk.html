@@ -47,7 +47,6 @@
             margin-left: 12px; cursor: pointer; flex-shrink: 0; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-weight: bold;
         }
-        #btn-disclaimer:active { transform: scale(0.95); }
 
         /* --- Main Card --- */
         .main-card {
@@ -59,19 +58,22 @@
             border: 1px solid #f0f0f0;
         }
 
-        /* --- Footer --- */
-        .footer-credit {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px; 
-            margin-bottom: 15px;
+        /* --- OCR Button --- */
+        .btn-ocr {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white; font-weight: bold; width: 100%; border: none;
+            padding: 15px; border-radius: 15px; font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
+        .btn-ocr:active { transform: scale(0.98); }
+
+        /* --- Footer --- */
+        .footer-credit { text-align: center; color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 15px; }
 
         /* --- Forms --- */
         .form-row { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .form-row:last-child { border-bottom: none; }
-        
         label { font-weight: 700; display: block; margin-bottom: 8px; color: #003366; font-size: 22px; }
         small { font-weight: 400; font-size: 18px; color: #666; display: block; margin-top: 5px; }
 
@@ -108,34 +110,26 @@
         .btn-action:active { transform: scale(0.98); }
         .btn-green { background-color: #28a745; }
         .btn-red { background-color: #dc3545; }
-        .btn-action:disabled { background-color: #888; cursor: not-allowed; }
 
         .status-box { padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; margin-bottom: 20px; font-weight: bold; line-height: 1.4; }
         .found { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
         .warn { background: #fff3cd; color: #856404; border: 1px solid #ffecb5; }
         .phone-alert { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 18px; display: none; }
         
-        /* สไตล์สำหรับกล่องผู้แนะนำ */
-        .referrer-box {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-            border: 1px solid #90caf9;
-            padding: 10px 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
+        .referrer-box { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; padding: 10px 15px; border-radius: 12px; margin-bottom: 20px; font-size: 18px; display: none; align-items: center; justify-content: center; text-align: center; }
 
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        #loading, #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
+        #ocrLoading { display: none; background: rgba(0,0,0,0.8); color: white;}
     </style>
 </head>
 <body>
 
     <div id="loading"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div></div>
+    
+    <div id="ocrLoading">
+        <div class="spinner-border text-light mb-3" style="width: 4rem; height: 4rem;"></div>
+        <h4 id="ocrLoadingText">กำลังใช้ AI อ่านข้อมูลจากสมุด...</h4>
+    </div>
 
     <!-- Modal Disclaimer -->
     <div class="modal fade" id="disclaimerModal" tabindex="-1">
@@ -154,6 +148,81 @@
         </div>
     </div>
 
+    <!-- Modal Consent สำหรับ OCR -->
+    <div class="modal fade" id="ocrConsentModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">📸 ข้อตกลงการใช้กล้อง AI</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="font-size: 18px;">
+                    <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยเพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
+                    <p>AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น ได้แก่: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน และ ประวัติสูบบุหรี่</b></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success" id="btnAcceptOcr">ยินยอมและเปิดกล้อง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal เติมข้อมูลที่ AI หาไม่เจอ -->
+    <div class="modal fade" id="missingDataModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">⚠️ กรุณาเติมข้อมูลให้ครบถ้วน</h5>
+                </div>
+                <div class="modal-body" style="font-size: 18px;">
+                    <p class="text-secondary">AI อ่านข้อมูลบางส่วนไม่พบ หรือในสมุดไม่ได้ระบุไว้ กรุณาเลือกข้อมูลด้านล่างให้ครบเพื่อประเมินผล:</p>
+                    
+                    <div id="missing-age-box" class="form-row d-none">
+                        <label>อายุ (ปี):</label>
+                        <input type="number" id="md_age" class="form-control" placeholder="ระบุอายุ">
+                    </div>
+                    
+                    <div id="missing-gender-box" class="form-row d-none">
+                        <label>เพศ:</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="md_sex" value="0"> หญิง</label>
+                            <label class="radio-label"><input type="radio" name="md_sex" value="1"> ชาย</label>
+                        </div>
+                    </div>
+
+                    <div id="missing-dm-box" class="form-row d-none">
+                        <label>ผู้ป่วยเป็นเบาหวานหรือไม่?</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="md_dm" value="0"> ไม่เป็น</label>
+                            <label class="radio-label"><input type="radio" name="md_dm" value="1"> เป็น</label>
+                        </div>
+                    </div>
+
+                    <div id="missing-smoke-box" class="form-row d-none">
+                        <label>ประวัติสูบบุหรี่ (ปัจจุบัน):</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="md_smoke" value="0"> ไม่สูบ</label>
+                            <label class="radio-label"><input type="radio" name="md_smoke" value="1"> สูบ</label>
+                        </div>
+                    </div>
+
+                    <div id="missing-sbp-box" class="form-row d-none">
+                        <label>ความดันตัวบน (SBP):</label>
+                        <input type="number" id="md_sbp" class="form-control" placeholder="ถ้าไม่มีให้เว้นไว้">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary w-100 fs-5 fw-bold" onclick="applyMissingData()">บันทึกข้อมูลและคำนวณ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden File Input สำหรับเรียกกล้อง -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
     <div class="container">
         <!-- Header Group -->
         <div class="header-group">
@@ -164,9 +233,7 @@
         <!-- Main Card -->
         <div class="main-card">
             
-            <!-- ส่วนแสดงผลผู้แนะนำ -->
             <div id="referrer-display" class="referrer-box"></div>
-
             <div id="history-alert"></div>
 
             <form id="mainForm">
@@ -184,6 +251,11 @@
                     </select>
                 </div>
 
+                <!-- ปุ่ม OCR ถ่ายรูป -->
+                <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
+                    📸 ถ่ายรูปสมุดเพื่อประเมิน (AI)
+                </button>
+
                 <div class="form-row">
                     <label>ชื่อผู้รับการประเมิน:</label>
                     <input type="text" id="name" placeholder="ชื่อเล่น หรือ ชื่อจริง">
@@ -200,9 +272,8 @@
                 <!-- Patient Info Box -->
                 <div id="patientForm">
                     <div class="form-row" style="border:none;">
-                        <label>เบอร์โทรศัพท์ของผู้ถูกประเมิน (จำเป็น*):</label>
+                        <label>เบอร์โทรศัพท์ (จำเป็น*):</label>
                         <input type="text" id="telephone" maxlength="10" inputmode="numeric" placeholder="เบอร์โทรศัพท์ 10 หลัก">
-                        <!-- แจ้งเตือนเมื่อเจอเบอร์ซ้ำ -->
                         <div id="phone-msg" class="phone-alert"></div>
                     </div>
                     <div class="form-row" style="border:none;">
@@ -234,7 +305,7 @@
 
                     <div class="form-row" style="border:none;">
                         <label>รพ.สต. ที่รับผิดชอบ:</label>
-                        <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555;" placeholder="จะแสดงอัตโนมัติเมื่อเลือกที่อยู่">
+                        <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555;" placeholder="จะแสดงอัตโนมัติ">
                     </div>
 
                     <div class="form-row" style="border:none;">
@@ -271,7 +342,7 @@
                     <label>โรคประจำตัว:</label>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
-                        <div id="stroke-date-wrapper" class="hidden" style="margin-left:35px;">
+                        <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px;">
                             <label>วันที่เป็น:</label><input type="date" id="stroke-date">
                         </div>
                         <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
@@ -323,7 +394,7 @@
                     </div>
                 </div>
 
-                <div id="tc_group" class="form-row hidden">
+                <div id="tc_group" class="form-row" style="display:none;">
                     <label>ค่าคอเลสเตอรอลรวม (TC):</label>
                     <input type="number" id="tc" class="calc-trigger" inputmode="numeric">
                 </div>
@@ -331,7 +402,7 @@
                 <div id="body_measure_group">
                     <div class="form-row">
                         <label>รอบเอว (นิ้ว):</label>
-                        <input type="number" id="wc" class="calc-trigger" inputmode="numeric" placeholder="หรือขนาดกางเกงที่ใส่เป็นนิ้วเช่น 30,32">
+                        <input type="number" id="wc" class="calc-trigger" inputmode="numeric" placeholder="หรือขนาดกางเกงที่ใส่เป็นนิ้ว">
                     </div>
                     <div class="form-row">
                         <label>ส่วนสูง (ซม.):</label>
@@ -378,8 +449,8 @@
     </div>
 
     <script>
-        const LIFF_ID = '2005789397-nebQ8oJy'; 
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbw0eiZGphjI0eIORtVhPu8tjVAvEBV2FZGRRJxw6WmdHpIxVBDQM52nW3PJufhrnd4qgg/exec';
+        const LIFF_ID = '2009491708-pTYytCZA'; 
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDdj6WzkazrnUNm62d6dSBXRZkM_5zQaDwF2nWH3Rx6qkNQsyl_4-vLn3xNQyKf7EN/exec';
         
         let userProfile = null;
         let globalRiskData = null;
@@ -390,20 +461,16 @@
             initializeLiff();
             populateVillageDropdown();
             toggleMeasurementFields();
-
-            checkReferrer(); // ตรวจสอบชื่อคนแนะนำ (แสดงผลเร็ว)
+            checkReferrer(); 
             
-            // Listeners
             $('input[name="isSawiPatient"]').change(function() {
                 $(this).val() === '1' ? $('#patientForm').slideDown() : $('#patientForm').slideUp();
             });
             
-            // --- Check Phone Number Logic ---
             $('#telephone').on('change', function() {
                 const phone = $(this).val();
                 if(phone.length === 10) {
                     $('#phone-msg').hide().text('');
-                    // เรียก GAS เพื่อเช็ค
                     $.getJSON(GAS_URL, { checkPhone: phone }, function(res) {
                         if(res.status === 'found') {
                             $('#phone-msg').html(`⚠️ หมายเลขนี้มีประวัติของคุณ <b>${res.name}</b> แล้ว<br>ข้อมูลนี้จะถูกบันทึกลงในประวัติของบุคคลดังกล่าว`).slideDown();
@@ -421,15 +488,153 @@
             });
             $('input[name="useCholesterol"]').change(toggleMeasurementFields);
             $('#chk-stroke').change(function() {
-                this.checked ? $('#stroke-date-wrapper').slideDown() : $('#stroke-date-wrapper').slideUp();
+                this.checked ? $('#stroke-date-wrapper').removeClass('d-none') : $('#stroke-date-wrapper').addClass('d-none');
                 updateRealtimeResult();
             });
             $('.calc-trigger').on('input change', updateRealtimeResult);
             $('#village, #district').change(updateAddressAndHospital);
             $('#role').change(function() { checkHistoryDisplay(); });
+
+            // --- OCR Logic ---
+            $('#btnAcceptOcr').click(function() {
+                $('#ocrConsentModal').modal('hide');
+                $('#cameraInput').click();
+            });
+
+            $('#cameraInput').change(function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                compressAndUploadImage(file);
+            });
         });
 
-        // --- ฟังก์ชันสำหรับตรวจสอบ Referrer ---
+        // --- OCR & Image Processing ---
+        function compressAndUploadImage(file) {
+            $('#ocrLoading').css('display', 'flex');
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // บีบอัดเป็น JPEG quality 0.6
+                    let base64String = canvas.toDataURL('image/jpeg', 0.6);
+                    let base64Data = base64String.split(',')[1]; 
+
+                    sendToGemini(base64Data);
+                }
+            }
+        }
+
+        function sendToGemini(base64Data) {
+            const payload = { action: 'ocr', imageBase64: base64Data };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                $('#ocrLoading').fadeOut();
+                if(res.status === 'success') {
+                    fillDataFromOCR(res.data);
+                } else {
+                    alert('เกิดข้อผิดพลาดในการวิเคราะห์รูปภาพ: ' + res.message);
+                }
+            })
+            .catch(err => {
+                $('#ocrLoading').fadeOut();
+                alert('การเชื่อมต่อล้มเหลว: ' + err.message);
+            });
+        }
+
+        function fillDataFromOCR(data) {
+            let missingSomething = false;
+
+            // เคลียร์ค่า d-none ออกก่อน
+            $('#missing-age-box, #missing-gender-box, #missing-dm-box, #missing-smoke-box, #missing-sbp-box').addClass('d-none');
+
+            // 1. อายุ
+            if (data.age) { $('#age').val(data.age); } 
+            else { $('#missing-age-box').removeClass('d-none'); missingSomething = true; }
+
+            // 2. เพศ
+            if (data.gender === 'female') { $('input[name="sex"][value="0"]').prop('checked', true); }
+            else if (data.gender === 'male') { $('input[name="sex"][value="1"]').prop('checked', true); }
+            else { $('#missing-gender-box').removeClass('d-none'); missingSomething = true; }
+
+            // 3. ความดัน
+            if (data.sbp) { $('#sbp').val(data.sbp); }
+            else { $('#missing-sbp-box').removeClass('d-none'); missingSomething = true; }
+
+            // 4. คอเลสเตอรอล
+            if (data.cholesterol) { 
+                $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
+                $('#tc').val(data.cholesterol);
+            }
+
+            // 5. เบาหวาน
+            if (data.dm_status === true) { $('input[name="dm"][value="1"]').prop('checked', true); }
+            else if (data.dm_status === false) { $('input[name="dm"][value="0"]').prop('checked', true); }
+            else { $('#missing-dm-box').removeClass('d-none'); missingSomething = true; }
+
+            // 6. สูบบุหรี่
+            if (data.smoker_status === true) { $('input[name="smoke"][value="1"]').prop('checked', true); }
+            else if (data.smoker_status === false) { $('input[name="smoke"][value="0"]').prop('checked', true); }
+            else { $('#missing-smoke-box').removeClass('d-none'); missingSomething = true; }
+
+            updateRealtimeResult();
+
+            if (missingSomething) {
+                const modal = new bootstrap.Modal(document.getElementById('missingDataModal'));
+                modal.show();
+            } else {
+                alert("🎉 AI อ่านข้อมูลและเติมลงฟอร์มสำเร็จแล้ว กรุณาตรวจสอบความถูกต้องอีกครั้ง");
+            }
+        }
+
+        function applyMissingData() {
+            // โอนค่าจาก Modal กลับไปที่ Form หลัก
+            if (!$('#missing-age-box').hasClass('d-none') && $('#md_age').val()) {
+                $('#age').val($('#md_age').val());
+            }
+            if (!$('#missing-gender-box').hasClass('d-none') && $('input[name="md_sex"]:checked').val()) {
+                $('input[name="sex"][value="' + $('input[name="md_sex"]:checked').val() + '"]').prop('checked', true);
+            }
+            if (!$('#missing-dm-box').hasClass('d-none') && $('input[name="md_dm"]:checked').val()) {
+                $('input[name="dm"][value="' + $('input[name="md_dm"]:checked').val() + '"]').prop('checked', true);
+            }
+            if (!$('#missing-smoke-box').hasClass('d-none') && $('input[name="md_smoke"]:checked').val()) {
+                $('input[name="smoke"][value="' + $('input[name="md_smoke"]:checked').val() + '"]').prop('checked', true);
+            }
+            if (!$('#missing-sbp-box').hasClass('d-none') && $('#md_sbp').val()) {
+                $('#sbp').val($('#md_sbp').val());
+            }
+
+            updateRealtimeResult();
+            $('#missingDataModal').modal('hide');
+        }
+
+
         function checkReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
             const refId = urlParams.get('ref');
@@ -453,7 +658,6 @@
                     userProfile = await liff.getProfile();
                     checkUserRegistration(userProfile.userId);
 
-                    // --- [เพิ่มใหม่] บันทึก Log การแชร์ที่นี่ เพราะมี userId แล้ว ---
                     const urlParams = new URLSearchParams(window.location.search);
                     const refId = urlParams.get('ref');
                     if (refId) {
@@ -461,16 +665,13 @@
                             action: 'logVhvShare', 
                             refId: refId,
                             page: 'risk_assessment',
-                            viewerId: userProfile.userId // ส่ง ID คนสแกนไปด้วย
+                            viewerId: userProfile.userId 
                         });
                     }
-                    // -------------------------------------------------------
-
                 } else { liff.login(); }
             } catch (e) { console.error(e); }
         }
 
-        // --- Logic ---
         function generateSuggestionText(data) {
             const ins = data.inputs;
             const sug = [];
@@ -513,7 +714,6 @@
             $('#result-container').slideDown();
         }
 
-        // --- Save & Send ---
         async function saveAndSend(actionType) {
             let missingFields = [];
             if(!$('input[name="sex"]:checked').val()) missingFields.push("เพศ");
@@ -565,7 +765,7 @@
                     displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No',
-                    pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', // ส่งค่า PDPA
+                    pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', 
                     area: $('#area').val(),
                     referrerId: $('#referrerId').val() 
                 };
@@ -579,10 +779,7 @@
                     await sendFlex(globalRiskData, payload.name, finalSuggestion);
                     
                     if (actionType === 'history') {
-                        liff.openWindow({
-                            url: "https://liff.line.me/2005789397-RLAGXrBJ",
-                            external: false
-                        });
+                        liff.openWindow({ url: "https://liff.line.me/2005789397-RLAGXrBJ", external: false });
                     } else {
                         liff.closeWindow();
                     }
@@ -597,7 +794,6 @@
             }
         }
 
-        // --- Flex Message ---
         async function sendFlex(data, name, suggestion) {
             const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
             const safeSuggestion = (suggestion && suggestion.trim() !== "") ? String(suggestion) : "ไม่มีคำแนะนำเพิ่มเติม";
@@ -606,40 +802,18 @@
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
 
             const msg = {
-                type: "flex",
-                altText: "ผลประเมินสวีรู้ทันสโตรก",
+                type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก",
                 contents: {
-                    type: "bubble",
-                    size: "giga", 
+                    type: "bubble", size: "giga", 
                     header: {
-                        type: "box",
-                        layout: "vertical",
-                        backgroundColor: safeColor, 
-                        paddingAll: "20px",
+                        type: "box", layout: "vertical", backgroundColor: safeColor, paddingAll: "20px",
                         contents: [
-                            {
-                                type: "text",
-                                text: "ผลประเมินสวีรู้ทันสโตรก",
-                                weight: "bold",
-                                color: "#ffffff",
-                                size: "xl",
-                                align: "center"
-                            },
-                            {
-                                type: "text",
-                                text: `คุณ ${safeName}`,
-                                weight: "bold",
-                                color: "#ffffff",
-                                size: "lg",
-                                align: "center",
-                                margin: "md",
-                                wrap: true
-                            }
+                            { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "xl", align: "center" },
+                            { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "md", wrap: true }
                         ]
                     },
                     body: {
-                        type: "box",
-                        layout: "vertical",
+                        type: "box", layout: "vertical",
                         contents: [
                             { type: "text", text: "โอกาสเป็นสโตรกใน 10 ปี", size: "md", color: "#aaaaaa", align: "center", margin: "md" }, 
                             { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: safeColor, align: "center", margin: "sm" }, 
@@ -650,29 +824,10 @@
                         ]
                     },
                     footer: {
-                        type: "box",
-                        layout: "vertical",
-                        spacing: "sm",
+                        type: "box", layout: "vertical", spacing: "sm",
                         contents: [
-                            {
-                                type: "button",
-                                style: "primary",
-                                color: safeColor,
-                                action: {
-                                    type: "uri",
-                                    label: "ประเมินซ้ำ",
-                                    uri: "https://liff.line.me/2005789397-nebQ8oJy"
-                                }
-                            },
-                            {
-                                type: "button",
-                                style: "secondary",
-                                action: {
-                                    type: "uri",
-                                    label: "ประวัติส่วนตัว",
-                                    uri: "https://liff.line.me/2005789397-RLAGXrBJ"
-                                }
-                            }
+                            { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/" + LIFF_ID } },
+                            { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2005789397-RLAGXrBJ" } }
                         ]
                     }
                 }
@@ -682,7 +837,6 @@
             catch (err) { console.error(err); alert("ส่ง LINE ไม่สำเร็จ: " + err.message); }
         }
 
-        // --- Helper Functions ---
         function checkUserRegistration(uid) {
             const url = `${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`;
             $.getScript(url);
@@ -736,17 +890,14 @@
             if (inputs.hasStrokeHistory) { riskPercent = 40.00; } else { if (riskPercent > 30) riskPercent = 30.00; }
             const classification = classifyRisk(riskPercent);
             return {
-                riskPercentText: riskPercent.toFixed(2),
-                barValue: Math.min(riskPercent, 30),
+                riskPercentText: riskPercent.toFixed(2), barValue: Math.min(riskPercent, 30),
                 riskGroup: inputs.hasStrokeHistory ? "สูงอันตราย (มีประวัติเดิม)" : classification.text,
                 riskColor: inputs.hasStrokeHistory ? "#b00020" : classification.color,
                 compareRatio: (ratio > 0 && !inputs.hasStrokeHistory) ? ratio.toFixed(1) : 'N/A',
-                hasStrokeHistory: inputs.hasStrokeHistory,
-                inputs: inputs
+                hasStrokeHistory: inputs.hasStrokeHistory, inputs: inputs
             };
         }
 
-        // --- Full Formula ---
         function TASCVDformular(age, smoke, dm, sbp, sex, tc, whr, wc) { 
             var sur_root = 0.964588; 
             var full_score = 0, compare_score = 0;
@@ -784,8 +935,8 @@
         function populateVillageDropdown() { for (let i=1; i<=19; i++) $('#village').append(`<option value="${i}">${i}</option>`); }
         function toggleMeasurementFields() {
             const useChol = $('input[name="useCholesterol"]:checked').val() === '1';
-            $('#tc_group').toggle(useChol);
-            $('#body_measure_group').toggle(!useChol);
+            if(useChol) { $('#tc_group').slideDown(); $('#body_measure_group').slideUp(); }
+            else { $('#tc_group').slideUp(); $('#body_measure_group').slideDown(); }
             updateRealtimeResult();
         }
         
