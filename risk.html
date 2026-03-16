@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สวีรู้ทันสโตรก</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* --- Base Styles & Background --- */
+        body { 
+            font-family: "Noto Sans Thai", sans-serif; 
+            font-size: 18px; 
+            margin: 0; color: #333;
+            line-height: 1.5;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #ff3654 0%, #ffffff 400px);
+            background-repeat: no-repeat;
+            background-attachment: fixed; 
+        }
+        .container { 
+            max-width: 100%; 
+            padding: 10px 15px; 
+            margin: 0 auto;
+        }
+
+        /* --- Header --- */
+        .header-group { 
+            display: flex; align-items: center; justify-content: center; 
+            margin-bottom: 15px; 
+            padding-top: 10px;   
+        }
+        h1 { 
+            color: #ffffff; 
+            font-weight: 900; 
+            font-size: 24px; 
+            margin: 0; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
+        }
+        #btn-disclaimer {
+            font-size: 16px; padding: 6px 15px; border-radius: 25px;
+            background: #ccff90; color: #006400; border: 2px solid #b2ff59;
+            margin-left: 12px; cursor: pointer; flex-shrink: 0; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-weight: bold;
+        }
+        #btn-disclaimer:active { transform: scale(0.95); }
+
+        /* --- Main Card --- */
+        .main-card {
+            background: #ffffff; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            border: 1px solid #f0f0f0;
+        }
+
+        /* --- Footer --- */
+        .footer-credit {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px; 
+            margin-bottom: 15px;
+        }
+
+        /* --- Forms --- */
+        .form-row { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .form-row:last-child { border-bottom: none; }
+        
+        label { font-weight: 700; display: block; margin-bottom: 8px; color: #003366; font-size: 22px; }
+        small { font-weight: 400; font-size: 18px; color: #666; display: block; margin-top: 5px; }
+
+        input[type="number"], input[type="text"], input[type="date"], select { 
+            width: 100%; padding: 12px; font-size: 22px; 
+            border-radius: 12px; border: 1px solid #ccc; background: #fdfdfd;
+        }
+        input:focus, select:focus { border-color: #ff3654; outline: none; background: #fff; box-shadow: 0 0 0 0.25rem rgba(255, 54, 84, 0.25); }
+
+        .inline-group { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .radio-label { font-weight: normal; display: flex; align-items: center; cursor: pointer; font-size: 20px; }
+        input[type="radio"], input[type="checkbox"] { transform: scale(1.6); margin-right: 10px; accent-color: #ff3654; }
+
+        #patientForm { background-color: #FFFDE7; border: 2px solid #FFC107; padding: 20px; border-radius: 15px; margin-top: 15px; }
+
+        /* --- Result --- */
+        #result-container { 
+            margin-top: 30px; padding: 25px; background: #f8fcf9; border-radius: 15px;
+            border: 2px solid #c3e6cb; display: none; text-align: center;
+        }
+        .risk-percent { font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 15px 0; }
+        .risk-desc { font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+        .progress-bar-bg { width: 100%; height: 30px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 20px 0; }
+        .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
+        .explanation-box { text-align: left; background: #fff; padding: 20px; border-radius: 15px; margin-top: 20px; font-size: 20px; line-height: 1.6; border: 1px solid #dee2e6; color: #333; white-space: pre-wrap; }
+
+        /* --- Buttons --- */
+        .action-buttons { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .btn-action { 
+            width: 100%; padding: 15px; font-size: 22px; font-weight: bold;
+            color: white; border: none; border-radius: 50px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        .btn-action:active { transform: scale(0.98); }
+        .btn-green { background-color: #28a745; }
+        .btn-red { background-color: #dc3545; }
+        .btn-action:disabled { background-color: #888; cursor: not-allowed; }
+
+        .status-box { padding: 12px; border-radius: 10px; text-align: center; font-size: 18px; margin-bottom: 20px; font-weight: bold; line-height: 1.4; }
+        .found { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .warn { background: #fff3cd; color: #856404; border: 1px solid #ffecb5; }
+        .phone-alert { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 18px; display: none; }
+        
+        /* สไตล์สำหรับกล่องผู้แนะนำ */
+        .referrer-box {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border: 1px solid #90caf9;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+    <div id="loading"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div></div>
+
+    <!-- Modal Disclaimer -->
+    <div class="modal fade" id="disclaimerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เกี่ยวกับแบบประเมิน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="font-size: 18px;">
+                    <b>Thai CV Risk Score</b> คือ แบบประเมินความเสี่ยงต่อโรคหัวใจและหลอดเลือด (รวมถึงสโตรก) ใน 10 ปีข้างหน้า<br><br>
+                    พัฒนาโดยคณะแพทยศาสตร์โรงพยาบาลรามาธิบดี ใช้ข้อมูลปัจจัยเสี่ยงต่าง ๆ เช่น อายุ เพศ ความดัน เบาหวาน มาคำนวณทางสถิติ<br><br>
+                    <i>*ผลที่ได้ใช้เพื่อการคัดกรองเบื้องต้นเท่านั้น ไม่ใช่การวินิจฉัยจากแพทย์</i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header Group -->
+        <div class="header-group">
+            <h1>ประเมินความเสี่ยงสโตรก</h1>
+            <button id="btn-disclaimer" type="button" data-bs-toggle="modal" data-bs-target="#disclaimerModal">อ่านก่อน</button>
+        </div>
+        
+        <!-- Main Card -->
+        <div class="main-card">
+            
+            <!-- ส่วนแสดงผลผู้แนะนำ -->
+            <div id="referrer-display" class="referrer-box"></div>
+
+            <div id="history-alert"></div>
+
+            <form id="mainForm">
+                <input type="hidden" id="lineName">
+                <input type="hidden" id="area">
+                <input type="hidden" id="referrerId"> 
+
+                <div class="form-row">
+                    <label>ประเมินให้ใคร:</label>
+                    <select id="role">
+                        <option value="ประเมินตัวเอง" selected>ประเมินตัวเอง</option>
+                        <option value="ญาติ/ผู้ดูแลผู้ป่วย">ญาติ/ผู้ดูแลผู้ป่วย</option>
+                        <option value="จนท.สาธารณสุข">จนท.สาธารณสุข</option>
+                        <option value="อสม.สโตรก ประเมินให้คนอื่น">อสม.สโตรก ประเมินให้คนอื่น</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>ชื่อผู้รับการประเมิน:</label>
+                    <input type="text" id="name" placeholder="ชื่อเล่น หรือ ชื่อจริง">
+                </div>
+
+                <div class="form-row">
+                    <label>เป็นผู้รับบริการ รพ.สวี:</label>
+                    <div class="inline-group">
+                        <label class="radio-label"><input type="radio" name="isSawiPatient" value="1" checked> ใช่</label>
+                        <label class="radio-label"><input type="radio" name="isSawiPatient" value="0"> ไม่ใช่</label>
+                    </div>
+                </div>
+
+                <!-- Patient Info Box -->
+                <div id="patientForm">
+                    <div class="form-row" style="border:none;">
+                        <label>เบอร์โทรศัพท์ของผู้ถูกประเมิน (จำเป็น*):</label>
+                        <input type="text" id="telephone" maxlength="10" inputmode="numeric" placeholder="เบอร์โทรศัพท์ 10 หลัก">
+                        <!-- แจ้งเตือนเมื่อเจอเบอร์ซ้ำ -->
+                        <div id="phone-msg" class="phone-alert"></div>
+                    </div>
+                    <div class="form-row" style="border:none;">
+                        <label>LINE ID:</label>
+                        <input type="text" id="lineId" placeholder="ถ้าจำได้">
+                    </div>
+                    <div class="form-row" style="border:none;">
+                        <label>HN (เลขบัตร รพ. ถ้าทราบ):</label>
+                        <input type="text" id="hn" placeholder="ระบุเลข HN">
+                    </div>
+                    
+                    <div class="form-row" style="border:none;">
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label>หมู่ที่:</label>
+                                <select id="village"><option value="">เลือก</option></select>
+                            </div>
+                            <div style="flex: 1.5;">
+                                <label>ตำบล:</label>
+                                <select id="district"><option value="">เลือก</option>
+                                    <option>ท่าหิน</option><option>ด่านสวี</option><option>เขาทะลุ</option>
+                                    <option>เขาค่าย</option><option>ปากแพรก</option><option>สวี</option>
+                                    <option>นาสัก</option><option>ทุ่งระยะ</option><option>วิสัยใต้</option>
+                                    <option>ครน</option><option>นาโพธิ์</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="border:none;">
+                        <label>รพ.สต. ที่รับผิดชอบ:</label>
+                        <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555;" placeholder="จะแสดงอัตโนมัติเมื่อเลือกที่อยู่">
+                    </div>
+
+                    <div class="form-row" style="border:none;">
+                        <label class="radio-label" style="align-items: flex-start;">
+                            <input type="checkbox" id="allowTel" checked style="margin-top: 5px;"> 
+                            <span style="font-size: 18px;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ อสม.และ จนท.รพ.สวี</span>
+                        </label>
+                    </div>
+
+                    <div class="form-row" style="border:none; border-top: 1px dashed #bbb; padding-top: 15px; margin-top: 10px;">
+                        <label>สมมติจู่ๆ ปากเบี้ยว แขนไม่มีแรง คุณจะทำอย่างไรเป็นอย่างแรก?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="decision" value="รอดูอาการ"> รอดูอาการ</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="โทรให้ญาติมาดู"> โทรให้ญาติมาดู</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="ไปคลินิก-อนามัย"> ไปคลินิก-อนามัย</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="รีบไป รพ.เอง"> รีบไป รพ.เอง</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="โทร 1669 ให้รถมารับ"> โทร 1669 ให้รถมารับ</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="border:none;">
+                        <label>ปกติช่วงกลางวัน/กลางคืน คุณอยู่บ้านกับใคร?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่คนเดียว"> อยู่คนเดียว</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับผู้สูงอายุ/เด็กเล็ก"> อยู่กับผู้สูงอายุ/เด็กเล็ก</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับญาติผู้ใหญ่/คนวัยทำงาน"> อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top:30px; border-bottom: 3px solid #003366; padding-bottom: 5px; color:#003366;">ข้อมูลสุขภาพ</h3>
+                
+                <div class="form-row">
+                    <label>โรคประจำตัว:</label>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
+                        <div id="stroke-date-wrapper" class="hidden" style="margin-left:35px;">
+                            <label>วันที่เป็น:</label><input type="date" id="stroke-date">
+                        </div>
+                        <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
+                        <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="เบาหวาน"> เบาหวาน</label>
+                        <label class="radio-label"><input type="checkbox" class="calc-trigger" name="ud" value="ไขมันในเลือดสูง"> ไขมันในเลือดสูง</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>อายุ (ปี):</label>
+                    <input type="number" id="age" class="calc-trigger" inputmode="numeric">
+                </div>
+
+                <div class="form-row">
+                    <label>เพศ:</label>
+                    <div class="inline-group">
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="sex" value="0"> หญิง</label>
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="sex" value="1"> ชาย</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>สูบบุหรี่:</label>
+                    <div class="inline-group">
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="smoke" value="0" checked> ไม่สูบ</label>
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="smoke" value="1"> สูบ</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>เป็นเบาหวาน:</label>
+                    <div class="inline-group">
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="dm" value="0" checked> ไม่เป็น</label>
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="dm" value="1"> เป็น</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>ความดันตัวบน (SBP):</label>
+                    <input type="text" id="sbp" class="calc-trigger" inputmode="numeric" placeholder="ใส่ค่าสูงแค่ค่าเดียว">
+                </div>
+
+                <div class="form-row">
+                    <label>มีผลไขมันคอเลสเทอรอล:</label>
+                    <small style="color: #007BFF;">(ดูได้จากสมุดผู้ป่วยหรือหมอพร้อม)</small>
+                    <div class="inline-group" style="margin-top:5px;">
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="useCholesterol" value="1"> มี</label>
+                        <label class="radio-label"><input type="radio" class="calc-trigger" name="useCholesterol" value="0" checked> ไม่มี</label>
+                    </div>
+                </div>
+
+                <div id="tc_group" class="form-row hidden">
+                    <label>ค่าคอเลสเตอรอลรวม (TC):</label>
+                    <input type="number" id="tc" class="calc-trigger" inputmode="numeric">
+                </div>
+
+                <div id="body_measure_group">
+                    <div class="form-row">
+                        <label>รอบเอว (นิ้ว):</label>
+                        <input type="number" id="wc" class="calc-trigger" inputmode="numeric" placeholder="หรือขนาดกางเกงที่ใส่เป็นนิ้วเช่น 30,32">
+                    </div>
+                    <div class="form-row">
+                        <label>ส่วนสูง (ซม.):</label>
+                        <input type="number" id="bdh" class="calc-trigger" inputmode="numeric">
+                    </div>
+                </div>
+
+            </form>
+
+            <div id="result-container">
+                <h2 style="color:#003366; font-weight:800;">ผลการประเมิน</h2>
+                <div class="risk-percent" id="rt-percent">0%</div>
+                <div class="risk-desc" id="rt-desc">-</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="rt-bar"></div>
+                </div>
+                
+                <div class="explanation-box" id="rt-explanation">
+                    <div id="basic-explain"></div>
+                    <hr style="border-top: 2px dashed #ccc; margin: 25px 0;">
+                    <div id="full-advice-display"></div>
+                </div>
+            </div>
+
+            <!-- PDPA Section -->
+            <div style="margin-top: 25px; margin-bottom: 10px;">
+                <label class="radio-label" style="align-items: flex-start; background-color: #e8f5e9; padding: 15px; border-radius: 12px; border: 1px solid #c8e6c9; width: 100%;">
+                    <input type="checkbox" id="pdpa" checked style="margin-top: 5px;"> 
+                    <span style="font-size: 18px; color: #2e7d32; font-weight: bold;">
+                        ยินยอมให้ รพ.สวี นำข้อมูลไปประมวลผลเพื่อเพิ่มความตระหนักรู้และการเข้าถึงการรักษาโรคหลอดเลือดสมอง
+                    </span>
+                </label>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn-action btn-green" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
+                <button type="button" class="btn-action btn-red" onclick="saveAndSend('close')">บันทึกและปิด</button>
+            </div>
+        
+        </div>
+
+        <div class="footer-credit">จัดทำโดย "สวีรู้ทันสโตรก" รพ.สวี จ.ชุมพร</div>
+
+    </div>
+
+    <script>
+        const LIFF_ID = '2005789397-nebQ8oJy'; 
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbw0eiZGphjI0eIORtVhPu8tjVAvEBV2FZGRRJxw6WmdHpIxVBDQM52nW3PJufhrnd4qgg/exec';
+        
+        let userProfile = null;
+        let globalRiskData = null;
+        let historyData = null;
+
+        $(document).ready(() => {
+            $('#loading').fadeOut(300);
+            initializeLiff();
+            populateVillageDropdown();
+            toggleMeasurementFields();
+
+            checkReferrer(); // ตรวจสอบชื่อคนแนะนำ (แสดงผลเร็ว)
+            
+            // Listeners
+            $('input[name="isSawiPatient"]').change(function() {
+                $(this).val() === '1' ? $('#patientForm').slideDown() : $('#patientForm').slideUp();
+            });
+            
+            // --- Check Phone Number Logic ---
+            $('#telephone').on('change', function() {
+                const phone = $(this).val();
+                if(phone.length === 10) {
+                    $('#phone-msg').hide().text('');
+                    // เรียก GAS เพื่อเช็ค
+                    $.getJSON(GAS_URL, { checkPhone: phone }, function(res) {
+                        if(res.status === 'found') {
+                            $('#phone-msg').html(`⚠️ หมายเลขนี้มีประวัติของคุณ <b>${res.name}</b> แล้ว<br>ข้อมูลนี้จะถูกบันทึกลงในประวัติของบุคคลดังกล่าว`).slideDown();
+                        }
+                    });
+                } else {
+                    $('#phone-msg').hide();
+                }
+            });
+
+            $('#sbp').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
+            $('#wc').on('change', function() {
+                if(this.value > 60) { alert('กรุณาเช็คคำตอบ เป็นหน่วยนิ้ว (ค่าไม่ควรเกิน 60)'); $(this).val(''); }
+                updateRealtimeResult();
+            });
+            $('input[name="useCholesterol"]').change(toggleMeasurementFields);
+            $('#chk-stroke').change(function() {
+                this.checked ? $('#stroke-date-wrapper').slideDown() : $('#stroke-date-wrapper').slideUp();
+                updateRealtimeResult();
+            });
+            $('.calc-trigger').on('input change', updateRealtimeResult);
+            $('#village, #district').change(updateAddressAndHospital);
+            $('#role').change(function() { checkHistoryDisplay(); });
+        });
+
+        // --- ฟังก์ชันสำหรับตรวจสอบ Referrer ---
+        function checkReferrer() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refId = urlParams.get('ref');
+
+            if (refId) {
+                $('#referrerId').val(refId);
+                $.getJSON(GAS_URL, { action: 'getReferrerName', refId: refId }, function(res) {
+                    if (res.success && res.name) {
+                        $('#referrer-display')
+                            .html(`🤝 แนะนำให้มาประเมินโดย: <b>คุณ${res.name}</b>`)
+                            .css('display', 'flex'); 
+                    }
+                });
+            }
+        }
+
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (liff.isLoggedIn()) {
+                    userProfile = await liff.getProfile();
+                    checkUserRegistration(userProfile.userId);
+
+                    // --- [เพิ่มใหม่] บันทึก Log การแชร์ที่นี่ เพราะมี userId แล้ว ---
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const refId = urlParams.get('ref');
+                    if (refId) {
+                        $.getJSON(GAS_URL, { 
+                            action: 'logVhvShare', 
+                            refId: refId,
+                            page: 'risk_assessment',
+                            viewerId: userProfile.userId // ส่ง ID คนสแกนไปด้วย
+                        });
+                    }
+                    // -------------------------------------------------------
+
+                } else { liff.login(); }
+            } catch (e) { console.error(e); }
+        }
+
+        // --- Logic ---
+        function generateSuggestionText(data) {
+            const ins = data.inputs;
+            const sug = [];
+            if(ins.smoke) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบ" ทันที');
+            if(ins.dm) sug.push('🍬 ท่านเป็นเบาหวาน: ควบคุมระดับน้ำตาล (HbA1c < 7%)');
+            if(ins.sbp >= 120) sug.push(`💓 ความดันตัวบนเริ่มสูง (${ins.sbp} mmHg): ควรลดเค็ม ออกกำลังกาย`);
+            if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): เลี่ยงของทอด กะทิ`);
+            if(ins.wc_inch > 36) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดพุง ลดโรค`);
+
+            const fiveOr = '⭐ หลัก 5 อ. 3 ส. เพื่อสุขภาพดี:\n- อ.อาหาร (ลดหวานมันเค็ม)\n- อ.ออกกำลังกาย\n- อ.อารมณ์\n- อ.อ้วน (คุมน้ำหนัก)\n- อ.ออกซิเจน (ไม่สูบบุหรี่)\n\n- ส.ตรวจร่างกายสม่ำเสมอ\n- ส.สังเกตอาการผิดปกติ\n- ส.ใส่ใจคนรอบข้าง';
+            const befast = '🚨 จดจำอาการ B.E.F.A.S.T หากมีอาการข้อใดข้อหนึ่ง ให้รีบไป รพ.ทันที หรือโทร 1669';
+            
+            const specificAdvice = sug.length > 0 ? "ข้อควรระวังของท่าน:\n" + sug.join('\n\n') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
+            
+            return specificAdvice + '\n\n' + fiveOr + '\n\n' + befast;
+        }
+
+        function updateRealtimeResult() {
+            if(!$('#age').val() || !$('#sbp').val()) { $('#result-container').slideUp(); return; }
+            
+            const result = calculateRisk();
+            globalRiskData = result;
+
+            $('#rt-percent').text(result.riskPercentText + "%").css('color', result.riskColor);
+            $('#rt-desc').text(result.riskGroup).css('color', result.riskColor);
+            $('#rt-bar').css('width', (result.barValue / 30 * 100) + "%").css('background', result.riskColor);
+            
+            let expHtml = `<b>ภายใน 10 ปีข้างหน้า</b> โอกาสเกิดโรคหลอดเลือดสมองของคุณคือ <span style="color:${result.riskColor}; font-weight:bold; font-size:24px;">${result.riskPercentText}%</span>`;
+            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
+                expHtml += `<br><br>⚠️ <b>เสี่ยงมากกว่า</b>คนทั่วไป (เพศ/วัยเดียวกัน) ถึง <span style="color:red; font-weight:bold;">${result.compareRatio} เท่า</span>`;
+            } else if (!result.hasStrokeHistory) {
+                expHtml += `<br><br>✅ ความเสี่ยงใกล้เคียงหรือต่ำกว่าคนทั่วไปในวัยเดียวกัน`;
+            }
+            if(result.hasStrokeHistory) expHtml += `<br><br>🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ`;
+            $('#basic-explain').html(expHtml);
+
+            const fullAdvice = generateSuggestionText(result);
+            $('#full-advice-display').text(fullAdvice);
+
+            $('#result-container').slideDown();
+        }
+
+        // --- Save & Send ---
+        async function saveAndSend(actionType) {
+            let missingFields = [];
+            if(!$('input[name="sex"]:checked').val()) missingFields.push("เพศ");
+            if(!$('#age').val()) missingFields.push("อายุ");
+            if(!$('#sbp').val()) missingFields.push("ความดันตัวบน");
+            if(!$('input[name="smoke"]:checked').val()) missingFields.push("สูบบุหรี่");
+            if(!$('input[name="dm"]:checked').val()) missingFields.push("เบาหวาน");
+
+            if($('input[name="isSawiPatient"]:checked').val() === '1') {
+                if(!$('#telephone').val() || $('#telephone').val().length !== 10) missingFields.push("เบอร์โทรศัพท์ (10 หลัก)");
+                if(!$('#village').val() || !$('#district').val()) missingFields.push("ที่อยู่");
+                if(!$('input[name="decision"]:checked').val()) missingFields.push("การตัดสินใจฉุกเฉิน");
+                if(!$('input[name="help"]:checked').val()) missingFields.push("ผู้อยู่ด้วย");
+            }
+            
+            if(missingFields.length > 0) { alert("กรุณากรอก: " + missingFields.join(", ")); return; }
+
+            $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
+
+            try {
+                const finalSuggestion = generateSuggestionText(globalRiskData);
+
+                const payload = {
+                    timestamp: new Date(),
+                    name: $('#name').val(),
+                    role: $('#role').val(),
+                    hn: $('#hn').val(),
+                    district: $('#district').val(),
+                    village: $('#village').val(),
+                    pcu: $('#pcu').val(),
+                    "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
+                    help: $('input[name="help"]:checked').val(),
+                    decision: $('input[name="decision"]:checked').val(),
+                    telephone: $('#telephone').val(),
+                    line_id: $('#lineId').val(),
+                    gender: globalRiskData.inputs.sex,
+                    age: globalRiskData.inputs.age,
+                    smoke: globalRiskData.inputs.smoke,
+                    dm: globalRiskData.inputs.dm,
+                    sbp: globalRiskData.inputs.sbp,
+                    cholesterol: globalRiskData.inputs.tc,
+                    waist: globalRiskData.inputs.wc_inch,
+                    height: globalRiskData.inputs.ht,
+                    thai_cv_risk_score: globalRiskData.riskPercentText,
+                    risk_group: globalRiskData.riskGroup,
+                    compare_risk: globalRiskData.compareRatio,
+                    suggestion: finalSuggestion,
+                    userId: userProfile ? userProfile.userId : '',
+                    displayName: userProfile ? userProfile.displayName : '',
+                    pictureUrl: userProfile ? userProfile.pictureUrl : '',
+                    allow_tel: $('#allowTel').is(':checked')?'Yes':'No',
+                    pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', // ส่งค่า PDPA
+                    area: $('#area').val(),
+                    referrerId: $('#referrerId').val() 
+                };
+
+                await fetch(GAS_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                if (liff.isInClient()) {
+                    await sendFlex(globalRiskData, payload.name, finalSuggestion);
+                    
+                    if (actionType === 'history') {
+                        liff.openWindow({
+                            url: "https://liff.line.me/2005789397-RLAGXrBJ",
+                            external: false
+                        });
+                    } else {
+                        liff.closeWindow();
+                    }
+                } else {
+                    alert('บันทึกสำเร็จ (ปิดหน้าต่างได้เลย)');
+                    $('.btn-action').text('บันทึกเรียบร้อย');
+                }
+
+            } catch(e) {
+                alert('เกิดข้อผิดพลาด: ' + e.message);
+                $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
+            }
+        }
+
+        // --- Flex Message ---
+        async function sendFlex(data, name, suggestion) {
+            const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
+            const safeSuggestion = (suggestion && suggestion.trim() !== "") ? String(suggestion) : "ไม่มีคำแนะนำเพิ่มเติม";
+            const safeColor = data.riskColor ? String(data.riskColor) : "#333333";
+            const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
+            const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
+
+            const msg = {
+                type: "flex",
+                altText: "ผลประเมินสวีรู้ทันสโตรก",
+                contents: {
+                    type: "bubble",
+                    size: "giga", 
+                    header: {
+                        type: "box",
+                        layout: "vertical",
+                        backgroundColor: safeColor, 
+                        paddingAll: "20px",
+                        contents: [
+                            {
+                                type: "text",
+                                text: "ผลประเมินสวีรู้ทันสโตรก",
+                                weight: "bold",
+                                color: "#ffffff",
+                                size: "xl",
+                                align: "center"
+                            },
+                            {
+                                type: "text",
+                                text: `คุณ ${safeName}`,
+                                weight: "bold",
+                                color: "#ffffff",
+                                size: "lg",
+                                align: "center",
+                                margin: "md",
+                                wrap: true
+                            }
+                        ]
+                    },
+                    body: {
+                        type: "box",
+                        layout: "vertical",
+                        contents: [
+                            { type: "text", text: "โอกาสเป็นสโตรกใน 10 ปี", size: "md", color: "#aaaaaa", align: "center", margin: "md" }, 
+                            { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: safeColor, align: "center", margin: "sm" }, 
+                            { type: "text", text: safeRiskGroup, size: "xxl", weight: "bold", color: "#555555", align: "center", margin: "sm", wrap: true }, 
+                            { type: "separator", margin: "xl" },
+                            { type: "text", text: "คำแนะนำและการปฏิบัติตัว:", weight: "bold", size: "lg", color: "#333333", margin: "lg" }, 
+                            { type: "text", text: safeSuggestion, wrap: true, size: "md", color: "#444444", margin: "md" } 
+                        ]
+                    },
+                    footer: {
+                        type: "box",
+                        layout: "vertical",
+                        spacing: "sm",
+                        contents: [
+                            {
+                                type: "button",
+                                style: "primary",
+                                color: safeColor,
+                                action: {
+                                    type: "uri",
+                                    label: "ประเมินซ้ำ",
+                                    uri: "https://liff.line.me/2005789397-nebQ8oJy"
+                                }
+                            },
+                            {
+                                type: "button",
+                                style: "secondary",
+                                action: {
+                                    type: "uri",
+                                    label: "ประวัติส่วนตัว",
+                                    uri: "https://liff.line.me/2005789397-RLAGXrBJ"
+                                }
+                            }
+                        ]
+                    }
+                }
+            };
+
+            try { await liff.sendMessages([msg]); } 
+            catch (err) { console.error(err); alert("ส่ง LINE ไม่สำเร็จ: " + err.message); }
+        }
+
+        // --- Helper Functions ---
+        function checkUserRegistration(uid) {
+            const url = `${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`;
+            $.getScript(url);
+        }
+        window.handleHistory = function(res) {
+            if(res.status === 'found') { historyData = res.data; checkHistoryDisplay(); }
+        }
+        function checkHistoryDisplay() {
+            const role = $('#role').val();
+            const box = $('#history-alert');
+            box.empty();
+            if (role === 'ประเมินตัวเอง' && historyData) {
+                $('#name').val(historyData.name);
+                $('#telephone').val(historyData.telephone);
+                $('#hn').val(historyData.hn);
+                if(historyData.village) $('#village').val(historyData.village);
+                if(historyData.district) $('#district').val(historyData.district).trigger('change');
+                const d = new Date(historyData.timestamp);
+                const dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
+                box.html(`<div class="status-box found">✅ คุณ (${historyData.name}) เคยประเมินล่าสุดเมื่อ: ${dateStr}</div>`);
+            } else if (role !== 'ประเมินตัวเอง') {
+                $('#name').val('');
+                box.html(`<div class="status-box warn">⚠️ ท่านกำลังเลือกโหมด "ประเมินให้บุคคลอื่น"</div>`);
+            }
+        }
+        
+        function calculateRisk() {
+            const inputs = {
+                age: parseFloat($('#age').val()) || 0,
+                sex: +$('input[name="sex"]:checked').val(), // 0 or 1
+                smoke: +$('input[name="smoke"]:checked').val(),
+                dm: +$('input[name="dm"]:checked').val(),
+                sbp: parseFloat($('#sbp').val()) || 0,
+                tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
+                wc_inch: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0,
+                ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
+                hasStrokeHistory: $('#chk-stroke').is(':checked')
+            };
+            const wc_cm = inputs.wc_inch * 2.54;
+            const whr = (wc_cm > 0 && inputs.ht > 0) ? wc_cm / inputs.ht : 0;
+            const clamped = {
+                age: Math.max(30, Math.min(inputs.age, 70)),
+                sbp: Math.max(70, Math.min(inputs.sbp, 220)),
+                tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0,
+                whr: whr, wc_cm: wc_cm
+            };
+            let [ , predicted_risk, , baseline_risk ] = TASCVDformular(clamped.age, inputs.smoke, inputs.dm, clamped.sbp, inputs.sex, clamped.tc, clamped.whr, clamped.wc_cm);
+            let riskPercent = predicted_risk * 100;
+            let ratio = 0;
+            if (baseline_risk > 0) { ratio = predicted_risk / baseline_risk; }
+            if (inputs.hasStrokeHistory) { riskPercent = 40.00; } else { if (riskPercent > 30) riskPercent = 30.00; }
+            const classification = classifyRisk(riskPercent);
+            return {
+                riskPercentText: riskPercent.toFixed(2),
+                barValue: Math.min(riskPercent, 30),
+                riskGroup: inputs.hasStrokeHistory ? "สูงอันตราย (มีประวัติเดิม)" : classification.text,
+                riskColor: inputs.hasStrokeHistory ? "#b00020" : classification.color,
+                compareRatio: (ratio > 0 && !inputs.hasStrokeHistory) ? ratio.toFixed(1) : 'N/A',
+                hasStrokeHistory: inputs.hasStrokeHistory,
+                inputs: inputs
+            };
+        }
+
+        // --- Full Formula ---
+        function TASCVDformular(age, smoke, dm, sbp, sex, tc, whr, wc) { 
+            var sur_root = 0.964588; 
+            var full_score = 0, compare_score = 0;
+            var c_sbp = (sex==1 && age>60)?132 : (sex==0 && age<=60)?115 : (sex==0 && age>60)?130 : 120;
+            var c_whr = sex==0 ? 0.52667 : 0.58125; 
+            var c_wc = sex==0 ? 79 : 93;
+            if (tc > 0) { 
+                full_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * sbp) + (0.69974 * dm) + (0.00212 * tc) + (0.41916 * smoke); 
+                compare_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * c_sbp) + (0.00212 * 200);
+                return calc(full_score, 7.04423, compare_score);
+            } else if (whr > 0) { 
+                full_score = (0.079 * age) + (0.128 * sex) + (0.019350987 * sbp) + (0.58454 * dm) + (3.512566 * whr) + (0.459 * smoke); 
+                compare_score = (0.079 * age) + (0.128 * sex) + (0.019350987 * c_sbp) + (3.512566 * c_whr); 
+                return calc(full_score, 7.712325, compare_score);
+            } else if (wc > 0) { 
+                full_score = (0.08372 * age) + (0.05988 * sex) + (0.02034 * sbp) + (0.59953 * dm) + (0.01283 * wc) + (0.459 * smoke); 
+                compare_score = (0.08372 * age) + (0.05988 * sex) + (0.02034 * c_sbp) + (0.01283 * c_wc); 
+                return calc(full_score, 7.31047, compare_score);
+            } 
+            return [0,0,0,0];
+            function calc(score, mean, c_score) {
+                let risk = 1 - (Math.pow(sur_root, Math.exp(score - mean)));
+                let c_risk = 1 - (Math.pow(sur_root, Math.exp(c_score - mean)));
+                return [score, risk, c_score, c_risk];
+            }
+        }
+        
+        function classifyRisk(p) {
+            if (p < 10) return { text: "ต่ำ", color: "#28a745" };
+            if (p < 20) return { text: "ปานกลาง", color: "#ffc107" };
+            if (p < 30) return { text: "สูง", color: "#fd7e14" };
+            return { text: "สูงมาก/อันตราย", color: "#dc3545" };
+        }
+
+        function populateVillageDropdown() { for (let i=1; i<=19; i++) $('#village').append(`<option value="${i}">${i}</option>`); }
+        function toggleMeasurementFields() {
+            const useChol = $('input[name="useCholesterol"]:checked').val() === '1';
+            $('#tc_group').toggle(useChol);
+            $('#body_measure_group').toggle(!useChol);
+            updateRealtimeResult();
+        }
+        
+        function updateAddressAndHospital() {
+            const moo = $('#village').val(); const tb = $('#district').val();
+            const hospitals = { "ท่าหิน": "รพ.สต.ท่าหิน", "ด่านสวี": "รพ.สต.ด่านสวี", "เขาทะลุ": "รพ.สต.เขาทะลุ", "เขาค่าย": "รพ.สต.เขาค่าย", "ปากแพรก": "รพ.สต.ปากแพรก", "สวี": "รพ.สต.สวี", "นาสัก": { "1": "รพ.สต.บ้านแก่งกระทั่ง", "6": "รพ.สต.บ้านแก่งกระทั่ง", "11": "รพ.สต.บ้านแก่งกระทั่ง", "13": "รพ.สต.บ้านแก่งกระทั่ง", "18": "รพ.สต.บ้านแก่งกระทั่ง", "19": "รพ.สต.บ้านแก่งกระทั่ง", "7": "รพ.สต.บ้านไทยพัฒนา", "8": "รพ.สต.บ้านไทยพัฒนา", "9": "รพ.สต.บ้านไทยพัฒนา", "10": "รพ.สต.บ้านไทยพัฒนา", "12": "รพ.สต.บ้านไทยพัฒนา", "15": "รพ.สต.บ้านไทยพัฒนา", "16": "รพ.สต.บ้านไทยพัฒนา", "2": "รพ.สต.นาสัก", "3": "รพ.สต.นาสัก", "4": "รพ.สต.นาสัก", "5": "รพ.สต.นาสัก", "14": "รพ.สต.นาสัก", "17": "รพ.สต.นาสัก" }, "ทุ่งระยะ": { "5": "รพ.สต.บ้านคลองน้อย", "6": "รพ.สต.บ้านคลองน้อย", "7": "รพ.สต.บ้านคลองน้อย", "8": "รพ.สต.บ้านคลองน้อย", "9": "รพ.สต.บ้านคลองน้อย", "10": "รพ.สต.บ้านคลองน้อย", "1": "รพ.สต.ทุ่งระยะ", "2": "รพ.สต.ทุ่งระยะ", "3": "รพ.สต.ทุ่งระยะ", "4": "รพ.สต.ทุ่งระยะ", "11": "รพ.สต.ทุ่งระยะ" }, "วิสัยใต้": { "1": "รพ.สต.บ้านดอนทราย", "3": "รพ.สต.บ้านดอนทราย", "4": "รพ.สต.บ้านดอนทราย", "8": "รพ.สต.บ้านดอนทราย", "2": "รพ.สต.วิสัยใต้", "5": "รพ.สต.วิสัยใต้", "6": "รพ.สต.วิสัยใต้", "7": "รพ.สต.วิสัยใต้", "9": "รพ.สต.วิสัยใต้", "10": "รพ.สต.วิสัยใต้" }, "ครน": { "1": "รพ.สต.ครน", "2": "รพ.สต.ครน", "3": "รพ.สต.ครน", "4": "รพ.สต.ครน", "6": "รพ.สต.ครน", "12": "รพ.สต.ครน", "9": "รพ.สต.บ้านควนสามัคคี", "10": "รพ.สต.บ้านควนสามัคคี", "13": "รพ.สต.บ้านควนสามัคคี", "14": "รพ.สต.บ้านควนสามัคคี", "5": "รพ.สต.บ้านน้ำฉา", "7": "รพ.สต.บ้านน้ำฉา", "8": "รพ.สต.บ้านน้ำฉา", "11": "รพ.สต.บ้านน้ำฉา" }, "นาโพธิ์": "รพ.สวี (นาโพธิ์)" };
+            let hosp = hospitals[tb]; 
+            if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } 
+            $('#pcu').val(hosp || '');
+            if(moo && tb) { $('#area').val(`ม.${moo} ต.${tb}`); } else { $('#area').val(''); }
+        }
+    </script>
+</body>
+</html>
