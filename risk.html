@@ -120,6 +120,10 @@
 
         #loading, #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
         #ocrLoading { display: none; background: rgba(0,0,0,0.8); color: white;}
+
+        /* --- Modal Custom --- */
+        .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
+        .is-invalid { border-color: #dc3545 !important; background-color: #fff8f8 !important;}
     </style>
 </head>
 <body>
@@ -158,7 +162,7 @@
                 </div>
                 <div class="modal-body" style="font-size: 18px;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยเพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
-                    <p>AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น ได้แก่: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน และ ประวัติสูบบุหรี่</b></p>
+                    <p>AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน, ยาที่ใช้ ฯลฯ</b></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
@@ -168,53 +172,92 @@
         </div>
     </div>
 
-    <!-- Modal เติมข้อมูลที่ AI หาไม่เจอ -->
-    <div class="modal fade" id="missingDataModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-warning">
-                <div class="modal-header bg-warning text-dark">
-                    <h5 class="modal-title">⚠️ กรุณาเติมข้อมูลให้ครบถ้วน</h5>
+    <!-- Modal แสดงข้อมูลหลังอ่าน AI (Preview & Edit) -->
+    <div class="modal fade" id="ocrPreviewModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow">
+                <div class="modal-header" style="background-color: #1e3c72; color: white;">
+                    <h5 class="modal-title fw-bold">🔍 ตรวจสอบข้อมูลจาก AI</h5>
                 </div>
-                <div class="modal-body" style="font-size: 18px;">
-                    <p class="text-secondary">AI อ่านข้อมูลบางส่วนไม่พบ หรือในสมุดไม่ได้ระบุไว้ กรุณาเลือกข้อมูลด้านล่างให้ครบเพื่อประเมินผล:</p>
+                <div class="modal-body" style="font-size: 16px; background: #f8f9fa;">
+                    <p class="mb-3 text-secondary" style="font-size:16px;">
+                        ✅ <span class="text-success fw-bold">สีเขียว</span> = ข้อมูลที่ AI หาเจอ<br>
+                        ⚠️ <span class="text-danger fw-bold">สีแดง</span> = AI หาไม่เจอ (กรุณาระบุเพิ่ม หรือเว้นว่างหากไม่มีข้อมูลในสมุด)
+                    </p>
                     
-                    <div id="missing-age-box" class="form-row d-none">
-                        <label>อายุ (ปี):</label>
-                        <input type="number" id="md_age" class="form-control" placeholder="ระบุอายุ">
-                    </div>
-                    
-                    <div id="missing-gender-box" class="form-row d-none">
-                        <label>เพศ:</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="md_sex" value="0"> หญิง</label>
-                            <label class="radio-label"><input type="radio" name="md_sex" value="1"> ชาย</label>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label mb-1 fw-bold">ชื่อ-สกุล</label>
+                            <input type="text" id="pv_name" class="form-control" placeholder="ชื่อ-สกุล">
                         </div>
-                    </div>
-
-                    <div id="missing-dm-box" class="form-row d-none">
-                        <label>ผู้ป่วยเป็นเบาหวานหรือไม่?</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="md_dm" value="0"> ไม่เป็น</label>
-                            <label class="radio-label"><input type="radio" name="md_dm" value="1"> เป็น</label>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">HN</label>
+                            <input type="text" id="pv_hn" class="form-control" placeholder="เลข HN">
                         </div>
-                    </div>
-
-                    <div id="missing-smoke-box" class="form-row d-none">
-                        <label>ประวัติสูบบุหรี่ (ปัจจุบัน):</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="md_smoke" value="0"> ไม่สูบ</label>
-                            <label class="radio-label"><input type="radio" name="md_smoke" value="1"> สูบ</label>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">อายุ (ปี)</label>
+                            <input type="number" id="pv_age" class="form-control" placeholder="อายุ">
                         </div>
-                    </div>
-
-                    <div id="missing-sbp-box" class="form-row d-none">
-                        <label>ความดันตัวบน (SBP):</label>
-                        <input type="number" id="md_sbp" class="form-control" placeholder="ถ้าไม่มีให้เว้นไว้">
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">เพศ</label>
+                            <select id="pv_sex" class="form-select">
+                                <option value="">--เลือก--</option>
+                                <option value="1">ชาย</option>
+                                <option value="0">หญิง</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">ความดัน (บน)</label>
+                            <input type="number" id="pv_sbp" class="form-control" placeholder="เช่น 130">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">เบาหวาน</label>
+                            <select id="pv_dm" class="form-select">
+                                <option value="">--เลือก--</option>
+                                <option value="1">เป็น</option>
+                                <option value="0">ไม่เป็น</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">สูบบุหรี่</label>
+                            <select id="pv_smoke" class="form-select">
+                                <option value="">--เลือก--</option>
+                                <option value="1">สูบ</option>
+                                <option value="0">ไม่สูบ</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1 fw-bold text-danger">ประวัติสโตรก/CVA (ดูจากวินิจฉัย/ยา)</label>
+                            <select id="pv_stroke" class="form-select">
+                                <option value="">--เลือก--</option>
+                                <option value="1">เคยเป็นสโตรก</option>
+                                <option value="0">ไม่เคย</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-12 mt-3">
+                            <hr class="m-0 border-primary">
+                            <small class="text-primary d-block mt-2 mb-1 fw-bold">ข้อมูลผลเลือด หรือ สัดส่วนร่างกาย (ระบุอย่างน้อย 1 อย่าง)</small>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label mb-1 fw-bold">คอเลสเตอรอลรวม</label>
+                            <input type="number" id="pv_chol" class="form-control" placeholder="เว้นว่างถ้าไม่มี">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">รอบเอว (ซม.)</label>
+                            <input type="number" id="pv_waist" class="form-control" placeholder="ซม.">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold">ส่วนสูง (ซม.)</label>
+                            <input type="number" id="pv_height" class="form-control" placeholder="ซม.">
+                        </div>
                     </div>
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100 fs-5 fw-bold" onclick="applyMissingData()">บันทึกข้อมูลและคำนวณ</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-success w-50 fw-bold" onclick="confirmOcrData()">ยืนยันข้อมูล</button>
                 </div>
             </div>
         </div>
@@ -535,7 +578,6 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // บีบอัดเป็น JPEG quality 0.6
                     let base64String = canvas.toDataURL('image/jpeg', 0.6);
                     let base64Data = base64String.split(',')[1]; 
 
@@ -568,70 +610,96 @@
         }
 
         function fillDataFromOCR(data) {
-            let missingSomething = false;
+            $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid is-invalid');
 
-            // เคลียร์ค่า d-none ออกก่อน
-            $('#missing-age-box, #missing-gender-box, #missing-dm-box, #missing-smoke-box, #missing-sbp-box').addClass('d-none');
-
-            // 1. อายุ
-            if (data.age) { $('#age').val(data.age); } 
-            else { $('#missing-age-box').removeClass('d-none'); missingSomething = true; }
-
-            // 2. เพศ
-            if (data.gender === 'female') { $('input[name="sex"][value="0"]').prop('checked', true); }
-            else if (data.gender === 'male') { $('input[name="sex"][value="1"]').prop('checked', true); }
-            else { $('#missing-gender-box').removeClass('d-none'); missingSomething = true; }
-
-            // 3. ความดัน
-            if (data.sbp) { $('#sbp').val(data.sbp); }
-            else { $('#missing-sbp-box').removeClass('d-none'); missingSomething = true; }
-
-            // 4. คอเลสเตอรอล
-            if (data.cholesterol) { 
-                $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
-                $('#tc').val(data.cholesterol);
+            function setField(id, val, isDropdown = false) {
+                if (val !== null && val !== undefined && val !== "") {
+                    $(`#${id}`).val(val).addClass('is-valid');
+                } else {
+                    $(`#${id}`).val('').addClass('is-invalid');
+                }
             }
 
-            // 5. เบาหวาน
-            if (data.dm_status === true) { $('input[name="dm"][value="1"]').prop('checked', true); }
-            else if (data.dm_status === false) { $('input[name="dm"][value="0"]').prop('checked', true); }
-            else { $('#missing-dm-box').removeClass('d-none'); missingSomething = true; }
+            setField('pv_name', data.name);
+            setField('pv_hn', data.hn);
+            setField('pv_age', data.age);
+            setField('pv_sbp', data.sbp);
+            
+            let genderVal = "";
+            if (data.gender === 'female') genderVal = "0";
+            else if (data.gender === 'male') genderVal = "1";
+            setField('pv_sex', genderVal, true);
 
-            // 6. สูบบุหรี่
-            if (data.smoker_status === true) { $('input[name="smoke"][value="1"]').prop('checked', true); }
-            else if (data.smoker_status === false) { $('input[name="smoke"][value="0"]').prop('checked', true); }
-            else { $('#missing-smoke-box').removeClass('d-none'); missingSomething = true; }
+            let dmVal = "";
+            if (data.dm_status === true) dmVal = "1";
+            else if (data.dm_status === false) dmVal = "0";
+            setField('pv_dm', dmVal, true);
 
-            updateRealtimeResult();
+            let strokeVal = "";
+            if (data.stroke_status === true) strokeVal = "1";
+            else if (data.stroke_status === false) strokeVal = "0";
+            setField('pv_stroke', strokeVal, true);
 
-            if (missingSomething) {
-                const modal = new bootstrap.Modal(document.getElementById('missingDataModal'));
-                modal.show();
-            } else {
-                alert("🎉 AI อ่านข้อมูลและเติมลงฟอร์มสำเร็จแล้ว กรุณาตรวจสอบความถูกต้องอีกครั้ง");
-            }
+            let smokeVal = "";
+            if (data.smoker_status === true) smokeVal = "1";
+            else if (data.smoker_status === false) smokeVal = "0";
+            setField('pv_smoke', smokeVal, true);
+
+            setField('pv_chol', data.cholesterol);
+            setField('pv_waist', data.waist);
+            setField('pv_height', data.height);
+
+            const modal = new bootstrap.Modal(document.getElementById('ocrPreviewModal'));
+            modal.show();
         }
 
-        function applyMissingData() {
-            // โอนค่าจาก Modal กลับไปที่ Form หลัก
-            if (!$('#missing-age-box').hasClass('d-none') && $('#md_age').val()) {
-                $('#age').val($('#md_age').val());
+        function confirmOcrData() {
+            const name = $('#pv_name').val();
+            const hn = $('#pv_hn').val();
+            const age = $('#pv_age').val();
+            const sex = $('#pv_sex').val();
+            const sbp = $('#pv_sbp').val();
+            const dm = $('#pv_dm').val();
+            const stroke = $('#pv_stroke').val();
+            const smoke = $('#pv_smoke').val();
+            const chol = $('#pv_chol').val();
+            const waist_cm = $('#pv_waist').val();
+            const height = $('#pv_height').val();
+
+            if(name) $('#name').val(name);
+            if(hn) $('#hn').val(hn);
+            if(age) $('#age').val(age);
+            if(sex) $(`input[name="sex"][value="${sex}"]`).prop('checked', true);
+            if(sbp) $('#sbp').val(sbp);
+            
+            if(dm) $(`input[name="dm"][value="${dm}"]`).prop('checked', true);
+            
+            if(stroke === "1") {
+                $('#chk-stroke').prop('checked', true);
+                $('#stroke-date-wrapper').removeClass('d-none');
+            } else if (stroke === "0") {
+                $('#chk-stroke').prop('checked', false);
+                $('#stroke-date-wrapper').addClass('d-none');
             }
-            if (!$('#missing-gender-box').hasClass('d-none') && $('input[name="md_sex"]:checked').val()) {
-                $('input[name="sex"][value="' + $('input[name="md_sex"]:checked').val() + '"]').prop('checked', true);
-            }
-            if (!$('#missing-dm-box').hasClass('d-none') && $('input[name="md_dm"]:checked').val()) {
-                $('input[name="dm"][value="' + $('input[name="md_dm"]:checked').val() + '"]').prop('checked', true);
-            }
-            if (!$('#missing-smoke-box').hasClass('d-none') && $('input[name="md_smoke"]:checked').val()) {
-                $('input[name="smoke"][value="' + $('input[name="md_smoke"]:checked').val() + '"]').prop('checked', true);
-            }
-            if (!$('#missing-sbp-box').hasClass('d-none') && $('#md_sbp').val()) {
-                $('#sbp').val($('#md_sbp').val());
+
+            if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
+
+            if(chol) {
+                $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
+                $('#tc').val(chol);
+            } else {
+                $('input[name="useCholesterol"][value="0"]').prop('checked', true).change();
+                if(waist_cm) {
+                    let inch = (parseFloat(waist_cm) / 2.54).toFixed(1);
+                    $('#wc').val(inch);
+                }
+                if(height) {
+                    $('#bdh').val(height);
+                }
             }
 
             updateRealtimeResult();
-            $('#missingDataModal').modal('hide');
+            $('#ocrPreviewModal').modal('hide');
         }
 
 
