@@ -28,6 +28,69 @@
             margin: 0 auto;
         }
 
+        /* --- Intro Screen (Video Overlay) --- */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1040; /* ให้อยู่เหนือ content ปกติ แต่ต่ำกว่า Modal (1050) */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        #intro-screen iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .intro-buttons-container {
+            position: relative;
+            z-index: 1041;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+            padding-bottom: 50px;
+        }
+
+        /* Neon Button Style */
+        @keyframes neonPulse {
+            0% { box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            50% { box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000; }
+            100% { box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000, 0 0 20px #ff0000; }
+        }
+        .btn-neon-red {
+            background-color: #e60000;
+            color: #ffffff;
+            border: 2px solid #ff4d4d;
+            border-radius: 35px;
+            padding: 15px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            animation: neonPulse 1.5s infinite alternate;
+        }
+        .btn-neon-red:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px #ff0000, 0 0 10px #ff0000;
+        }
+        .btn-secondary-neon {
+            background-color: rgba(230, 0, 0, 0.7); /* โปร่งแสงเล็กน้อยเพื่อให้ปุ่มหลักเด่นกว่า */
+            animation-delay: 0.5s; /* สลับจังหวะกระพริบ */
+        }
+
         /* --- Header --- */
         .header-group { 
             display: flex; align-items: center; justify-content: center; 
@@ -127,6 +190,17 @@
     </style>
 </head>
 <body>
+
+    <!-- Intro Video Screen -->
+    <div id="intro-screen">
+        <!-- ใช้พารามิเตอร์ autoplay=1 และ mute=1 เพื่อให้สามารถเล่นอัตโนมัติบนมือถือได้ -->
+        <iframe src="https://drive.google.com/file/d/1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3/preview?autoplay=1&mute=1" allow="autoplay; fullscreen" frameborder="0"></iframe>
+        
+        <div class="intro-buttons-container">
+            <button id="btn-start-eval" class="btn-neon-red">เริ่มประเมิน</button>
+            <button id="btn-read-intro" class="btn-neon-red btn-secondary-neon">อ่านคำแนะนำ</button>
+        </div>
+    </div>
 
     <div id="loading"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div></div>
     
@@ -506,6 +580,20 @@
             toggleMeasurementFields();
             checkReferrer(); 
             
+            // --- Intro Screen Logic ---
+            $('#btn-start-eval').click(function() {
+                // ปิดวิดีโอแบบค่อยๆ เฟดออก แล้วลบออกจาก DOM เพื่อหยุดการเล่นเสียง(ถ้ามี)
+                $('#intro-screen').fadeOut(500, function() {
+                    $(this).remove();
+                });
+            });
+
+            $('#btn-read-intro').click(function() {
+                // เรียก Modal คำแนะนำขึ้นมาโดยที่วิดีโอยังอยู่เป็นพื้นหลัง
+                $('#disclaimerModal').modal('show');
+            });
+            // --------------------------
+
             $('input[name="isSawiPatient"]').change(function() {
                 $(this).val() === '1' ? $('#patientForm').slideDown() : $('#patientForm').slideUp();
             });
