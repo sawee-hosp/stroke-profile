@@ -9,6 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 สำหรับแจ้งเตือนสวยงาม -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         /* --- Base Styles & Background --- */
@@ -40,12 +42,6 @@
             font-size: 24px; 
             margin: 0; 
             text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
-        }
-        #btn-disclaimer {
-            font-size: 16px; padding: 6px 15px; border-radius: 25px;
-            background: #ccff90; color: #006400; border: 2px solid #b2ff59;
-            margin-left: 12px; cursor: pointer; flex-shrink: 0; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15); font-weight: bold;
         }
 
         /* --- Main Card & Steps --- */
@@ -97,7 +93,7 @@
             position: relative;
         }
         .video-element {
-            width: 100%; height: 100%; object-fit: cover;
+            width: 100%; height: 100%; object-fit: cover; background: #ffffff;
         }
         
         /* Custom Play Button */
@@ -124,7 +120,7 @@
 
         .btn-red-flat {
             background-color: #e60000; color: #ffffff; border: none;
-            border-radius: 25px; padding: 12px 20px; font-size: 20px; font-weight: bold;
+            border-radius: 15px; padding: 12px 20px; font-size: 20px; font-weight: bold;
             text-align: center; cursor: pointer; transition: all 0.2s ease;
             width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
@@ -170,8 +166,6 @@
         .radio-label { font-weight: normal; display: flex; align-items: center; cursor: pointer; font-size: 20px; }
         input[type="radio"], input[type="checkbox"] { transform: scale(1.6); margin-right: 10px; accent-color: #ff3654; }
 
-        #patientForm { background-color: #FFFDE7; border: 2px solid #FFC107; padding: 20px; border-radius: 15px; margin-top: 15px; }
-
         /* --- Result --- */
         #result-container { 
             margin-top: 10px; padding: 25px; background: #f8fcf9; border-radius: 15px;
@@ -183,7 +177,7 @@
         .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
         .explanation-box { text-align: left; background: #fff; padding: 20px; border-radius: 15px; margin-top: 20px; font-size: 20px; line-height: 1.6; border: 1px solid #dee2e6; color: #333; white-space: pre-wrap; }
 
-        /* --- Buttons Navigation --- */
+        /* --- Navigation Buttons --- */
         .step-nav-buttons { display: flex; gap: 15px; margin-top: 20px; }
         .btn-nav {
             flex: 1; padding: 12px; font-size: 20px; font-weight: bold;
@@ -372,7 +366,7 @@
             <div id="step-progress" class="step-progress">
                 <div class="step-dot active" id="dot-1">1</div>
                 <div class="step-dot" id="dot-2">2</div>
-                <div class="step-dot" id="dot-3">3</div>
+                <div class="step-dot" id="dot-3" style="display:none;">3</div> <!-- โชว์/ซ่อน อัตโนมัติตามเงื่อนไข รพ.สวี -->
                 <div class="step-dot" id="dot-4">4</div>
             </div>
 
@@ -380,7 +374,6 @@
             <div id="history-alert"></div>
 
             <form id="mainForm">
-                <input type="hidden" id="lineName">
                 <input type="hidden" id="area">
                 <input type="hidden" id="referrerId"> 
 
@@ -388,8 +381,9 @@
                 <div id="step-intro" class="step-section active">
                     <div class="video-container">
                         <!-- วิดีโอเล่นอัตโนมัติ (Muted) -->
-                        <video id="intro-video" class="video-element" autoplay muted playsinline>
+                        <video id="intro-video" class="video-element" autoplay muted loop playsinline>
                             <source src="https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3" type="video/mp4">
+                            เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ HTML5
                         </video>
                         
                         <!-- ปุ่ม เล่นวิดีโอกลม -->
@@ -412,9 +406,9 @@
                     </div>
                 </div>
 
-                <!-- ================= STEP 1: ข้อมูลทั่วไป ================= -->
+                <!-- ================= STEP 1: ข้อมูลทั่วไป และตัวแปรสุขภาพ ================= -->
                 <div id="step-1" class="step-section">
-                    <div class="step-title">ข้อมูลทั่วไป</div>
+                    <div class="step-title">ข้อมูลทั่วไปและการประเมิน</div>
 
                     <div class="form-row">
                         <label>ประเมินให้ใคร:</label>
@@ -425,11 +419,6 @@
                             <option value="อสม.สโตรก ประเมินให้คนอื่น">อสม.สโตรก ประเมินให้คนอื่น</option>
                         </select>
                     </div>
-
-                    <!-- ปุ่ม OCR ถ่ายรูป ย้ายมาหน้านี้เพื่อให้สแกนก่อน -->
-                    <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
-                        📸 ถ่ายรูปสมุดเพื่อประเมิน (AI)
-                    </button>
 
                     <div class="form-row">
                         <label>ชื่อผู้รับการประเมิน:</label>
@@ -444,17 +433,133 @@
                         </div>
                     </div>
 
-                    <!-- Patient Info Box -->
+                    <!-- ปุ่ม OCR โชว์เฉพาะคน รพ.สวี -->
+                    <div id="ocr-btn-wrapper">
+                        <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
+                            📸 ถ่ายรูปสมุดล่าสุดเพื่อประเมิน (AI)
+                        </button>
+                    </div>
+
+                    <!-- --- ข้อมูลสุขภาพย้ายมาหน้านี้ --- -->
+                    <div class="form-row mt-4">
+                        <label>โรคประจำตัว:</label>
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
+                            <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px;">
+                                <label>วันที่เป็น:</label><input type="date" id="stroke-date">
+                            </div>
+                            <label class="radio-label"><input type="checkbox" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
+                            <label class="radio-label"><input type="checkbox" name="ud" value="เบาหวาน"> เบาหวาน</label>
+                            <label class="radio-label"><input type="checkbox" name="ud" value="ไขมันในเลือดสูง"> ไขมันในเลือดสูง</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>อายุ (ปี):</label>
+                        <input type="number" id="age" inputmode="numeric" placeholder="อายุต้องอยู่ระหว่าง 30 - 70 ปี">
+                    </div>
+
+                    <div class="form-row">
+                        <label>เพศ:</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="sex" value="0"> หญิง</label>
+                            <label class="radio-label"><input type="radio" name="sex" value="1"> ชาย</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>สูบบุหรี่:</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="smoke" value="0" checked> ไม่สูบ</label>
+                            <label class="radio-label"><input type="radio" name="smoke" value="1"> สูบ</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>เป็นเบาหวาน:</label>
+                        <div class="inline-group">
+                            <label class="radio-label"><input type="radio" name="dm" value="0" checked> ไม่เป็น</label>
+                            <label class="radio-label"><input type="radio" name="dm" value="1"> เป็น</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>ความดันตัวบน (SBP):</label>
+                        <input type="text" id="sbp" inputmode="numeric" placeholder="ใส่ค่าสูงแค่ค่าเดียว เช่น 120">
+                    </div>
+
+                    <div class="form-row">
+                        <label>มีผลไขมันคอเลสเทอรอล:</label>
+                        <small style="color: #007BFF;">(ดูได้จากสมุดผู้ป่วยหรือหมอพร้อม)</small>
+                        <div class="inline-group" style="margin-top:5px;">
+                            <label class="radio-label"><input type="radio" name="useCholesterol" value="1"> มี</label>
+                            <label class="radio-label"><input type="radio" name="useCholesterol" value="0" checked> ไม่มี</label>
+                        </div>
+                    </div>
+
+                    <div id="tc_group" class="form-row" style="display:none;">
+                        <label>ค่าคอเลสเตอรอลรวม (TC):</label>
+                        <input type="number" id="tc" inputmode="numeric">
+                    </div>
+
+                    <div id="body_measure_group">
+                        <div class="form-row">
+                            <label>รอบเอว (นิ้ว):</label>
+                            <input type="number" id="wc" inputmode="numeric" placeholder="หรือขนาดกางเกงที่ใส่เป็นนิ้ว">
+                        </div>
+                        <div class="form-row">
+                            <label>ส่วนสูง (ซม.):</label>
+                            <input type="number" id="bdh" inputmode="numeric">
+                        </div>
+                    </div>
+
+                    <div class="step-nav-buttons">
+                        <button type="button" class="btn-nav btn-back" onclick="goToStep('intro')">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-next" onclick="validateStep1AndProceed()">ถัดไป</button>
+                    </div>
+                </div>
+
+                <!-- ================= STEP 2: แบบสอบถามการอยู่อาศัย ================= -->
+                <div id="step-2" class="step-section">
+                    <div class="step-title">แบบสอบถามการอยู่อาศัย</div>
+
+                    <div class="form-row">
+                        <label>สมมติจู่ๆ ปากเบี้ยว แขนไม่มีแรง คุณจะทำอย่างไรเป็นอย่างแรก?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="decision" value="รอดูอาการ"> รอดูอาการ</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="โทรให้ญาติมาดู"> โทรให้ญาติมาดู</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="ไปคลินิก-อนามัย"> ไปคลินิก-อนามัย</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="รีบไป รพ.เอง"> รีบไป รพ.เอง</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="โทร 1669 ให้รถมารับ"> โทร 1669 ให้รถมารับ</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>ปกติช่วงกลางวัน/กลางคืน คุณอยู่บ้านกับใคร?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่คนเดียว"> อยู่คนเดียว</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับผู้สูงอายุ/เด็กเล็ก"> อยู่กับผู้สูงอายุ/เด็กเล็ก</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับญาติผู้ใหญ่/คนวัยทำงาน"> อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</label>
+                        </div>
+                    </div>
+
+                    <div class="step-nav-buttons">
+                        <button type="button" class="btn-nav btn-back" onclick="goToStep(1)">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-next" onclick="validateStep2AndProceed()">ถัดไป</button>
+                    </div>
+                </div>
+
+                <!-- ================= STEP 3: ข้อมูลติดต่อ (เฉพาะ รพ.สวี) ================= -->
+                <div id="step-3" class="step-section">
+                    <div class="step-title">ข้อมูลติดต่อ รพ.สวี</div>
+                    
                     <div id="patientForm">
                         <div class="form-row" style="border:none;">
                             <label>เบอร์โทรศัพท์ (จำเป็น*):</label>
                             <input type="text" id="telephone" maxlength="10" inputmode="numeric" placeholder="เบอร์โทรศัพท์ 10 หลัก">
                             <div id="phone-msg" class="phone-alert"></div>
                         </div>
-                        <div class="form-row" style="border:none;">
-                            <label>LINE ID:</label>
-                            <input type="text" id="lineId" placeholder="ถ้าจำได้">
-                        </div>
+
                         <div class="form-row" style="border:none;">
                             <label>HN (เลขบัตร รพ. ถ้าทราบ):</label>
                             <input type="text" id="hn" placeholder="ระบุเลข HN">
@@ -492,131 +597,14 @@
                     </div>
 
                     <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep('intro')">ย้อนกลับ</button>
-                        <button type="button" class="btn-nav btn-next" onclick="goToStep(2)">ถัดไป</button>
-                    </div>
-                </div>
-
-                <!-- ================= STEP 2: แบบสอบถาม ================= -->
-                <div id="step-2" class="step-section">
-                    <div class="step-title">แบบสอบถามเบื้องต้น</div>
-
-                    <div id="survey-sawi-only">
-                        <div class="form-row">
-                            <label>สมมติจู่ๆ ปากเบี้ยว แขนไม่มีแรง คุณจะทำอย่างไรเป็นอย่างแรก?</label>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <label class="radio-label"><input type="radio" name="decision" value="รอดูอาการ"> รอดูอาการ</label>
-                                <label class="radio-label"><input type="radio" name="decision" value="โทรให้ญาติมาดู"> โทรให้ญาติมาดู</label>
-                                <label class="radio-label"><input type="radio" name="decision" value="ไปคลินิก-อนามัย"> ไปคลินิก-อนามัย</label>
-                                <label class="radio-label"><input type="radio" name="decision" value="รีบไป รพ.เอง"> รีบไป รพ.เอง</label>
-                                <label class="radio-label"><input type="radio" name="decision" value="โทร 1669 ให้รถมารับ"> โทร 1669 ให้รถมารับ</label>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <label>ปกติช่วงกลางวัน/กลางคืน คุณอยู่บ้านกับใคร?</label>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <label class="radio-label"><input type="radio" name="help" value="อยู่คนเดียว"> อยู่คนเดียว</label>
-                                <label class="radio-label"><input type="radio" name="help" value="อยู่กับผู้สูงอายุ/เด็กเล็ก"> อยู่กับผู้สูงอายุ/เด็กเล็ก</label>
-                                <label class="radio-label"><input type="radio" name="help" value="อยู่กับญาติผู้ใหญ่/คนวัยทำงาน"> อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="survey-skip-msg" style="display:none; padding: 20px; text-align:center; color: #666;">
-                        (ข้ามส่วนนี้สำหรับบุคคลทั่วไปที่ไม่ได้ใช้บริการ รพ.สวี)
-                    </div>
-
-                    <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep(1)">ย้อนกลับ</button>
-                        <button type="button" class="btn-nav btn-next" onclick="goToStep(3)">ถัดไป</button>
-                    </div>
-                </div>
-
-                <!-- ================= STEP 3: ข้อมูลสุขภาพ ================= -->
-                <div id="step-3" class="step-section">
-                    <div class="step-title">ข้อมูลสุขภาพ</div>
-                    
-                    <div class="form-row">
-                        <label>โรคประจำตัว:</label>
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
-                            <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px;">
-                                <label>วันที่เป็น:</label><input type="date" id="stroke-date">
-                            </div>
-                            <label class="radio-label"><input type="checkbox" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
-                            <label class="radio-label"><input type="checkbox" name="ud" value="เบาหวาน"> เบาหวาน</label>
-                            <label class="radio-label"><input type="checkbox" name="ud" value="ไขมันในเลือดสูง"> ไขมันในเลือดสูง</label>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <label>อายุ (ปี):</label>
-                        <input type="number" id="age" inputmode="numeric" class="required-input">
-                    </div>
-
-                    <div class="form-row">
-                        <label>เพศ:</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="sex" value="0" class="required-input"> หญิง</label>
-                            <label class="radio-label"><input type="radio" name="sex" value="1" class="required-input"> ชาย</label>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <label>สูบบุหรี่:</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="smoke" value="0" checked> ไม่สูบ</label>
-                            <label class="radio-label"><input type="radio" name="smoke" value="1"> สูบ</label>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <label>เป็นเบาหวาน:</label>
-                        <div class="inline-group">
-                            <label class="radio-label"><input type="radio" name="dm" value="0" checked> ไม่เป็น</label>
-                            <label class="radio-label"><input type="radio" name="dm" value="1"> เป็น</label>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <label>ความดันตัวบน (SBP):</label>
-                        <input type="text" id="sbp" inputmode="numeric" placeholder="ใส่ค่าสูงแค่ค่าเดียว" class="required-input">
-                    </div>
-
-                    <div class="form-row">
-                        <label>มีผลไขมันคอเลสเทอรอล:</label>
-                        <small style="color: #007BFF;">(ดูได้จากสมุดผู้ป่วยหรือหมอพร้อม)</small>
-                        <div class="inline-group" style="margin-top:5px;">
-                            <label class="radio-label"><input type="radio" name="useCholesterol" value="1"> มี</label>
-                            <label class="radio-label"><input type="radio" name="useCholesterol" value="0" checked> ไม่มี</label>
-                        </div>
-                    </div>
-
-                    <div id="tc_group" class="form-row" style="display:none;">
-                        <label>ค่าคอเลสเตอรอลรวม (TC):</label>
-                        <input type="number" id="tc" inputmode="numeric">
-                    </div>
-
-                    <div id="body_measure_group">
-                        <div class="form-row">
-                            <label>รอบเอว (นิ้ว):</label>
-                            <input type="number" id="wc" inputmode="numeric" placeholder="หรือขนาดกางเกงที่ใส่เป็นนิ้ว">
-                        </div>
-                        <div class="form-row">
-                            <label>ส่วนสูง (ซม.):</label>
-                            <input type="number" id="bdh" inputmode="numeric">
-                        </div>
-                    </div>
-
-                    <div class="step-nav-buttons">
                         <button type="button" class="btn-nav btn-back" onclick="goToStep(2)">ย้อนกลับ</button>
-                        <button type="button" class="btn-nav btn-calc" onclick="calculateAndShowResult()">ประเมินผล</button>
+                        <button type="button" class="btn-nav btn-calc" onclick="validateStep3AndCalculate()">ประเมินผล</button>
                     </div>
                 </div>
             </form>
 
             <!-- ================= STEP 4: ผลการประเมิน ================= -->
-            <div id="step-result" class="step-section">
+            <div id="step-4" class="step-section">
                 <div id="result-container">
                     <h2 style="color:#003366; font-weight:800; font-size: 28px;">ผลการประเมิน</h2>
                     <div class="risk-percent" id="rt-percent">0%</div>
@@ -644,7 +632,7 @@
                 <div class="action-buttons">
                     <button type="button" class="btn-action btn-green" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
                     <button type="button" class="btn-action btn-red" onclick="saveAndSend('close')">บันทึกและปิด</button>
-                    <button type="button" class="btn-action" style="background:#6c757d;" onclick="goToStep(3)">กลับไปแก้ไขข้อมูล</button>
+                    <button type="button" class="btn-action" style="background:#6c757d;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
                 </div>
             </div>
 
@@ -678,9 +666,9 @@
                     videoElement.currentTime = 0;
                     videoElement.muted = false; // เปิดเสียงเมื่อกดเล่น
                     videoElement.play();
-                    $(this).fadeOut(200); // ซ่อนปุ่มเล่น
+                    $(this).fadeOut(200); // ซ่อนปุ่มเล่นวงกลม
                     
-                    // ย้ายปุ่มเริ่มประเมินลงมาด้านล่าง
+                    // ย้ายปุ่มเริ่มประเมินลงมาด้านล่างเพื่อไม่ให้บังวิดีโอ
                     $('#floating-btn-container').children().appendTo('#static-btn-container');
                     $('#static-btn-container').addClass('static-btns').hide().slideDown();
                     $('#floating-btn-container').remove();
@@ -689,20 +677,18 @@
 
             if (videoElement) {
                 videoElement.addEventListener('ended', function() {
-                    $('#next-video-container').fadeIn();
+                    $('#next-video-container').fadeIn(); // แสดงปุ่มเล่นวิดีโอถัดไปตอนวิดีโอจบ
                 });
             }
 
             // --- Form Logic ---
             $('input[name="isSawiPatient"]').change(function() {
                 if($(this).val() === '1') {
-                    $('#patientForm').slideDown();
-                    $('#survey-sawi-only').slideDown();
-                    $('#survey-skip-msg').slideUp();
+                    $('#ocr-btn-wrapper').slideDown();
+                    $('#dot-3').show();
                 } else {
-                    $('#patientForm').slideUp();
-                    $('#survey-sawi-only').slideUp();
-                    $('#survey-skip-msg').slideDown();
+                    $('#ocr-btn-wrapper').slideUp();
+                    $('#dot-3').hide();
                 }
             });
             
@@ -722,7 +708,10 @@
 
             $('#sbp').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
             $('#wc').on('change', function() {
-                if(this.value > 60) { alert('กรุณาเช็คคำตอบ เป็นหน่วยนิ้ว (ค่าไม่ควรเกิน 60)'); $(this).val(''); }
+                if(this.value > 60) { 
+                    Swal.fire({icon:'error', title:'เกิดข้อผิดพลาด', text:'กรุณาเช็คคำตอบ เป็นหน่วยนิ้ว (ค่าไม่ควรเกิน 60)'}); 
+                    $(this).val(''); 
+                }
             });
             $('input[name="useCholesterol"]').change(toggleMeasurementFields);
             $('#chk-stroke').change(function() {
@@ -745,11 +734,15 @@
             });
         });
 
-        // --- Step Navigation Logic ---
+        // --- Navigation Logic ---
         function goToStep(step) {
             const videoElement = document.getElementById('intro-video');
             if(currentStep === 'intro' && step !== 'intro') {
-                if(videoElement) videoElement.pause();
+                if(videoElement) {
+                    videoElement.pause();
+                    videoElement.removeAttribute('src'); // Stop loading background
+                    videoElement.load();
+                }
             }
 
             $('.step-section').removeClass('active');
@@ -771,27 +764,70 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- Calculation & Validation ---
-        function calculateAndShowResult() {
-            let missingFields = [];
-            if(!$('#age').val()) missingFields.push("อายุ");
-            if(!$('input[name="sex"]:checked').val()) missingFields.push("เพศ");
-            if(!$('#sbp').val()) missingFields.push("ความดันตัวบน");
+        function goBackToEdit() {
+            // ถ้าย้อนกลับจากผลลัพธ์ ให้เช็คว่าเป็นคน รพ.สวี หรือไม่ 
+            if($('input[name="isSawiPatient"]:checked').val() === '1') goToStep(3);
+            else goToStep(2);
+        }
 
-            if(missingFields.length > 0) { 
-                alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน: " + missingFields.join(", ")); 
-                
-                // Highlight missing fields
-                if(!$('#age').val()) $('#age').addClass('highlight-flash');
-                if(!$('#sbp').val()) $('#sbp').addClass('highlight-flash');
-                
-                setTimeout(() => {
-                    $('#age, #sbp').removeClass('highlight-flash');
-                }, 3000);
-                
-                return; 
+        // --- Step Validation ---
+        function validateStep1AndProceed() {
+            let missing = [];
+            if(!$('#age').val()) missing.push("อายุ");
+            if(!$('input[name="sex"]:checked').val()) missing.push("เพศ");
+            if(!$('#sbp').val()) missing.push("ความดันตัวบน");
+
+            if(missing.length > 0) {
+                Swal.fire({ icon: 'warning', title: 'กรุณากรอกข้อมูลให้ครบ', text: 'ขาดข้อมูล: ' + missing.join(", ") });
+                missing.forEach(id => {
+                    if(id === "อายุ") $('#age').addClass('highlight-flash');
+                    if(id === "ความดันตัวบน") $('#sbp').addClass('highlight-flash');
+                });
+                setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
+                return;
+            }
+            goToStep(2);
+        }
+
+        function validateStep2AndProceed() {
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            let missing = [];
+            
+            if(isSawi) {
+                if(!$('input[name="decision"]:checked').val()) missing.push("การจัดการอาการเบื้องต้น");
+                if(!$('input[name="help"]:checked').val()) missing.push("ผู้อยู่อาศัยด้วย");
+            }
+            
+            if(missing.length > 0) {
+                Swal.fire({ icon: 'warning', title: 'กรุณาทำแบบสอบถามให้ครบ', text: 'ขาดข้อมูล: ' + missing.join(", ") });
+                return;
             }
 
+            if(isSawi) {
+                goToStep(3);
+            } else {
+                // ถ้าไม่ใช่ รพ.สวี ให้ข้ามหน้า 3 ไปประมวลผลเลย
+                calculateAndShowResult();
+            }
+        }
+
+        function validateStep3AndCalculate() {
+            let missing = [];
+            if(!$('#telephone').val() || $('#telephone').val().length !== 10) missing.push("เบอร์โทรศัพท์ (10 หลัก)");
+            if(!$('#village').val() || !$('#district').val()) missing.push("ที่อยู่ (หมู่/ตำบล)");
+
+            if(missing.length > 0) {
+                Swal.fire({ icon: 'warning', title: 'ข้อมูล รพ.สวี ไม่ครบถ้วน', text: 'ขาดข้อมูล: ' + missing.join(", ") });
+                if(missing.includes("เบอร์โทรศัพท์ (10 หลัก)")) $('#telephone').addClass('highlight-flash');
+                if(missing.includes("ที่อยู่ (หมู่/ตำบล)")) { $('#village').addClass('highlight-flash'); $('#district').addClass('highlight-flash'); }
+                setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
+                return;
+            }
+            calculateAndShowResult();
+        }
+
+        // --- Calculation & Result View ---
+        function calculateAndShowResult() {
             const result = calculateRisk();
             globalRiskData = result;
 
@@ -811,7 +847,7 @@
             const fullAdvice = generateSuggestionText(result);
             $('#full-advice-display').text(fullAdvice);
 
-            goToStep(4);
+            goToStep(4); // ไปยังหน้าผลลัพธ์
         }
 
         // --- OCR & Image Processing ---
@@ -854,11 +890,11 @@
             .then(res => {
                 $('#ocrLoading').fadeOut();
                 if(res.status === 'success') { fillDataFromOCR(res.data); } 
-                else { alert('เกิดข้อผิดพลาดในการวิเคราะห์รูปภาพ: ' + res.message); }
+                else { Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการวิเคราะห์รูปภาพ: ' + res.message, 'error'); }
             })
             .catch(err => {
                 $('#ocrLoading').fadeOut();
-                alert('การเชื่อมต่อล้มเหลว: ' + err.message);
+                Swal.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งรูปภาพได้ ' + err.message, 'error');
             });
         }
 
@@ -960,7 +996,13 @@
             }
 
             $('#ocrPreviewModal').modal('hide');
-            goToStep(3); // พาไปหน้า 3 ให้เห็นว่ากรอกแล้ว
+            Swal.fire({
+                title: 'สำเร็จ!',
+                text: 'นำข้อมูลจาก AI เติมลงในฟอร์มเรียบร้อย กรุณาตรวจสอบและดำเนินการต่อ',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
 
         function checkReferrer() {
@@ -979,7 +1021,6 @@
 
         async function initializeLiff() {
             try {
-                // เอาเงื่อนไข iframe ออก เพื่อให้โหลด LIFF ทุกกรณี
                 await liff.init({ liffId: LIFF_ID });
                 if (liff.isLoggedIn()) {
                     userProfile = await liff.getProfile();
@@ -1009,20 +1050,6 @@
         }
 
         async function saveAndSend(actionType) {
-            let missingFields = [];
-            
-            if($('input[name="isSawiPatient"]:checked').val() === '1') {
-                if(!$('#telephone').val() || $('#telephone').val().length !== 10) missingFields.push("เบอร์โทรศัพท์ (10 หลัก)");
-                if(!$('#village').val() || !$('#district').val()) missingFields.push("ที่อยู่");
-                if(!$('input[name="decision"]:checked').val()) missingFields.push("การตัดสินใจฉุกเฉิน");
-                if(!$('input[name="help"]:checked').val()) missingFields.push("ผู้อยู่ด้วย");
-            }
-            
-            if(missingFields.length > 0) { 
-                alert("กรุณาย้อนกลับไปกรอกข้อมูลให้ครบถ้วน: " + missingFields.join(", ")); 
-                return; 
-            }
-
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
 
             try {
@@ -1033,7 +1060,7 @@
                     district: $('#district').val(), village: $('#village').val(), pcu: $('#pcu').val(),
                     "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
                     help: $('input[name="help"]:checked').val(), decision: $('input[name="decision"]:checked').val(),
-                    telephone: $('#telephone').val(), line_id: $('#lineId').val(),
+                    telephone: $('#telephone').val(), line_id: '', /* ตัด Line ID ทิ้ง */
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_inch, height: globalRiskData.inputs.ht,
@@ -1055,12 +1082,16 @@
                     if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2005789397-RLAGXrBJ", external: false });
                     else liff.closeWindow();
                 } else {
-                    alert('บันทึกสำเร็จ (ปิดหน้าต่างได้เลย)');
+                    Swal.fire({
+                        title: 'บันทึกสำเร็จ!',
+                        text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว ปิดหน้าต่างนี้ได้เลย',
+                        icon: 'success'
+                    });
                     $('.btn-action').text('บันทึกเรียบร้อย');
                 }
 
             } catch(e) {
-                alert('เกิดข้อผิดพลาด: ' + e.message);
+                Swal.fire('ผิดพลาด', 'เกิดข้อผิดพลาด: ' + e.message, 'error');
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
@@ -1103,7 +1134,7 @@
                     }
                 }
             };
-            try { await liff.sendMessages([msg]); } catch (err) { console.error(err); alert("ส่ง LINE ไม่สำเร็จ: " + err.message); }
+            try { await liff.sendMessages([msg]); } catch (err) { console.error(err); }
         }
 
         function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
