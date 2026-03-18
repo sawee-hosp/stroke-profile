@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- YouTube Iframe API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <style>
         /* --- Base Styles & Background --- */
@@ -18,7 +20,7 @@
             font-family: "Noto Sans Thai", sans-serif; 
             font-size: 18px; 
             margin: 0; color: #333;
-            line-height: 1.4; /* ปรับ line-height ให้กระชับขึ้น */
+            line-height: 1.4; 
             min-height: 100vh;
             background: linear-gradient(180deg, #ff3654 0%, #ffffff 400px);
             background-repeat: no-repeat;
@@ -28,7 +30,7 @@
 
         /* --- Header --- */
         .header-group { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; padding-top: 10px; }
-        h1 { color: #ffffff; font-weight: 900; font-size: 24px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
+        h1 { color: #ffffff; font-weight: 900; font-size: 26px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
 
         /* --- Main Card & Steps --- */
         .main-card {
@@ -47,11 +49,11 @@
 
         /* --- Video Section (Intro) --- */
         .video-container {
-            width: 100%; max-width: 315px; margin: 0 auto; background: #ffffff;
+            width: 100%; max-width: 315px; margin: 0 auto; background: #000000;
             border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border: 2px solid #f0f0f0; aspect-ratio: 315/560; position: relative;
         }
-        .video-iframe { width: 100%; height: 100%; border: none; background: #ffffff; display: block; }
+        .video-iframe { width: 100%; height: 100%; border: none; display: block; }
         
         .custom-play-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -73,10 +75,12 @@
 
         .btn-red-flat {
             background-color: #e60000; color: #ffffff; border: none; border-radius: 15px; 
-            padding: 10px 20px; font-size: 18px; font-weight: bold; text-align: center; 
+            padding: 12px 20px; font-size: 20px; font-weight: bold; text-align: center; 
             cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .btn-red-flat:active { transform: scale(0.98); }
+
+        .btn-next-video { background-color: #0d6efd; display: none; }
 
         /* --- OCR Area --- */
         .sawi-ocr-box {
@@ -116,15 +120,15 @@
 
         /* --- Result --- */
         #result-container { margin-top: 5px; padding: 20px; background: #f8fcf9; border-radius: 15px; border: 2px solid #c3e6cb; text-align: center; }
-        .risk-percent { font-size: 4rem; font-weight: 900; line-height: 1; margin: 10px 0; }
-        .risk-desc { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
+        .risk-percent { font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
+        .risk-desc { font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
         .progress-bar-bg { width: 100%; height: 25px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 15px 0; }
         .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .explanation-box { text-align: left; background: #fff; padding: 15px 20px; border-radius: 15px; margin-top: 15px; font-size: 18px; line-height: 1.4; border: 1px solid #dee2e6; color: #333; }
+        .explanation-box { text-align: left; background: #fff; padding: 20px; border-radius: 15px; margin-top: 15px; font-size: 20px; line-height: 1.4; border: 1px solid #dee2e6; color: #333; }
 
         /* --- Navigation Buttons --- */
         .step-nav-buttons { display: flex; gap: 10px; margin-top: 25px; }
-        .btn-nav { flex: 1; padding: 10px; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-nav { flex: 1; padding: 12px; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-nav:active { transform: scale(0.98); }
         .btn-back { background-color: #e9ecef; color: #495057; }
         .btn-next { background-color: #ff3654; color: white; box-shadow: 0 4px 6px rgba(255, 54, 84, 0.3); }
@@ -145,7 +149,11 @@
 
         .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
         .step-title { color: #003366; border-bottom: 3px solid #ff3654; padding-bottom: 5px; margin-bottom: 5px; font-weight: 800; font-size: 22px;}
-        .step-subtitle { color: #666; font-size: 15px; margin-bottom: 15px; }
+        .step-subtitle { color: #666; font-size: 16px; margin-bottom: 15px; }
+
+        /* Custom SweetAlert Override */
+        .swal2-title { font-size: 24px !important; }
+        .swal2-html-container { font-size: 20px !important; }
     </style>
 </head>
 <body>
@@ -165,7 +173,7 @@
                     <h5 class="modal-title m-0">📸 ข้อตกลงการใช้กล้อง AI</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
+                <div class="modal-body" style="font-size: 18px; line-height: 1.4;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
                     <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
@@ -184,8 +192,8 @@
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold m-0">🔍 ตรวจสอบข้อมูลจาก AI</h5>
                 </div>
-                <div class="modal-body p-3" style="font-size: 16px; background: #f8f9fa;">
-                    <p class="mb-3 text-secondary" style="font-size:15px; line-height:1.3;">
+                <div class="modal-body p-3" style="font-size: 18px; background: #f8f9fa;">
+                    <p class="mb-3 text-secondary" style="font-size:16px; line-height:1.3;">
                         ✅ <span class="text-success fw-bold">สีเขียว</span> = ข้อมูลที่ AI หาเจอ<br>
                         ⚠️ <span class="text-danger fw-bold">กระพริบสีแดง</span> = ข้อมูลจำเป็นที่ขาดหาย (กรุณากรอกเพิ่มให้ครบ)
                     </p>
@@ -299,13 +307,8 @@
                 <!-- ================= INTRO STEP ================= -->
                 <div id="step-intro" class="step-section active">
                     <div class="video-container">
-                        <!-- YouTube Iframe -->
-                        <iframe id="youtube-iframe" width="100%" height="100%" class="video-iframe"
-                            src="https://www.youtube.com/embed/uFlOzsSZyG4?autoplay=1&mute=1&loop=1&playlist=uFlOzsSZyG4&controls=0" 
-                            title="YouTube Shorts Player" frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen>
-                        </iframe>
+                        <!-- YouTube Iframe placeholder -->
+                        <div id="youtube-player"></div>
                         
                         <!-- ปุ่ม เล่นวิดีโอกลม -->
                         <div id="custom-play-btn" class="custom-play-btn">
@@ -320,6 +323,11 @@
                     
                     <!-- พื้นที่รับปุ่มเมื่อสไลด์ลงมา -->
                     <div id="static-btn-container"></div>
+
+                    <!-- ปุ่มดูวิดีโออื่น (ซ่อนไว้ตอนแรก จะโผล่มาเมื่อวิดีโอจบ) -->
+                    <div id="next-video-container" style="display:none; margin-top:15px;">
+                        <button type="button" id="btn-next-video" class="btn-red-flat btn-next-video" style="background:#0d6efd; display:block;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
+                    </div>
                 </div>
 
                 <!-- ================= STEP 1: ข้อมูลผู้ประเมิน ================= -->
@@ -354,7 +362,7 @@
 
                     <!-- กล่องซ่อน รพ.สวี -->
                     <div id="sawi-ocr-box" class="sawi-ocr-box">
-                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:15px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
+                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:16px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
                         <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
                             📸 ถ่ายรูปสมุดล่าสุดเพื่อประเมิน
                         </button>
@@ -376,7 +384,7 @@
                         <div style="display:flex; flex-direction:column; gap:5px;">
                             <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
                             <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px; margin-bottom:10px;">
-                                <label style="font-size:16px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="font-size:16px; padding:8px;">
+                                <label style="font-size:18px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="padding:10px;">
                             </div>
                             <label class="radio-label"><input type="checkbox" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
                             <label class="radio-label"><input type="checkbox" name="ud" value="เบาหวาน"> เบาหวาน</label>
@@ -436,7 +444,7 @@
                     <div class="form-row">
                         <label>มีผลการตรวจ 'คอเลสเตอรอล' หรือไม่?</label>
                         <small style="color: #666;">(หากไม่มีให้ใช้ขนาดรอบเอวและส่วนสูงแทน)</small>
-                        <div class="inline-group" style="margin-top:5px;">
+                        <div class="inline-group" style="margin-top:10px;">
                             <label class="radio-label"><input type="radio" name="useCholesterol" value="1"> มีผลเลือด</label>
                             <label class="radio-label"><input type="radio" name="useCholesterol" value="0" checked> ไม่มีผลเลือด</label>
                         </div>
@@ -519,11 +527,11 @@
                         <label>ข้อมูลที่อยู่ (ไม่บังคับ):</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
-                                <label style="font-size:16px;">หมู่ที่:</label>
+                                <label style="font-size:18px;">หมู่ที่:</label>
                                 <select id="village"><option value="">เลือก</option></select>
                             </div>
                             <div style="flex: 1.5;">
-                                <label style="font-size:16px;">ตำบล:</label>
+                                <label style="font-size:18px;">ตำบล:</label>
                                 <select id="district"><option value="">เลือก</option>
                                     <option>ท่าหิน</option><option>ด่านสวี</option><option>เขาทะลุ</option>
                                     <option>เขาค่าย</option><option>ปากแพรก</option><option>สวี</option>
@@ -532,14 +540,14 @@
                                 </select>
                             </div>
                         </div>
-                        <label style="font-size:16px;">รพ.สต. ที่รับผิดชอบ:</label>
+                        <label style="font-size:18px;">รพ.สต. ที่รับผิดชอบ:</label>
                         <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555; border:none;" placeholder="จะแสดงอัตโนมัติ">
                     </div>
 
-                    <div class="form-row" style="background:#fff8f8; padding:10px 15px; border-radius:10px; border:1px solid #ffcdd2;">
+                    <div class="form-row" style="background:#fff8f8; padding:15px; border-radius:10px; border:1px solid #ffcdd2;">
                         <label class="radio-label" style="align-items: flex-start; margin:0;">
                             <input type="checkbox" id="allowTel" checked style="margin-top: 3px;"> 
-                            <span style="font-size: 15px; color:#666; line-height:1.3;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อการติดตามผล</span>
+                            <span style="font-size: 16px; color:#666; line-height:1.4;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อการติดตามผล</span>
                         </label>
                     </div>
 
@@ -553,7 +561,7 @@
             <!-- ================= STEP 6: ผลการประเมิน ================= -->
             <div id="step-6" class="step-section">
                 <div id="result-container">
-                    <h2 style="color:#003366; font-weight:800; font-size: 26px; margin-bottom:5px;">ผลการประเมิน</h2>
+                    <h2 style="color:#003366; font-weight:800; font-size: 28px; margin-bottom:5px;">ผลการประเมิน</h2>
                     <div class="risk-percent" id="rt-percent">0%</div>
                     <div class="risk-desc" id="rt-desc">-</div>
                     <div class="progress-bar-bg">
@@ -562,15 +570,15 @@
                     
                     <div class="explanation-box" id="rt-explanation">
                         <div id="basic-explain"></div>
-                        <hr style="border-top: 2px dashed #ccc; margin: 15px 0;">
+                        <hr style="border-top: 2px dashed #ccc; margin: 20px 0;">
                         <div id="full-advice-display"></div>
                     </div>
                 </div>
 
-                <div style="margin-top: 15px; margin-bottom: 10px;">
-                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 12px; border-radius:10px; border: 1px solid #ffcdd2; width: 100%;">
+                <div style="margin-top: 20px; margin-bottom: 15px;">
+                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 15px; border-radius:12px; border: 1px solid #ffcdd2; width: 100%;">
                         <input type="checkbox" id="pdpa" checked style="margin-top: 2px;"> 
-                        <span style="font-size: 15px; color: #cc0000; font-weight: bold; line-height:1.3;">
+                        <span style="font-size: 16px; color: #cc0000; font-weight: bold; line-height:1.4;">
                             ยินยอมให้ รพ.สวี นำข้อมูลไปประมวลผลเพื่อเพิ่มความตระหนักรู้และการเข้าถึงการรักษา
                         </span>
                     </label>
@@ -578,8 +586,8 @@
 
                 <div class="action-buttons">
                     <button type="button" class="btn-action btn-red" onclick="saveAndSend('close')">บันทึกข้อมูลและปิด</button>
-                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:10px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
-                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:10px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
+                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:12px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
+                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:12px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
                 </div>
             </div>
 
@@ -597,15 +605,53 @@
         let globalRiskData = null;
         let historyData = null;
         let currentStep = 'intro';
-        const totalSteps = 5; // Step 1-5 (Step 6 is result)
+        const totalSteps = 5; 
+
+        // --- YouTube Player Logic ---
+        let ytPlayer;
+        let currentPlayingUrl = "https://www.youtube.com/shorts/uFlOzsSZyG4";
+        // Dummy playlist as fallback if backend doesn't have getPlaylist yet
+        let playlistMap = { "risk_intro": "https://youtube.com/shorts/uFlOzsSZyG4" };
+
+        function extractVideoID(url) {
+            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+            return (match && match[2].length == 11) ? match[2] : null;
+        }
+
+        function onYouTubeIframeAPIReady() {
+            let ytId = extractVideoID(playlistMap['risk_intro']);
+            ytPlayer = new YT.Player('youtube-player', {
+                height: '100%', width: '100%', videoId: ytId,
+                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'playsinline': 1, 'rel': 0, 'loop': 0 },
+                events: { 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                $('#next-video-container').fadeIn(300);
+            }
+        }
+
+        function playNextVideo() {
+            let rand = Math.floor(Math.random() * 10) + 1;
+            let nextId = 'risk_' + (rand < 10 ? '0'+rand : rand);
+            let url = playlistMap[nextId] || playlistMap['risk_intro'];
+            currentPlayingUrl = url;
+            ytPlayer.loadVideoById(extractVideoID(url));
+            $('#next-video-container').hide();
+        }
 
         // Custom SweetAlert Theme (Red/White)
         const swalCustom = Swal.mixin({
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#f8f9fa',
             customClass: {
                 confirmButton: 'btn btn-danger px-4 py-2 fs-5 rounded-pill mx-2',
-                cancelButton: 'btn btn-outline-danger px-4 py-2 fs-5 rounded-pill mx-2'
+                cancelButton: 'btn btn-light text-dark border px-4 py-2 fs-5 rounded-pill mx-2'
             },
-            buttonsStyling: false
+            buttonsStyling: true
         });
 
         $(document).ready(() => {
@@ -615,16 +661,21 @@
             toggleMeasurementFields();
             checkReferrer(); 
 
+            // ดึง Playlist จาก GAS (ถ้ามี)
+            $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
+                if(res && res.data) Object.assign(playlistMap, res.data);
+            }).fail(function() { console.log("Using default playlist"); });
+
             // --- Initial Disclaimer Modal (SweetAlert) ---
             swalCustom.fire({
-                title: '<h3 style="color:#cc0000; font-weight:800; margin:0;">สวีรู้ทันสโตรก</h3>',
+                title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
                 html: `
-                    <div style="text-align: left; font-size: 16px; line-height: 1.4; margin-top:10px;">
+                    <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
                         <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
                         <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
-                        <hr style="border-top: 1px dashed #ccc; margin:10px 0;">
+                        <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
                         <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
-                        <p style="font-size:14px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
+                        <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
                     </div>
                 `,
                 icon: 'info',
@@ -633,16 +684,19 @@
                 allowEscapeKey: false
             });
             
-            // --- Video Logic ---
+            // --- Video Control Logic ---
             $('#custom-play-btn').click(function() {
-                // Reload iframe with YouTube unmute (using YouTube URL)
-                $('#youtube-iframe').attr('src', 'https://www.youtube.com/embed/uFlOzsSZyG4?autoplay=1&loop=1&playlist=uFlOzsSZyG4&controls=1');
-                $(this).fadeOut(200); 
-                
-                // Move start button down
-                $('#floating-btn-container').children().appendTo('#static-btn-container');
-                $('#static-btn-container').addClass('static-btns').hide().slideDown();
-                $('#floating-btn-container').remove();
+                if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+                    ytPlayer.seekTo(0);
+                    ytPlayer.unMute();
+                    ytPlayer.setVolume(100);
+                    ytPlayer.playVideo();
+                    $(this).fadeOut(200); 
+                    
+                    $('#floating-btn-container').children().appendTo('#static-btn-container');
+                    $('#static-btn-container').addClass('static-btns').hide().slideDown();
+                    $('#floating-btn-container').remove();
+                }
             });
 
             // --- Form Logic ---
@@ -696,7 +750,7 @@
         // --- Navigation Logic ---
         function goToStep(step) {
             if(currentStep === 'intro' && step !== 'intro') {
-                $('#youtube-iframe').attr('src', ''); // Stop video
+                if(ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
             }
 
             $('.step-section').removeClass('active');
@@ -711,7 +765,6 @@
                 $('.progress-container').show();
                 $(`#step-${step}`).addClass('active');
                 
-                // Update Progress Text/Bar
                 const percent = (step / totalSteps) * 100;
                 $('#progress-text').text(`ขั้นตอนที่ ${step} / ${totalSteps}`);
                 $('#progress-bar').css('width', `${percent}%`);
@@ -768,7 +821,7 @@
 
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
             if(isSawi) { goToStep(5); } 
-            else { calculateAndShowResult(); } // Skip step 5 if not Sawi
+            else { calculateAndShowResult(); } 
         }
 
         // --- Calculation & Result View ---
@@ -780,7 +833,7 @@
             $('#rt-desc').text(result.riskGroup).css('color', result.riskColor);
             $('#rt-bar').css('width', (result.barValue / 30 * 100) + "%").css('background', result.riskColor);
             
-            let expHtml = `<div style="font-size:18px; line-height:1.4;"><b>ภายใน 10 ปีข้างหน้า</b> โอกาสเกิดโรคหลอดเลือดสมองของคุณคือ <br><span style="color:${result.riskColor}; font-weight:bold; font-size:26px;">${result.riskPercentText}%</span>`;
+            let expHtml = `<div style="font-size:20px; line-height:1.5;"><b>ภายใน 10 ปีข้างหน้า</b> โอกาสเกิดโรคหลอดเลือดสมองของคุณคือ <br><span style="color:${result.riskColor}; font-weight:bold; font-size:30px;">${result.riskPercentText}%</span>`;
             if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
                 expHtml += `<br>⚠️ <b>เสี่ยงมากกว่า</b>คนทั่วไป (เพศ/วัยเดียวกัน) ถึง <span style="color:red; font-weight:bold;">${result.compareRatio} เท่า</span></div>`;
             } else if (!result.hasStrokeHistory) {
@@ -792,7 +845,7 @@
             const fullAdvice = generateSuggestionText(result);
             $('#full-advice-display').html(fullAdvice.html);
 
-            goToStep(6); // ไปยังหน้าผลลัพธ์
+            goToStep(6); 
         }
 
         // --- OCR & Image Processing ---
@@ -875,7 +928,6 @@
             if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
             setField('pv_smoke', smokeVal);
 
-            // --- Logic for Cholesterol vs Waist/Height ---
             if (data.cholesterol) {
                 $('#pv_chol_box').show(); $('#pv_body_box').hide();
                 setField('pv_chol', data.cholesterol);
@@ -885,7 +937,6 @@
                 setField('pv_waist', data.waist); setField('pv_height', data.height);
                 $('#pv_chol').removeClass('highlight-flash is-valid');
             } else if (data.waist || data.height) {
-                // ขาดตัวใดตัวนึงของรูปร่าง ให้โชว์รอให้เติม
                 $('#pv_chol_box').hide(); $('#pv_body_box').show();
                 setField('pv_waist', data.waist); setField('pv_height', data.height);
                 $('#pv_chol').removeClass('highlight-flash is-valid');
@@ -923,7 +974,6 @@
 
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
-            // อัปเดตในฟอร์มหลักตาม Logic
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
                 $('#tc').val(chol);
@@ -939,7 +989,7 @@
             $('#ocrPreviewModal').modal('hide');
             swalCustom.fire({
                 title: 'นำเข้าสำเร็จ!',
-                text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย ให้กด "ถัดไป" เพื่อตรวจสอบหน้าอื่นๆ',
+                text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย ให้กด "ถัดไป" เพื่อตรวจสอบ',
                 icon: 'success',
                 timer: 2500,
                 showConfirmButton: false
@@ -949,7 +999,6 @@
         function checkReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
             const refId = urlParams.get('ref');
-
             if (refId) {
                 $('#referrerId').val(refId);
                 $.getJSON(GAS_URL, { action: 'getReferrerName', refId: refId }, function(res) {
@@ -977,34 +1026,38 @@
         }
 
         function generateSuggestionText(data) {
-            const ins = data.inputs; const sug = [];
-            if(ins.smoke) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบ" ทันที');
-            if(ins.dm) sug.push('🍬 ท่านเป็นเบาหวาน: ควบคุมระดับน้ำตาล (HbA1c < 7%)');
-            if(ins.sbp >= 120) sug.push(`💓 ความดันตัวบนเริ่มสูง (${ins.sbp} mmHg): ควรลดเค็ม ออกกำลังกาย`);
-            if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): เลี่ยงของทอด กะทิ`);
-            if(ins.wc_inch > 36) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดพุง ลดโรค`);
+            const ins = data.inputs; 
+            const sug = [];
+            
+            // คำแนะนำเฉพาะเจาะจงตามปัจจัยเสี่ยงที่ปรับเปลี่ยนได้
+            if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
+            if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
+            if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
+            if(ins.sbp >= 130) sug.push(`💓 ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
+            
+            let waistLimit = ins.sex === 1 ? 36 : 32;
+            if(ins.wc_inch > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
 
-            let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">ข้อควรระวังของท่าน:</div><ul style="margin-top:0; margin-bottom:10px; padding-left:20px; line-height:1.3;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
-            let specificAlertsText = sug.length > 0 ? "ข้อควรระวังของท่าน:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
+            let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.4;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
+            let specificAlertsText = sug.length > 0 ? "⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
 
             let riskPercent = parseFloat(data.riskPercentText);
-            let riskAdviceHtml = "";
-            let riskAdviceText = "";
+            let riskAdviceHtml = ""; let riskAdviceText = "";
 
             if(riskPercent < 10) {
-                riskAdviceHtml = `<div style="margin-bottom:15px; line-height:1.4;"><span style="color:#28a745; font-weight:bold;">🟢 การปฏิบัติตัว (ความเสี่ยงต่ำ):</span><br>รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น</div>`;
-                riskAdviceText = "🟢 การปฏิบัติตัว (ความเสี่ยงต่ำ):\nรักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#28a745; font-weight:bold;">🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)</span><br><b>สิ่งที่ต้องทำ:</b> รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น</div>`;
+                riskAdviceText = "🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)\nสิ่งที่ต้องทำ: รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น";
             } else if (riskPercent < 30) {
-                riskAdviceHtml = `<div style="margin-bottom:15px; line-height:1.4;"><span style="color:#fd7e14; font-weight:bold;">🟡🟠 การปฏิบัติตัว (ความเสี่ยงปานกลาง-สูง):</span><br>ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)</div>`;
-                riskAdviceText = "🟡🟠 การปฏิบัติตัว (ความเสี่ยงปานกลาง-สูง):\nต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต\n📌 การติดตาม: ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#fd7e14; font-weight:bold;">🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)</div>`;
+                riskAdviceText = "🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)\nสิ่งที่ต้องทำ: ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต\n📌 การติดตาม: ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)";
             } else {
-                riskAdviceHtml = `<div style="margin-bottom:15px; line-height:1.4;"><span style="color:#dc3545; font-weight:bold;">🔴 การปฏิบัติตัว (ความเสี่ยงสูงมาก/อันตราย):</span><br>ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน</div>`;
-                riskAdviceText = "🔴 การปฏิบัติตัว (ความเสี่ยงสูงมาก/อันตราย):\nต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน\n📌 การติดตาม: ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#dc3545; font-weight:bold;">🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน</div>`;
+                riskAdviceText = "🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)\nสิ่งที่ต้องทำ: ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน\n📌 การติดตาม: ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน";
             }
 
             const principlesHtml = `
-                <div style="font-weight:bold; color:#003366; margin-bottom:5px;">⭐ หลัก 3อ. 2ส. แบบจำง่าย</div>
-                <ul style="margin-top:0; padding-left:20px; line-height:1.3; margin-bottom:5px; font-size:16px;">
+                <div style="font-weight:bold; color:#003366; margin-bottom:8px;">⭐ หลัก 3อ. 2ส. แบบจำง่าย</div>
+                <ul style="margin-top:0; padding-left:25px; line-height:1.4; margin-bottom:5px; font-size:18px;">
                     <li><b>อาหาร:</b> ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น</li>
                     <li><b>ออกกำลังกาย:</b> ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)</li>
                     <li><b>อารมณ์:</b> ทำจิตใจให้แจ่มใส ไม่เครียด</li>
@@ -1012,7 +1065,7 @@
                     <li><b>ลดดื่มสุรา:</b> งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด</li>
                 </ul>
             `;
-            const principlesText = "⭐ หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นผัก/ผลไม้สด\n- ออกกำลังกาย: วันละ 30 นาที (5วัน/สัปดาห์)\n- อารมณ์: ทำจิตใจแจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกเด็ดขาด เลี่ยงควัน\n- ลดดื่มสุรา: งดหรือจำกัดให้น้อยที่สุด";
+            const principlesText = "⭐ หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น\n- ออกกำลังกาย: ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)\n- อารมณ์: ทำจิตใจให้แจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่\n- ลดดื่มสุรา: งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด";
 
             return {
                 html: specificAlertsHtml + riskAdviceHtml + principlesHtml,
@@ -1050,7 +1103,7 @@
 
                 if (liff.isInClient()) {
                     await sendFlex(globalRiskData, payload.name, finalSuggestion.text);
-                    if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2005789397-RLAGXrBJ", external: false });
+                    if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2009491708-PgcjtJDL", external: false });
                     else liff.closeWindow();
                 } else {
                     swalCustom.fire({
@@ -1073,21 +1126,37 @@
             const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
 
-            // แยกข้อความคำแนะนำออกเป็นส่วนๆ เพื่อให้ Flex แสดงผลได้สวยงามขึ้น
             const adviceBlocks = suggestionText.split('\n\n');
             const adviceFlexContents = adviceBlocks.map(block => ({
-                type: "text",
-                text: block,
-                wrap: true,
-                size: "sm",
-                color: "#444444",
-                margin: "sm"
+                type: "text", text: block, wrap: true, size: "sm", color: "#444444", margin: "sm"
             }));
 
-            const msg = {
+            // 1. Flex Message สำหรับ Video แนะนำ
+            const videoFlex = {
+                type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
+                contents: {
+                    type: "bubble", size: "mega",
+                    body: {
+                        type: "box", layout: "vertical", spacing: "sm",
+                        contents: [
+                            { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
+                            { type: "text", text: "คลิกเพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
+                        ]
+                    },
+                    footer: {
+                        type: "box", layout: "vertical",
+                        contents: [
+                            { type: "button", style: "primary", color: "#cc0000", action: { type: "uri", label: "▶ ดูวิดีโอ", uri: currentPlayingUrl } }
+                        ]
+                    }
+                }
+            };
+
+            // 2. Flex Message สำหรับผลประเมินความเสี่ยง (ลดขนาดเป็น mega)
+            const riskFlex = {
                 type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก",
                 contents: {
-                    type: "bubble", size: "giga", 
+                    type: "bubble", size: "mega", 
                     header: {
                         type: "box", layout: "vertical", backgroundColor: safeColor, paddingAll: "20px",
                         contents: [
@@ -1099,7 +1168,7 @@
                         type: "box", layout: "vertical",
                         contents: [
                             { type: "text", text: "โอกาสเป็นสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center", margin: "md" }, 
-                            { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: safeColor, align: "center", margin: "xs" }, 
+                            { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: safeColor, align: "center", margin: "xs" }, 
                             { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", margin: "sm", wrap: true }, 
                             { type: "separator", margin: "lg" },
                             { type: "text", text: "คำแนะนำและการปฏิบัติตัว:", weight: "bold", size: "md", color: "#333333", margin: "lg" }, 
@@ -1109,13 +1178,15 @@
                     footer: {
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
-                            { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/" + LIFF_ID } },
-                            { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2005789397-RLAGXrBJ" } }
+                            { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA" } },
+                            { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
                         ]
                     }
                 }
             };
-            try { await liff.sendMessages([msg]); } catch (err) { console.error(err); }
+
+            // ส่งข้อความไป 2 กล่องตามลำดับ วิดีโอก่อน แล้วตามด้วยผลความเสี่ยง
+            try { await liff.sendMessages([videoFlex, riskFlex]); } catch (err) { console.error(err); }
         }
 
         function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
