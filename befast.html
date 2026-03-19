@@ -578,6 +578,12 @@
         setupTimeOptions();
     }
 
+    window.handleAiTest = function(moduleName) { 
+        activeAiModule = moduleName;
+        showLayer('layer-ai-intro'); 
+        updateBaselineFaceUI(); 
+    };
+
     function buildAILayers() {
         document.getElementById('layer-ai-intro').innerHTML = `
             <h2 class="section-title"><span class="iconify" data-icon="mdi:brain"></span> ทดสอบด้วย AI</h2>
