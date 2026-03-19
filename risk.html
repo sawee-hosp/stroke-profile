@@ -53,7 +53,7 @@
             border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border: 2px solid #f0f0f0; aspect-ratio: 315/560; position: relative;
         }
-        .video-iframe { width: 100%; height: 100%; border: none; display: block; }
+        .video-iframe { width: 100%; height: 100%; border: none; background: #ffffff; display: block; }
         
         .custom-play-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -167,7 +167,7 @@
     
     <div id="ocrLoading">
         <div class="spinner-border text-light mb-3" style="width: 4rem; height: 4rem;"></div>
-        <h4 id="ocrLoadingText">กำลังใช้ AI อ่านข้อมูลจากสมุด...</h4>
+        <h4 id="ocrLoadingText">กำลังใช้ AI อ่านข้อมูล...</h4>
     </div>
 
     <!-- Modal Consent สำหรับ OCR -->
@@ -180,7 +180,7 @@
                 </div>
                 <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
-                    <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
+                    <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็นและรายการยา เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
                 <div class="modal-footer p-2">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
@@ -197,10 +197,10 @@
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold m-0">🔍 ตรวจสอบข้อมูลจาก AI</h5>
                 </div>
-                <div class="modal-body p-3" style="font-size: 16px; background: #f8f9fa;">
+                <div class="modal-body p-3" style="font-size: 16px; background: #f8f9fa; max-height: 70vh; overflow-y: auto;">
                     <p class="mb-3 text-secondary" style="font-size:15px; line-height:1.3;">
                         ✅ <span class="text-success fw-bold">สีเขียว</span> = ข้อมูลที่ AI หาเจอ<br>
-                        ⚠️ <span class="text-danger fw-bold">กระพริบสีแดง</span> = ข้อมูลจำเป็นที่ขาดหาย (กรุณากรอกเพิ่มให้ครบ)
+                        ⚠️ <span class="text-danger fw-bold">กระพริบสีแดง</span> = ข้อมูลจำเป็นที่ขาดหาย
                     </p>
                     
                     <div class="row g-2">
@@ -273,6 +273,15 @@
                                 <input type="number" id="pv_height" class="form-control" placeholder="ซม.">
                             </div>
                         </div>
+
+                        <!-- เพิ่มส่วนแสดงรายการยา -->
+                        <div class="col-12 mt-3">
+                            <hr class="m-0 border-primary opacity-25">
+                            <small class="text-primary d-block mt-2 mb-1 fw-bold">💊 รายการยาที่สกัดได้ (สามารถแก้ไขได้)</small>
+                            <div id="pv_medicines_box" style="font-size: 14px;">
+                                <!-- รายการยาจะถูก Render ที่นี่ -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer p-2">
@@ -320,7 +329,7 @@
                             <div class="play-icon">▶</div>
                         </div>
 
-                        <!-- ปุ่มลอยบนวิดีโอ (จะย้ายออกเมื่อกดเล่น) -->
+                        <!-- ปุ่มลอยบนวิดีโอ -->
                         <div id="floating-btn-container" class="floating-btns">
                             <button type="button" id="btn-next-video-float" class="btn-red-flat" style="background:#0d6efd;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
                             <button type="button" id="btn-start-eval" class="btn-red-flat" onclick="goToStep(1)">เริ่มประเมินทันที</button>
@@ -330,7 +339,7 @@
                     <!-- พื้นที่รับปุ่มเมื่อสไลด์ลงมา -->
                     <div id="static-btn-container"></div>
 
-                    <!-- ปุ่มดูวิดีโออื่น (ซ่อนไว้ตอนแรก จะโผล่มาเมื่อวิดีโอจบ) -->
+                    <!-- ปุ่มดูวิดีโออื่น (โผล่มาเมื่อวิดีโอจบ) -->
                     <div id="next-video-container" style="display:none; margin-top:15px;">
                         <button type="button" id="btn-next-video" class="btn-red-flat btn-next-video" style="background:#0d6efd; display:block;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
                     </div>
@@ -576,6 +585,7 @@
                     
                     <div class="explanation-box" id="rt-explanation">
                         <div id="basic-explain"></div>
+                        <hr style="border-top: 2px dashed #ccc; margin: 15px 0;">
                         <div id="full-advice-display"></div>
                     </div>
                 </div>
@@ -1001,6 +1011,7 @@
             if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
             setField('pv_smoke', smokeVal);
 
+            // --- Logic for Cholesterol vs Waist/Height ---
             if (data.cholesterol) {
                 $('#pv_chol_box').show(); $('#pv_body_box').hide();
                 setField('pv_chol', data.cholesterol);
@@ -1017,6 +1028,25 @@
                 $('#pv_chol_box').show(); $('#pv_body_box').show();
                 setField('pv_chol', ''); setField('pv_waist', ''); setField('pv_height', '');
             }
+
+            // --- แสดงรายการยาใน Modal ให้แก้ไขได้ ---
+            let medsHtml = '';
+            if (extractedMedicines.length > 0) {
+                extractedMedicines.forEach((med, idx) => {
+                    medsHtml += `
+                    <div class="p-2 mb-2 border border-info rounded bg-white position-relative">
+                        <input type="text" class="form-control form-control-sm mb-1 fw-bold text-primary med-name" data-idx="${idx}" value="${med.name || ''}" placeholder="ชื่อยา">
+                        <div class="row g-1">
+                            <div class="col-6"><input type="text" class="form-control form-control-sm med-strength" data-idx="${idx}" value="${med.strength || ''}" placeholder="ความแรง"></div>
+                            <div class="col-6"><input type="text" class="form-control form-control-sm med-dosage" data-idx="${idx}" value="${med.dosage || ''}" placeholder="วิธีกิน"></div>
+                            <div class="col-12"><input type="text" class="form-control form-control-sm med-indication" data-idx="${idx}" value="${med.indication || ''}" placeholder="กลุ่มยา"></div>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                medsHtml = '<div class="text-muted text-center p-2">ไม่พบรายการยาบนสมุด</div>';
+            }
+            $('#pv_medicines_box').html(medsHtml);
 
             const modal = new bootstrap.Modal(document.getElementById('ocrPreviewModal'));
             modal.show();
@@ -1047,7 +1077,6 @@
 
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
-            // อัปเดตในฟอร์มหลักตาม Logic
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
                 $('#tc').val(chol);
@@ -1060,10 +1089,21 @@
                 if(height) $('#bdh').val(height);
             }
 
+            // อ่านค่ายาที่แก้ไขแล้วบันทึกกลับ
+            extractedMedicines = [];
+            $('#pv_medicines_box .med-name').each(function() {
+                let idx = $(this).data('idx');
+                let medName = $(this).val();
+                let strength = $(`.med-strength[data-idx="${idx}"]`).val();
+                let dosage = $(`.med-dosage[data-idx="${idx}"]`).val();
+                let indication = $(`.med-indication[data-idx="${idx}"]`).val();
+                if(medName) extractedMedicines.push({name: medName, strength, dosage, indication});
+            });
+
             $('#ocrPreviewModal').modal('hide');
             swalCustom.fire({
                 title: 'นำเข้าสำเร็จ!',
-                text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย ให้กด "ถัดไป" เพื่อตรวจสอบ',
+                text: 'นำข้อมูลจากสมุดและรายการยาเติมลงในแบบฟอร์มเรียบร้อย ให้กด "ถัดไป" เพื่อตรวจสอบ',
                 icon: 'success',
                 timer: 2500,
                 showConfirmButton: false
@@ -1146,6 +1186,21 @@
             };
         }
 
+        // Helper สำหรับข้อความเตือนยาใน Flex Message Carousel
+        function getMedicineAdvice(indication) {
+            if (!indication) return "รับประทานตามที่แพทย์หรือเภสัชกรสั่งอย่างเคร่งครัด";
+            if (indication.includes("ยาต้านเกล็ดเลือด")) {
+                return "ต้องรับประทานอย่างสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาดเพื่อป้องกันการเกิดลิ่มเลือดอุดตันซ้ำ\n\n⚠️ ให้สังเกตภาวะเลือดออกผิดปกติ หากมีรอยจ้ำเลือดขนาดใหญ่ เลือดกำเดาไหลไม่หยุด อาเจียน/ถ่ายเป็นเลือด ให้รีบพบแพทย์ทันที";
+            } else if (indication.includes("ยาต้านการแข็งตัวของเลือด")) {
+                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเองเด็ดขาด ต้องมาตรวจเลือด (INR) อย่างสม่ำเสมอ\n\n⚠️ ห้ามซื้อยาสมุนไพร อาหารเสริม หรือยาแก้ปวดอักเสบ (NSAIDs) มารับประทานร่วมเองเด็ดขาด เพราะเสี่ยงเลือดออกรุนแรงในสมอง/กระเพาะ";
+            } else if (indication.includes("ยาลดไขมัน")) {
+                return "ต้องรับประทานต่อเนื่องตามสั่ง แม้ผลไขมันจะปกติแล้ว เพื่อลดการอักเสบผนังหลอดเลือด\n\n⚠️ หากมีอาการปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้รีบแจ้งแพทย์หรือเภสัชกร";
+            } else if (indication.includes("ยาลดความดัน")) {
+                return "ต้องรับประทานทุกวันอย่างต่อเนื่องเพื่อคุมความดัน\n\n⚠️ ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงหลอดเลือดสมองแตก/ตีบซ้ำ";
+            }
+            return "รับประทานตามที่แพทย์หรือเภสัชกรสั่งอย่างเคร่งครัด";
+        }
+
         async function saveAndSend(actionType) {
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
 
@@ -1162,12 +1217,12 @@
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_inch, height: globalRiskData.inputs.ht,
                     thai_cv_risk_score: globalRiskData.riskPercentText, risk_group: globalRiskData.riskGroup,
-                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text,
+                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, 
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', 
                     area: '', referrerId: $('#referrerId').val(),
-                    medicines: globalRiskData.inputs.medicines // ส่งรายการยาไปด้วย
+                    medicines: globalRiskData.inputs.medicines
                 };
 
                 await fetch(GAS_URL, {
@@ -1205,7 +1260,7 @@
                 type: "text", text: block, wrap: true, size: "sm", color: "#444444", margin: "sm"
             }));
 
-            // Flex 1: Risk Result (Mega Size)
+            // 1. Flex Message สำหรับผลประเมินความเสี่ยง
             let sickCount = Math.round(parseFloat(data.riskPercentText));
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
@@ -1262,7 +1317,48 @@
                 }
             };
 
-            // 2. Flex Message สำหรับ Video แนะนำ
+            // เตรียม Message Array สำหรับส่งผ่าน LIFF
+            let messagesToSend = [riskFlex];
+
+            // 2. ถ้ามียา ให้สร้าง Carousel Flex ของยาและแนบไปพร้อมกันเลย
+            if (data.inputs.medicines && data.inputs.medicines.length > 0) {
+                let medBubbles = [];
+                data.inputs.medicines.forEach(med => {
+                    let advice = getMedicineAdvice(med.indication);
+                    medBubbles.push({
+                        type: "bubble", size: "kilo",
+                        header: {
+                            type: "box", layout: "vertical", backgroundColor: "#0d6efd",
+                            contents: [{ type: "text", text: "💊 " + (med.name || "ไม่ระบุชื่อ"), weight: "bold", color: "#ffffff", wrap: true }]
+                        },
+                        body: {
+                            type: "box", layout: "vertical", spacing: "sm",
+                            contents: [
+                                { type: "text", text: "ความแรง: " + (med.strength || "-"), size: "sm", color: "#555555", wrap: true },
+                                { type: "text", text: "วิธีกิน: " + (med.dosage || "-"), size: "sm", color: "#555555", wrap: true },
+                                { type: "separator", margin: "md" },
+                                { type: "text", text: "📌 ข้อควรทราบ:", size: "sm", weight: "bold", color: "#cc0000", margin: "md" },
+                                { type: "text", text: advice, size: "sm", color: "#333333", wrap: true }
+                            ]
+                        }
+                    });
+                });
+                
+                const carouselFlex = {
+                    type: "flex", altText: "ข้อมูลการใช้ยาของคุณ",
+                    contents: { type: "carousel", contents: medBubbles }
+                };
+
+                messagesToSend.push(carouselFlex);
+
+                // เพิ่มปุ่มหลอกในกล่อง Risk เพื่อความสอดคล้องกับ UX ที่ระบุ (เมื่อมีบอทรองรับ)
+                riskFlex.contents.footer.contents.push({
+                    type: "button", style: "primary", color: "#17a2b8", margin: "sm",
+                    action: { type: "message", label: "💊 อธิบายการกินยา", text: "ขอข้อมูลอธิบายการกินยา" }
+                });
+            }
+
+            // 3. Flex Message สำหรับ Video แนะนำ
             const videoUrl = playlistMap['advice_mp4'] || "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
             const thumbUrl = playlistMap['advice_thumbnail'] || "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
 
@@ -1271,12 +1367,8 @@
                 contents: {
                     type: "bubble", size: "mega",
                     hero: {
-                        type: "video",
-                        url: videoUrl,
-                        previewUrl: thumbUrl,
-                        altContent: {
-                            type: "image", size: "full", aspectRatio: "9:16", aspectMode: "cover", url: thumbUrl
-                        },
+                        type: "video", url: videoUrl, previewUrl: thumbUrl,
+                        altContent: { type: "image", size: "full", aspectRatio: "9:16", aspectMode: "cover", url: thumbUrl },
                         aspectRatio: "9:16"
                     },
                     body: {
@@ -1288,9 +1380,11 @@
                     }
                 }
             };
+            
+            messagesToSend.push(videoFlex);
 
-            // ส่งข้อความไป 2 กล่อง (Risk ขึ้นก่อน แล้วตามด้วย Video)
-            try { await liff.sendMessages([riskFlex, videoFlex]); } catch (err) { console.error(err); }
+            // ส่งข้อความเรียงกัน: Risk -> (Meds Carousel) -> Video
+            try { await liff.sendMessages(messagesToSend); } catch (err) { console.error(err); }
         }
 
         function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
@@ -1306,7 +1400,7 @@
                 wc_inch: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0,
                 ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
                 hasStrokeHistory: $('#chk-stroke').is(':checked'),
-                medicines: extractedMedicines // แนบยาที่สกัดมาได้ไปพร้อมกับ object
+                medicines: extractedMedicines
             };
             const wc_cm = inputs.wc_inch * 2.54; const whr = (wc_cm > 0 && inputs.ht > 0) ? wc_cm / inputs.ht : 0;
             const clamped = {
