@@ -80,6 +80,8 @@
         }
         .btn-red-flat:active { transform: scale(0.98); }
 
+        .btn-next-video { background-color: #0d6efd; display: none; }
+
         /* --- OCR Area --- */
         .sawi-ocr-box {
             background-color: #f8f9fa; border-left: 4px solid #0d6efd; padding: 12px 15px;
@@ -174,7 +176,7 @@
                     <h5 class="modal-title m-0">📸 ข้อตกลงการใช้กล้อง AI</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
+                <div class="modal-body" style="font-size: 18px; line-height: 1.4;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
                     <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
@@ -325,6 +327,11 @@
                     
                     <!-- พื้นที่รับปุ่มเมื่อสไลด์ลงมา -->
                     <div id="static-btn-container"></div>
+
+                    <!-- ปุ่มดูวิดีโออื่น (ซ่อนไว้ตอนแรก จะโผล่มาเมื่อวิดีโอจบ) -->
+                    <div id="next-video-container" style="display:none; margin-top:15px;">
+                        <button type="button" id="btn-next-video" class="btn-red-flat btn-next-video" style="background:#0d6efd; display:block;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
+                    </div>
                 </div>
 
                 <!-- ================= STEP 1: ข้อมูลผู้ประเมิน ================= -->
@@ -606,19 +613,24 @@
 
         // --- YouTube Player Logic ---
         let ytPlayer;
-        let currentPlayingUrl = "https://www.youtube.com/shorts/uFlOzsSZyG4";
+        let currentPlayingUrl = "https://www.youtube.com/shorts/ckTJuVS5h-I";
         
-        // Playlist map default
-        let playlistMap = { "risk_intro": "https://www.youtube.com/shorts/uFlOzsSZyG4" };
+        // Playlist map default (will be updated from GAS if available)
+        let playlistMap = { 
+            "risk_intro": "https://youtube.com/shorts/ckTJuVS5h-I",
+            "advice_mp4": "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3",
+            "advice_thumbnail": "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL"
+        };
 
         function extractVideoID(url) {
+            if (!url) return null;
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
             var match = url.match(regExp);
             return (match && match[2].length == 11) ? match[2] : null;
         }
 
         function onYouTubeIframeAPIReady() {
-            let ytId = extractVideoID(playlistMap['risk_intro']);
+            let ytId = extractVideoID(currentPlayingUrl);
             ytPlayer = new YT.Player('youtube-player', {
                 height: '100%', width: '100%', videoId: ytId,
                 playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'playsinline': 1, 'rel': 0, 'loop': 1 },
@@ -660,9 +672,20 @@
             toggleMeasurementFields();
             checkReferrer(); 
 
-            // ดึง Playlist จาก GAS
+            // ดึง Playlist จาก GAS แบบไดนามิก
             $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
-                if(res && res.data) Object.assign(playlistMap, res.data);
+                if(res && res.data) {
+                    Object.assign(playlistMap, res.data);
+                    // อัปเดตวิดีโอที่กำลังเล่นให้เป็น risk_intro จากฐานข้อมูลจริง
+                    currentPlayingUrl = playlistMap['risk_intro'] || currentPlayingUrl;
+                    if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+                        let newYtId = extractVideoID(currentPlayingUrl);
+                        if (newYtId) {
+                            ytPlayer.loadVideoById(newYtId);
+                            ytPlayer.mute(); // คงการปิดเสียงไว้สำหรับหน้า Intro เริ่มต้น
+                        }
+                    }
+                }
             }).fail(function() { console.log("Using default playlist"); });
 
             // --- Initial Disclaimer Modal (SweetAlert) ---
@@ -973,6 +996,7 @@
 
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
+            // อัปเดตในฟอร์มหลักตาม Logic
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
                 $('#tc').val(chol);
@@ -1129,38 +1153,7 @@
                 type: "text", text: block, wrap: true, size: "sm", color: "#444444", margin: "sm"
             }));
 
-            // 1. Flex Message สำหรับ Video แนะนำ
-            const videoUrl = "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
-            const thumbUrl = "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
-
-            const videoFlex = {
-                type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
-                contents: {
-                    type: "bubble", size: "mega",
-                    hero: {
-                        type: "video",
-                        url: videoUrl,
-                        previewUrl: thumbUrl,
-                        altContent: {
-                            type: "image",
-                            size: "full",
-                            aspectRatio: "9:16",
-                            aspectMode: "cover",
-                            url: thumbUrl
-                        },
-                        aspectRatio: "9:16"
-                    },
-                    body: {
-                        type: "box", layout: "vertical", spacing: "sm",
-                        contents: [
-                            { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
-                            { type: "text", text: "คลิกเพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
-                        ]
-                    }
-                }
-            };
-
-            // 2. Flex Message สำหรับผลประเมินความเสี่ยง (ลดขนาดเป็น mega)
+            // 1. Flex Message สำหรับผลประเมินความเสี่ยง (ลดขนาดเป็น mega)
             const riskFlex = {
                 type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก",
                 contents: {
@@ -1193,8 +1186,39 @@
                 }
             };
 
-            // ส่งข้อความไป 2 กล่องตามลำดับ วิดีโอก่อน แล้วตามด้วยผลความเสี่ยง
-            try { await liff.sendMessages([videoFlex, riskFlex]); } catch (err) { console.error(err); }
+            // 2. Flex Message สำหรับ Video แนะนำ
+            const videoUrl = playlistMap['advice_mp4'] || "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
+            const thumbUrl = playlistMap['advice_thumbnail'] || "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
+
+            const videoFlex = {
+                type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
+                contents: {
+                    type: "bubble", size: "mega",
+                    hero: {
+                        type: "video",
+                        url: videoUrl,
+                        previewUrl: thumbUrl,
+                        altContent: {
+                            type: "image",
+                            size: "full",
+                            aspectRatio: "9:16",
+                            aspectMode: "cover",
+                            url: thumbUrl
+                        },
+                        aspectRatio: "9:16"
+                    },
+                    body: {
+                        type: "box", layout: "vertical", spacing: "sm",
+                        contents: [
+                            { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
+                            { type: "text", text: "คลิกเพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
+                        ]
+                    }
+                }
+            };
+
+            // ส่งข้อความไป 2 กล่องตามลำดับ ผลความเสี่ยงก่อน แล้วตามด้วยวิดีโอ
+            try { await liff.sendMessages([riskFlex, videoFlex]); } catch (err) { console.error(err); }
         }
 
         function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
