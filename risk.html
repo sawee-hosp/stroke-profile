@@ -53,7 +53,7 @@
             border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border: 2px solid #f0f0f0; aspect-ratio: 315/560; position: relative;
         }
-        .video-iframe { width: 100%; height: 100%; border: none; display: block; }
+        .video-iframe { width: 100%; height: 100%; border: none; background: #ffffff; display: block; }
         
         .custom-play-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -75,12 +75,10 @@
 
         .btn-red-flat {
             background-color: #e60000; color: #ffffff; border: none; border-radius: 15px; 
-            padding: 12px 20px; font-size: 20px; font-weight: bold; text-align: center; 
+            padding: 10px 20px; font-size: 18px; font-weight: bold; text-align: center; 
             cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .btn-red-flat:active { transform: scale(0.98); }
-
-        .btn-next-video { background-color: #0d6efd; display: none; }
 
         /* --- OCR Area --- */
         .sawi-ocr-box {
@@ -120,15 +118,15 @@
 
         /* --- Result --- */
         #result-container { margin-top: 5px; padding: 20px; background: #f8fcf9; border-radius: 15px; border: 2px solid #c3e6cb; text-align: center; }
-        .risk-percent { font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
-        .risk-desc { font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
+        .risk-percent { font-size: 4rem; font-weight: 900; line-height: 1; margin: 10px 0; }
+        .risk-desc { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
         .progress-bar-bg { width: 100%; height: 25px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 15px 0; }
         .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .explanation-box { text-align: left; background: #fff; padding: 20px; border-radius: 15px; margin-top: 15px; font-size: 20px; line-height: 1.4; border: 1px solid #dee2e6; color: #333; }
+        .explanation-box { text-align: left; background: #fff; padding: 15px 20px; border-radius: 15px; margin-top: 15px; font-size: 18px; line-height: 1.4; border: 1px solid #dee2e6; color: #333; }
 
         /* --- Navigation Buttons --- */
         .step-nav-buttons { display: flex; gap: 10px; margin-top: 25px; }
-        .btn-nav { flex: 1; padding: 12px; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-nav { flex: 1; padding: 10px; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-nav:active { transform: scale(0.98); }
         .btn-back { background-color: #e9ecef; color: #495057; }
         .btn-next { background-color: #ff3654; color: white; box-shadow: 0 4px 6px rgba(255, 54, 84, 0.3); }
@@ -144,12 +142,15 @@
         .phone-alert { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 8px; border-radius: 8px; margin-top: 8px; font-size: 16px; display: none; }
         .referrer-box { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 16px; display: none; align-items: center; justify-content: center; text-align: center; }
 
+        /* --- Footer Credit --- */
+        .footer-credit { text-align: center; color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 15px; width: 100%; display: block;}
+
         #loading, #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
         #ocrLoading { display: none; background: rgba(0,0,0,0.8); color: white;}
 
         .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
         .step-title { color: #003366; border-bottom: 3px solid #ff3654; padding-bottom: 5px; margin-bottom: 5px; font-weight: 800; font-size: 22px;}
-        .step-subtitle { color: #666; font-size: 16px; margin-bottom: 15px; }
+        .step-subtitle { color: #666; font-size: 15px; margin-bottom: 15px; }
 
         /* Custom SweetAlert Override */
         .swal2-title { font-size: 24px !important; }
@@ -173,7 +174,7 @@
                     <h5 class="modal-title m-0">📸 ข้อตกลงการใช้กล้อง AI</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="font-size: 18px; line-height: 1.4;">
+                <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
                     <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
@@ -192,8 +193,8 @@
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title fw-bold m-0">🔍 ตรวจสอบข้อมูลจาก AI</h5>
                 </div>
-                <div class="modal-body p-3" style="font-size: 18px; background: #f8f9fa;">
-                    <p class="mb-3 text-secondary" style="font-size:16px; line-height:1.3;">
+                <div class="modal-body p-3" style="font-size: 16px; background: #f8f9fa;">
+                    <p class="mb-3 text-secondary" style="font-size:15px; line-height:1.3;">
                         ✅ <span class="text-success fw-bold">สีเขียว</span> = ข้อมูลที่ AI หาเจอ<br>
                         ⚠️ <span class="text-danger fw-bold">กระพริบสีแดง</span> = ข้อมูลจำเป็นที่ขาดหาย (กรุณากรอกเพิ่มให้ครบ)
                     </p>
@@ -315,19 +316,15 @@
                             <div class="play-icon">▶</div>
                         </div>
 
-                        <!-- ปุ่มลอยบนวิดีโอ (ย้ายออกเมื่อกดเล่น) -->
+                        <!-- ปุ่มลอยบนวิดีโอ (จะย้ายออกเมื่อกดเล่น และแสดงปุ่มข้ามทันที) -->
                         <div id="floating-btn-container" class="floating-btns">
+                            <button type="button" id="btn-next-video-float" class="btn-red-flat" style="background:#0d6efd;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
                             <button type="button" id="btn-start-eval" class="btn-red-flat" onclick="goToStep(1)">เริ่มประเมินทันที</button>
                         </div>
                     </div>
                     
                     <!-- พื้นที่รับปุ่มเมื่อสไลด์ลงมา -->
                     <div id="static-btn-container"></div>
-
-                    <!-- ปุ่มดูวิดีโออื่น (ซ่อนไว้ตอนแรก จะโผล่มาเมื่อวิดีโอจบ) -->
-                    <div id="next-video-container" style="display:none; margin-top:15px;">
-                        <button type="button" id="btn-next-video" class="btn-red-flat btn-next-video" style="background:#0d6efd; display:block;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
-                    </div>
                 </div>
 
                 <!-- ================= STEP 1: ข้อมูลผู้ประเมิน ================= -->
@@ -362,7 +359,7 @@
 
                     <!-- กล่องซ่อน รพ.สวี -->
                     <div id="sawi-ocr-box" class="sawi-ocr-box">
-                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:16px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
+                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:15px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
                         <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
                             📸 ถ่ายรูปสมุดล่าสุดเพื่อประเมิน
                         </button>
@@ -384,7 +381,7 @@
                         <div style="display:flex; flex-direction:column; gap:5px;">
                             <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
                             <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px; margin-bottom:10px;">
-                                <label style="font-size:18px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="padding:10px;">
+                                <label style="font-size:16px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="padding:10px;">
                             </div>
                             <label class="radio-label"><input type="checkbox" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
                             <label class="radio-label"><input type="checkbox" name="ud" value="เบาหวาน"> เบาหวาน</label>
@@ -527,11 +524,11 @@
                         <label>ข้อมูลที่อยู่ (ไม่บังคับ):</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
-                                <label style="font-size:18px;">หมู่ที่:</label>
+                                <label style="font-size:16px;">หมู่ที่:</label>
                                 <select id="village"><option value="">เลือก</option></select>
                             </div>
                             <div style="flex: 1.5;">
-                                <label style="font-size:18px;">ตำบล:</label>
+                                <label style="font-size:16px;">ตำบล:</label>
                                 <select id="district"><option value="">เลือก</option>
                                     <option>ท่าหิน</option><option>ด่านสวี</option><option>เขาทะลุ</option>
                                     <option>เขาค่าย</option><option>ปากแพรก</option><option>สวี</option>
@@ -540,14 +537,14 @@
                                 </select>
                             </div>
                         </div>
-                        <label style="font-size:18px;">รพ.สต. ที่รับผิดชอบ:</label>
+                        <label style="font-size:16px;">รพ.สต. ที่รับผิดชอบ:</label>
                         <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555; border:none;" placeholder="จะแสดงอัตโนมัติ">
                     </div>
 
-                    <div class="form-row" style="background:#fff8f8; padding:15px; border-radius:10px; border:1px solid #ffcdd2;">
+                    <div class="form-row" style="background:#fff8f8; padding:10px 15px; border-radius:10px; border:1px solid #ffcdd2;">
                         <label class="radio-label" style="align-items: flex-start; margin:0;">
                             <input type="checkbox" id="allowTel" checked style="margin-top: 3px;"> 
-                            <span style="font-size: 16px; color:#666; line-height:1.4;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อการติดตามผล</span>
+                            <span style="font-size: 15px; color:#666; line-height:1.3;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อการติดตามผล</span>
                         </label>
                     </div>
 
@@ -561,7 +558,7 @@
             <!-- ================= STEP 6: ผลการประเมิน ================= -->
             <div id="step-6" class="step-section">
                 <div id="result-container">
-                    <h2 style="color:#003366; font-weight:800; font-size: 28px; margin-bottom:5px;">ผลการประเมิน</h2>
+                    <h2 style="color:#003366; font-weight:800; font-size: 26px; margin-bottom:5px;">ผลการประเมิน</h2>
                     <div class="risk-percent" id="rt-percent">0%</div>
                     <div class="risk-desc" id="rt-desc">-</div>
                     <div class="progress-bar-bg">
@@ -570,15 +567,15 @@
                     
                     <div class="explanation-box" id="rt-explanation">
                         <div id="basic-explain"></div>
-                        <hr style="border-top: 2px dashed #ccc; margin: 20px 0;">
+                        <hr style="border-top: 2px dashed #ccc; margin: 15px 0;">
                         <div id="full-advice-display"></div>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; margin-bottom: 15px;">
-                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 15px; border-radius:12px; border: 1px solid #ffcdd2; width: 100%;">
+                <div style="margin-top: 15px; margin-bottom: 10px;">
+                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 12px; border-radius:10px; border: 1px solid #ffcdd2; width: 100%;">
                         <input type="checkbox" id="pdpa" checked style="margin-top: 2px;"> 
-                        <span style="font-size: 16px; color: #cc0000; font-weight: bold; line-height:1.4;">
+                        <span style="font-size: 15px; color: #cc0000; font-weight: bold; line-height:1.3;">
                             ยินยอมให้ รพ.สวี นำข้อมูลไปประมวลผลเพื่อเพิ่มความตระหนักรู้และการเข้าถึงการรักษา
                         </span>
                     </label>
@@ -586,8 +583,8 @@
 
                 <div class="action-buttons">
                     <button type="button" class="btn-action btn-red" onclick="saveAndSend('close')">บันทึกข้อมูลและปิด</button>
-                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:12px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
-                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:12px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
+                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:10px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
+                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:10px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
                 </div>
             </div>
 
@@ -610,8 +607,9 @@
         // --- YouTube Player Logic ---
         let ytPlayer;
         let currentPlayingUrl = "https://www.youtube.com/shorts/uFlOzsSZyG4";
-        // Dummy playlist as fallback if backend doesn't have getPlaylist yet
-        let playlistMap = { "risk_intro": "https://youtube.com/shorts/uFlOzsSZyG4" };
+        
+        // Playlist map default
+        let playlistMap = { "risk_intro": "https://www.youtube.com/shorts/uFlOzsSZyG4" };
 
         function extractVideoID(url) {
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
@@ -623,14 +621,14 @@
             let ytId = extractVideoID(playlistMap['risk_intro']);
             ytPlayer = new YT.Player('youtube-player', {
                 height: '100%', width: '100%', videoId: ytId,
-                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'playsinline': 1, 'rel': 0, 'loop': 0 },
+                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'playsinline': 1, 'rel': 0, 'loop': 1 },
                 events: { 'onStateChange': onPlayerStateChange }
             });
         }
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
-                $('#next-video-container').fadeIn(300);
+                // หยุดเล่นแล้ว ไม่ loop ถ้าไม่ใช่ risk_intro
             }
         }
 
@@ -639,8 +637,9 @@
             let nextId = 'risk_' + (rand < 10 ? '0'+rand : rand);
             let url = playlistMap[nextId] || playlistMap['risk_intro'];
             currentPlayingUrl = url;
-            ytPlayer.loadVideoById(extractVideoID(url));
-            $('#next-video-container').hide();
+            if(ytPlayer && extractVideoID(url)) {
+                ytPlayer.loadVideoById(extractVideoID(url));
+            }
         }
 
         // Custom SweetAlert Theme (Red/White)
@@ -661,7 +660,7 @@
             toggleMeasurementFields();
             checkReferrer(); 
 
-            // ดึง Playlist จาก GAS (ถ้ามี)
+            // ดึง Playlist จาก GAS
             $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
                 if(res && res.data) Object.assign(playlistMap, res.data);
             }).fail(function() { console.log("Using default playlist"); });
@@ -1029,7 +1028,6 @@
             const ins = data.inputs; 
             const sug = [];
             
-            // คำแนะนำเฉพาะเจาะจงตามปัจจัยเสี่ยงที่ปรับเปลี่ยนได้
             if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
             if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
             if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
@@ -1089,7 +1087,7 @@
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_inch, height: globalRiskData.inputs.ht,
                     thai_cv_risk_score: globalRiskData.riskPercentText, risk_group: globalRiskData.riskGroup,
-                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, // บันทึกลง Sheet เป็น plain text
+                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, 
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', 
@@ -1132,21 +1130,31 @@
             }));
 
             // 1. Flex Message สำหรับ Video แนะนำ
+            const videoUrl = "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
+            const thumbUrl = "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
+
             const videoFlex = {
                 type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
                 contents: {
                     type: "bubble", size: "mega",
+                    hero: {
+                        type: "video",
+                        url: videoUrl,
+                        previewUrl: thumbUrl,
+                        altContent: {
+                            type: "image",
+                            size: "full",
+                            aspectRatio: "9:16",
+                            aspectMode: "cover",
+                            url: thumbUrl
+                        },
+                        aspectRatio: "9:16"
+                    },
                     body: {
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
                             { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
                             { type: "text", text: "คลิกเพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
-                        ]
-                    },
-                    footer: {
-                        type: "box", layout: "vertical",
-                        contents: [
-                            { type: "button", style: "primary", color: "#cc0000", action: { type: "uri", label: "▶ ดูวิดีโอ", uri: currentPlayingUrl } }
                         ]
                     }
                 }
