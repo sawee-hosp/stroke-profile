@@ -53,7 +53,7 @@
             border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border: 2px solid #f0f0f0; aspect-ratio: 315/560; position: relative;
         }
-        .video-iframe { width: 100%; height: 100%; border: none; background: #ffffff; display: block; }
+        .video-iframe { width: 100%; height: 100%; border: none; display: block; }
         
         .custom-play-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -157,6 +157,8 @@
         /* Custom SweetAlert Override */
         .swal2-title { font-size: 24px !important; }
         .swal2-html-container { font-size: 20px !important; }
+        
+        .infographic-icons svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
     </style>
 </head>
 <body>
@@ -176,7 +178,7 @@
                     <h5 class="modal-title m-0">📸 ข้อตกลงการใช้กล้อง AI</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="font-size: 18px; line-height: 1.4;">
+                <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
                     <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
                     <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็น เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
@@ -318,7 +320,7 @@
                             <div class="play-icon">▶</div>
                         </div>
 
-                        <!-- ปุ่มลอยบนวิดีโอ (จะย้ายออกเมื่อกดเล่น และแสดงปุ่มข้ามทันที) -->
+                        <!-- ปุ่มลอยบนวิดีโอ (จะย้ายออกเมื่อกดเล่น) -->
                         <div id="floating-btn-container" class="floating-btns">
                             <button type="button" id="btn-next-video-float" class="btn-red-flat" style="background:#0d6efd;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
                             <button type="button" id="btn-start-eval" class="btn-red-flat" onclick="goToStep(1)">เริ่มประเมินทันที</button>
@@ -574,7 +576,6 @@
                     
                     <div class="explanation-box" id="rt-explanation">
                         <div id="basic-explain"></div>
-                        <hr style="border-top: 2px dashed #ccc; margin: 15px 0;">
                         <div id="full-advice-display"></div>
                     </div>
                 </div>
@@ -608,6 +609,7 @@
         let userProfile = null;
         let globalRiskData = null;
         let historyData = null;
+        let extractedMedicines = []; // จัดเก็บรายการยาจาก OCR
         let currentStep = 'intro';
         const totalSteps = 5; 
 
@@ -615,9 +617,9 @@
         let ytPlayer;
         let currentPlayingUrl = "https://www.youtube.com/shorts/ckTJuVS5h-I";
         
-        // Playlist map default (will be updated from GAS if available)
+        // Playlist map default (will be updated from GAS)
         let playlistMap = { 
-            "risk_intro": "https://youtube.com/shorts/ckTJuVS5h-I",
+            "risk_intro": "https://www.youtube.com/shorts/ckTJuVS5h-I",
             "advice_mp4": "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3",
             "advice_thumbnail": "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL"
         };
@@ -640,7 +642,8 @@
 
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
-                // หยุดเล่นแล้ว ไม่ loop ถ้าไม่ใช่ risk_intro
+                // หยุดเล่น ไม่ loop โชว์ปุ่ม next video
+                $('#next-video-container').fadeIn();
             }
         }
 
@@ -654,7 +657,7 @@
             }
         }
 
-        // Custom SweetAlert Theme (Red/White)
+        // Custom SweetAlert Theme
         const swalCustom = Swal.mixin({
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#f8f9fa',
@@ -676,13 +679,13 @@
             $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
                 if(res && res.data) {
                     Object.assign(playlistMap, res.data);
-                    // อัปเดตวิดีโอที่กำลังเล่นให้เป็น risk_intro จากฐานข้อมูลจริง
+                    // อัปเดตวิดีโอที่กำลังเล่น
                     currentPlayingUrl = playlistMap['risk_intro'] || currentPlayingUrl;
                     if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
                         let newYtId = extractVideoID(currentPlayingUrl);
                         if (newYtId) {
                             ytPlayer.loadVideoById(newYtId);
-                            ytPlayer.mute(); // คงการปิดเสียงไว้สำหรับหน้า Intro เริ่มต้น
+                            ytPlayer.mute(); 
                         }
                     }
                 }
@@ -855,15 +858,60 @@
             $('#rt-desc').text(result.riskGroup).css('color', result.riskColor);
             $('#rt-bar').css('width', (result.barValue / 30 * 100) + "%").css('background', result.riskColor);
             
-            let expHtml = `<div style="font-size:20px; line-height:1.5;"><b>ภายใน 10 ปีข้างหน้า</b> โอกาสเกิดโรคหลอดเลือดสมองของคุณคือ <br><span style="color:${result.riskColor}; font-weight:bold; font-size:30px;">${result.riskPercentText}%</span>`;
-            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
-                expHtml += `<br>⚠️ <b>เสี่ยงมากกว่า</b>คนทั่วไป (เพศ/วัยเดียวกัน) ถึง <span style="color:red; font-weight:bold;">${result.compareRatio} เท่า</span></div>`;
-            } else if (!result.hasStrokeHistory) {
-                expHtml += `<br>✅ ความเสี่ยงใกล้เคียงหรือต่ำกว่าคนทั่วไปในวัยเดียวกัน</div>`;
+            // --- 💡 ส่วนอธิบาย % (Infographic 100 คน) ---
+            let riskPercentInt = Math.round(parseFloat(result.riskPercentText));
+            let safeCount = 100 - riskPercentInt;
+            
+            let sick10 = Math.ceil(riskPercentInt / 10);
+            if(sick10 === 0 && riskPercentInt > 0) sick10 = 1;
+            
+            let iconsHtml = `<div style="margin-top:15px; line-height:1.2; text-align:center;">`;
+            for(let i=0; i<10; i++) {
+                let color = i < sick10 ? '#dc3545' : '#28a745';
+                iconsHtml += `<svg width="30" height="30" viewBox="0 0 24 24" fill="${color}" style="margin:2px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
             }
-            if(result.hasStrokeHistory) expHtml += `<br>🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
-            $('#basic-explain').html(expHtml);
+            iconsHtml += `</div>`;
 
+            let analogyHtml = `
+                <div style="background:#f1fcf5; border-radius:15px; padding:15px; margin-bottom:20px; border:1px solid #c3e6cb;">
+                    <div style="font-weight:bold; color:#003366; font-size:20px; text-align:center;">💡 ความหมายของ ${result.riskPercentText}% คืออะไร?</div>
+                    <div style="font-size:16px; color:#555; margin-top:5px; text-align:center;">หากมีคน 100 คน ที่รูปร่าง สุขภาพ และผลเลือดเหมือนคุณเป๊ะๆ ใน 10 ปีข้างหน้า...</div>
+                    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:15px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:28px; font-weight:bold; color:#dc3545;">${riskPercentInt} <span style="font-size:16px;">คน</span></div>
+                            <div style="font-size:14px; color:#dc3545;">จะป่วยเป็นสโตรก</div>
+                        </div>
+                        <div style="font-size:24px; color:#ccc;">|</div>
+                        <div style="text-align:center;">
+                            <div style="font-size:28px; font-weight:bold; color:#28a745;">${safeCount} <span style="font-size:16px;">คน</span></div>
+                            <div style="font-size:14px; color:#28a745;">ยังคงปลอดภัยดี</div>
+                        </div>
+                    </div>
+                    ${iconsHtml}
+                </div>
+            `;
+
+            // --- 📊 ส่วนเปรียบเทียบ Compare Ratio ---
+            let compareHtml = '';
+            let sexStr = result.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
+                compareHtml = `
+                    <div style="background:#fff8f8; border-left: 4px solid #dc3545; padding:15px; margin-bottom:20px;">
+                        <div style="font-weight:bold; color:#dc3545; font-size:18px;">📊 เทียบกับคนสุขภาพดี:</div>
+                        <div style="font-size:16px; margin-top:5px; line-height:1.4;">คนเพศ${sexStr} วัย ${result.inputs.age} ปี ที่ไม่สูบบุหรี่ ไม่มีเบาหวาน และไขมันปกติ...<br>คุณมีความเสี่ยง <b>มากกว่าพวกเขาถึง <span style="font-size:22px; color:#cc0000;">${result.compareRatio} เท่า!</span></b></div>
+                    </div>
+                `;
+            } else if (!result.hasStrokeHistory) {
+                compareHtml = `<div style="background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; color:#155724;">✅ ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่าคนวัยเดียวกันที่สุขภาพดี</div>`;
+            }
+
+            if(result.hasStrokeHistory) {
+                compareHtml = `<div style="background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:20px; color:#856404;">🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
+            }
+
+            $('#basic-explain').html(analogyHtml + compareHtml);
+
+            // --- คำแนะนำ ---
             const fullAdvice = generateSuggestionText(result);
             $('#full-advice-display').html(fullAdvice.html);
 
@@ -920,6 +968,9 @@
 
         function fillDataFromOCR(data) {
             $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid highlight-flash');
+
+            // เก็บรายการยาลงตัวแปร Global
+            extractedMedicines = data.medicines || [];
 
             function setField(id, val) {
                 if (val !== null && val !== undefined && val !== "") { 
@@ -1111,11 +1162,12 @@
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_inch, height: globalRiskData.inputs.ht,
                     thai_cv_risk_score: globalRiskData.riskPercentText, risk_group: globalRiskData.riskGroup,
-                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, 
+                    compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text,
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', 
-                    area: '', referrerId: $('#referrerId').val() 
+                    area: '', referrerId: $('#referrerId').val(),
+                    medicines: globalRiskData.inputs.medicines // ส่งรายการยาไปด้วย
                 };
 
                 await fetch(GAS_URL, {
@@ -1153,7 +1205,20 @@
                 type: "text", text: block, wrap: true, size: "sm", color: "#444444", margin: "sm"
             }));
 
-            // 1. Flex Message สำหรับผลประเมินความเสี่ยง (ลดขนาดเป็น mega)
+            // Flex 1: Risk Result (Mega Size)
+            let sickCount = Math.round(parseFloat(data.riskPercentText));
+            let safeCount = 100 - sickCount;
+            let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+            
+            let compareFlex = [];
+            if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
+                compareFlex = [
+                    { type: "separator", margin: "md" },
+                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "xs", color: "#666666", wrap: true, margin: "md" },
+                    { type: "text", text: `คุณมีความเสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "sm", color: "#dc3545", weight: "bold", wrap: true }
+                ];
+            }
+
             const riskFlex = {
                 type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก",
                 contents: {
@@ -1168,9 +1233,20 @@
                     body: {
                         type: "box", layout: "vertical",
                         contents: [
-                            { type: "text", text: "โอกาสเป็นสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center", margin: "md" }, 
+                            { type: "text", text: "โอกาสเกิดสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center", margin: "md" }, 
                             { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: safeColor, align: "center", margin: "xs" }, 
                             { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", margin: "sm", wrap: true }, 
+                            
+                            { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "10px", margin: "lg", cornerRadius: "md",
+                                contents: [
+                                    { type: "text", text: `💡 จาก 100 คนที่มีสุขภาพแบบคุณ:`, size: "xs", color: "#003366", weight: "bold", wrap: true },
+                                    { type: "text", text: `🚨 ${sickCount} คน โชคร้ายป่วยเป็นสโตรก`, size: "sm", color: "#dc3545", weight: "bold", margin: "sm" },
+                                    { type: "text", text: `✅ ${safeCount} คน ยังคงปลอดภัยดี`, size: "sm", color: "#28a745", weight: "bold", margin: "xs" },
+                                    { type: "text", text: Array(Math.max(1, Math.ceil(sickCount/10))).fill('🔴').join('') + Array(10 - Math.max(1, Math.ceil(sickCount/10))).fill('🟢').join(''), size: "lg", align: "center", margin: "sm" }
+                                ]
+                            },
+                            ...compareFlex,
+
                             { type: "separator", margin: "lg" },
                             { type: "text", text: "คำแนะนำและการปฏิบัติตัว:", weight: "bold", size: "md", color: "#333333", margin: "lg" }, 
                             ...adviceFlexContents
@@ -1199,11 +1275,7 @@
                         url: videoUrl,
                         previewUrl: thumbUrl,
                         altContent: {
-                            type: "image",
-                            size: "full",
-                            aspectRatio: "9:16",
-                            aspectMode: "cover",
-                            url: thumbUrl
+                            type: "image", size: "full", aspectRatio: "9:16", aspectMode: "cover", url: thumbUrl
                         },
                         aspectRatio: "9:16"
                     },
@@ -1217,7 +1289,7 @@
                 }
             };
 
-            // ส่งข้อความไป 2 กล่องตามลำดับ ผลความเสี่ยงก่อน แล้วตามด้วยวิดีโอ
+            // ส่งข้อความไป 2 กล่อง (Risk ขึ้นก่อน แล้วตามด้วย Video)
             try { await liff.sendMessages([riskFlex, videoFlex]); } catch (err) { console.error(err); }
         }
 
@@ -1233,7 +1305,8 @@
                 tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
                 wc_inch: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0,
                 ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
-                hasStrokeHistory: $('#chk-stroke').is(':checked')
+                hasStrokeHistory: $('#chk-stroke').is(':checked'),
+                medicines: extractedMedicines // แนบยาที่สกัดมาได้ไปพร้อมกับ object
             };
             const wc_cm = inputs.wc_inch * 2.54; const whr = (wc_cm > 0 && inputs.ht > 0) ? wc_cm / inputs.ht : 0;
             const clamped = {
