@@ -287,17 +287,21 @@
     let cropper;
     let activeAiModule = 'all'; 
 
-    let hospitalList = []; // เก็บรายชื่อ รพ. จาก Backend
-    let nearestHospital = null; // เก็บข้อมูล รพ. ที่คำนวณว่าใกล้ที่สุด
+    let hospitalList = []; 
+    let nearestHospital = null; 
 
+    // อัปเดตลิงก์รูปภาพทั้งหมดตามที่ต้องการ
     const symptomTranslations = { 'Balance': 'การทรงตัว', 'Eye': 'การมองเห็น', 'Face': 'ใบหน้า', 'Arm': 'แขนขา', 'Speech': 'การพูด' };
     const symptomImages = {
-        'Balance': 'https://img2.pic.in.th/pic/-14a8e9c4fc269d4d8f.md.png',
-        'Eye': 'https://img2.pic.in.th/pic/-16881cec753a949477.md.png',
-        'Face': 'https://img5.pic.in.th/file/secure-sv1/-1846055524307466a7.md.png',
-        'Arm': 'https://img2.pic.in.th/pic/-15dbb33e12115949f4.md.png',
-        'Speech': 'https://img5.pic.in.th/file/secure-sv1/-179b7758ead26c6d76.md.png'
+        'Balance': 'https://lh3.googleusercontent.com/d/1oMxfes0ZeRgg3PSONzkwtTM6DCz-xOwg',
+        'Eye': 'https://lh3.googleusercontent.com/d/1LIIZQNJfU0gmH96VSv8rFw0Fr1890rxD',
+        'Face': 'https://lh3.googleusercontent.com/d/1D_nmU04u42iDENlyTz_RCgE6GYl47Ajo',
+        'Arm': 'https://lh3.googleusercontent.com/d/1GoSbVxfPywt9bgbFQW8FpS45VLbqW31e',
+        'Speech': 'https://lh3.googleusercontent.com/d/13QUC578D4YP-vOLuCNP1j5jn-BARsLoD'
     };
+    const exampleFaceImage = 'https://lh3.googleusercontent.com/d/1a9tTFBDwjPTop6yc8fGWoFP34Lo3o7Ut';
+    const exampleArmImage = 'https://lh3.googleusercontent.com/d/1v8OP5dhMl1Lg-EpGqBarczelIUyeI-M4';
+
     const symptomDetails = {
         'Balance': { likely: ['เดินเซรุนแรง', 'สูญเสียการทรงตัว', 'ยืน/นั่งนิ่งไม่ได้'], unlikely: ['เวียนหัวตอนเปลี่ยนท่า', 'น้ำในหูไม่เท่ากัน'], desc: 'ยืนตัวตรงแขนแนบลำตัว 10 วินาที ไม่ได้ มีเซล้ม' },
         'Eye': { likely: ['ตามัวหรือมองไม่เห็น', 'เห็นภาพซ้อน', 'เสียการมองเห็นครึ่งซีก'], unlikely: ['ปัญหาสายตาเดิม', 'ตาแห้ง/ระคายเคือง'], desc: 'เอามือปิดตาทีละข้างแล้วมอง เห็นไม่ชัด' },
@@ -341,7 +345,6 @@
         setTimeout(() => { const infoBtn = document.getElementById('info-btn'); if(infoBtn) infoBtn.onclick = () => { document.querySelector('#disclaimerModal').style.display = 'flex'; }; }, 500);
         checkReferrerDisplay();
 
-        // โหลดข้อมูลโรงพยาบาลตอนเปิดเว็บ
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getHospitals' }) })
         .then(r => r.json()).then(res => {
             if(res.status === 'success') { hospitalList = res.data; }
@@ -404,7 +407,7 @@
                 ...sessionData, 
                 registeredName: res.data.name, 
                 risk_group: res.data.risk_group, 
-                normal_face: res.data.normal_face,
+                normal_face: (res.data.normal_face === "Deleted") ? "" : res.data.normal_face, // เช็คสถานะ Deleted
                 telephone: res.data.telephone 
             };
             document.getElementById('ui-name').textContent = res.data.name || '-';
@@ -443,7 +446,7 @@
     };
 
     function formatDriveUrl(url) {
-        if (!url) return '';
+        if (!url || url === "Deleted") return '';
         const match = url.match(/id=([a-zA-Z0-9_-]+)/);
         if (match && match[1]) {
             return `https://lh3.googleusercontent.com/d/${match[1]}`;
@@ -451,13 +454,12 @@
         return url.replace('&export=download', '');
     }
 
-    // อัปเดต UI ของรูปภาพ Baseline ให้มีปุ่มลบ และแนะนำหน้าโปรไฟล์
     function updateBaselineFaceUI() {
         const img = document.getElementById('baseline-face-img');
         const container = document.getElementById('baseline-upload-btn-container');
         if(!img) return;
 
-        if (sessionData.normal_face) {
+        if (sessionData.normal_face && sessionData.normal_face !== "Deleted") {
             img.src = formatDriveUrl(sessionData.normal_face);
             aiInputs.baselineFaceUrl = sessionData.normal_face;
             img.style.display = 'block';
@@ -494,7 +496,6 @@
         }
     }
 
-    // ฟังก์ชันสั่งลบรูป Baseline ปัจจุบัน
     window.deleteCurrentBaseline = function() {
         showCustomConfirm("ต้องการลบรูปภาพอ้างอิงภาพนี้ออกใช่หรือไม่?", "ยืนยันการลบ", () => {
             document.getElementById('loading-text').textContent = 'กำลังลบรูปภาพ...';
@@ -577,12 +578,6 @@
         setupTimeOptions();
     }
 
-    window.handleAiTest = function(moduleName) { 
-        activeAiModule = moduleName;
-        showLayer('layer-ai-intro'); 
-        updateBaselineFaceUI(); 
-    };
-
     function buildAILayers() {
         document.getElementById('layer-ai-intro').innerHTML = `
             <h2 class="section-title"><span class="iconify" data-icon="mdi:brain"></span> ทดสอบด้วย AI</h2>
@@ -618,7 +613,7 @@
                 <div class="card p-4 mb-4 border shadow-sm">
                     <h5 class="fw-bold fs-3">1. ใบหน้าปัจจุบัน (Face)</h5>
                     <div class="d-flex gap-3 align-items-start">
-                        <img src="https://img2.pic.in.th/pic/-19b938acd92f7035f5.png" class="rounded border" style="width:120px; height:120px; object-fit:cover;">
+                        <img src="${exampleFaceImage}" class="rounded border" style="width:120px; height:120px; object-fit:cover;">
                         <div class="flex-grow-1">
                             <small class="text-muted d-block mb-3 fs-4">ยิ้มกว้างๆ ให้เห็นฟัน เหมือนรูปตัวอย่าง</small>
                             <div id="upload-face-btn-container" style="position:relative; overflow:hidden;">
@@ -639,7 +634,7 @@
             <div id="card-ai-arm" class="card p-4 mb-4 border shadow-sm" style="display:none;">
                 <h5 class="fw-bold fs-3">2. แขน (Arm Drift)</h5>
                 <div class="d-flex gap-3 align-items-start mb-3">
-                    <img src="https://img5.pic.in.th/file/secure-sv1/-20d4026a1d1efbfe8e.png" class="rounded border" style="width:120px; height:120px; object-fit:cover;">
+                    <img src="${exampleArmImage}" class="rounded border" style="width:120px; height:120px; object-fit:cover;">
                     <div class="text-dark fs-4">
                         บอกให้ผู้ป่วยหลับตาและเหยียดแขนทั้งสองข้างตรงไปข้างหน้า (หรือยกแขนขึ้นพร้อมกัน) เป็นเวลา 10 วินาที<br>
                         <small class="text-muted">* ให้เห็นแขนทั้งสองข้างเต็มจอเหมือนรูปตัวอย่าง</small>
@@ -800,13 +795,12 @@
         sessionData.onsetTimeObject = onset;
         saveData('onsetTime', formatFullDateTime(onset));
         
-        // เมื่อถึงหน้านี้ ให้เริ่มเช็คพิกัดแบบเงียบๆ เพื่อหา รพ. ทันที
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(p => {
                 sessionData.location = `${p.coords.latitude},${p.coords.longitude}`;
                 nearestHospital = findNearestHospital(p.coords.latitude, p.coords.longitude);
                 if (document.getElementById('layer-5').classList.contains('hidden') === false) {
-                     updateSummaryAndActions(); // อัปเดตตารางถ้าหน้าเปิดอยู่
+                     updateSummaryAndActions(); 
                 }
             }, e => { console.log("Silent GPS failed"); });
         }
@@ -815,7 +809,6 @@
         buildSummaryPage();
     };
 
-    // --- CROPPER / CANVAS & NEON WATERMARK ---
     function applyGridAndBadge(base64Str, label, callback) {
         let img = new Image();
         img.onload = function() {
@@ -826,7 +819,6 @@
             
             ctx.drawImage(img, 0, 0);
 
-            // 1. ตีเส้น Grid สีเขียวสด
             ctx.strokeStyle = "rgba(0, 255, 0, 0.6)";
             ctx.lineWidth = 3;
             for(let i=1; i<=3; i++) {
@@ -836,32 +828,29 @@
                 ctx.beginPath(); ctx.moveTo(0, (canvas.height/6)*j); ctx.lineTo(canvas.width, (canvas.height/6)*j); ctx.stroke();
             }
 
-            // 2. วาดลายน้ำ นีออน (Neon Watermark) ทะลุกลางรูป
             ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2); // ย้ายจุดศูนย์กลางมาตรงกลาง
-            ctx.rotate(-Math.PI / 4); // หมุนเฉียง -45 องศา
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(-Math.PI / 4);
             ctx.textAlign = "center";
             ctx.font = "bold 60px Noto Sans Thai";
-            ctx.fillStyle = "rgba(0, 255, 0, 0.3)"; // สีเขียวโปร่งแสง
-            ctx.shadowColor = "#00FF00"; // เอฟเฟกต์เรืองแสง (Neon)
+            ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+            ctx.shadowColor = "#00FF00";
             ctx.shadowBlur = 15;
             ctx.fillText("เพื่อประเมินสโตรกเท่านั้น", 0, -30);
             ctx.font = "bold 40px Noto Sans Thai";
             ctx.fillText("รพ.สวี จ.ชุมพร", 0, 40);
             ctx.restore();
 
-            // 3. วาด Badge ที่มุมซ้ายบน
             ctx.fillStyle = "rgba(0, 255, 0, 0.9)";
             ctx.fillRect(10, 10, 220, 45); 
             ctx.fillStyle = "black";
             ctx.font = "bold 26px Noto Sans Thai";
             ctx.fillText(label, 20, 40);
 
-            // 4. วาด Timestamp มุมซ้ายล่าง (ให้เรืองแสงนีออนด้วย)
             let timeStr = formatFullDateTime(new Date());
             ctx.fillStyle = "#00FF00";
             ctx.font = "bold 26px Noto Sans Thai";
-            ctx.shadowColor = "black"; // ขอบดำให้ตัวหนังสือตัดกับพื้นหลัง
+            ctx.shadowColor = "black";
             ctx.shadowBlur = 5;
             ctx.fillText(timeStr, 15, canvas.height - 15);
             ctx.shadowBlur = 0; 
@@ -943,7 +932,6 @@
         }
     };
 
-    // --- ARM VIDEO ---
     window.startArmVideo = function() {
         const video = document.getElementById('arm-video-preview');
         const overlay = document.getElementById('video-overlay-prep');
@@ -1013,7 +1001,6 @@
         }).catch(err => { showCustomAlert("ไม่สามารถเปิดกล้องได้"); });
     };
 
-    // --- AUDIO LOGIC ---
     window.toggleRecording = function() {
         const btn = document.getElementById('btn-record');
         if (btn.innerText.includes("กดเพื่ออัดเสียง")) {
@@ -1152,7 +1139,6 @@
         });
     }
 
-    // --- FIND NEAREST HOSPITAL ---
     function findNearestHospital(lat, lon) {
         if (!hospitalList || hospitalList.length === 0) {
             return { name: 'รพ.สวี', lat: 10.229937, lon: 99.109073, dist: getDistanceFromLatLonInKm(lat, lon, 10.229937, 99.109073) };
@@ -1182,7 +1168,6 @@
             createTableRow('mdi:timer-sand', 'ต้องถึง รพ. (3.5ชม.)', sessionData.arrivalDeadline + ' น.') +
             createTableRow('mdi:timer-sand', 'ยาภายใน (4.5ชม.)', `<span class="text-warning fw-bold">${sessionData.rtpaDeadline} น.</span>`) + `</tbody>`;
         
-        // ถ้าเคย get location ก่อนหน้านี้ จะมีค่า nearestHospital แล้ว (เกิดตอนเปิดหน้า 4)
         updateSummaryAndActions(); 
     }
 
@@ -1204,23 +1189,19 @@
         if (!tableBody) return;
         document.querySelectorAll('.distance-row').forEach(r => r.remove());
         
-        buildActionContainer(); // สร้างปุ่มโทรใหม่ให้ตรงกับ รพ.
+        buildActionContainer(); 
         
         const floatSawiBtn = document.getElementById('float-sawi-btn');
 
         if (sessionData.location && nearestHospital) {
             let html = '';
-            
-            // ปรับข้อความเตือนให้เข้ากับ รพ. ที่พบ
             const urgencyText = document.getElementById('urgency-text');
             if(urgencyText) urgencyText.textContent = `โปรดกดส่งพิกัด และโทรออกหา ${nearestHospital.name} ด้วยตัวเอง`;
 
             if (nearestHospital.dist > 100) {
-                // ระยะทางไกลผิดปกติ
                 html += createTableRow('mdi:alert-circle-outline', 'ระยะทาง', 'อยู่นอกพื้นที่', true, 'distance-row text-warning');
                 if (floatSawiBtn) floatSawiBtn.style.display = 'none';
             } else {
-                // คำนวณเวลาเดินทางไป รพ. ที่ใกล้ที่สุด
                 const travelMins = Math.round((nearestHospital.dist / 40) * 60);
                 const ambMins = Math.round((travelMins * 2) + 10);
                 
@@ -1234,11 +1215,9 @@
                 html += createTableRow('mdi:car-clock', 'ไปเองใช้เวลา', sessionData.selfTravelEstimate, false, 'distance-row');
                 html += createTableRow('mdi:ambulance', 'รถ รพ.รับใช้เวลา', sessionData.ambulanceEstimate, false, 'distance-row');
                 
-                // ปุ่มนำทางไปยัง รพ. ที่ใกล้ที่สุด
                 document.getElementById('route-button-container').innerHTML = `<a href="https://www.google.com/maps/dir/?api=1&destination=${nearestHospital.lat},${nearestHospital.lon}" target="_blank" class="contact-button route-button text-white" style="background-color:#17a2b8; flex-direction:row;"><span class="iconify" data-icon="mdi:directions"></span> นำทางไป ${nearestHospital.name}</a>`;
             }
             
-            // จัดการ Floating Button 
             if (nearestHospital.name === 'รพ.สวี') {
                 if (floatSawiBtn) floatSawiBtn.style.display = 'flex';
             } else {
@@ -1253,18 +1232,14 @@
 
     function createTableRow(icon, label, val, urgent, cls='') { return `<tr class="${cls}"><td><span class="iconify fs-2" data-icon="${icon}"></span></td><td>${label}</td><td class="${urgent?'text-warning fw-bold':'fw-bold'}">${val||'N/A'}</td></tr>`; }
     
-    // จัดการปุ่มโทรตาม รพ.ที่ใกล้ที่สุด
     function buildActionContainer() {
         let buttonsHtml = '';
-        // ปุ่มส่งพิกัดแสดงเสมอ
         buttonsHtml += `<div class="action-button-wrapper"><div id="location-action" class="action-button location-button ${sessionData.location?'success':''}" onclick="getLocation(false, false)"><span class="iconify" data-icon="${sessionData.location?'mdi:check-circle':'mdi:map-marker'}"></span></div><p class="action-button-text" id="location-text">${sessionData.location?'ส่งพิกัดแล้ว':'ส่งพิกัดที่อยู่'}</p></div>`;
         
         if (!nearestHospital || nearestHospital.name === 'รพ.สวี') {
-            // ถ้าระบุไม่ได้ หรือใกล้ รพ.สวี ให้แสดง 2 ปุ่ม (รพ.สวี + 1669)
             buttonsHtml += `<div class="action-button-wrapper" onclick="handleCallClick(this, 'tel_sawee', '0894745523', 'รพ.สวี')"><div class="action-button tel-sawi-button"><span class="iconify" data-icon="mdi:phone"></span></div><p class="action-button-text">โทร รพ.สวี</p></div>`;
             buttonsHtml += `<div class="action-button-wrapper" onclick="handleCallClick(this, 'tel_1669', '1669', '1669')"><div class="action-button tel-1669-button"><span class="iconify" data-icon="mdi:phone"></span></div><p class="action-button-text">โทร 1669</p></div>`;
         } else {
-            // ถ้าใกล้ รพ. อื่นๆ ให้แสดงปุ่ม 1669 อันเดียว และขยายให้เต็มพื้นที่
             buttonsHtml += `
             <div class="action-button-wrapper" style="grid-column: span 2;" onclick="handleCallClick(this, 'tel_1669', '1669', '1669')">
                 <div class="action-button tel-1669-button"><span class="iconify" data-icon="mdi:phone-alert"></span></div>
@@ -1390,7 +1365,6 @@
              if (data.onsetTime) bodyContents.push({ type: "text", text: "เริ่มเป็น: " + data.onsetTime, size: "sm", color: "#D32F2F", weight: "bold" });
              if (data.rtpaDeadline) bodyContents.push({ type: "text", text: "หมดเวลาให้ยา: " + data.rtpaDeadline, size: "sm", color: "#D32F2F", weight: "bold" });
              
-             // เพิ่มข้อมูล รพ.ที่ใกล้ที่สุดลงในไลน์
              let locText = data.distance ? `ระยะทาง: ${data.distance}` : "";
              if (data.nearestHospitalName) locText = `ไป ${data.nearestHospitalName}: ${data.distance}`;
              if (locText) bodyContents.push({ type: "text", text: locText, size: "sm", color: "#D32F2F", weight: "bold" });
@@ -1410,14 +1384,13 @@
 
         let footerContents = [];
         if (isAbnormal) {
-            let mapUri = `https://www.google.com/maps/dir/?api=1&destination=10.229937,99.109073`; // ค่าเริ่มต้น รพ.สวี
+            let mapUri = `https://www.google.com/maps/dir/?api=1&destination=10.229937,99.109073`; 
             if (data.nearestHospitalName && nearestHospital) {
                 mapUri = `https://www.google.com/maps/dir/?api=1&destination=${nearestHospital.lat},${nearestHospital.lon}`;
             }
             footerContents.push({ type: "button", style: "secondary", height: "sm", action: { type: "uri", label: `📍 นำทางไป รพ.`, uri: mapUri } });
             footerContents.push({ type: "button", style: "primary", color: "#D32F2F", height: "sm", margin: "sm", action: { type: "uri", label: "📞 โทรฉุกเฉิน 1669", uri: "tel:1669" } });
             
-            // แสดงปุ่มโทร รพ.สวี เฉพาะกรณีที่ใกล้สวี
             if (!data.nearestHospitalName || data.nearestHospitalName === 'รพ.สวี') {
                  footerContents.push({ type: "button", style: "primary", color: "#F57C00", height: "sm", margin: "sm", action: { type: "uri", label: "📞 โทร รพ.สวี", uri: "tel:0894745523" } });
             }
