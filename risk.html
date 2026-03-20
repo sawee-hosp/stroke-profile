@@ -902,7 +902,7 @@
 
         // --- ฟังก์ชันอ่านออกเสียง (Web Speech API) ---
         function readAloudResult() {
-            if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window && window.speechSynthesis) {
                 window.speechSynthesis.cancel(); // หยุดเสียงเก่าถ้ามี
                 
                 let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
@@ -921,9 +921,20 @@
                 let utterance = new SpeechSynthesisUtterance(textToRead);
                 utterance.lang = 'th-TH';
                 utterance.rate = 1.0; 
+                
+                // พยายามหาเสียงภาษาไทย (เพื่อรองรับเบราว์เซอร์บางตัวที่ต้องการให้ระบุ Voice ตรงๆ)
+                let voices = window.speechSynthesis.getVoices();
+                let thaiVoice = voices.find(voice => voice.lang.includes('th'));
+                if (thaiVoice) utterance.voice = thaiVoice;
+
+                utterance.onerror = function(e) {
+                    console.error("SpeechSynthesis Error: ", e);
+                    swalCustom.fire('ขออภัย', 'เกิดข้อผิดพลาดในการเล่นเสียงบนเบราว์เซอร์นี้', 'warning');
+                };
+
                 window.speechSynthesis.speak(utterance);
             } else {
-                swalCustom.fire('ขออภัย', 'โทรศัพท์หรือเบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง', 'info');
+                swalCustom.fire('ขออภัย', 'แอป LINE หรือเบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง แนะนำให้เปิดผ่าน Chrome หรือ Safari (กด 3 จุดมุมขวาบน -> เปิดในเบราว์เซอร์)', 'info');
             }
         }
 
@@ -1072,6 +1083,7 @@
 
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
+            // อัปเดตในฟอร์มหลักตาม Logic
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
                 $('#tc').val(chol);
@@ -1375,15 +1387,14 @@
                 contents: {
                     type: "bubble", size: "mega",
                     hero: {
-                        type: "video", url: vUrl, previewUrl: tUrl,
-                        altContent: { type: "image", size: "full", aspectRatio: "9:16", aspectMode: "cover", url: tUrl },
-                        aspectRatio: "9:16"
+                        type: "image", url: tUrl, size: "full", aspectRatio: "9:16", aspectMode: "cover",
+                        action: { type: "uri", uri: vUrl }
                     },
                     body: {
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
                             { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
-                            { type: "text", text: "คลิกเพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
+                            { type: "text", text: "กดที่รูปด้านบน 👆 เพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
                         ]
                     }
                 }
@@ -1391,18 +1402,18 @@
             messagesToSend.push(videoFlex);
 
             // ส่งข้อความไป 3 กล่องเรียงกัน (หรือ 2 หากไม่มียา)
-            const urlParams = new URLSearchParams(window.location.search);
-            const target = urlParams.get('target');
+            const currentUrl = window.location.href;
             
-            if (target === 'myoa') {
+            // เช็คว่ามีคำว่า myoa ใน URL หรือไม่ เพื่อป้องกันการส่งให้เพื่อน
+            if (currentUrl.includes('myoa')) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
                 } catch (err) { 
                     console.error(err); 
-                    swalCustom.fire('แจ้งเตือน', 'บันทึกสำเร็จ แต่การส่งข้อความลงแชท LINE ล้มเหลว ('+err.message+')', 'warning');
+                    swalCustom.fire('แจ้งเตือน', 'บันทึกสำเร็จ แต่การส่งข้อความลงแชท LINE ล้มเหลว กรุณาตรวจสอบว่าเปิดผ่าน LINE OA หรือไม่ ('+err.message+')', 'warning');
                 }
             } else {
-                console.log("PDPA Protection: ข้ามการส่ง Flex Message เนื่องจากไม่ได้เปิดจากหน้า LINE OA โดยตรง");
+                console.log("PDPA Protection: ข้ามการส่ง Flex Message เนื่องจากไม่ได้เปิดจากหน้า LINE OA โดยตรง (ไม่มี target=myoa)");
             }
         }
 
