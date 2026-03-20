@@ -902,40 +902,35 @@
 
         // --- ฟังก์ชันอ่านออกเสียง (Web Speech API) ---
         function readAloudResult() {
-            if ('speechSynthesis' in window && window.speechSynthesis) {
-                window.speechSynthesis.cancel(); // หยุดเสียงเก่าถ้ามี
-                
-                let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
-                
-                if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
-                    let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
-                    textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
-                }
-                
-                textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
-                
-                // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
-                let cleanAdvice = generateSuggestionText(globalRiskData).text.replace(/[\n🔴🟡🟢✅⚠️📌⭐\-]/g, ' ');
-                textToRead += cleanAdvice;
-
-                let utterance = new SpeechSynthesisUtterance(textToRead);
-                utterance.lang = 'th-TH';
-                utterance.rate = 1.0; 
-                
-                // พยายามหาเสียงภาษาไทย (เพื่อรองรับเบราว์เซอร์บางตัวที่ต้องการให้ระบุ Voice ตรงๆ)
-                let voices = window.speechSynthesis.getVoices();
-                let thaiVoice = voices.find(voice => voice.lang.includes('th'));
-                if (thaiVoice) utterance.voice = thaiVoice;
-
-                utterance.onerror = function(e) {
-                    console.error("SpeechSynthesis Error: ", e);
-                    swalCustom.fire('ขออภัย', 'เกิดข้อผิดพลาดในการเล่นเสียงบนเบราว์เซอร์นี้', 'warning');
-                };
-
-                window.speechSynthesis.speak(utterance);
-            } else {
-                swalCustom.fire('ขออภัย', 'แอป LINE หรือเบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง แนะนำให้เปิดผ่าน Chrome หรือ Safari (กด 3 จุดมุมขวาบน -> เปิดในเบราว์เซอร์)', 'info');
+            if (!('speechSynthesis' in window)) {
+                swalCustom.fire('ขออภัย', 'เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง', 'info');
+                return;
             }
+            window.speechSynthesis.cancel(); // หยุดเสียงเก่าถ้ามี
+            
+            let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
+            
+            if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
+                let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+                textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
+            }
+            
+            textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
+            
+            // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
+            let cleanAdvice = generateSuggestionText(globalRiskData).text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-]/g, ' ');
+            textToRead += cleanAdvice;
+
+            let utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'th-TH';
+            utterance.rate = 1.0; 
+            
+            // ให้ OS เลือกเสียงภาษาไทยที่ดีที่สุดเอง ไม่บังคับ
+            utterance.onerror = function(e) {
+                console.error("SpeechSynthesis Error: ", e);
+            };
+
+            window.speechSynthesis.speak(utterance);
         }
 
         function compressAndUploadImage(file) {
@@ -1196,13 +1191,13 @@
         function getMedicineAdvice(indication) {
             if (!indication) return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
             if (indication.includes("ต้านเกล็ดเลือด")) {
-                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด\n\n⚠️ สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
+                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด\n⚠️ สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
             } else if (indication.includes("แข็งตัวของเลือด")) {
-                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด\n\n⚠️ ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
+                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด\n⚠️ ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
             } else if (indication.includes("ลดไขมัน")) {
-                return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว\n\n⚠️ หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
+                return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว\n⚠️ หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
             } else if (indication.includes("ความดัน")) {
-                return "ต้องรับประทานทุกวันอย่างต่อเนื่อง\n\n⚠️ ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
+                return "ต้องรับประทานทุกวันอย่างต่อเนื่อง\n⚠️ ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
             }
             return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
         }
@@ -1236,10 +1231,15 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
+                let flexSuccess = false;
                 if (liff.isInClient()) {
-                    await sendFlex(globalRiskData, payload.name, finalSuggestion.text);
-                    if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2009491708-PgcjtJDL", external: false });
-                    else liff.closeWindow();
+                    flexSuccess = await sendFlex(globalRiskData, payload.name, finalSuggestion.text);
+                    if (flexSuccess) {
+                        if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2009491708-PgcjtJDL", external: false });
+                        else liff.closeWindow();
+                    } else {
+                        $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
+                    }
                 } else {
                     swalCustom.fire({
                         title: 'บันทึกสำเร็จ!',
@@ -1367,10 +1367,10 @@
                         contents: { type: "carousel", contents: medBubbles }
                     });
 
-                    // ใส่ปุ่มวิธีใช้ยาใน Risk Flex (เพื่อเป็น Message Action)
+                    // ใส่ปุ่มวิธีใช้ยาใน Risk Flex แบบเอา Emoji ออกป้องกันการ error ในบาง Client
                     riskFlex.contents.footer.contents.push({
-                        type: "button", style: "primary", color: "#17a2b8", margin: "sm",
-                        action: { type: "message", label: "💊 วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
+                        type: "button", style: "primary", margin: "sm",
+                        action: { type: "message", label: "วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
                     });
                 }
             }
@@ -1387,8 +1387,9 @@
                 contents: {
                     type: "bubble", size: "mega",
                     hero: {
-                        type: "image", url: tUrl, size: "full", aspectRatio: "9:16", aspectMode: "cover",
-                        action: { type: "uri", uri: vUrl }
+                        type: "video", url: vUrl, previewUrl: tUrl,
+                        altContent: { type: "image", size: "full", aspectRatio: "9:16", aspectMode: "cover", url: tUrl },
+                        aspectRatio: "9:16"
                     },
                     body: {
                         type: "box", layout: "vertical", spacing: "sm",
@@ -1408,12 +1409,22 @@
             if (currentUrl.includes('myoa')) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
+                    return true;
                 } catch (err) { 
-                    console.error(err); 
-                    swalCustom.fire('แจ้งเตือน', 'บันทึกสำเร็จ แต่การส่งข้อความลงแชท LINE ล้มเหลว กรุณาตรวจสอบว่าเปิดผ่าน LINE OA หรือไม่ ('+err.message+')', 'warning');
+                    console.error("LIFF Send Error:", err); 
+                    swalCustom.fire('แจ้งเตือน', 'บันทึกข้อมูลแล้ว แต่ไม่สามารถส่งข้อความลงแชท LINE ได้ ('+err.message+')', 'warning');
+                    return false;
                 }
             } else {
-                console.log("PDPA Protection: ข้ามการส่ง Flex Message เนื่องจากไม่ได้เปิดจากหน้า LINE OA โดยตรง (ไม่มี target=myoa)");
+                console.log("PDPA Protection: ข้ามการส่ง Flex Message");
+                swalCustom.fire({
+                    title: 'บันทึกสำเร็จ!',
+                    text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ข้ามการส่งแชทเนื่องจากเหตุผลความเป็นส่วนตัว)',
+                    icon: 'success'
+                }).then(() => {
+                    const action = (name === 'history') ? 'history' : 'close'; // fallback for logic flow
+                });
+                return true; // ปล่อยให้ถือว่าทำงานสำเร็จและปิดหน้าจอได้
             }
         }
 
