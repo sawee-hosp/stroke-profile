@@ -627,6 +627,37 @@
         let currentStep = 'intro';
         const totalSteps = 5; 
 
+        // ฟังก์ชันแปลวิธีกินยาเป็นภาษาไทยให้อ่านง่าย
+        function translateDosage(text) {
+            if (!text) return "-";
+            let t = text.toLowerCase();
+            
+            // แปลงรูปแบบติดกันที่พบบ่อยก่อน
+            t = t.replace(/1x1pc/g, "วันละ 1 ครั้ง หลังอาหาร");
+            t = t.replace(/1x2pc/g, "วันละ 2 ครั้ง หลังอาหาร (เช้า-เย็น)");
+            t = t.replace(/1x3pc/g, "วันละ 3 ครั้ง หลังอาหาร (เช้า-กลางวัน-เย็น)");
+            t = t.replace(/1x4pc/g, "วันละ 4 ครั้ง หลังอาหาร (เช้า-กลางวัน-เย็น-ก่อนนอน)");
+            t = t.replace(/1x1ac/g, "วันละ 1 ครั้ง ก่อนอาหาร");
+            t = t.replace(/1x2ac/g, "วันละ 2 ครั้ง ก่อนอาหาร (เช้า-เย็น)");
+            t = t.replace(/1x3ac/g, "วันละ 3 ครั้ง ก่อนอาหาร (เช้า-กลางวัน-เย็น)");
+            
+            const dict = {
+                "1 tab": "1 เม็ด", "1 tabs": "1 เม็ด", "1tab": "1 เม็ด",
+                "2 tab": "2 เม็ด", "2 tabs": "2 เม็ด", "2tab": "2 เม็ด",
+                "1/2 tab": "ครึ่งเม็ด",
+                "1x1": "วันละ 1 ครั้ง", "1x2": "วันละ 2 ครั้ง", "1x3": "วันละ 3 ครั้ง", "1x4": "วันละ 4 ครั้ง",
+                "od": "วันละ 1 ครั้ง", "bid": "วันละ 2 ครั้ง", "tid": "วันละ 3 ครั้ง", "qid": "วันละ 4 ครั้ง",
+                "pc": "หลังอาหาร", "ac": "ก่อนอาหาร", "hs": "ก่อนนอน", "prn": "เมื่อมีอาการ",
+                "q morning": "ทุกเช้า", "morning": "ตอนเช้า", "evening": "ตอนเย็น"
+            };
+            
+            for (let key in dict) {
+                let re = new RegExp("\\b" + key + "\\b", "g");
+                t = t.replace(re, dict[key]);
+            }
+            return t;
+        }
+
         // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS (แก้ปัญหา Web Speech API ของเบราว์เซอร์) ---
         class ThaiTTSQueue {
             constructor() {
@@ -676,7 +707,7 @@
                 this.stop(); 
                 
                 // ลบอิโมจิและเครื่องหมายพิเศษออกเพื่อให้อ่านได้ลื่นไหล
-                let cleanText = text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-🎬👆]/g, ' ').replace(/\s+/g, ' ');
+                let cleanText = text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-🎬👆💊]/g, ' ').replace(/\s+/g, ' ');
                 this.queue = this.splitText(cleanText);
 
                 if (!this.isPlaying && this.queue.length > 0) {
@@ -786,22 +817,26 @@
                 }
             }).fail(function() { console.log("Using default playlist"); });
 
-            swalCustom.fire({
-                title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
-                html: `
-                    <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
-                        <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
-                        <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
-                        <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
-                        <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
-                        <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
-                allowOutsideClick: false,
-                allowEscapeKey: false
-            });
+            // ป้องกันการเตือนซ้ำซ้อนด้วย sessionStorage
+            if (!sessionStorage.getItem('introShown')) {
+                swalCustom.fire({
+                    title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
+                    html: `
+                        <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
+                            <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
+                            <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
+                            <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
+                            <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
+                            <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
+                        </div>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+                sessionStorage.setItem('introShown', 'true');
+            }
             
             $('#custom-play-btn').click(function() {
                 if (ytPlayer && typeof ytPlayer.unMute === 'function') {
@@ -1249,6 +1284,21 @@
             let waistLimit = ins.sex === 1 ? 36 : 32;
             if(ins.wc_inch > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
 
+            // เพิ่มคำแนะนำเรื่องยา หากพบรายการยา
+            if (ins.medicines && ins.medicines.length > 0) {
+                let medPurposes = [];
+                ins.medicines.forEach(m => {
+                    if (m.indication && !medPurposes.includes(m.indication)) {
+                        medPurposes.push(m.indication);
+                    }
+                });
+                if (medPurposes.length > 0) {
+                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
+                } else {
+                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
+                }
+            }
+
             let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.4;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
             let specificAlertsText = sug.length > 0 ? "⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
 
@@ -1284,17 +1334,17 @@
             };
         }
 
-        // Helper สำหรับข้อความเตือนยาใน Flex Message Carousel
+        // Helper สำหรับข้อความเตือนยา
         function getMedicineAdvice(indication) {
             let indStr = String(indication || "");
             if (indStr.includes("ต้านเกล็ดเลือด")) {
-                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด\n⚠️ สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
+                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
             } else if (indStr.includes("แข็งตัวของเลือด")) {
-                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด\n⚠️ ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
+                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
             } else if (indStr.includes("ลดไขมัน")) {
-                return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว\n⚠️ หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
+                return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
             } else if (indStr.includes("ความดัน")) {
-                return "ต้องรับประทานทุกวันอย่างต่อเนื่อง\n⚠️ ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
+                return "ต้องรับประทานทุกวันอย่างต่อเนื่อง ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
             }
             return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
         }
@@ -1432,48 +1482,44 @@
             };
             messagesToSend.push(riskFlex);
 
-            // --- 2. Flex Message: Carousel ยา (แนบไปพร้อมกันหากมียา) ---
+            // --- 2. Flex Message: สรุปรายการยา (เปลี่ยนเป็น Flex เดี่ยวแบบ List แทน Carousel) ---
             let meds = data.inputs.medicines;
             if (Array.isArray(meds) && meds.length > 0) {
-                let medBubbles = [];
-                // ตัดรายการยาไม่ให้เกิน 10 เพื่อไม่ให้เกินขีดจำกัด Carousel ของ LINE
-                meds.slice(0, 10).forEach(med => {
+                let medContents = [
+                    { type: "text", text: "💊 สรุปรายการยาของคุณ", weight: "bold", size: "lg", color: "#0d6efd", align: "center", margin: "sm" },
+                    { type: "separator", margin: "md" }
+                ];
+
+                meds.forEach((med, idx) => {
                     let indicationStr = med.indication ? String(med.indication) : "";
                     let advice = getMedicineAdvice(indicationStr);
-                    let safeMedName = med.name ? String(med.name).substring(0, 40) : "ไม่ระบุชื่อ";
-                    
-                    // ใน Carousel ของ LINE ห้ามระบุ size ในระดับ bubble ย่อย อย่างเด็ดขาด
-                    medBubbles.push({
-                        type: "bubble",
-                        header: {
-                            type: "box", layout: "vertical", backgroundColor: "#0d6efd",
-                            contents: [{ type: "text", text: "💊 " + safeMedName, weight: "bold", color: "#ffffff", wrap: true }]
-                        },
-                        body: {
-                            type: "box", layout: "vertical", spacing: "sm",
-                            contents: [
-                                { type: "text", text: "ความแรง: " + (med.strength ? String(med.strength) : "-"), size: "sm", color: "#555555", wrap: true },
-                                { type: "text", text: "วิธีกิน: " + (med.dosage ? String(med.dosage) : "-"), size: "sm", color: "#555555", wrap: true },
-                                { type: "separator", margin: "md" },
-                                { type: "text", text: "📌 ข้อควรทราบ:", size: "sm", weight: "bold", color: "#cc0000", margin: "md" },
-                                { type: "text", text: String(advice), size: "sm", color: "#333333", wrap: true }
-                            ]
-                        }
+                    let safeMedName = med.name ? String(med.name) : "ไม่ระบุชื่อ";
+                    let strength = med.strength ? String(med.strength) : "";
+                    let dosageText = translateDosage(med.dosage ? String(med.dosage) : "");
+
+                    medContents.push({
+                        type: "box", layout: "vertical", margin: "md",
+                        contents: [
+                            { type: "text", text: `${idx + 1}. ${safeMedName} ${strength}`.trim(), weight: "bold", size: "sm", color: "#333333", wrap: true },
+                            { type: "text", text: `วิธีกิน: ${dosageText}`, size: "xs", color: "#555555", wrap: true },
+                            { type: "text", text: `สรรพคุณ: ${indicationStr}`, size: "xs", color: "#0d6efd", wrap: true },
+                            { type: "text", text: `📌 คำแนะนำ: ${advice}`, size: "xs", color: "#dc3545", wrap: true, margin: "xs" },
+                            { type: "separator", margin: "md" }
+                        ]
                     });
                 });
-                
-                if (medBubbles.length > 0) {
-                    messagesToSend.push({
-                        type: "flex", altText: "ข้อมูลการใช้ยาของคุณ",
-                        contents: { type: "carousel", contents: medBubbles }
-                    });
 
-                    // ใส่ปุ่มวิธีใช้ยาใน Risk Flex แบบปลอดภัย
-                    riskFlex.contents.footer.contents.push({
-                        type: "button", style: "primary", color: "#0d6efd", margin: "sm",
-                        action: { type: "message", label: "วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
-                    });
-                }
+                const medFlex = {
+                    type: "flex", altText: "สรุปรายการยาของคุณ",
+                    contents: {
+                        type: "bubble", size: "mega",
+                        body: {
+                            type: "box", layout: "vertical",
+                            contents: medContents
+                        }
+                    }
+                };
+                messagesToSend.push(medFlex);
             }
 
             // --- 3. Flex Message: Video แนะนำ (แก้ไขเป็น Image เพื่อป้องกัน LINE บล็อก) ---
@@ -1504,7 +1550,7 @@
 
             // เช็คว่าเปิดผ่าน LINE OA หรือไม่ เพื่อป้องกัน PDPA (ส่งลิงก์ในกลุ่มแชทเพื่อน)
             const currentUrl = window.location.search; // ใช้ location.search ปลอดภัยกว่า
-            if (currentUrl.includes('myoa')) {
+            if (currentUrl.includes('target=myoa')) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
                     return true;
