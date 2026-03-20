@@ -624,71 +624,6 @@
         let currentStep = 'intro';
         const totalSteps = 5; 
 
-        // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS (แก้ปัญหา Web Speech API) ---
-        class ThaiTTSQueue {
-            constructor() {
-                this.audio = new Audio();
-                this.queue = [];
-                this.isPlaying = false;
-                this.onPlay = null;
-                this.onEnd = null;
-                
-                this.audio.onended = () => {
-                    this.playNext();
-                };
-            }
-
-            splitText(text, maxLength = 180) {
-                // ตัดตามเครื่องหมายวรรคตอน หรือช่องว่าง เพื่อไม่ให้เสียงขาดช่วงกลางคำ และไม่เกิน Limit 200 ตัวอักษรของ Google API
-                const regex = new RegExp(`.{1,${maxLength}}(?=\\s|[।|!|?|.]|$)`, 'g');
-                let chunks = text.match(regex);
-                if (!chunks) {
-                    chunks = text.match(new RegExp(`.{1,${maxLength}}`, 'g'));
-                }
-                return chunks;
-            }
-
-            speak(text) {
-                if (!text) return;
-                this.stop(); // หยุดเสียงเก่าก่อน
-                const chunks = this.splitText(text);
-                this.queue = [...chunks];
-
-                if (!this.isPlaying) {
-                    this.playNext();
-                }
-            }
-
-            playNext() {
-                if (this.queue.length === 0) {
-                    this.isPlaying = false;
-                    if(this.onEnd) this.onEnd();
-                    return;
-                }
-
-                this.isPlaying = true;
-                if(this.onPlay) this.onPlay();
-                
-                const currentText = this.queue.shift();
-                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentText)}&tl=th&client=tw-ob`;
-                
-                this.audio.src = url;
-                this.audio.play().catch(error => {
-                    console.error("Audio Playback Error:", error);
-                    this.isPlaying = false;
-                    if(this.onEnd) this.onEnd();
-                });
-            }
-
-            stop() {
-                this.audio.pause();
-                this.queue = [];
-                this.isPlaying = false;
-                if(this.onEnd) this.onEnd();
-            }
-        }
-        const tts = new ThaiTTSQueue();
-
         // --- YouTube Player Logic ---
         let ytPlayer;
         let currentPlayingUrl = "https://www.youtube.com/shorts/ckTJuVS5h-I";
@@ -965,12 +900,22 @@
             goToStep(6); 
         }
 
-        // --- ฟังก์ชันอ่านออกเสียงด้วย Google Translate TTS (หลีกเลี่ยง Web Speech API bug) ---
+        // --- ฟังก์ชันอ่านออกเสียง (Web Speech API) ---
+        let isSpeaking = false;
         function readAloudResult() {
+            if (!('speechSynthesis' in window)) {
+                swalCustom.fire('ขออภัย', 'เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง', 'info');
+                return;
+            }
+            
             const btn = document.getElementById('btn-read-aloud');
             
-            if (tts.isPlaying) {
-                tts.stop();
+            if (isSpeaking) {
+                window.speechSynthesis.cancel(); // หยุดเสียง
+                isSpeaking = false;
+                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline-danger');
                 return;
             }
             
@@ -978,28 +923,42 @@
             
             if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
                 let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
-                textToRead += `เมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขา ${globalRiskData.compareRatio} เท่า `;
+                textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
             }
             
             textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
             
-            // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมด
+            // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
             let cleanAdvice = generateSuggestionText(globalRiskData).text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-]/g, ' ');
             textToRead += cleanAdvice;
 
-            // จัดการปุ่ม UI ขณะอ่าน
-            tts.onPlay = () => {
+            let utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'th-TH';
+            utterance.rate = 1.0; 
+            
+            utterance.onstart = function() {
+                isSpeaking = true;
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
                 btn.classList.remove('btn-outline-danger');
                 btn.classList.add('btn-danger');
             };
-            tts.onEnd = () => {
+            
+            utterance.onend = function() {
+                isSpeaking = false;
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
                 btn.classList.remove('btn-danger');
                 btn.classList.add('btn-outline-danger');
             };
 
-            tts.speak(textToRead);
+            utterance.onerror = function(e) {
+                console.error("SpeechSynthesis Error: ", e);
+                isSpeaking = false;
+                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline-danger');
+            };
+
+            window.speechSynthesis.speak(utterance);
         }
 
         function compressAndUploadImage(file) {
@@ -1273,7 +1232,7 @@
 
         async function saveAndSend(actionType) {
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
-            tts.stop(); // ปิดเสียงอ่านเมื่อกดบันทึก
+            if (window.speechSynthesis) window.speechSynthesis.cancel(); // ปิดเสียงอ่านเมื่อกดบันทึก
 
             try {
                 const finalSuggestion = generateSuggestionText(globalRiskData);
@@ -1343,7 +1302,7 @@
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
             
-            // สร้าง Emoji 10 ตัว
+            // สร้างรูปคน 10 คนแบบปลอดภัยเพื่อป้องกัน Array Error
             let redDots = Math.max(1, Math.ceil(sickCount / 10));
             if (sickCount === 0) redDots = 0; 
             let greenDots = 10 - redDots;
@@ -1414,6 +1373,7 @@
                     let advice = getMedicineAdvice(indicationStr);
                     let safeMedName = med.name ? String(med.name).substring(0, 40) : "ไม่ระบุชื่อ";
                     
+                    // ใน Carousel ของ LINE บังคับห้ามระบุ size ในระดับ bubble ย่อย
                     medBubbles.push({
                         type: "bubble",
                         header: {
@@ -1439,18 +1399,19 @@
                         contents: { type: "carousel", contents: medBubbles }
                     });
 
-                    // ใส่ปุ่มวิธีใช้ยาใน Risk Flex แบบปลอดภัย
+                    // ใส่ปุ่มอธิบายยาในหน้า Risk (นำ Emoji ออกจาก label เพราะ LINE บางเวอร์ชันไม่รองรับการมี emoji นำหน้า action)
                     riskFlex.contents.footer.contents.push({
-                        type: "button", style: "primary", color: "#0d6efd", margin: "sm",
-                        action: { type: "message", label: "อธิบายการกินยา", text: "ขอข้อมูลอธิบายการกินยา" }
+                        type: "button", style: "primary", color: "#17a2b8", margin: "sm",
+                        action: { type: "message", label: "วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
                     });
                 }
             }
 
-            // --- 3. Flex Message: Video แนะนำ ---
+            // --- 3. Flex Message: Video แนะนำ (แก้ไขเป็น Image เพื่อป้องกัน LINE บล็อก) ---
             // ป้องกันการติดนามสกุลไฟล์ที่ LINE ไม่ยอมรับ โดยการเติมนามสกุลหลอกท้ายสุด
             let vUrl = playlistMap['advice_mp4'] || "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
             let tUrl = playlistMap['advice_thumbnail'] || "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
+            if (!vUrl.includes('.mp4')) vUrl += "&ext=.mp4#.mp4";
             if (!tUrl.match(/\.(jpeg|jpg|png|gif)/i)) tUrl += "&ext=.png#.png";
 
             const videoFlex = {
@@ -1473,7 +1434,7 @@
             messagesToSend.push(videoFlex);
 
             // เช็คว่าเปิดผ่าน LINE OA หรือไม่ เพื่อป้องกัน PDPA (ส่งลิงก์ในกลุ่มแชทเพื่อน)
-            const currentUrl = window.location.href;
+            const currentUrl = window.location.search; // ใช้ location.search ปลอดภัยกว่า
             if (currentUrl.includes('myoa')) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
