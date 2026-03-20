@@ -1442,7 +1442,7 @@
                     let advice = getMedicineAdvice(indicationStr);
                     let safeMedName = med.name ? String(med.name).substring(0, 40) : "ไม่ระบุชื่อ";
                     
-                    // ใน Carousel ของ LINE บังคับห้ามระบุ size ในระดับ bubble ย่อย
+                    // ใน Carousel ของ LINE ห้ามระบุ size ในระดับ bubble ย่อย อย่างเด็ดขาด
                     medBubbles.push({
                         type: "bubble",
                         header: {
@@ -1468,9 +1468,9 @@
                         contents: { type: "carousel", contents: medBubbles }
                     });
 
-                    // ใส่ปุ่มอธิบายยาในหน้า Risk (นำ Emoji ออกจาก label เพราะ LINE บางเวอร์ชันไม่รองรับการมี emoji นำหน้า action)
+                    // ใส่ปุ่มวิธีใช้ยาใน Risk Flex แบบปลอดภัย
                     riskFlex.contents.footer.contents.push({
-                        type: "button", style: "secondary", margin: "sm",
+                        type: "button", style: "primary", color: "#0d6efd", margin: "sm",
                         action: { type: "message", label: "วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
                     });
                 }
