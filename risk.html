@@ -156,7 +156,7 @@
 
         /* Custom SweetAlert Override */
         .swal2-title { font-size: 24px !important; }
-        .swal2-html-container { font-size: 20px !important; }
+        .swal2-html-container { font-size: 20px !important; text-align: left; }
     </style>
 </head>
 <body>
@@ -579,6 +579,10 @@
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" id="rt-bar"></div>
                     </div>
+
+                    <button type="button" class="btn btn-outline-danger mt-2 mb-3 fw-bold rounded-pill shadow-sm" onclick="readAloudResult()">
+                        <span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง
+                    </button>
                     
                     <div class="explanation-box" id="rt-explanation">
                         <div id="basic-explain"></div>
@@ -693,12 +697,12 @@
             swalCustom.fire({
                 title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
                 html: `
-                    <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
+                    <div style="text-align: left; font-size: 18px; line-height: 1.5; margin-top:15px;">
                         <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
                         <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
                         <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
                         <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
-                        <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
+                        <p style="font-size:15px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
                     </div>
                 `,
                 icon: 'info',
@@ -838,19 +842,89 @@
             $('#rt-desc').text(result.riskGroup).css('color', result.riskColor);
             $('#rt-bar').css('width', (result.barValue / 30 * 100) + "%").css('background', result.riskColor);
             
-            let expHtml = `<div style="font-size:20px; line-height:1.5;"><b>ภายใน 10 ปีข้างหน้า</b> โอกาสเกิดโรคหลอดเลือดสมองของคุณคือ <br><span style="color:${result.riskColor}; font-weight:bold; font-size:30px;">${result.riskPercentText}%</span>`;
-            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
-                expHtml += `<br>⚠️ <b>เสี่ยงมากกว่า</b>คนทั่วไป (เพศ/วัยเดียวกัน) ถึง <span style="color:red; font-weight:bold;">${result.compareRatio} เท่า</span></div>`;
-            } else if (!result.hasStrokeHistory) {
-                expHtml += `<br>✅ ความเสี่ยงใกล้เคียงหรือต่ำกว่าคนทั่วไปในวัยเดียวกัน</div>`;
+            // --- 💡 ส่วนอธิบาย % และเปรียบเทียบแบบละเอียด ---
+            let riskPercentInt = Math.round(parseFloat(result.riskPercentText));
+            let safeCount = 100 - riskPercentInt;
+            
+            // สร้างรูปคน 10 คน
+            let sick10 = Math.ceil(riskPercentInt / 10);
+            if(sick10 === 0 && riskPercentInt > 0) sick10 = 1;
+            let iconsHtml = `<div style="margin-top:15px; line-height:1.2; text-align:center;">`;
+            for(let i=0; i<10; i++) {
+                let color = i < sick10 ? '#dc3545' : '#28a745';
+                iconsHtml += `<svg width="30" height="30" viewBox="0 0 24 24" fill="${color}" style="margin:2px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
             }
-            if(result.hasStrokeHistory) expHtml += `<br>🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
-            $('#basic-explain').html(expHtml);
+            iconsHtml += `</div>`;
 
+            let analogyHtml = `
+                <div style="background:#f1fcf5; border-radius:15px; padding:15px; margin-bottom:20px; border:1px solid #c3e6cb;">
+                    <div style="font-weight:bold; color:#003366; font-size:18px; text-align:center;">โอกาส ${result.riskPercentText}% ใน 10 ปี แปลว่าอะไร?</div>
+                    <div style="font-size:16px; color:#555; margin-top:10px; line-height: 1.4;">สมมติว่ามีคน 100 คน ที่มีสุขภาพ รูปร่าง อายุ ความดัน และผลเลือด เหมือนกับคุณเป๊ะๆ เดินมาอยู่รวมกัน<br>ในอีก 10 ปีข้างหน้า...</div>
+                    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:15px;">
+                        <div style="text-align:center; width:45%;">
+                            <div style="font-size:26px; font-weight:bold; color:#dc3545;">${riskPercentInt} <span style="font-size:14px;">คน</span></div>
+                            <div style="font-size:14px; color:#dc3545; line-height:1.2;">จะโชคร้ายเกิดเส้นเลือดสมองตีบแตก (สโตรก)</div>
+                        </div>
+                        <div style="font-size:24px; color:#ccc;">|</div>
+                        <div style="text-align:center; width:45%;">
+                            <div style="font-size:26px; font-weight:bold; color:#28a745;">${safeCount} <span style="font-size:14px;">คน</span></div>
+                            <div style="font-size:14px; color:#28a745; line-height:1.2;">ที่เหลือจะยังปลอดภัยดี</div>
+                        </div>
+                    </div>
+                    ${iconsHtml}
+                </div>
+            `;
+
+            let compareHtml = '';
+            let sexStr = result.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
+                compareHtml = `
+                    <div style="background:#fff8f8; border-left: 4px solid #dc3545; padding:15px; margin-bottom:20px;">
+                        <div style="font-size:16px; line-height:1.4; color:#333;">และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${result.inputs.age} ปี ที่ไม่เป็นเบาหวาน ไม่สูบบุหรี่ ไขมันไม่สูงแล้ว<br><b>คุณมีความเสี่ยงมากกว่าพวกเขาถึง <span style="font-size:22px; color:#cc0000;">${result.compareRatio} เท่า</span> เลยนะ!</b></div>
+                    </div>
+                `;
+            } else if (!result.hasStrokeHistory) {
+                compareHtml = `<div style="background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; color:#155724;">✅ ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่าคนวัยเดียวกันที่สุขภาพดี</div>`;
+            }
+
+            if(result.hasStrokeHistory) {
+                compareHtml = `<div style="background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:20px; color:#856404;">🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
+            }
+
+            $('#basic-explain').html(analogyHtml + compareHtml);
+
+            // --- คำแนะนำ ---
             const fullAdvice = generateSuggestionText(result);
             $('#full-advice-display').html(fullAdvice.html);
 
             goToStep(6); 
+        }
+
+        // --- ฟังก์ชันอ่านออกเสียง (Web Speech API) ---
+        function readAloudResult() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // หยุดเสียงเก่าถ้ามี
+                
+                let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
+                
+                if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
+                    let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+                    textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
+                }
+                
+                textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
+                
+                // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
+                let cleanAdvice = generateSuggestionText(globalRiskData).text.replace(/[\n🔴🟡🟢✅⚠️📌⭐\-]/g, ' ');
+                textToRead += cleanAdvice;
+
+                let utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.lang = 'th-TH';
+                utterance.rate = 1.0; 
+                window.speechSynthesis.speak(utterance);
+            } else {
+                swalCustom.fire('ขออภัย', 'โทรศัพท์หรือเบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง', 'info');
+            }
         }
 
         function compressAndUploadImage(file) {
@@ -1108,17 +1182,17 @@
 
         // Helper สำหรับข้อความเตือนยาใน Flex Message Carousel
         function getMedicineAdvice(indication) {
-            if (!indication) return "รับประทานตามที่แพทย์หรือเภสัชกรสั่งอย่างเคร่งครัด";
+            if (!indication) return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
             if (indication.includes("ต้านเกล็ดเลือด")) {
-                return "ต้องรับประทานอย่างสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด\n\n⚠️ สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดาไหลไม่หยุด หากมีให้พบแพทย์";
+                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด\n\n⚠️ สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
             } else if (indication.includes("แข็งตัวของเลือด")) {
-                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด\n\n⚠️ ห้ามซื้อยาสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
+                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด\n\n⚠️ ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
             } else if (indication.includes("ลดไขมัน")) {
                 return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว\n\n⚠️ หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
             } else if (indication.includes("ความดัน")) {
                 return "ต้องรับประทานทุกวันอย่างต่อเนื่อง\n\n⚠️ ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
             }
-            return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด และมาตรวจตามนัด";
+            return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
         }
 
         async function saveAndSend(actionType) {
@@ -1176,9 +1250,9 @@
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
 
             // กรองข้อความว่างเพื่อป้องกัน Error การส่ง LINE Flex
-            const adviceBlocks = suggestionText.split('\n\n').filter(b => b.trim() !== "");
+            const adviceBlocks = String(suggestionText).split('\n\n').filter(b => b.trim() !== "");
             const adviceFlexContents = adviceBlocks.map(block => ({
-                type: "text", text: block, wrap: true, size: "sm", color: "#444444", margin: "sm"
+                type: "text", text: String(block), wrap: true, size: "sm", color: "#444444", margin: "sm"
             }));
 
             let messagesToSend = [];
@@ -1255,7 +1329,7 @@
                 // ตัดรายการยาไม่ให้เกิน 10 เพื่อไม่ให้เกินขีดจำกัด Carousel ของ LINE
                 data.inputs.medicines.slice(0, 10).forEach(med => {
                     let advice = getMedicineAdvice(med.indication);
-                    let safeMedName = med.name || "ไม่ระบุชื่อ";
+                    let safeMedName = med.name ? String(med.name) : "ไม่ระบุชื่อ";
                     medBubbles.push({
                         type: "bubble", size: "mega",
                         header: {
@@ -1265,11 +1339,11 @@
                         body: {
                             type: "box", layout: "vertical", spacing: "sm",
                             contents: [
-                                { type: "text", text: "ความแรง: " + (med.strength || "-"), size: "sm", color: "#555555", wrap: true },
-                                { type: "text", text: "วิธีกิน: " + (med.dosage || "-"), size: "sm", color: "#555555", wrap: true },
+                                { type: "text", text: "ความแรง: " + (med.strength ? String(med.strength) : "-"), size: "sm", color: "#555555", wrap: true },
+                                { type: "text", text: "วิธีกิน: " + (med.dosage ? String(med.dosage) : "-"), size: "sm", color: "#555555", wrap: true },
                                 { type: "separator", margin: "md" },
                                 { type: "text", text: "📌 ข้อควรทราบ:", size: "sm", weight: "bold", color: "#cc0000", margin: "md" },
-                                { type: "text", text: advice, size: "sm", color: "#333333", wrap: true }
+                                { type: "text", text: String(advice), size: "sm", color: "#333333", wrap: true }
                             ]
                         }
                     });
@@ -1290,7 +1364,7 @@
             }
 
             // --- 3. Flex Message: Video แนะนำ ---
-            // ป้องกันการติดนามสกุลไฟล์ที่ LINE ไม่ยอมรับ
+            // ป้องกันการติดนามสกุลไฟล์ที่ LINE ไม่ยอมรับ โดยการเติมนามสกุลหลอกท้ายสุด
             let vUrl = playlistMap['advice_mp4'] || "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
             let tUrl = playlistMap['advice_thumbnail'] || "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
             if (!vUrl.includes('.mp4')) vUrl += "&ext=.mp4#.mp4";
@@ -1317,11 +1391,18 @@
             messagesToSend.push(videoFlex);
 
             // ส่งข้อความไป 3 กล่องเรียงกัน (หรือ 2 หากไม่มียา)
-            try { 
-                await liff.sendMessages(messagesToSend); 
-            } catch (err) { 
-                console.error(err); 
-                swalCustom.fire('แจ้งเตือน', 'การประมวลผลเสร็จสิ้น แต่ไม่สามารถส่งเข้าห้องแชทได้ เนื่องจากระบบของ LINE ขัดข้อง', 'warning');
+            const urlParams = new URLSearchParams(window.location.search);
+            const target = urlParams.get('target');
+            
+            if (target === 'myoa') {
+                try { 
+                    await liff.sendMessages(messagesToSend); 
+                } catch (err) { 
+                    console.error(err); 
+                    swalCustom.fire('แจ้งเตือน', 'บันทึกสำเร็จ แต่การส่งข้อความลงแชท LINE ล้มเหลว ('+err.message+')', 'warning');
+                }
+            } else {
+                console.log("PDPA Protection: ข้ามการส่ง Flex Message เนื่องจากไม่ได้เปิดจากหน้า LINE OA โดยตรง");
             }
         }
 
