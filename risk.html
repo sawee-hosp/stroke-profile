@@ -161,6 +161,9 @@
 </head>
 <body>
 
+    <!-- ระบบเล่นเสียงอัตโนมัติ (DOM Audio Element) -->
+    <audio id="tts-audio" style="display: none;"></audio>
+
     <div id="loading"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div></div>
     
     <div id="ocrLoading">
@@ -624,6 +627,95 @@
         let currentStep = 'intro';
         const totalSteps = 5; 
 
+        // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS (แก้ปัญหา Web Speech API ของเบราว์เซอร์) ---
+        class ThaiTTSQueue {
+            constructor() {
+                let audioEl = document.getElementById('tts-audio');
+                if (!audioEl) {
+                    audioEl = document.createElement('audio');
+                    audioEl.id = 'tts-audio';
+                    audioEl.style.display = 'none';
+                    document.body.appendChild(audioEl);
+                }
+                this.audio = audioEl;
+                this.queue = [];
+                this.isPlaying = false;
+                this.onPlay = null;
+                this.onEnd = null;
+
+                this.audio.onended = () => {
+                    this.playNext();
+                };
+                this.audio.onerror = (e) => {
+                    console.error("Audio error", e);
+                    this.playNext();
+                };
+            }
+
+            splitText(text, maxLength = 150) {
+                const words = text.split(' ');
+                let chunks = [];
+                let currentChunk = '';
+                
+                words.forEach(word => {
+                    if ((currentChunk + word).length > maxLength) {
+                        chunks.push(currentChunk.trim());
+                        currentChunk = word + ' ';
+                    } else {
+                        currentChunk += word + ' ';
+                    }
+                });
+                if (currentChunk.trim().length > 0) {
+                    chunks.push(currentChunk.trim());
+                }
+                return chunks;
+            }
+
+            speak(text) {
+                if (!text) return;
+                this.stop(); 
+                
+                // ลบอิโมจิและเครื่องหมายพิเศษออกเพื่อให้อ่านได้ลื่นไหล
+                let cleanText = text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-🎬👆]/g, ' ').replace(/\s+/g, ' ');
+                this.queue = this.splitText(cleanText);
+
+                if (!this.isPlaying && this.queue.length > 0) {
+                    this.playNext();
+                }
+            }
+
+            playNext() {
+                if (this.queue.length === 0) {
+                    this.isPlaying = false;
+                    if(this.onEnd) this.onEnd();
+                    return;
+                }
+
+                this.isPlaying = true;
+                if(this.onPlay) this.onPlay();
+                
+                const currentText = this.queue.shift();
+                // ใช้ Google Translate TTS (ฟรี สำหรับการอ่านข้อความสั้นๆ ต่อเนื่องกัน)
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentText)}&tl=th&client=tw-ob`;
+                
+                this.audio.src = url;
+                this.audio.play().catch(error => {
+                    console.error("Audio Playback Error:", error);
+                    this.isPlaying = false;
+                    if(this.onEnd) this.onEnd();
+                });
+            }
+
+            stop() {
+                this.audio.pause();
+                this.queue = [];
+                this.isPlaying = false;
+                if(this.onEnd) this.onEnd();
+            }
+        }
+        
+        const tts = new ThaiTTSQueue();
+
         // --- YouTube Player Logic ---
         let ytPlayer;
         let currentPlayingUrl = "https://www.youtube.com/shorts/ckTJuVS5h-I";
@@ -697,12 +789,12 @@
             swalCustom.fire({
                 title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
                 html: `
-                    <div style="text-align: left; font-size: 18px; line-height: 1.5; margin-top:15px;">
+                    <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
                         <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
                         <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
                         <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
                         <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
-                        <p style="font-size:15px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
+                        <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
                     </div>
                 `,
                 icon: 'info',
@@ -900,22 +992,12 @@
             goToStep(6); 
         }
 
-        // --- ฟังก์ชันอ่านออกเสียง (Web Speech API) ---
-        let isSpeaking = false;
+        // --- ควบคุมการอ่านออกเสียงโดยปุ่ม ---
         function readAloudResult() {
-            if (!('speechSynthesis' in window)) {
-                swalCustom.fire('ขออภัย', 'เบราว์เซอร์ของคุณไม่รองรับระบบอ่านออกเสียง', 'info');
-                return;
-            }
-            
             const btn = document.getElementById('btn-read-aloud');
             
-            if (isSpeaking) {
-                window.speechSynthesis.cancel(); // หยุดเสียง
-                isSpeaking = false;
-                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline-danger');
+            if (tts.isPlaying) {
+                tts.stop(); // สั่งหยุดผ่าน Class
                 return;
             }
             
@@ -929,36 +1011,23 @@
             textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
             
             // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
-            let cleanAdvice = generateSuggestionText(globalRiskData).text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-]/g, ' ');
+            let cleanAdvice = generateSuggestionText(globalRiskData).text;
             textToRead += cleanAdvice;
 
-            let utterance = new SpeechSynthesisUtterance(textToRead);
-            utterance.lang = 'th-TH';
-            utterance.rate = 1.0; 
-            
-            utterance.onstart = function() {
-                isSpeaking = true;
+            // จัดการ UI ของปุ่ม
+            tts.onPlay = function() {
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
                 btn.classList.remove('btn-outline-danger');
                 btn.classList.add('btn-danger');
             };
             
-            utterance.onend = function() {
-                isSpeaking = false;
+            tts.onEnd = function() {
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
                 btn.classList.remove('btn-danger');
                 btn.classList.add('btn-outline-danger');
             };
 
-            utterance.onerror = function(e) {
-                console.error("SpeechSynthesis Error: ", e);
-                isSpeaking = false;
-                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline-danger');
-            };
-
-            window.speechSynthesis.speak(utterance);
+            tts.speak(textToRead);
         }
 
         function compressAndUploadImage(file) {
@@ -1232,7 +1301,7 @@
 
         async function saveAndSend(actionType) {
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
-            if (window.speechSynthesis) window.speechSynthesis.cancel(); // ปิดเสียงอ่านเมื่อกดบันทึก
+            tts.stop(); // ปิดเสียงอ่านเมื่อกดบันทึก
 
             try {
                 const finalSuggestion = generateSuggestionText(globalRiskData);
@@ -1302,7 +1371,7 @@
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
             
-            // สร้างรูปคน 10 คนแบบปลอดภัยเพื่อป้องกัน Array Error
+            // สร้าง Emoji 10 ตัว
             let redDots = Math.max(1, Math.ceil(sickCount / 10));
             if (sickCount === 0) redDots = 0; 
             let greenDots = 10 - redDots;
@@ -1355,7 +1424,7 @@
                     footer: {
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
-                            { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA" } },
+                            { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                             { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
                         ]
                     }
@@ -1401,7 +1470,7 @@
 
                     // ใส่ปุ่มอธิบายยาในหน้า Risk (นำ Emoji ออกจาก label เพราะ LINE บางเวอร์ชันไม่รองรับการมี emoji นำหน้า action)
                     riskFlex.contents.footer.contents.push({
-                        type: "button", style: "primary", color: "#17a2b8", margin: "sm",
+                        type: "button", style: "secondary", margin: "sm",
                         action: { type: "message", label: "วิธีรับประทานยา", text: "ขอข้อมูลอธิบายการกินยา" }
                     });
                 }
