@@ -184,7 +184,16 @@
             </div>
             <div class="custom-modal-actions">
                 <a href="tel:1669" class="btn-action btn-pulse-danger" style="font-size: 36px !important; text-decoration: none; padding: 20px; font-weight: 900;" onclick="handleInitialRealCall()">📞 โทร 1669 ทันที</a>
-                <button class="btn-action" style="background-color: #6c757d; color: white; font-size: 20px; flex-direction:row; margin-top: 15px;" onclick="handleInitialTestMode()">ฉันต้องการทดสอบสถานการณ์เรียกรถพยาบาล<br><small>(ไม่ได้เรียกจริง)</small></button>
+                
+                <button class="btn-action btn-ai" style="margin-top: 10px; font-size: 24px; padding: 15px;" onclick="handleInitialAiTest()">
+                    <span>ทดสอบอาการด้วย AI</span>
+                    <span class="iconify wink-icon-right" data-icon="mdi:sparkles"></span>
+                </button>
+
+                <button class="btn-action" style="background-color: #6c757d; color: white; font-size: 20px; flex-direction:column; margin-top: 10px; padding: 15px;" onclick="handleInitialTestMode()">
+                    ฉันต้องการทดสอบสถานการณ์เรียกรถพยาบาล<br>
+                    <span style="font-size: 18px; font-weight: normal;">(ไม่ได้เรียกรถจริง)</span>
+                </button>
             </div>
         </div>
     </div>
@@ -374,6 +383,11 @@
         document.getElementById('test-mode-toggle').checked = true;
         document.getElementById('test-watermark').classList.add('active');
         document.getElementById('initial-warning-modal').style.display = 'none';
+    };
+
+    window.handleInitialAiTest = function() {
+        document.getElementById('initial-warning-modal').style.display = 'none';
+        handleAiTest('all');
     };
 
     window.toggleTestMode = function(checkbox) {
@@ -612,8 +626,11 @@
         document.getElementById('layer-2').innerHTML = `<h2 id="layer-2-title" class="section-title"></h2><div id="layer-2-new-content"></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-1')">ย้อนกลับ</button></div>`;
         document.getElementById('layer-3').innerHTML = `<h2 class="section-title">อาการเกิดขึ้นอย่างไร?</h2><div class="d-flex flex-column gap-3"><button class="btn-likely" onclick="handleSeveritySelection('เกิดขึ้นอย่างเฉียบพลัน')">เกิดขึ้นอย่างเฉียบพลัน</button><button class="btn-action" style="background-color: #E67E22; color: white; flex-direction:row;" onclick="handleChronicSymptom('เกิดขึ้นเรื้อรัง/ค่อยๆ เป็น')">เป็นมานาน/ค่อยๆเป็น</button></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-2')">ย้อนกลับ</button></div>`;
         document.getElementById('layer-4').innerHTML = `<h2 class="section-title">อาการเริ่มเป็นเมื่อไหร่?</h2><div id="time-options-container" class="d-flex flex-wrap gap-2 justify-content-center"></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-3')">ย้อนกลับ</button></div>`;
-        document.getElementById('layer-5').innerHTML = `<div class="alert-stroke-detected mb-4"><span class="iconify alert-icon" data-icon="mdi:alarm-light"></span><p class="mb-2 fs-3">อาการของท่าน เข้าข่าย</p><p class="fw-bold" style="font-size: 36px; line-height:1.1;">เป็นอาการของสโตรก</p><p class="fw-bold fs-3 mt-2" id="urgency-text">โปรดกดส่งพิกัด และโทรออกหา รพ.ด้วยตัวเอง</p><div id="countdown-timer" class="fw-bold mt-3 fs-3 border-top pt-2" style="color: #FFD700;"></div></div><div id="action-grid-container" class="action-buttons-grid"></div><table id="summary-table" class="table table-borderless mt-4 fs-4"></table><div id="map-card-container" class="mt-4 mb-4" style="display:none; width: 100%; border-radius: 20px; overflow: hidden; border: 2px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 250px;"></div><div id="contact-buttons" class="mt-4"></div><div id="route-button-container" class="mt-4"></div><button class="btn-action btn-pulse-jerky" onclick="handleFinalSave(this, true)">บันทึกข้อมูลและปิดหน้าต่าง</button><button class="btn-action btn-share" onclick="handleShare()">แชร์ผลการประเมินให้คนอื่น</button><button class="btn-action btn-test-close" onclick="handleTestClose()">ออกจากการทดสอบโดยไม่บันทึก</button><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-4')">ย้อนกลับ</button></div>`;
-        document.getElementById('layer-6').innerHTML = `<div id="final-emoji" style="text-align:center; font-size: 100px; margin-bottom: 20px;"></div><h2 id="final-title" class="section-title" style="font-size:36px;"></h2><p id="final-text" class="text-center" style="font-size:28px;"></p><div class="d-flex flex-column gap-3 mt-4"><button class="btn-action btn-pulse-jerky" onclick="handleFinalSave(this, false, true)">บันทึกและปิดหน้าต่าง</button></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-1')">ย้อนกลับหน้าแรก</button></div>`;
+        
+        // อัปเดต layer-5 ให้มี ID สำหรับเปลี่ยนค่ากรณีไม่ใช่ Risk
+        document.getElementById('layer-5').innerHTML = `<div class="alert-stroke-detected mb-4"><span class="iconify alert-icon" data-icon="mdi:alarm-light"></span><p class="mb-2 fs-3">อาการของท่าน เข้าข่าย</p><p class="fw-bold" style="font-size: 36px; line-height:1.1;">เป็นอาการของสโตรก</p><p class="fw-bold fs-3 mt-2" id="urgency-text">โปรดกดส่งพิกัด และโทรออกหา รพ.ด้วยตัวเอง</p><div id="countdown-timer" class="fw-bold mt-3 fs-3 border-top pt-2" style="color: #FFD700;"></div></div><div id="action-grid-container" class="action-buttons-grid"></div><table id="summary-table" class="table table-borderless mt-4 fs-4"></table><div id="map-card-container" class="mt-4 mb-4" style="display:none; width: 100%; border-radius: 20px; overflow: hidden; border: 2px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 250px;"></div><div id="contact-buttons" class="mt-4"></div><div id="route-button-container" class="mt-4"></div><button id="layer-5-save-btn" class="btn-action btn-pulse-jerky">บันทึกข้อมูลและปิดหน้าต่าง</button><button class="btn-action btn-share" onclick="handleShare()">แชร์ผลการประเมินให้คนอื่น</button><button class="btn-action btn-test-close" onclick="handleTestClose()">ออกจากการทดสอบโดยไม่บันทึก</button><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-4')">ย้อนกลับ</button></div>`;
+        
+        document.getElementById('layer-6').innerHTML = `<div id="final-emoji" style="text-align:center; font-size: 100px; margin-bottom: 20px;"></div><h2 id="final-title" class="section-title" style="font-size:36px;"></h2><p id="final-text" class="text-center" style="font-size:28px;"></p><div id="layer-6-extra-buttons" class="d-flex flex-column gap-3 mt-4"></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-1')">ย้อนกลับหน้าแรก</button></div>`;
         setupTimeOptions();
     }
 
@@ -850,6 +867,25 @@
             }, e => { console.log("Silent GPS failed"); });
         }
 
+        showLayer('layer-5');
+        buildSummaryPage();
+    };
+
+    // --- ฟังก์ชันสำหรับให้ปุ่ม "ทดสอบระยะทางไป รพ." ในกรณีที่ไม่มีความเสี่ยง ---
+    window.testDistanceToHospital = function() {
+        if (!sessionData.onsetTimeObject) {
+            sessionData.onsetTimeObject = new Date();
+            saveData('onsetTime', formatFullDateTime(sessionData.onsetTimeObject));
+        }
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                sessionData.location = `${p.coords.latitude},${p.coords.longitude}`;
+                nearestHospital = findNearestHospital(p.coords.latitude, p.coords.longitude);
+                if (document.getElementById('layer-5').classList.contains('hidden') === false) {
+                     updateSummaryAndActions(); 
+                }
+            }, e => { console.log("Silent GPS failed"); });
+        }
         showLayer('layer-5');
         buildSummaryPage();
     };
@@ -1134,6 +1170,7 @@
                     innerHtml += `<button class="btn-action btn-pulse-danger" onclick="showLayer('layer-3'); saveData('symptomDetail', 'AI: ' + currentAnalysisResult.analysis);">ประเมินความฉับพลันต่อ</button>`;
                 } else {
                     innerHtml += `<button class="btn-action btn-pulse-jerky mt-3" onclick="saveData('symptomDetail', 'AI: Low Risk'); handleFinalSave(this, false, true);">บันทึกและปิดโดยไม่ประเมินต่อ</button>`;
+                    innerHtml += `<button class="btn-action mt-3" style="background-color: #17a2b8; color: white; flex-direction:row;" onclick="saveData('symptomDetail', 'AI: Low Risk'); testDistanceToHospital();"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
                 }
                 innerHtml += `<button class="btn-action btn-share" onclick="handleShare()">แชร์ผลการประเมินนี้</button>`;
                 innerHtml += `<button class="btn-action btn-back" onclick="showLayer('layer-ai-input')">กลับไปแก้ไข</button>`;
@@ -1199,19 +1236,38 @@
 
     function buildSummaryPage() {
         if (!sessionData.eventId) sessionData.eventId = (sessionData.targetUserId || sessionData.userID || sessionData.tel) + '-' + Date.now();
-        const onset = sessionData.onsetTimeObject;
-        if (!onset) return;
+        const onset = sessionData.onsetTimeObject || new Date();
         const deadline = new Date(onset.getTime() + 4.5 * 60 * 60 * 1000);
         sessionData.arrivalDeadline = formatTime(new Date(onset.getTime() + 3.5 * 60 * 60 * 1000));
         sessionData.rtpaDeadline = formatTime(deadline);
-        startCountdown(deadline.getTime());
         
-        document.getElementById('summary-table').innerHTML = `<tbody>` + 
+        const alertBox = document.querySelector('#layer-5 .alert-stroke-detected');
+        let tableHtml = `<tbody>` + 
             createTableRow('mdi:account-circle', 'ผู้ป่วย', sessionData.registeredName || sessionData.userName) +
-            createTableRow('mdi:account-heart-outline', 'อาการ', sessionData.symptomDetail) +
-            createTableRow('mdi:clock-time-three-outline', 'เริ่มเป็น', formatFullDateTime(onset)) +
+            createTableRow('mdi:account-heart-outline', 'อาการ', sessionData.symptomDetail);
+            
+        if (sessionData.isRisk) {
+            startCountdown(deadline.getTime());
+            alertBox.innerHTML = `<span class="iconify alert-icon" data-icon="mdi:alarm-light"></span><p class="mb-2 fs-3">อาการของท่าน เข้าข่าย</p><p class="fw-bold" style="font-size: 36px; line-height:1.1;">เป็นอาการของสโตรก</p><p class="fw-bold fs-3 mt-2" id="urgency-text">โปรดกดส่งพิกัด และโทรออกหา รพ.ด้วยตัวเอง</p><div id="countdown-timer" class="fw-bold mt-3 fs-3 border-top pt-2" style="color: #FFD700;"></div>`;
+            alertBox.style.backgroundColor = "#D32F2F";
+            alertBox.style.borderColor = "#B71C1C";
+            
+            tableHtml += createTableRow('mdi:clock-time-three-outline', 'เริ่มเป็น', formatFullDateTime(onset)) +
             createTableRow('mdi:timer-sand', 'ต้องถึง รพ. (3.5ชม.)', sessionData.arrivalDeadline + ' น.') +
-            createTableRow('mdi:timer-sand', 'ยาภายใน (4.5ชม.)', `<span class="text-warning fw-bold">${sessionData.rtpaDeadline} น.</span>`) + `</tbody>`;
+            createTableRow('mdi:timer-sand', 'ยาภายใน (4.5ชม.)', `<span class="text-warning fw-bold">${sessionData.rtpaDeadline} น.</span>`);
+        } else {
+            if (countdownInterval) clearInterval(countdownInterval);
+            alertBox.innerHTML = `<span class="iconify alert-icon" data-icon="mdi:map-marker-distance" style="color:white; text-shadow: none;"></span><p class="mb-2 fs-3">ไม่พบอาการเสี่ยง</p><p class="fw-bold" style="font-size: 36px; line-height:1.1;">ทดสอบระยะทาง</p><p class="fw-bold fs-3 mt-2" id="urgency-text">จำลองแสดงระยะทางไปยังโรงพยาบาล</p>`;
+            alertBox.style.backgroundColor = "#17a2b8";
+            alertBox.style.borderColor = "#138496";
+        }
+        tableHtml += `</tbody>`;
+        document.getElementById('summary-table').innerHTML = tableHtml;
+        
+        const saveBtn = document.getElementById('layer-5-save-btn');
+        if (saveBtn) {
+            saveBtn.onclick = function() { handleFinalSave(this, sessionData.isRisk); };
+        }
         
         updateSummaryAndActions(); 
     }
@@ -1241,7 +1297,9 @@
         if (sessionData.location && nearestHospital) {
             let html = '';
             const urgencyText = document.getElementById('urgency-text');
-            if(urgencyText) urgencyText.textContent = `โปรดกดส่งพิกัด และโทรออกหา ${nearestHospital.name} ด้วยตัวเอง`;
+            if (urgencyText && sessionData.isRisk) {
+                urgencyText.textContent = `โปรดกดส่งพิกัด และโทรออกหา ${nearestHospital.name} ด้วยตัวเอง`;
+            }
 
             if (nearestHospital.dist > 100) {
                 html += createTableRow('mdi:alert-circle-outline', 'ระยะทาง', 'อยู่นอกพื้นที่', true, 'distance-row text-warning');
@@ -1472,7 +1530,21 @@
         };
     }
 
-    window.showFinalMessage = function(t, txt) { document.getElementById('final-title').textContent = t; document.getElementById('final-text').textContent = txt; document.getElementById('final-emoji').textContent = '👍'; showLayer('layer-6'); };
+    window.showFinalMessage = function(t, txt) { 
+        document.getElementById('final-title').textContent = t; 
+        document.getElementById('final-text').textContent = txt; 
+        document.getElementById('final-emoji').textContent = '👍'; 
+        
+        let extraHtml = `<button class="btn-action btn-pulse-jerky" onclick="handleFinalSave(this, false, true)">บันทึกและปิดหน้าต่าง</button>`;
+        
+        if (!sessionData.isRisk) {
+            extraHtml += `<button class="btn-action" style="background-color: #17a2b8; color: white; flex-direction:row;" onclick="testDistanceToHospital()"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
+        }
+        
+        document.getElementById('layer-6-extra-buttons').innerHTML = extraHtml;
+        showLayer('layer-6'); 
+    };
+
     function formatTime(d) { return d.toTimeString().slice(0,5); }
     function formatFullDateTime(d) { return `${new Date(d).getDate()}/${new Date(d).getMonth()+1}/${new Date(d).getFullYear()+543} ${formatTime(new Date(d))}`; }
     function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) { const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLon=(lon2-lon1)*Math.PI/180; const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2); return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
