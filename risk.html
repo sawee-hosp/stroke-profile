@@ -80,6 +80,20 @@
         }
         .btn-red-flat:active { transform: scale(0.98); }
 
+        /* --- Golden Flash Button --- */
+        @keyframes goldFlash {
+            0% { box-shadow: 0 0 5px #ffd700; background-color: #ffc107; }
+            50% { box-shadow: 0 0 20px #ffea00; background-color: #ffea00; color: #b30000; }
+            100% { box-shadow: 0 0 5px #ffd700; background-color: #ffc107; }
+        }
+        .btn-golden-flash {
+            background-color: #ffc107; color: #333; border: 2px solid #ffea00;
+            border-radius: 15px; padding: 15px 20px; font-size: 22px; font-weight: 900;
+            text-align: center; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            animation: goldFlash 1.5s infinite; transition: transform 0.2s;
+        }
+        .btn-golden-flash:active { transform: scale(0.98); }
+
         .btn-next-video { background-color: #0d6efd; display: none; }
 
         /* --- OCR Area --- */
@@ -180,7 +194,8 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
-                    <p>ระบบจะขออนุญาตถ่ายรูปสมุดประจำตัวผู้ป่วยหน้าล่าสุด เพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
+                    <p style="color:#003366; font-weight:bold; margin-bottom:10px;">📌 วิธีถ่ายรูป: ให้ถ่ายรูปให้เต็มหน้าสมุดในหน้าล่าสุดที่พบแพทย์</p>
+                    <p>AI จะวิเคราะห์ผลการตรวจเพื่อหาความเสี่ยงสโตรกเพื่อประโยชน์ในการป้องกันความเสี่ยง และเพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
                     <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็นและรายการยา เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
                 </div>
                 <div class="modal-footer p-2">
@@ -332,7 +347,8 @@
                         <!-- ปุ่มลอยบนวิดีโอ -->
                         <div id="floating-btn-container" class="floating-btns">
                             <button type="button" id="btn-next-video-float" class="btn-red-flat" style="background:#0d6efd;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
-                            <button type="button" id="btn-start-eval" class="btn-red-flat" onclick="goToStep(1)">เริ่มประเมินทันที</button>
+                            <button type="button" id="btn-ocr-direct" class="btn-golden-flash" onclick="$('#ocrConsentModal').modal('show');">📸 ถ่ายรูปสมุดโรคเรื้อรัง</button>
+                            <button type="button" id="btn-start-eval" class="btn-red-flat" onclick="goToStep(1)">คลิกประเมินความเสี่ยงสโตรก(พิมพ์เอง)</button>
                         </div>
                     </div>
                     
@@ -623,7 +639,7 @@
         let userProfile = null;
         let globalRiskData = null;
         let historyData = null;
-        let extractedMedicines = []; // จัดเก็บรายการยา
+        let extractedMedicines = []; 
         let currentStep = 'intro';
         const totalSteps = 5; 
 
@@ -632,7 +648,6 @@
             if (!text) return "-";
             let t = text.toLowerCase();
             
-            // แปลงรูปแบบติดกันที่พบบ่อยก่อน
             t = t.replace(/1x1pc/g, "วันละ 1 ครั้ง หลังอาหาร");
             t = t.replace(/1x2pc/g, "วันละ 2 ครั้ง หลังอาหาร (เช้า-เย็น)");
             t = t.replace(/1x3pc/g, "วันละ 3 ครั้ง หลังอาหาร (เช้า-กลางวัน-เย็น)");
@@ -658,7 +673,7 @@
             return t;
         }
 
-        // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS (แก้ปัญหา Web Speech API ของเบราว์เซอร์) ---
+        // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS ---
         class ThaiTTSQueue {
             constructor() {
                 let audioEl = document.getElementById('tts-audio');
@@ -706,7 +721,6 @@
                 if (!text) return;
                 this.stop(); 
                 
-                // ลบอิโมจิและเครื่องหมายพิเศษออกเพื่อให้อ่านได้ลื่นไหล
                 let cleanText = text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-🎬👆💊]/g, ' ').replace(/\s+/g, ' ');
                 this.queue = this.splitText(cleanText);
 
@@ -726,7 +740,6 @@
                 if(this.onPlay) this.onPlay();
                 
                 const currentText = this.queue.shift();
-                // ใช้ Google Translate TTS (ฟรี สำหรับการอ่านข้อความสั้นๆ ต่อเนื่องกัน)
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentText)}&tl=th&client=tw-ob`;
                 
                 this.audio.src = url;
@@ -754,7 +767,7 @@
         let playlistMap = { 
             "risk_intro": "https://youtube.com/shorts/MBf9xTkn_Sw",
             "advice_mp4": "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4",
-            "advice_thumbnail": "https://sawee-hosp.github.io/stroke-profile/befast_check.png"
+            "advice_thumbnail": "https://sawee-hosp.github.io/stroke-profile/video_preview.png"
         };
 
         function extractVideoID(url) {
@@ -817,7 +830,6 @@
                 }
             }).fail(function() { console.log("Using default playlist"); });
 
-            // ป้องกันการเตือนซ้ำซ้อนด้วย sessionStorage
             if (!sessionStorage.getItem('introShown')) {
                 swalCustom.fire({
                     title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
@@ -973,7 +985,6 @@
             let riskPercentInt = Math.round(parseFloat(result.riskPercentText));
             let safeCount = 100 - riskPercentInt;
             
-            // สร้างรูปคน 10 คน
             let sick10 = Math.ceil(riskPercentInt / 10);
             if(sick10 === 0 && riskPercentInt > 0) sick10 = 1;
             let iconsHtml = `<div style="margin-top:15px; line-height:1.2; text-align:center;">`;
@@ -1032,7 +1043,7 @@
             const btn = document.getElementById('btn-read-aloud');
             
             if (tts.isPlaying) {
-                tts.stop(); // สั่งหยุดผ่าน Class
+                tts.stop();
                 return;
             }
             
@@ -1045,11 +1056,9 @@
             
             textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
             
-            // คลีนข้อความที่เป็นสัญลักษณ์ออกให้หมดก่อนให้ AI อ่าน
             let cleanAdvice = generateSuggestionText(globalRiskData).text;
             textToRead += cleanAdvice;
 
-            // จัดการ UI ของปุ่ม
             tts.onPlay = function() {
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
                 btn.classList.remove('btn-outline-danger');
@@ -1103,12 +1112,28 @@
             .then(res => res.json())
             .then(res => {
                 $('#ocrLoading').fadeOut();
-                if(res.status === 'success') { fillDataFromOCR(res.data); } 
-                else { swalCustom.fire('ผิดพลาด', 'เกิดข้อผิดพลาด: ' + res.message, 'error'); }
+                if(res.status === 'success' && res.data && !res.data.error) { 
+                    fillDataFromOCR(res.data); 
+                } 
+                else { 
+                    swalCustom.fire({
+                        title: 'เกิดข้อผิดพลาด', 
+                        text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลจากสมุดเพื่อวิเคราะห์ได้', 
+                        icon: 'warning'
+                    }).then(() => {
+                        goToStep(1); // บังคับกรอกข้อมูลเอง
+                    }); 
+                }
             })
             .catch(err => {
                 $('#ocrLoading').fadeOut();
-                swalCustom.fire('เชื่อมต่อล้มเหลว', 'ไม่สามารถส่งรูปภาพได้ ' + err.message, 'error');
+                swalCustom.fire({
+                    title: 'เชื่อมต่อล้มเหลว', 
+                    text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลจากสมุดเพื่อวิเคราะห์ได้', 
+                    icon: 'warning'
+                }).then(() => {
+                    goToStep(1); // บังคับกรอกข้อมูลเอง
+                });
             });
         }
 
@@ -1210,7 +1235,6 @@
 
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
-            // อัปเดตในฟอร์มหลักตาม Logic
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
                 $('#tc').val(chol);
@@ -1284,7 +1308,6 @@
             let waistLimit = ins.sex === 1 ? 36 : 32;
             if(ins.wc_inch > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
 
-            // เพิ่มคำแนะนำเรื่องยา หากพบรายการยา
             if (ins.medicines && ins.medicines.length > 0) {
                 let medPurposes = [];
                 ins.medicines.forEach(m => {
@@ -1334,7 +1357,6 @@
             };
         }
 
-        // Helper สำหรับข้อความเตือนยา
         function getMedicineAdvice(indication) {
             let indStr = String(indication || "");
             if (indStr.includes("ต้านเกล็ดเลือด")) {
@@ -1351,7 +1373,7 @@
 
         async function saveAndSend(actionType) {
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
-            tts.stop(); // ปิดเสียงอ่านเมื่อกดบันทึก
+            tts.stop(); 
 
             try {
                 const finalSuggestion = generateSuggestionText(globalRiskData);
@@ -1408,7 +1430,6 @@
             const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
 
-            // กรองข้อความว่างเพื่อป้องกัน Error การส่ง LINE Flex
             const adviceBlocks = String(suggestionText).split('\n\n').filter(b => b.trim() !== "");
             const adviceFlexContents = adviceBlocks.map(block => ({
                 type: "text", text: String(block), wrap: true, size: "sm", color: "#444444", margin: "sm"
@@ -1421,7 +1442,6 @@
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
             
-            // สร้าง Emoji 10 ตัว
             let redDots = Math.max(1, Math.ceil(sickCount / 10));
             if (sickCount === 0) redDots = 0; 
             let greenDots = 10 - redDots;
@@ -1482,7 +1502,7 @@
             };
             messagesToSend.push(riskFlex);
 
-            // --- 2. Flex Message: สรุปรายการยา (เปลี่ยนเป็น Flex เดี่ยวแบบ List แทน Carousel) ---
+            // --- 2. Flex Message: สรุปรายการยา ---
             let meds = data.inputs.medicines;
             if (Array.isArray(meds) && meds.length > 0) {
                 let medContents = [
@@ -1522,34 +1542,36 @@
                 messagesToSend.push(medFlex);
             }
 
-            // --- 3. Flex Message: Video แนะนำ (แก้ไขเป็น Image เพื่อป้องกัน LINE บล็อก) ---
-            // ป้องกันการติดนามสกุลไฟล์ที่ LINE ไม่ยอมรับ โดยการเติมนามสกุลหลอกท้ายสุด
-            let vUrl = playlistMap['advice_mp4'] || "https://drive.google.com/uc?export=download&id=1NUHHF4pXz3UBWthJolJSRg5mQJGn95O3";
-            let tUrl = playlistMap['advice_thumbnail'] || "https://drive.google.com/uc?export=download&id=1t-VQzYlnsYIzglmZS_9Pmmu_XclKHSoL";
-            if (!vUrl.includes('.mp4')) vUrl += "&ext=.mp4#.mp4";
-            if (!tUrl.match(/\.(jpeg|jpg|png|gif)/i)) tUrl += "&ext=.png#.png";
-
+            // --- 3. Flex Message: Video แนะนำ (แก้ไขรองรับชนิด Video เพื่อให้เล่นได้เลย) ---
             const videoFlex = {
                 type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
                 contents: {
                     type: "bubble", size: "mega",
                     hero: {
-                        type: "image", url: tUrl, size: "full", aspectRatio: "9:16", aspectMode: "cover",
-                        action: { type: "uri", uri: vUrl }
+                        type: "video",
+                        url: "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4",
+                        previewUrl: "https://sawee-hosp.github.io/stroke-profile/video_preview.png",
+                        altContent: {
+                            type: "image",
+                            size: "full",
+                            aspectRatio: "9:16",
+                            aspectMode: "cover",
+                            url: "https://sawee-hosp.github.io/stroke-profile/video_preview.png"
+                        },
+                        aspectRatio: "9:16"
                     },
                     body: {
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
                             { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
-                            { type: "text", text: "กดที่รูปด้านบน 👆 เพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
+                            { type: "text", text: "สามารถกดเล่นวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเราได้ทันที", wrap: true, size: "sm", color: "#666666" }
                         ]
                     }
                 }
             };
             messagesToSend.push(videoFlex);
 
-            // เช็คว่าเปิดผ่าน LINE OA หรือไม่ เพื่อป้องกัน PDPA (ส่งลิงก์ในกลุ่มแชทเพื่อน)
-            const currentUrl = window.location.search; // ใช้ location.search ปลอดภัยกว่า
+            const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa')) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
@@ -1564,7 +1586,6 @@
                     return false;
                 }
             } else {
-                console.log("PDPA Protection: ข้ามการส่ง Flex Message เนื่องจากไม่ได้ระบุ target=myoa ใน URL");
                 swalCustom.fire({
                     title: 'บันทึกสำเร็จ!',
                     text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ข้ามการส่งแชทอัตโนมัติเนื่องจากไม่ได้เปิดผ่านเมนู LINE OA โดยตรง)',
