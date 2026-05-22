@@ -15,12 +15,11 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <style>
-        /* --- Base Styles & Background --- */
         body { 
             font-family: "Noto Sans Thai", sans-serif; 
-            font-size: 18px; 
+            font-size: 20px; 
             margin: 0; color: #333;
-            line-height: 1.4; 
+            line-height: 1.5; 
             min-height: 100vh;
             background: linear-gradient(180deg, #ff3654 0%, #ffffff 400px);
             background-repeat: no-repeat;
@@ -30,7 +29,7 @@
 
         /* --- Header --- */
         .header-group { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; padding-top: 10px; }
-        h1 { color: #ffffff; font-weight: 900; font-size: 26px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
+        h1 { color: #ffffff; font-weight: 900; font-size: 28px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
 
         /* --- Main Card & Steps --- */
         .main-card {
@@ -43,8 +42,8 @@
 
         /* --- Progress Bar --- */
         .progress-container { display: none; margin-bottom: 20px; text-align: center; }
-        .progress-text { font-weight: bold; color: #ff3654; margin-bottom: 5px; font-size: 16px; }
-        .progress { height: 8px; border-radius: 10px; background-color: #ffe5e5; }
+        .progress-text { font-weight: bold; color: #ff3654; margin-bottom: 5px; font-size: 18px; }
+        .progress { height: 10px; border-radius: 10px; background-color: #ffe5e5; }
         .progress-bar { background-color: #ff3654; transition: width 0.4s ease; border-radius: 10px; }
 
         /* --- Video Section (Intro) --- */
@@ -57,25 +56,25 @@
         
         .custom-play-btn {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(230, 0, 0, 0.9); color: white; width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(230, 0, 0, 0.9); color: white; width: 75px; height: 75px; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; cursor: pointer; 
             box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); z-index: 20; transition: transform 0.2s;
             animation: pulsePlay 2s infinite;
         }
         .custom-play-btn:active { transform: translate(-50%, -50%) scale(0.9); }
-        .custom-play-btn .play-icon { font-size: 35px; line-height: 1; margin-left: 5px; }
+        .custom-play-btn .play-icon { font-size: 38px; line-height: 1; margin-left: 5px; }
         @keyframes pulsePlay {
             0% { box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7); }
             70% { box-shadow: 0 0 0 15px rgba(230, 0, 0, 0); }
             100% { box-shadow: 0 0 0 0 rgba(230, 0, 0, 0); }
         }
 
-        .floating-btns { position: absolute; bottom: 20px; left: 5%; right: 5%; z-index: 15; display: flex; flex-direction: column; gap: 8px; }
-        .static-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 100%; }
+        .floating-btns { position: absolute; bottom: 20px; left: 5%; right: 5%; z-index: 15; display: flex; flex-direction: column; gap: 10px; }
+        .static-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; width: 100%; }
 
         .btn-red-flat {
             background-color: #e60000; color: #ffffff; border: none; border-radius: 15px; 
-            padding: 10px 20px; font-size: 18px; font-weight: bold; text-align: center; 
+            padding: 12px 20px; font-size: 20px; font-weight: bold; text-align: center; 
             cursor: pointer; transition: all 0.2s ease; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .btn-red-flat:active { transform: scale(0.98); }
@@ -88,7 +87,7 @@
         }
         .btn-golden-flash {
             background-color: #ffc107; color: #333; border: 2px solid #ffea00;
-            border-radius: 15px; padding: 15px 20px; font-size: 22px; font-weight: 900;
+            border-radius: 15px; padding: 18px 20px; font-size: 24px; font-weight: 900;
             text-align: center; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             animation: goldFlash 1.5s infinite; transition: transform 0.2s;
         }
@@ -103,7 +102,7 @@
         }
         .btn-ocr {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; font-weight: bold; 
-            width: 100%; border: none; padding: 10px; border-radius: 10px; font-size: 16px;
+            width: 100%; border: none; padding: 12px; border-radius: 10px; font-size: 18px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-ocr:active { transform: scale(0.98); }
@@ -116,62 +115,61 @@
         .highlight-flash { animation: flashBorder 0.8s infinite alternate !important; background-color: #fff5f5 !important; }
 
         /* --- Forms --- */
-        .form-row { margin-bottom: 15px; }
+        .form-row { margin-bottom: 18px; }
         .form-divider { border-top: 2px dashed #ffcdd2; margin: 20px 0; opacity: 0.8; }
         
-        label { font-weight: 700; display: block; margin-bottom: 5px; color: #003366; font-size: 20px; }
-        small { font-weight: 400; font-size: 16px; color: #666; display: block; margin-top: 2px; }
+        label { font-weight: 700; display: block; margin-bottom: 6px; color: #003366; font-size: 22px; }
+        small { font-weight: 400; font-size: 18px; color: #666; display: block; margin-top: 2px; }
 
         input[type="number"], input[type="text"], input[type="date"], select { 
-            width: 100%; padding: 10px 12px; font-size: 20px; 
+            width: 100%; padding: 12px 14px; font-size: 22px; 
             border-radius: 10px; border: 1px solid #ccc; background: #fdfdfd; transition: all 0.3s;
         }
         input:focus, select:focus { border-color: #ff3654; outline: none; background: #fff; box-shadow: 0 0 0 0.2rem rgba(255, 54, 84, 0.25); }
 
         .inline-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-        .radio-label { font-weight: normal; display: flex; align-items: center; cursor: pointer; font-size: 18px; margin-bottom: 0;}
-        input[type="radio"], input[type="checkbox"] { transform: scale(1.4); margin-right: 8px; accent-color: #ff3654; }
+        .radio-label { font-weight: normal; display: flex; align-items: center; cursor: pointer; font-size: 20px; margin-bottom: 0;}
+        input[type="radio"], input[type="checkbox"] { transform: scale(1.5); margin-right: 10px; accent-color: #ff3654; }
 
         /* --- Result --- */
         #result-container { margin-top: 5px; padding: 20px; background: #f8fcf9; border-radius: 15px; border: 2px solid #c3e6cb; text-align: center; }
-        .risk-percent { font-size: 4rem; font-weight: 900; line-height: 1; margin: 10px 0; }
-        .risk-desc { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
-        .progress-bar-bg { width: 100%; height: 25px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 15px 0; }
+        .risk-percent { font-size: 4.5rem; font-weight: 900; line-height: 1; margin: 10px 0; }
+        .risk-desc { font-size: 2rem; font-weight: bold; margin-bottom: 10px; }
+        .progress-bar-bg { width: 100%; height: 28px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 15px 0; }
         .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
-        /* ปรับขนาดฟอนต์หน้าผลลัพธ์ให้ใหญ่ขึ้นสำหรับผู้สูงอายุ */
-        .explanation-box { text-align: left; background: #fff; padding: 15px 20px; border-radius: 15px; margin-top: 15px; font-size: 20px; line-height: 1.5; border: 1px solid #dee2e6; color: #333; }
+        .explanation-box { text-align: left; background: #fff; padding: 20px 25px; border-radius: 15px; margin-top: 15px; font-size: 20px; line-height: 1.6; border: 1px solid #dee2e6; color: #333; }
 
         /* --- Navigation Buttons --- */
         .step-nav-buttons { display: flex; gap: 10px; margin-top: 25px; }
-        .btn-nav { flex: 1; padding: 10px; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
+        .btn-nav { flex: 1; padding: 12px; font-size: 20px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; transition: transform 0.1s; }
         .btn-nav:active { transform: scale(0.98); }
         .btn-back { background-color: #e9ecef; color: #495057; }
         .btn-next { background-color: #ff3654; color: white; box-shadow: 0 4px 6px rgba(255, 54, 84, 0.3); }
 
-        .action-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .btn-action { width: 100%; padding: 12px; font-size: 20px; font-weight: bold; color: white; border: none; border-radius: 50px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.1s; }
+        .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .btn-action { width: 100%; padding: 14px; font-size: 22px; font-weight: bold; color: white; border: none; border-radius: 50px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.1s; }
         .btn-action:active { transform: scale(0.98); }
         .btn-red { background-color: #dc3545; }
 
-        .status-box { padding: 10px; border-radius: 8px; text-align: center; font-size: 16px; margin-bottom: 15px; font-weight: bold; line-height: 1.4; }
+        .status-box { padding: 10px; border-radius: 8px; text-align: center; font-size: 18px; margin-bottom: 15px; font-weight: bold; line-height: 1.4; }
         .found { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
         .warn { background: #fff3cd; color: #856404; border: 1px solid #ffecb5; }
-        .phone-alert { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 8px; border-radius: 8px; margin-top: 8px; font-size: 16px; display: none; }
-        .referrer-box { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 16px; display: none; align-items: center; justify-content: center; text-align: center; }
+        .phone-alert { color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 8px; border-radius: 8px; margin-top: 8px; font-size: 18px; display: none; }
+        .referrer-box { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #90caf9; padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 18px; display: none; align-items: center; justify-content: center; text-align: center; }
 
         /* --- Footer Credit --- */
-        .footer-credit { text-align: center; color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 15px; width: 100%; display: block;}
+        .footer-credit { text-align: center; color: #666; font-size: 16px; margin-top: 5px; margin-bottom: 15px; width: 100%; display: block;}
 
         #loading, #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
         #ocrLoading { display: none; background: rgba(0,0,0,0.8); color: white;}
 
         .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
-        .step-title { color: #003366; border-bottom: 3px solid #ff3654; padding-bottom: 5px; margin-bottom: 5px; font-weight: 800; font-size: 22px;}
-        .step-subtitle { color: #666; font-size: 15px; margin-bottom: 15px; }
+        .step-title { color: #003366; border-bottom: 3px solid #ff3654; padding-bottom: 5px; margin-bottom: 5px; font-weight: 800; font-size: 24px;}
+        .step-subtitle { color: #666; font-size: 17px; margin-bottom: 15px; }
 
         /* Custom SweetAlert Override */
-        .swal2-title { font-size: 24px !important; }
-        .swal2-html-container { font-size: 20px !important; text-align: left; }
+        .swal2-title { font-size: 30px !important; font-weight: 900 !important; }
+        .swal2-html-container { font-size: 22px !important; text-align: left; line-height: 1.6 !important; }
     </style>
 </head>
 <body>
@@ -183,84 +181,106 @@
     
     <div id="ocrLoading">
         <div class="spinner-border text-light mb-3" style="width: 4rem; height: 4rem;"></div>
-        <h4 id="ocrLoadingText">กำลังใช้ AI อ่านข้อมูล...</h4>
+        <h4 id="ocrLoadingText" style="font-size: 22px;">กำลังใช้ AI อ่านข้อมูล...</h4>
     </div>
 
-    <!-- Modal Consent สำหรับ OCR -->
+    <!-- Modal Consent สำหรับ OCR (ปรับปรุงขนาดตัวอักษรใหญ่ขึ้นสำหรับผู้สูงอายุ และเพิ่มรูปภาพแนะนำ 1:1) -->
     <div class="modal fade" id="ocrConsentModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title m-0">📸 ข้อตกลงการใช้กล้อง AI</h5>
+                    <h4 class="modal-title m-0 fw-bold">📸 ข้อตกลงการใช้กล้อง AI</h4>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" style="font-size: 16px; line-height: 1.4;">
-                    <p style="color:#003366; font-weight:bold; margin-bottom:10px;">📌 วิธีถ่ายรูป: ให้ถ่ายรูปให้เต็มหน้าสมุดในหน้าล่าสุดที่พบแพทย์</p>
-                    <p>AI จะวิเคราะห์ผลการตรวจเพื่อหาความเสี่ยงสโตรกเพื่อประโยชน์ในการป้องกันความเสี่ยง และเพื่อความรวดเร็วในการกรอกข้อมูล โดยระบบ <b>จะไม่บันทึกรูปภาพนี้เก็บไว้</b></p>
-                    <p class="m-0">AI จะดึงเฉพาะค่าตัวเลขที่จำเป็นและรายการยา เช่น: <b>อายุ, เพศ, ความดัน, คอเลสเตอรอล, ประวัติเบาหวาน ฯลฯ</b></p>
+                <div class="modal-body p-4" style="font-size: 20px; line-height: 1.6;">
+                    
+                    <!-- โครงสร้างรูปภาพชิดซ้ายและข้อความชิดขวาแบบ 1:1 และ Responsive -->
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-xs-12 col-sm-5 text-center">
+                            <img src="https://sawee-hosp.github.io/stroke-profile/test3.png" 
+                                 class="img-fluid rounded border shadow-sm" 
+                                 style="aspect-ratio: 1/1; object-fit: cover; max-width: 100%; max-height: 250px;" 
+                                 alt="วิธีถ่ายรูปหน้าสมุดโรคเรื้อรัง"
+                                 onerror="this.src='https://placehold.co/250x250/fee2e2/991b1b?text=Book+Photo'">
+                        </div>
+                        <div class="col-xs-12 col-sm-7">
+                            <p class="text-danger fw-bold m-0" style="font-size: 22px;">📌 วิธีถ่ายรูปหน้าสมุดพก:</p>
+                            <p class="m-0 text-dark">ให้ถ่ายรูปให้เห็นเต็มทั้งหน้าสมุดล่าสุดที่พบแพทย์ เพื่อให้ AI สกัดผลเลือดและความดันล่าสุดได้อย่างถูกต้อง</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-2">ระบบ AI จะวิเคราะห์ผลการตรวจเพื่อประเมินความเสี่ยงสโตรก เพื่อให้ผู้สูงอายุได้รับคำแนะนำในการดูแลสุขภาพอย่างรวดเร็ว โดยระบบจะ <b>ไม่มีการบันทึกหรือเก็บรูปภาพนี้ไว้ในเซิร์ฟเวอร์แต่อย่างใด</b></p>
+                    <p class="m-0 text-muted" style="font-size: 18px;">AI จะดึงเฉพาะตัวเลขสำคัญ ได้แก่ อายุ, ความดัน, ไขมัน, เบาหวาน, ประวัติเคยเป็นสโตรก และรายการยาประจำตัวเท่านั้น</p>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-danger" id="btnAcceptOcr">ยินยอมและเปิดกล้อง</button>
+                    <button type="button" class="btn btn-lg btn-outline-secondary px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-lg btn-danger px-5 fw-bold" id="btnAcceptOcr">ยินยอมและเปิดกล้อง</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal แสดงข้อมูลหลังอ่าน AI (Preview & Edit) -->
+    <!-- Modal แสดงข้อมูลหลังอ่าน AI (Preview & Edit) (อัปเดตและเปลี่ยนคำตามความต้องการ) -->
     <div class="modal fade" id="ocrPreviewModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content shadow">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title fw-bold m-0">🔍 ตรวจสอบข้อมูลจาก AI</h5>
+                    <h4 class="modal-title fw-bold m-0">🔍 ตรวจสอบข้อมูลจาก AI</h4>
                 </div>
-                <div class="modal-body p-3" style="font-size: 16px; background: #f8f9fa; max-height: 70vh; overflow-y: auto;">
-                    <p class="mb-3 text-secondary" style="font-size:15px; line-height:1.3;">
+                <div class="modal-body p-4" style="font-size: 20px; background: #f8f9fa; max-height: 70vh; overflow-y: auto;">
+                    <p class="mb-3 text-secondary fw-bold" style="font-size:18px; line-height:1.4;">
                         ✅ <span class="text-success fw-bold">สีเขียว</span> = ข้อมูลที่ AI หาเจอ<br>
                         ⚠️ <span class="text-danger fw-bold">กระพริบสีแดง</span> = ข้อมูลจำเป็นที่ขาดหาย
                     </p>
                     
+                    <div class="alert alert-warning py-2 px-3 fw-bold mb-3" style="font-size: 18px;">
+                        📢 ช่วยกรอกข้อมูลเพิ่มเติมในช่องสีแดงหน่อยครับ หากไม่มั่นใจสอบถามเจ้าหน้าที่รพ.หรือ อสม.ให้ช่วยเหลือได้เลย
+                    </div>
+                    
                     <div class="row g-2">
-                        <!-- ซ่อนช่องกรอกชื่อใน Preview เพราะจะไปให้กรอกข้างนอกแทน -->
-                        <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">HN</label>
-                            <input type="text" id="pv_hn" class="form-control" placeholder="เลข HN">
+                        <div class="col-12">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">ชื่อผู้รับการประเมิน <span class="text-danger">*</span></label>
+                            <input type="text" id="pv_name" class="form-control fs-5" placeholder="ให้เอไอเรียกชื่อคุณว่าอะไรดีครับ (ระบุชื่อเล่นก็ได้)">
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">อายุ (ปี)</label>
-                            <input type="number" id="pv_age" class="form-control" placeholder="อายุ">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">HN (ไม่บังคับ)</label>
+                            <input type="text" id="pv_hn" class="form-control fs-5" placeholder="เลข HN">
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">เพศ</label>
-                            <select id="pv_sex" class="form-select">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">อายุ (ปี)</label>
+                            <input type="number" id="pv_age" class="form-control fs-5" placeholder="อายุ">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">เพศ</label>
+                            <select id="pv_sex" class="form-select fs-5">
                                 <option value="">--เลือก--</option>
                                 <option value="1">ชาย</option>
                                 <option value="0">หญิง</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">ความดัน (บน)</label>
-                            <input type="number" id="pv_sbp" class="form-control" placeholder="เช่น 130">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">ความดัน (บน)</label>
+                            <input type="number" id="pv_sbp" class="form-control fs-5" placeholder="เช่น 130">
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">เบาหวาน</label>
-                            <select id="pv_dm" class="form-select">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">เบาหวาน</label>
+                            <select id="pv_dm" class="form-select fs-5">
                                 <option value="">--เลือก--</option>
                                 <option value="1">เป็น</option>
                                 <option value="0">ไม่เป็น</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label mb-1 fw-bold fs-6">สูบบุหรี่</label>
-                            <select id="pv_smoke" class="form-select">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">สูบบุหรี่</label>
+                            <select id="pv_smoke" class="form-select fs-5">
                                 <option value="">--เลือก--</option>
                                 <option value="1">สูบ</option>
                                 <option value="0">ไม่สูบ</option>
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label mb-1 fw-bold fs-6">ประวัติสโตรก/CVA</label>
-                            <select id="pv_stroke" class="form-select">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">ประวัติเคยเป็นสโตรก</label>
+                            <select id="pv_stroke" class="form-select fs-5">
                                 <option value="">--เลือก--</option>
                                 <option value="1">เคยเป็นสโตรก</option>
                                 <option value="0">ไม่เคย</option>
@@ -269,37 +289,36 @@
                         
                         <div class="col-12 mt-2">
                             <hr class="m-0 border-danger opacity-25">
-                            <small class="text-danger d-block mt-2 mb-1 fw-bold">ข้อมูลผลเลือด หรือ สัดส่วนร่างกาย</small>
+                            <small class="text-danger d-block mt-2 mb-1 fw-bold" style="font-size: 17px;">ข้อมูลผลเลือด หรือ สัดส่วนร่างกาย</small>
                         </div>
                         
                         <div class="col-12" id="pv_chol_box">
-                            <label class="form-label mb-1 fw-bold fs-6">คอเลสเตอรอลรวม</label>
-                            <input type="number" id="pv_chol" class="form-control" placeholder="เว้นว่างถ้าไม่มี">
+                            <label class="form-label mb-1 fw-bold" style="font-size: 18px;">ไขมันคอเลสเตอรอลรวม</label>
+                            <input type="number" id="pv_chol" class="form-control fs-5" placeholder="เว้นว่างถ้าไม่มี">
                         </div>
                         
                         <div class="col-12 row g-2 m-0 p-0" id="pv_body_box">
                             <div class="col-6">
-                                <label class="form-label mb-1 fw-bold fs-6">รอบเอว (ซม.)</label>
-                                <input type="number" id="pv_waist" class="form-control" placeholder="ซม.">
+                                <label class="form-label mb-1 fw-bold" style="font-size: 18px;">รอบเอว (ซม.)</label>
+                                <input type="number" id="pv_waist" class="form-control fs-5" placeholder="ซม.">
                             </div>
                             <div class="col-6">
-                                <label class="form-label mb-1 fw-bold fs-6">ส่วนสูง (ซม.)</label>
-                                <input type="number" id="pv_height" class="form-control" placeholder="ซม.">
+                                <label class="form-label mb-1 fw-bold" style="font-size: 18px;">ส่วนสูง (ซม.)</label>
+                                <input type="number" id="pv_height" class="form-control fs-5" placeholder="ซม.">
                             </div>
                         </div>
 
                         <!-- ส่วนแสดงรายการยา -->
                         <div class="col-12 mt-3">
                             <hr class="m-0 border-primary opacity-25">
-                            <small class="text-primary d-block mt-2 mb-1 fw-bold">💊 รายการยาที่สกัดได้ (สามารถแก้ไขได้)</small>
-                            <div id="pv_medicines_box" style="font-size: 14px;">
-                            </div>
+                            <small class="text-primary d-block mt-2 mb-1 fw-bold" style="font-size: 17px;">💊 รายการยาที่สกัดได้ (สามารถแก้ไขได้)</small>
+                            <div id="pv_medicines_box" style="font-size: 16px;"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer p-2">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="button" class="btn btn-danger w-50 fw-bold" onclick="confirmOcrData()">ยืนยันข้อมูล</button>
+                    <button type="button" class="btn btn-lg btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="button" class="btn btn-lg btn-danger w-50 fw-bold" onclick="confirmOcrData()">ยืนยันข้อมูล</button>
                 </div>
             </div>
         </div>
@@ -376,7 +395,7 @@
 
                     <div class="form-row">
                         <label>ชื่อผู้รับการประเมิน <span class="text-danger">*</span></label>
-                        <input type="text" id="name" placeholder="อยากให้เอไอเรียกคุณว่าอะไร (ชื่อเล่นก็ได้)">
+                        <input type="text" id="name" placeholder="ให้เอไอเรียกชื่อคุณว่าอะไรดีครับ (ระบุชื่อเล่นก็ได้)">
                     </div>
 
                     <div class="form-divider"></div>
@@ -391,8 +410,8 @@
 
                     <!-- กล่องซ่อน รพ.สวี -->
                     <div id="sawi-ocr-box" class="sawi-ocr-box">
-                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:15px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
-                        <button type="button" class="btn-ocr" data-bs-toggle="modal" data-bs-target="#ocrConsentModal">
+                        <p style="color: #0d6efd; font-weight: bold; margin-bottom: 10px; font-size:17px;">ตัวช่วยกรอกข้อมูลอัตโนมัติ (AI)</p>
+                        <button type="button" class="btn-ocr" id="btn-ocr-trigger">
                             📸 ถ่ายรูปสมุดล่าสุดเพื่อประเมิน
                         </button>
                     </div>
@@ -410,10 +429,10 @@
 
                     <div class="form-row">
                         <label>โรคประจำตัว:</label>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> เคยเป็นสโตรก</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="checkbox" name="ud" value="โรคหลอดเลือดสมอง" id="chk-stroke"> ประวัติเคยเป็นสโตรก</label>
                             <div id="stroke-date-wrapper" class="d-none" style="margin-left:35px; margin-bottom:10px;">
-                                <label style="font-size:16px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="padding:10px;">
+                                <label style="font-size:18px;">วันที่เป็น:</label><input type="date" id="stroke-date" style="padding:10px;">
                             </div>
                             <label class="radio-label"><input type="checkbox" name="ud" value="ความดันสูง"> ความดันโลหิตสูง</label>
                             <label class="radio-label"><input type="checkbox" name="ud" value="เบาหวาน"> เบาหวาน</label>
@@ -437,7 +456,7 @@
                     </div>
 
                     <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep(1)">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-back" onclick="handlePrevStepDynamic()">ย้อนกลับ</button>
                         <button type="button" class="btn-nav btn-next" onclick="validateStep2AndProceed()">ถัดไป</button>
                     </div>
                 </div>
@@ -471,7 +490,7 @@
                     </div>
 
                     <div class="form-row">
-                        <label>มีผลการตรวจ 'คอเลสเตอรอล' หรือไม่?</label>
+                        <label>มีผลการตรวจ 'ไขมันคอเลสเตอรอลรวม' หรือไม่?</label>
                         <small style="color: #666;">(หากไม่มีให้ใช้ขนาดรอบเอวและส่วนสูงแทน)</small>
                         <div class="inline-group" style="margin-top:10px;">
                             <label class="radio-label"><input type="radio" name="useCholesterol" value="1"> มีผลเลือด</label>
@@ -480,10 +499,11 @@
                     </div>
 
                     <div id="tc_group" class="form-row" style="display:none; background:#fff8f8; padding:15px; border-radius:10px; border:1px solid #ffcdd2;">
-                        <label>ค่าคอเลสเตอรอลรวม (TC) <span class="text-danger">*</span></label>
+                        <label>ไขมันคอเลสเตอรอลรวม (TC) <span class="text-danger">*</span></label>
                         <input type="number" id="tc" inputmode="numeric" placeholder="หน่วย mg/dL">
                     </div>
 
+                    <!-- ปรับรอบเอวเป็น ซม. ตามการแก้ไขโค้ดใหม่ และไม่มีขนาดกางเกง -->
                     <div id="body_measure_group" style="background:#f1fcf5; padding:15px; border-radius:10px; border:1px solid #c3e6cb;">
                         <div class="form-row mb-3">
                             <label>รอบเอว (ซม.) <span class="text-danger">*</span></label>
@@ -496,20 +516,21 @@
                     </div>
 
                     <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep(2)">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-back" onclick="handlePrevStepDynamic()">ย้อนกลับ</button>
                         <button type="button" class="btn-nav btn-next" onclick="validateStep3AndProceed()">ถัดไป</button>
                     </div>
                 </div>
 
-                <!-- ================= STEP 4: แบบสอบถามการอยู่อาศัย ================= -->
+                <!-- ================= STEP 4: แบบสอบถามเพิ่มเติม (ปรับตามสคริปต์ใหม่ทั้งหมด) ================= -->
                 <div id="step-4" class="step-section">
                     <div class="step-title">แบบสอบถามเพิ่มเติม</div>
                     <div class="step-subtitle">ข้อมูลการอยู่อาศัยและการตัดสินใจ</div>
 
                     <div class="form-row">
-                        <label>สมมติจู่ๆ ปากเบี้ยว แขนไม่มีแรง คุณจะทำอย่างไรเป็นอย่างแรก?</label>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label class="radio-label"><input type="radio" name="decision" value="รอดูอาการ"> รอดูอาการ</label>
+                        <label>สมมติว่าวันหนึ่ง ตื่นเช้ามาแล้วรู้สึกว่ามุมปากตก หน้าเบี้ยวครึ่งซีก หรือยกแขนกินข้าวไม่ขึ้น สิ่งแรกที่จะเลือกทำคืออะไร?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="decision" value="รอดูอาการ เผื่อดีขึ้น"> รอดูอาการ เผื่อดีขึ้น</label>
+                            <label class="radio-label"><input type="radio" name="decision" value="นวดเฟ้น ทายา กินยาเอง"> นวดเฟ้น ทายา กินยาเอง</label>
                             <label class="radio-label"><input type="radio" name="decision" value="โทรให้ญาติมาดู"> โทรให้ญาติมาดู</label>
                             <label class="radio-label"><input type="radio" name="decision" value="ไปคลินิก-อนามัย"> ไปคลินิก-อนามัย</label>
                             <label class="radio-label"><input type="radio" name="decision" value="รีบไป รพ.เอง"> รีบไป รพ.เอง</label>
@@ -521,23 +542,36 @@
 
                     <div class="form-row">
                         <label>ปกติช่วงกลางวัน/กลางคืน คุณอยู่บ้านกับใคร?</label>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
-                            <label class="radio-label"><input type="radio" name="help" value="อยู่คนเดียว"> อยู่คนเดียว</label>
-                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับผู้สูงอายุ/เด็กเล็ก"> อยู่กับผู้สูงอายุ/เด็กเล็ก</label>
-                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับญาติผู้ใหญ่/คนวัยทำงาน"> อยู่กับญาติผู้ใหญ่/คนวัยทำงาน</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่คนเดียวเป็นส่วนใหญ่"> อยู่คนเดียวเป็นส่วนใหญ่</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับผู้สูงอายุด้วยกัน/เด็กเล็ก"> อยู่กับผู้สูงอายุด้วยกัน/เด็กเล็ก</label>
+                            <label class="radio-label"><input type="radio" name="help" value="อยู่กับญาติ/คนวัยทำงาน"> อยู่กับญาติ/คนวัยทำงาน</label>
+                            <label class="radio-label"><input type="radio" name="help" value="มีเพื่อนบ้านใกล้ชิด"> มีเพื่อนบ้านใกล้ชิด</label>
+                        </div>
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="form-row">
+                        <label>ท่านมั่นใจแค่ไหนว่า ถ้ามีคนในบ้านเป็นสโตรก จะสามารถพาไปโรงพยาบาลได้ทันเวลาทอง 4 ชั่วโมงครึ่ง?</label>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <label class="radio-label"><input type="radio" name="confident" value="ไม่มั่นใจเลย"> ไม่มั่นใจเลย</label>
+                            <label class="radio-label"><input type="radio" name="confident" value="มั่นใจนิดหน่อย"> มั่นใจนิดหน่อย</label>
+                            <label class="radio-label"><input type="radio" name="confident" value="มั่นใจปานกลาง"> มั่นใจปานกลาง</label>
+                            <label class="radio-label"><input type="radio" name="confident" value="มั่นใจเต็มร้อย"> มั่นใจเต็มร้อย</label>
                         </div>
                     </div>
 
                     <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep(3)">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-back" onclick="handlePrevStepDynamic()">ย้อนกลับ</button>
                         <button type="button" class="btn-nav btn-next" onclick="validateStep4AndProceed()">ถัดไป</button>
                     </div>
                 </div>
 
-                <!-- ================= STEP 5: ข้อมูลติดต่อ (เฉพาะ รพ.สวี) ================= -->
+                <!-- ================= STEP 5: ข้อมูลติดต่อและที่อยู่ (สำหรับผู้รับบริการ รพ.สวี) ================= -->
                 <div id="step-5" class="step-section">
-                    <div class="step-title">ข้อมูลติดต่อ (ข้ามได้)</div>
-                    <div class="step-subtitle">สำหรับผู้รับบริการ รพ.สวี</div>
+                    <div class="step-title">ข้อมูลติดต่อและที่อยู่</div>
+                    <div class="step-subtitle">สำหรับเจ้าหน้าที่ติดตามผลในเขตพื้นที่ รพ.สวี</div>
                     
                     <div class="form-row">
                         <label>เบอร์โทรศัพท์ (ไม่บังคับ):</label>
@@ -546,21 +580,21 @@
                     </div>
 
                     <div class="form-row">
-                        <label>HN (เลขบัตร รพ.):</label>
+                        <label>HN (เลขบัตร รพ.) (ไม่บังคับ):</label>
                         <input type="text" id="hn" placeholder="ระบุเลข HN ถ้าทราบ">
                     </div>
                     
                     <div class="form-divider"></div>
 
                     <div class="form-row">
-                        <label>ข้อมูลที่อยู่ (ไม่บังคับ):</label>
+                        <label>ข้อมูลที่อยู่:</label>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div style="flex: 1;">
-                                <label style="font-size:16px;">หมู่ที่:</label>
+                                <label style="font-size:18px;">หมู่ที่:</label>
                                 <select id="village"><option value="">เลือก</option></select>
                             </div>
                             <div style="flex: 1.5;">
-                                <label style="font-size:16px;">ตำบล:</label>
+                                <label style="font-size:18px;">ตำบล:</label>
                                 <select id="district"><option value="">เลือก</option>
                                     <option>ท่าหิน</option><option>ด่านสวี</option><option>เขาทะลุ</option>
                                     <option>เขาค่าย</option><option>ปากแพรก</option><option>สวี</option>
@@ -569,20 +603,20 @@
                                 </select>
                             </div>
                         </div>
-                        <label style="font-size:16px;">รพ.สต. ที่รับผิดชอบ:</label>
+                        <label style="font-size:18px;">รพ.สต. ที่รับผิดชอบ:</label>
                         <input type="text" id="pcu" readonly style="background-color: #e9ecef; color: #555; border:none;" placeholder="จะแสดงอัตโนมัติ">
                     </div>
 
                     <div class="form-row" style="background:#fff8f8; padding:10px 15px; border-radius:10px; border:1px solid #ffcdd2;">
                         <label class="radio-label" style="align-items: flex-start; margin:0;">
                             <input type="checkbox" id="allowTel" checked style="margin-top: 3px;"> 
-                            <span style="font-size: 15px; color:#666; line-height:1.3;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อการติดตามผล</span>
+                            <span style="font-size: 16px; color:#666; line-height:1.4;">ยินยอมให้ข้อมูลเบอร์โทร/ที่อยู่ แก่ จนท.รพ.สวี เพื่อความรวดเร็วในการดูแลกรณีฉุกเฉิน</span>
                         </label>
                     </div>
 
                     <div class="step-nav-buttons">
-                        <button type="button" class="btn-nav btn-back" onclick="goToStep(4)">ย้อนกลับ</button>
-                        <button type="button" class="btn-nav btn-next" onclick="calculateAndShowResult()">ประเมินผลความเสี่ยง</button>
+                        <button type="button" class="btn-nav btn-back" onclick="handlePrevStepDynamic()">ย้อนกลับ</button>
+                        <button type="button" class="btn-nav btn-next" onclick="validateStep5AndProceed()">ถัดไป</button>
                     </div>
                 </div>
             </form>
@@ -590,18 +624,19 @@
             <!-- ================= STEP 6: ผลการประเมิน ================= -->
             <div id="step-6" class="step-section">
                 <div id="result-container">
-                    <h2 style="color:#003366; font-weight:800; font-size: 26px; margin-bottom:5px;">ผลการประเมิน</h2>
+                    <h2 style="color:#003366; font-weight:800; font-size: 30px; margin-bottom:5px;">ผลการประเมินความเสี่ยง</h2>
                     <div class="risk-percent" id="rt-percent">0%</div>
                     <div class="risk-desc" id="rt-desc">-</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" id="rt-bar"></div>
                     </div>
 
-                    <button type="button" id="btn-read-aloud" class="btn btn-outline-danger mt-2 mb-3 fw-bold rounded-pill shadow-sm" onclick="readAloudResult()">
-                        <span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง
+                    <button type="button" id="btn-read-aloud" class="btn btn-outline-danger mt-2 mb-3 fw-bold rounded-pill shadow-sm" onclick="readAloudResult()" style="font-size: 20px;">
+                        <span style="font-size: 22px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง
                     </button>
                     
-                    <div class="explanation-box" id="rt-explanation">
+                    <!-- ขยายขนาดตัวอักษรกล่องคำบรรยายเพื่อให้ผู้สูงอายุอ่านง่ายเป็นพิเศษ -->
+                    <div class="explanation-box" id="rt-explanation" style="font-size: 22px; line-height:1.6;">
                         <div id="basic-explain"></div>
                         <hr style="border-top: 2px dashed #ccc; margin: 15px 0;">
                         <div id="full-advice-display"></div>
@@ -609,18 +644,18 @@
                 </div>
 
                 <div style="margin-top: 15px; margin-bottom: 10px;">
-                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 12px; border-radius:10px; border: 1px solid #ffcdd2; width: 100%;">
-                        <input type="checkbox" id="pdpa" checked style="margin-top: 2px;"> 
-                        <span style="font-size: 15px; color: #cc0000; font-weight: bold; line-height:1.3;">
-                            ยินยอมให้ รพ.สวี นำข้อมูลไปประมวลผลเพื่อเพิ่มความตระหนักรู้และการเข้าถึงการรักษา
+                    <label class="radio-label" style="align-items: flex-start; background-color: #fff8f8; padding: 15px; border-radius:10px; border: 1px solid #ffcdd2; width: 100%;">
+                        <input type="checkbox" id="pdpa" checked style="margin-top: 4px;"> 
+                        <span style="font-size: 18px; color: #cc0000; font-weight: bold; line-height:1.4;">
+                            ยินยอมให้ รพ.สวี นำข้อมูลไปประมวลผลเพื่อเพิ่มความตระหนักรู้และการเข้าถึงการรักษาความเสี่ยงโรคหลอดเลือดสมอง
                         </span>
                     </label>
                 </div>
 
                 <div class="action-buttons">
                     <button type="button" class="btn-action btn-red" onclick="saveAndSend('close')">บันทึกข้อมูลและปิด</button>
-                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:10px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
-                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:10px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
+                    <button type="button" class="btn-action" style="background:#ffffff; color:#cc0000; border:2px solid #cc0000; padding:12px;" onclick="saveAndSend('history')">บันทึกและดูประวัติ</button>
+                    <button type="button" class="btn-action" style="background:#e9ecef; color:#333; box-shadow:none; padding:12px;" onclick="goBackToEdit()">กลับไปแก้ไขข้อมูล</button>
                 </div>
             </div>
 
@@ -640,12 +675,15 @@
         let extractedMedicines = []; 
         let currentStep = 'intro';
         const totalSteps = 5; 
+        
+        // สถานะการไหลของขั้นตอนที่ปรับตามเงื่อนไข Address
+        let isOcrFlow = false;
+        let hasExistingAddress = false;
 
-        // ฟังก์ชันแปลวิธีกินยาเป็นภาษาไทยให้อ่านง่าย
+        // แปลวิธีกินยา
         function translateDosage(text) {
             if (!text) return "-";
             let t = text.toLowerCase();
-            
             t = t.replace(/1x1pc/g, "วันละ 1 ครั้ง หลังอาหาร");
             t = t.replace(/1x2pc/g, "วันละ 2 ครั้ง หลังอาหาร (เช้า-เย็น)");
             t = t.replace(/1x3pc/g, "วันละ 3 ครั้ง หลังอาหาร (เช้า-กลางวัน-เย็น)");
@@ -663,7 +701,6 @@
                 "pc": "หลังอาหาร", "ac": "ก่อนอาหาร", "hs": "ก่อนนอน", "prn": "เมื่อมีอาการ",
                 "q morning": "ทุกเช้า", "morning": "ตอนเช้า", "evening": "ตอนเย็น"
             };
-            
             for (let key in dict) {
                 let re = new RegExp("\\b" + key + "\\b", "g");
                 t = t.replace(re, dict[key]);
@@ -687,20 +724,14 @@
                 this.onPlay = null;
                 this.onEnd = null;
 
-                this.audio.onended = () => {
-                    this.playNext();
-                };
-                this.audio.onerror = (e) => {
-                    console.error("Audio error", e);
-                    this.playNext();
-                };
+                this.audio.onended = () => { this.playNext(); };
+                this.audio.onerror = (e) => { console.error("Audio error", e); this.playNext(); };
             }
 
             splitText(text, maxLength = 150) {
                 const words = text.split(' ');
                 let chunks = [];
                 let currentChunk = '';
-                
                 words.forEach(word => {
                     if ((currentChunk + word).length > maxLength) {
                         chunks.push(currentChunk.trim());
@@ -709,22 +740,16 @@
                         currentChunk += word + ' ';
                     }
                 });
-                if (currentChunk.trim().length > 0) {
-                    chunks.push(currentChunk.trim());
-                }
+                if (currentChunk.trim().length > 0) { chunks.push(currentChunk.trim()); }
                 return chunks;
             }
 
             speak(text) {
                 if (!text) return;
                 this.stop(); 
-                
                 let cleanText = text.replace(/[\n🔴🟡🟠🟢✅⚠️📌⭐\-🎬👆💊]/g, ' ').replace(/\s+/g, ' ');
                 this.queue = this.splitText(cleanText);
-
-                if (!this.isPlaying && this.queue.length > 0) {
-                    this.playNext();
-                }
+                if (!this.isPlaying && this.queue.length > 0) { this.playNext(); }
             }
 
             playNext() {
@@ -733,13 +758,10 @@
                     if(this.onEnd) this.onEnd();
                     return;
                 }
-
                 this.isPlaying = true;
                 if(this.onPlay) this.onPlay();
-                
                 const currentText = this.queue.shift();
                 const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentText)}&tl=th&client=tw-ob`;
-                
                 this.audio.src = url;
                 this.audio.play().catch(error => {
                     console.error("Audio Playback Error:", error);
@@ -761,7 +783,6 @@
         // --- YouTube Player Logic ---
         let ytPlayer;
         let currentPlayingUrl = "https://youtube.com/shorts/MBf9xTkn_Sw";
-        
         let playlistMap = { 
             "risk_intro": "https://youtube.com/shorts/MBf9xTkn_Sw",
             "advice_mp4": "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4",
@@ -785,9 +806,7 @@
         }
 
         function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.ENDED) {
-                $('#next-video-container').fadeIn();
-            }
+            if (event.data === YT.PlayerState.ENDED) { $('#next-video-container').fadeIn(); }
         }
 
         function playNextVideo() {
@@ -795,17 +814,16 @@
             let nextId = 'risk_' + (rand < 10 ? '0'+rand : rand);
             let url = playlistMap[nextId] || playlistMap['risk_intro'];
             currentPlayingUrl = url;
-            if(ytPlayer && extractVideoID(url)) {
-                ytPlayer.loadVideoById(extractVideoID(url));
-            }
+            if(ytPlayer && extractVideoID(url)) { ytPlayer.loadVideoById(extractVideoID(url)); }
         }
 
+        // Custom Swal with larger text and prominent buttons for seniors
         const swalCustom = Swal.mixin({
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#f8f9fa',
             customClass: {
-                confirmButton: 'btn btn-danger px-4 py-2 fs-5 rounded-pill mx-2',
-                cancelButton: 'btn btn-light text-dark border px-4 py-2 fs-5 rounded-pill mx-2'
+                confirmButton: 'btn btn-danger btn-lg px-4 py-2 fs-4 rounded-pill mx-2 shadow-sm',
+                cancelButton: 'btn btn-light text-dark border btn-lg px-4 py-2 fs-4 rounded-pill mx-2 shadow-sm'
             },
             buttonsStyling: true
         });
@@ -828,39 +846,34 @@
                 }
             }).fail(function() { console.log("Using default playlist"); });
 
+            // ตรวจหา Parameter ?camera=1 หรือจาก URL แชท
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceCamera = urlParams.get('camera') !== null;
+
             if (!sessionStorage.getItem('introShown')) {
                 swalCustom.fire({
-                    title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
+                    title: '📢 สวีรู้ทันสโตรก',
                     html: `
-                        <div style="text-align: left; font-size: 20px; line-height: 1.5; margin-top:15px;">
-                            <p>แบบประเมินนี้ใช้เพื่อ <b>คำนวณความเสี่ยงเบื้องต้น</b> ในการเกิด 'โรคหลอดเลือดสมองและหัวใจ' ภายใน 10 ปีข้างหน้า พร้อมคำแนะนำเบื้องต้น</p>
-                            <p class="text-danger fw-bold">⚠️ ข้อควรทราบ: ผลลัพธ์ที่ได้เป็นการประเมินจากสถิติ ไม่สามารถใช้แทนการวินิจฉัยของแพทย์ได้</p>
+                        <div style="text-align: left; font-size: 22px; line-height: 1.6; margin-top:15px; color:#333;">
+                            <p>ยินดีต้อนรับสู่ระบบประเมินความเสี่ยงโรคหลอดเลือดสมองและหัวใจเฉียบพลัน เพื่อสุขภาพที่ดีของคุณและคนในครอบครัว</p>
+                            <p class="text-danger fw-bold">⚠️ ข้อตกลงการใช้งาน: ผลประเมินความเสี่ยงนี้วัดค่าจากสถิติตามเกณฑ์ทางการแพทย์เบื้องต้น ไม่ควรนำไปใช้แทนคำวินิจฉัยรักษาโดยแพทย์ประจำตัวของคุณ</p>
                             <hr style="border-top: 2px dashed #ccc; margin:15px 0;">
-                            <p><b>🔒 ความเป็นส่วนตัว:</b> ระบบจะ <u>ไม่บันทึกข้อมูลใดๆ</u> จนกว่าท่านจะกดปุ่ม 'บันทึกข้อมูล' ในหน้าสุดท้าย</p>
-                            <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
+                            <p><b>🔒 ความเป็นส่วนตัว:</b> ข้อมูลของคุณจะได้รับความคุ้มครองอย่างเคร่งครัดตามข้อกำหนดความยินยอม (PDPA) โรงพยาบาลสวีขอขอบคุณที่ร่วมป้องกันภัยอัมพฤกษ์อัมพาตไปด้วยกัน</p>
                         </div>
                     `,
                     icon: 'info',
-                    confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
+                    confirmButtonText: 'รับทราบและเริ่มใช้งาน',
                     allowOutsideClick: false,
                     allowEscapeKey: false
                 }).then(() => {
-                    // หากมีพารามิเตอร์ ?camera ให้เปิดกล้องอัตโนมัติ
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.get('camera')) {
-                        setTimeout(() => {
-                            $('#ocrConsentModal').modal('show');
-                        }, 500);
+                    if (forceCamera) {
+                        setTimeout(() => { $('#ocrConsentModal').modal('show'); }, 600);
                     }
                 });
                 sessionStorage.setItem('introShown', 'true');
             } else {
-                // กรณีรีเฟรชหน้าแต่มี ?camera
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('camera')) {
-                    setTimeout(() => {
-                        $('#ocrConsentModal').modal('show');
-                    }, 500);
+                if (forceCamera) {
+                    setTimeout(() => { $('#ocrConsentModal').modal('show'); }, 600);
                 }
             }
             
@@ -874,9 +887,25 @@
                 }
             });
 
+            // คุมการกรอกรอบเอว และการเตือนเมื่อกรอกหน่วยเป็น นิ้ว
+            $('#wc').on('change', function() {
+                const val = parseFloat($(this).val()) || 0;
+                if (val > 0 && val < 50) {
+                    swalCustom.fire({
+                        icon: 'warning',
+                        title: '⚠️ ตรวจพบข้อผิดพลาด',
+                        text: 'กรุณาระบุรอบเอวเป็น "เซนติเมตร" (ซม.) หากท่านใส่เป็นนิ้ว เช่น 32 นิ้ว โปรดแก้ไขให้ถูกต้องด้วยครับ (ตัวอย่างเช่น 81 ซม.)'
+                    });
+                }
+            });
+
             $('input[name="isSawiPatient"]').change(function() {
                 if($(this).val() === '1') { $('#sawi-ocr-box').slideDown(); } 
                 else { $('#sawi-ocr-box').slideUp(); }
+            });
+
+            $('#btn-ocr-trigger').click(function() {
+                $('#ocrConsentModal').modal('show');
             });
             
             $('#telephone').on('change', function() {
@@ -892,20 +921,8 @@
             });
 
             $('#sbp').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
-            
-            // ตรวจสอบรอบเอว หาก < 50 ตีว่าอาจเป็นนิ้ว
-            $('#wc').on('change', function() {
-                const val = parseFloat(this.value);
-                if(val > 0 && val < 50) { 
-                    swalCustom.fire({
-                        icon: 'warning', 
-                        title: 'โปรดตรวจสอบ', 
-                        text: 'กรุณาระบุรอบเอวเป็น "เซนติเมตร" (ซม.) หากท่านใส่เป็นนิ้ว โปรดแก้ไขให้ถูกต้อง'
-                    }); 
-                }
-            });
-
             $('input[name="useCholesterol"]').change(toggleMeasurementFields);
+            
             $('#chk-stroke').change(function() {
                 this.checked ? $('#stroke-date-wrapper').removeClass('d-none') : $('#stroke-date-wrapper').addClass('d-none');
             });
@@ -924,6 +941,7 @@
             });
         });
 
+        // ฟังก์ชันระบบสลับหน้าอัตโนมัติ (อัจฉริยะ) คอยสืบเงื่อนไข Address และระบบ OCR/Manual
         function goToStep(step) {
             if(currentStep === 'intro' && step !== 'intro') {
                 if(ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
@@ -948,14 +966,41 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // ตัวคุมทิศทางอัจฉริยะ (Dynamic Back & Next Navigation)
+        function handlePrevStepDynamic() {
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            
+            if (currentStep === 2) {
+                goToStep(1);
+            } else if (currentStep === 3) {
+                goToStep(2);
+            } else if (currentStep === 4) {
+                // ย้อนกลับจากแบบสอบถามเพิ่มเติม
+                if (isOcrFlow && isSawi && !hasExistingAddress) {
+                    goToStep(5); // ย้อนไปที่หน้ากรอกที่อยู่
+                } else {
+                    goToStep(3); // ย้อนกลับไปหน้าปกติ
+                }
+            } else if (currentStep === 5) {
+                if (isOcrFlow) {
+                    goToStep(3); // หน้า 5 ย้อนไป 3 ใน OCR flow (ที่อยู่มาขั้นกลาง)
+                } else {
+                    goToStep(1); // ย้อนจาก หน้า 5 ไป 1 (ถ้าเลือกผู้ใช้สวี manual)
+                }
+            }
+        }
+
         function goBackToEdit() {
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
-            if(isSawi) goToStep(5);
-            else goToStep(4);
+            if (isSawi && !hasExistingAddress) {
+                goToStep(5);
+            } else {
+                goToStep(4);
+            }
         }
 
         function triggerError(missingArr, selectors) {
-            swalCustom.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุ: ' + missingArr.join(", ") });
+            swalCustom.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุข้อมูลจำเป็น: ' + missingArr.join(", ") });
             selectors.forEach(sel => $(sel).addClass('highlight-flash'));
             setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
         }
@@ -987,119 +1032,46 @@
                 }
             }
             if(missing.length > 0) return triggerError(missing, selectors);
-            goToStep(4);
+            
+            // การไหลอัจฉริยะ (OCR Flow กับข้อมูล Address)
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            if (isOcrFlow && isSawi && !hasExistingAddress) {
+                goToStep(5); // ไปหน้ารับข้อมูลที่อยู่ก่อน
+            } else {
+                goToStep(4); // ไปหน้าแบบสอบถามเพิ่มเติม
+            }
         }
 
         function validateStep4AndProceed() {
             let missing = []; let selectors = [];
-            if(!$('input[name="decision"]:checked').val()) { missing.push("การจัดการอาการเบื้องต้น"); }
+            if(!$('input[name="decision"]:checked').val()) { missing.push("ข้อพึงปฏิบัติกรณีฉุกเฉิน"); }
             if(!$('input[name="help"]:checked').val()) { missing.push("ผู้อยู่อาศัยด้วย"); }
+            if(!$('input[name="confident"]:checked').val()) { missing.push("ระดับความมั่นใจเวลาทอง"); }
             if(missing.length > 0) return triggerError(missing, selectors);
 
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
-            if(isSawi) { goToStep(5); } 
-            else { calculateAndShowResult(); } 
+            if(isSawi && !isOcrFlow && !hasExistingAddress) { 
+                goToStep(5); // ไปหน้ากรอกที่อยู่ 5
+            } else { 
+                calculateAndShowResult(); 
+            } 
         }
 
-        function calculateAndShowResult() {
-            const result = calculateRisk();
-            globalRiskData = result;
-
-            $('#rt-percent').text(result.riskPercentText + "%").css('color', result.riskColor);
-            $('#rt-desc').text(result.riskGroup).css('color', result.riskColor);
-            $('#rt-bar').css('width', (result.barValue / 30 * 100) + "%").css('background', result.riskColor);
+        function validateStep5AndProceed() {
+            let missing = []; let selectors = [];
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
             
-            // --- 💡 ส่วนอธิบาย % และเปรียบเทียบแบบละเอียด ---
-            let riskPercentInt = Math.round(parseFloat(result.riskPercentText));
-            let safeCount = 100 - riskPercentInt;
-            
-            let sick10 = Math.ceil(riskPercentInt / 10);
-            if(sick10 === 0 && riskPercentInt > 0) sick10 = 1;
-            let iconsHtml = `<div style="margin-top:15px; line-height:1.2; text-align:center;">`;
-            for(let i=0; i<10; i++) {
-                let color = i < sick10 ? '#dc3545' : '#28a745';
-                iconsHtml += `<svg width="30" height="30" viewBox="0 0 24 24" fill="${color}" style="margin:2px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+            if (isSawi) {
+                if(!$('#village').val()) { missing.push("หมู่ที่"); selectors.push("#village"); }
+                if(!$('#district').val()) { missing.push("ตำบล"); selectors.push("#district"); }
             }
-            iconsHtml += `</div>`;
+            if(missing.length > 0) return triggerError(missing, selectors);
 
-            let analogyHtml = `
-                <div style="background:#f1fcf5; border-radius:15px; padding:15px; margin-bottom:20px; border:1px solid #c3e6cb;">
-                    <div style="font-weight:bold; color:#003366; font-size:20px; text-align:center;">โอกาส ${result.riskPercentText}% ใน 10 ปี แปลว่าอะไร?</div>
-                    <div style="font-size:18px; color:#555; margin-top:10px; line-height: 1.4;">สมมติว่ามีคน 100 คน ที่มีสุขภาพ รูปร่าง อายุ ความดัน และผลเลือด เหมือนกับคุณเป๊ะๆ เดินมาอยู่รวมกัน<br>ในอีก 10 ปีข้างหน้า...</div>
-                    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:15px;">
-                        <div style="text-align:center; width:45%;">
-                            <div style="font-size:28px; font-weight:bold; color:#dc3545;">${riskPercentInt} <span style="font-size:16px;">คน</span></div>
-                            <div style="font-size:16px; color:#dc3545; line-height:1.2;">จะโชคร้ายเกิดเส้นเลือดสมองตีบแตก (สโตรก)</div>
-                        </div>
-                        <div style="font-size:24px; color:#ccc;">|</div>
-                        <div style="text-align:center; width:45%;">
-                            <div style="font-size:28px; font-weight:bold; color:#28a745;">${safeCount} <span style="font-size:16px;">คน</span></div>
-                            <div style="font-size:16px; color:#28a745; line-height:1.2;">ที่เหลือจะยังปลอดภัยดี</div>
-                        </div>
-                    </div>
-                    ${iconsHtml}
-                </div>
-            `;
-
-            let compareHtml = '';
-            let sexStr = result.inputs.sex === 1 ? 'ชาย' : 'หญิง';
-            if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
-                compareHtml = `
-                    <div style="background:#fff8f8; border-left: 4px solid #dc3545; padding:15px; margin-bottom:20px;">
-                        <div style="font-size:18px; line-height:1.4; color:#333;">และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${result.inputs.age} ปี ที่ไม่เป็นเบาหวาน ไม่สูบบุหรี่ ไขมันไม่สูงแล้ว<br><b>คุณมีความเสี่ยงมากกว่าพวกเขาถึง <span style="font-size:24px; color:#cc0000;">${result.compareRatio} เท่า</span> เลยนะ!</b></div>
-                    </div>
-                `;
-            } else if (!result.hasStrokeHistory) {
-                compareHtml = `<div style="background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; color:#155724; font-size:18px;">✅ ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่าคนวัยเดียวกันที่สุขภาพดี</div>`;
+            if (isOcrFlow) {
+                goToStep(4); // ถ้ามาทาง OCR กลับไปหา Step 4 เพื่อเก็บแบบสอบถามเพิ่ม
+            } else {
+                calculateAndShowResult(); // ไปหน้าผลลัพธ์
             }
-
-            if(result.hasStrokeHistory) {
-                compareHtml = `<div style="background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:20px; color:#856404; font-size:18px;">🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
-            }
-
-            $('#basic-explain').html(analogyHtml + compareHtml);
-
-            // --- คำแนะนำ ---
-            const fullAdvice = generateSuggestionText(result);
-            $('#full-advice-display').html(fullAdvice.html);
-
-            goToStep(6); 
-        }
-
-        // --- ควบคุมการอ่านออกเสียงโดยปุ่ม ---
-        function readAloudResult() {
-            const btn = document.getElementById('btn-read-aloud');
-            
-            if (tts.isPlaying) {
-                tts.stop();
-                return;
-            }
-            
-            let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
-            
-            if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
-                let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
-                textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
-            }
-            
-            textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
-            
-            let cleanAdvice = generateSuggestionText(globalRiskData).text;
-            textToRead += cleanAdvice;
-
-            tts.onPlay = function() {
-                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
-                btn.classList.remove('btn-outline-danger');
-                btn.classList.add('btn-danger');
-            };
-            
-            tts.onEnd = function() {
-                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline-danger');
-            };
-
-            tts.speak(textToRead);
         }
 
         function compressAndUploadImage(file) {
@@ -1119,7 +1091,6 @@
                     } else {
                         if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     }
-
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
@@ -1141,33 +1112,29 @@
             .then(res => {
                 $('#ocrLoading').fadeOut();
                 if(res.status === 'success' && res.data && !res.data.error) { 
+                    isOcrFlow = true;
                     fillDataFromOCR(res.data); 
                 } 
                 else { 
                     swalCustom.fire({
-                        title: 'เกิดข้อผิดพลาด', 
-                        text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลด้วยตัวเองเพื่อวิเคราะห์ได้', 
+                        title: 'เกิดข้อผิดพลาดในการแปลผล', 
+                        text: 'ขณะนี้ระบบประมวลผลมีผู้ใช้จำนวนมาก กรุณากรอกข้อมูลเพื่อวิเคราะห์ผลลัพธ์ด้วยตัวท่านเองก่อนได้เลยครับ', 
                         icon: 'warning'
-                    }).then(() => {
-                        goToStep(1); 
-                    }); 
+                    }).then(() => { goToStep(1); }); 
                 }
             })
             .catch(err => {
                 $('#ocrLoading').fadeOut();
                 swalCustom.fire({
                     title: 'เชื่อมต่อล้มเหลว', 
-                    text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลด้วยตัวเองเพื่อวิเคราะห์ได้', 
+                    text: 'กรุณากรอกข้อมูลเพื่อวิเคราะห์ผลลัพธ์ด้วยตัวท่านเองเพื่อความรวดเร็วครับ', 
                     icon: 'warning'
-                }).then(() => {
-                    goToStep(1); 
-                });
+                }).then(() => { goToStep(1); });
             });
         }
 
         function fillDataFromOCR(data) {
             $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid highlight-flash');
-
             extractedMedicines = data.medicines || [];
 
             function setField(id, val) {
@@ -1178,7 +1145,7 @@
                 }
             }
 
-            // ไม่ดึงชื่อจาก AI
+            // แสดง HN ใน Preview Form แต่ไม่บังคับกรอก (ถ้าดึงข้อมูลชื่อจาก Sheet ไม่เจอ ให้ถามชื่อ)
             setField('pv_hn', data.hn);
             setField('pv_age', data.age);
             setField('pv_sbp', data.sbp);
@@ -1199,15 +1166,19 @@
             if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
             setField('pv_smoke', smokeVal);
 
+            // ดึงชื่อถ้ามีในระบบ หากไม่มีให้ใช้ช่องกรอก
+            if (historyData && historyData.Name) {
+                setField('pv_name', historyData.Name);
+            } else {
+                setField('pv_name', '');
+                $('#pv_name').attr('placeholder', 'ให้เอไอเรียกชื่อคุณว่าอะไรดีครับ (ระบุชื่อเล่นก็ได้)');
+            }
+
             if (data.cholesterol) {
                 $('#pv_chol_box').show(); $('#pv_body_box').hide();
                 setField('pv_chol', data.cholesterol);
                 $('#pv_waist, #pv_height').removeClass('highlight-flash is-valid');
             } else if (data.waist && data.height) {
-                $('#pv_chol_box').hide(); $('#pv_body_box').show();
-                setField('pv_waist', data.waist); setField('pv_height', data.height);
-                $('#pv_chol').removeClass('highlight-flash is-valid');
-            } else if (data.waist || data.height) {
                 $('#pv_chol_box').hide(); $('#pv_body_box').show();
                 setField('pv_waist', data.waist); setField('pv_height', data.height);
                 $('#pv_chol').removeClass('highlight-flash is-valid');
@@ -1239,6 +1210,7 @@
         }
 
         function confirmOcrData() {
+            const name = $('#pv_name').val();
             const hn = $('#pv_hn').val();
             const age = $('#pv_age').val(); const sex = $('#pv_sex').val();
             const sbp = $('#pv_sbp').val(); const dm = $('#pv_dm').val();
@@ -1246,6 +1218,17 @@
             const chol = $('#pv_chol').val(); const waist_cm = $('#pv_waist').val();
             const height = $('#pv_height').val();
 
+            if (!name) {
+                swalCustom.fire({
+                    icon: 'warning',
+                    title: 'จำเป็นต้องระบุชื่อ',
+                    text: 'กรุณาระบุชื่อที่ต้องการให้เอไอใช้เรียกคุณก่อนดำเนินการต่อครับ'
+                });
+                $('#pv_name').addClass('highlight-flash');
+                return;
+            }
+
+            $('#name').val(name);
             if(hn) $('#hn').val(hn);
             if(age) $('#age').val(age);
             if(sex) $(`input[name="sex"][value="${sex}"]`).prop('checked', true);
@@ -1267,9 +1250,7 @@
                 $('#tc').val(chol);
             } else if (waist_cm || height) {
                 $('input[name="useCholesterol"][value="0"]').prop('checked', true).change();
-                if(waist_cm) {
-                    $('#wc').val(waist_cm); // ใส่ค่าเซนติเมตรโดยตรง ไม่ต้องแปลง
-                }
+                if(waist_cm) $('#wc').val(waist_cm); 
                 if(height) $('#bdh').val(height);
             }
 
@@ -1285,34 +1266,32 @@
 
             $('#ocrPreviewModal').modal('hide');
             
-            // เช็คว่า AI ขาดข้อมูลใดบ้าง และอธิบายผู้ใช้งาน
             let isComplete = true;
-            if(!age || !sex || !sbp || (!chol && !waist_cm && !height)) {
-                isComplete = false;
-            }
+            if(!age || !sex || !sbp || (!chol && !waist_cm && !height)) { isComplete = false; }
 
             if(!isComplete) {
                 swalCustom.fire({
-                    title: 'AI ช่วยกรอกข้อมูลแล้วบางส่วน',
-                    html: '<span style="color:#d9534f; font-weight:bold; font-size:18px;">⚠️ ยังมีข้อมูลสำคัญบางส่วนที่ขาดหายไป</span><br><br><span style="font-size:16px;">กรุณาตรวจสอบช่องที่มี <b>กรอบสีแดง</b> และกรอกให้ครบถ้วน จากนั้นค่อยกดประเมินผลในขั้นตอนถัดไป</span>',
+                    title: 'ช่วยกรอกข้อมูลเพิ่มเติมในช่องสีแดงหน่อยครับ',
+                    html: '<span style="font-size:18px;">กรุณากรอกข้อมูลในช่องที่ <b>มีกรอบกระพริบสีแดง</b> เพื่อการวิเคราะห์ที่แม่นยำที่สุด หากไม่มั่นใจสอบถามเจ้าหน้าที่รพ.หรือ อสม.ให้ช่วยเหลือได้เลย</span>',
                     icon: 'info',
-                    confirmButtonText: 'ตกลง, ฉันจะกรอกเพิ่ม'
+                    confirmButtonText: 'รับทราบ'
                 }).then(() => {
-                    goToStep(1); // นำไปสู่หน้า 1 เพื่อกรอกชื่อ และไล่ถัดไปเช็คข้อมูลที่ขาด
-                    setTimeout(() => {
-                        if(!$('#age').val()) $('#age').addClass('highlight-flash');
-                        if(!$('input[name="sex"]:checked').val()) $('input[name="sex"]').addClass('highlight-flash');
-                    }, 500);
+                    goToStep(1); 
                 });
             } else {
                 swalCustom.fire({
                     title: 'นำเข้าข้อมูลสำเร็จ!',
-                    text: 'ข้อมูลจากสมุดถูกเติมลงในแบบฟอร์มเรียบร้อย กรุณาตรวจสอบให้แน่ใจอีกครั้งก่อนกดประเมิน',
+                    text: 'ข้อมูลจากสมุดบันทึกถูกแปลงค่าลงระบบแล้ว กรุณาทำการตอบแบบสอบถามเพิ่มเติมต่อเพื่อดูระดับความเสี่ยงของคุณ',
                     icon: 'success',
-                    confirmButtonText: 'ตกลง'
+                    confirmButtonText: 'ถัดไป'
                 }).then(() => {
-                    // หากดึงข้อมูลจำเป็นได้ครบแล้ว ส่งไปหน้าแบบสอบถาม (Step 4) เพื่อลดขั้นตอน
-                    goToStep(4);
+                    // หากมีที่อยู่เรียบร้อยแล้ว หรือไม่ใช่เขตสวี ข้ามไปที่ Step 4 ทันที
+                    const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+                    if (isSawi && !hasExistingAddress) {
+                        goToStep(5); // บังคับกรอกที่อยู่ 5 ก่อน
+                    } else {
+                        goToStep(4); // ข้ามไปแบบสอบถามเพิ่มเติม 4 ได้เลย
+                    }
                 });
             }
         }
@@ -1346,61 +1325,80 @@
             } catch (e) { console.warn("LIFF SDK Warning: ", e); }
         }
 
+        // ดึงชื่อและประวัติความยินยอมเดิมจากฐานข้อมูล
+        function checkUserRegistration(uid) { 
+            $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); 
+        }
+
+        window.handleHistory = function(res) { 
+            if(res.status === 'found') { 
+                historyData = res.data; 
+                if(historyData.name || historyData.Name) {
+                    $('#name').val(historyData.name || historyData.Name);
+                }
+                
+                // ตรวจหาที่อยู่เดิม
+                if (historyData.district || historyData.village || historyData.pcu || historyData.Address) {
+                    hasExistingAddress = true;
+                    if (historyData.hn) $('#hn').val(historyData.hn);
+                    if (historyData.village) $('#village').val(historyData.village);
+                    if (historyData.district) $('#district').val(historyData.district).change();
+                }
+            } 
+        }
+
         function generateSuggestionText(data) {
             const ins = data.inputs; 
             const sug = [];
             
             if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
-            if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
+            if(ins.tc >= 200) sug.push(`🍳 ไขมันคอเลสเตอรอลรวมสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
             if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
             if(ins.sbp >= 130) sug.push(`💓 ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
             
-            // รอบเอว เปลี่ยนเป็น ซม. (ชาย < 90 ซม., หญิง < 80 ซม.)
             let waistLimitCm = ins.sex === 1 ? 90 : 80;
-            if(ins.wc_cm > waistLimitCm) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_cm} ซม.): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
+            if(ins.wc_cm > waistLimitCm) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_cm} ซม.): ควรลดน้ำหนักและรอบเอวเพื่อป้องกันความเสี่ยงอ้วนลงพุง`);
 
             if (ins.medicines && ins.medicines.length > 0) {
                 let medPurposes = [];
                 ins.medicines.forEach(m => {
-                    if (m.indication && !medPurposes.includes(m.indication)) {
-                        medPurposes.push(m.indication);
-                    }
+                    if (m.indication && !medPurposes.includes(m.indication)) { medPurposes.push(m.indication); }
                 });
                 if (medPurposes.length > 0) {
-                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
+                    sug.push(`💊 การรับประทานยา: ควรรับประทานยาอย่างเคร่งครัดตามแพทย์สั่ง โดยเฉพาะยากลุ่ม: ${medPurposes.join(', ')}`);
                 } else {
-                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
+                    sug.push(`💊 การรับประทานยา: โปรดทานยาตามแพทย์สั่งอย่างสม่ำเสมอ ห้ามปรับยาหรือหยุดยาเอง`);
                 }
             }
 
-            let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.4;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
-            let specificAlertsText = sug.length > 0 ? "⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
+            let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและแนวทางปรับพฤติกรรม:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.5;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพได้ดีมาก ขอให้รักษามาตรฐานนี้ต่อไปเพื่อชีวิตที่ยืนยาว</div>`;
+            let specificAlertsText = sug.length > 0 ? "⚠️ ข้อควรระวังและแนวทางปรับพฤติกรรม:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพได้ดีมาก ขอให้รักษามาตรฐานนี้ต่อไป";
 
             let riskPercent = parseFloat(data.riskPercentText);
             let riskAdviceHtml = ""; let riskAdviceText = "";
 
             if(riskPercent < 10) {
-                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#28a745; font-weight:bold;">🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)</span><br><b>สิ่งที่ต้องทำ:</b> รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น</div>`;
-                riskAdviceText = "🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)\nสิ่งที่ต้องทำ: รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#28a745; font-weight:bold;">🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)</span><br><b>สิ่งที่ต้องทำ:</b> รักษาสุขภาพให้ดีต่อไปตามหลัก 3อ. 2ส. ประเมินความเสี่ยงซ้ำปีละครั้ง</div>`;
+                riskAdviceText = "🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)\nสิ่งที่ต้องทำ: รักษาสุขภาพให้ดีต่อไปตามหลัก 3อ. 2ส. ประเมินความเสี่ยงซ้ำปีละครั้ง";
             } else if (riskPercent < 30) {
-                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#fd7e14; font-weight:bold;">🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)</div>`;
-                riskAdviceText = "🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)\nสิ่งที่ต้องทำ: ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต\n📌 การติดตาม: ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#fd7e14; font-weight:bold;">🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มงวด โดยเฉพาะการลดรอบเอวและงดบุหรี่<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> วัดความดันโลหิตสม่ำเสมอ และประเมินความเสี่ยงซ้ำในทุก 6 เดือน</div>`;
+                riskAdviceText = "🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)\nสิ่งที่ต้องทำ: ปรับพฤติกรรม 3อ. 2ส. อย่างจริงจัง\n📌 การติดตาม: ประเมินความเสี่ยงซ้ำทุก 6 เดือน";
             } else {
-                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#dc3545; font-weight:bold;">🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน</div>`;
-                riskAdviceText = "🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)\nสิ่งที่ต้องทำ: ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน\n📌 การติดตาม: ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน";
+                riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#dc3545; font-weight:bold;">🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)</span><br><b>สิ่งที่ต้องทำ:</b> แนะนำให้พบแพทย์ที่โรงพยาบาลโดยด่วน เพื่อพิจารณาการรักษาด้วยยาและการควบคุมความดัน/ไขมัน<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ติดตามการวัดความดันและพบเจ้าหน้าที่ทุกๆ 3 เดือน</div>`;
+                riskAdviceText = "🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)\nสิ่งที่ต้องทำ: ควรเข้าพบแพทย์โรงพยาบาลทันทีเพื่อหาแนวทางการรักษาอย่างเหมาะสม";
             }
 
             const principlesHtml = `
-                <div style="font-weight:bold; color:#003366; margin-bottom:8px;">⭐ หลัก 3อ. 2ส. แบบจำง่าย</div>
-                <ul style="margin-top:0; padding-left:25px; line-height:1.4; margin-bottom:5px; font-size:18px;">
-                    <li><b>อาหาร:</b> ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น</li>
-                    <li><b>ออกกำลังกาย:</b> ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)</li>
-                    <li><b>อารมณ์:</b> ทำจิตใจให้แจ่มใส ไม่เครียด</li>
-                    <li><b>งดสูบบุหรี่:</b> เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่</li>
-                    <li><b>ลดดื่มสุรา:</b> งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด</li>
+                <div style="font-weight:bold; color:#003366; margin-bottom:8px;">⭐ หลัก 3อ. 2ส. ยาอายุวัฒนะ</div>
+                <ul style="margin-top:0; padding-left:25px; line-height:1.5; margin-bottom:5px; font-size:20px;">
+                    <li><b>อาหาร:</b> ลดรสจัด หวาน มัน เค็ม เน้นผักและปลา</li>
+                    <li><b>ออกกำลังกาย:</b> เดินหรือขยับร่างกายวันละ 30 นาที สัปดาห์ละ 5 วัน</li>
+                    <li><b>อารมณ์:</b> ทำจิตใจให้แจ่มใส ไม่เครียด ปล่อยวาง</li>
+                    <li><b>งดสูบบุหรี่:</b> เลิกสูบเด็ดขาด ลดความดันและไขมันได้รวดเร็ว</li>
+                    <li><b>ลดดื่มสุรา:</b> งดหรือดื่มให้น้อยที่สุดเพื่อหัวใจที่แข็งแรง</li>
                 </ul>
             `;
-            const principlesText = "⭐ หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น\n- ออกกำลังกาย: ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)\n- อารมณ์: ทำจิตใจให้แจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่\n- ลดดื่มสุรา: งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด";
+            const principlesText = "⭐ หลัก 3อ. 2ส. ยาอายุวัฒนะ\n- อาหาร: ลดรสจัด หวาน มัน เค็ม\n- ออกกำลังกาย: วันละ 30 นาที\n- อารมณ์: ทำจิตใจให้แจ่มใส\n- งดสูบบุหรี่: เลิกเด็ดขาด\n- ลดดื่มสุรา: งดหลีกเลี่ยง";
 
             return {
                 html: specificAlertsHtml + riskAdviceHtml + principlesHtml,
@@ -1409,7 +1407,24 @@
         }
 
         async function saveAndSend(actionType) {
-            $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
+            // บังคับว่าถ้าไม่ติ๊ก PDPA ห้ามบันทึกข้อมูลและให้ขึ้น Modal เตือนก่อนปิด
+            if (!$('#pdpa').is(':checked')) {
+                swalCustom.fire({
+                    title: '🚨 ข้อกำหนดความปลอดภัย',
+                    text: 'ข้อมูลชุดนี้จะไม่ถูกบันทึกเข้าระบบใดๆ และไม่สามารถนำมาประมวลผลเพื่อติดตามส่งคำแนะนำในการดูแลสุขภาพได้เนื่องจากขาดข้อตกลงความยินยอม (PDPA) หากต้องการบันทึกโปรดกดยินยอมด้านล่าง',
+                    icon: 'warning',
+                    confirmButtonText: 'รับทราบ (ปิดหน้าต่าง)'
+                }).then(() => {
+                    if (liff.isInClient()) {
+                        liff.closeWindow();
+                    } else {
+                        window.close();
+                    }
+                });
+                return;
+            }
+
+            $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูลความเสี่ยง...');
             tts.stop(); 
 
             try {
@@ -1419,16 +1434,18 @@
                     timestamp: new Date(), name: $('#name').val(), role: $('#role').val(), hn: $('#hn').val(),
                     district: $('#district').val(), village: $('#village').val(), pcu: $('#pcu').val(),
                     "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
-                    help: $('input[name="help"]:checked').val(), decision: $('input[name="decision"]:checked').val(),
-                    telephone: $('#telephone').val(), line_id: '',
+                    help: $('input[name="help"]:checked').val(), 
+                    decision: $('input[name="decision"]:checked').val(),
+                    confident: $('input[name="confident"]:checked').val(), // บันทึกลง L
+                    telephone: $('#telephone').val(), 
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
-                    waist: globalRiskData.inputs.wc_cm, height: globalRiskData.inputs.ht, // ส่งค่าเป็น ซม.
+                    waist: globalRiskData.inputs.wc_cm, height: globalRiskData.inputs.ht, // ส่งหน่วยเซนติเมตร
                     thai_cv_risk_score: globalRiskData.riskPercentText, risk_group: globalRiskData.riskGroup,
                     compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, 
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
-                    allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: $('#pdpa').is(':checked') ? 'Yes' : 'No', 
+                    allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: 'Yes', 
                     area: '', referrerId: $('#referrerId').val(),
                     medicines: globalRiskData.inputs.medicines
                 };
@@ -1444,19 +1461,19 @@
                         if (actionType === 'history') liff.openWindow({ url: "https://liff.line.me/2009491708-PgcjtJDL", external: false });
                         else liff.closeWindow();
                     } else {
-                        $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
+                        $('.btn-action').prop('disabled', false).text('ลองส่งข้อมูลใหม่อีกครั้ง');
                     }
                 } else {
                     swalCustom.fire({
-                        title: 'บันทึกสำเร็จ!',
-                        text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ไม่สามารถส่ง Flex ได้เนื่องจากไม่ได้เปิดผ่านแอป LINE)',
+                        title: 'บันทึกข้อมูลเรียบร้อยแล้ว!',
+                        text: 'วิเคราะห์ความเสี่ยงและเก็บประวัติประเมินสำเร็จครับ',
                         icon: 'success'
                     });
                     $('.btn-action').text('บันทึกเรียบร้อย');
                 }
 
             } catch(e) {
-                swalCustom.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + e.message, 'error');
+                swalCustom.fire('ผิดพลาด', 'ระบบเชื่อมต่อขัดข้อง: ' + e.message, 'error');
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
@@ -1473,8 +1490,6 @@
             }));
 
             let messagesToSend = [];
-
-            // --- 1. Flex Message: Risk Result เพียงอันเดียว ---
             let sickCount = Math.round(parseFloat(data.riskPercentText));
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
@@ -1495,6 +1510,7 @@
                 ];
             }
 
+            // Flex Bubble สรุปผลความเสี่ยง (Bubble เดียวที่ปรับแต่งตามต้องการทั้งหมด)
             const riskFlex = {
                 type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก",
                 contents: {
@@ -1523,11 +1539,11 @@
                             },
                             ...compareFlex,
 
-                            // เพิ่มแบนเนอร์สีแดง คำเตือนสโตรก
+                            // เพิ่มแบนเนอร์ตัวอักษรสีขาว หนา XXL บนพื้นสีแดง เรื่องการมารักษาทันท่วงที
                             {
                                 type: "box", layout: "vertical", backgroundColor: "#dc3545", paddingAll: "15px", margin: "lg", cornerRadius: "md",
                                 contents: [
-                                    { type: "text", text: "ถ้ามีอาการเสี่ยงสโตรก ต้องรีบมารพ.ทันที อย่ารอเด็ดขาด ลดโอกาสอัมพาตและเสียชีวิตได้", color: "#ffffff", weight: "bold", size: "xxl", wrap: true, align: "center" }
+                                    { type: "text", text: "ถ้ามีอาการเสี่ยงสโตรก ต้องรีบมารพ.ทันที อย่ารอเด็ดขาด ลดโอกาสอัมพาตและเสียชีวิตได้", color: "#ffffff", weight: "bold", size: "xl", wrap: true, align: "center" }
                                 ]
                             },
 
@@ -1551,6 +1567,21 @@
             };
             messagesToSend.push(riskFlex);
 
+            // ส่งข้อความความถี่ตอบไลน์ต่อท้ายด้วย Quick Reply เพื่อนำค่าไปบันทึกใน Sheet users (col Notify)
+            const textQuickReply = {
+                type: "text",
+                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup} อย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน) อยากให้หมอสวีดูแลใกล้ชิดทางไลน์บ่อยแค่ไหนครับ`,
+                quickReply: {
+                    items: [
+                        { type: "action", action: { type: "message", label: "ทุกวัน", text: "ทุกวัน" } },
+                        { type: "action", action: { type: "message", label: "สัปดาห์ละครั้ง", text: "สัปดาห์ละครั้ง" } },
+                        { type: "action", action: { type: "message", label: "ทุกเดือน", text: "ทุกเดือน" } },
+                        { type: "action", action: { type: "message", label: "ไม่ต้อง", text: "ไม่ต้อง" } }
+                    ]
+                }
+            };
+            messagesToSend.push(textQuickReply);
+
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa')) {
                 try { 
@@ -1560,7 +1591,7 @@
                     console.error("LIFF Send Error:", err); 
                     swalCustom.fire({
                         title: 'บันทึกสำเร็จ!',
-                        text: 'ไม่สามารถส่งข้อความลงแชท LINE ได้ (' + err.message + ')',
+                        text: 'ระบบบันทึกประวัติสำเร็จแล้ว (' + err.message + ')',
                         icon: 'warning'
                     }).then(() => { liff.closeWindow(); });
                     return false;
@@ -1568,33 +1599,51 @@
             } else {
                 swalCustom.fire({
                     title: 'บันทึกสำเร็จ!',
-                    text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ข้ามการส่งแชทอัตโนมัติเนื่องจากไม่ได้เปิดผ่านเมนู LINE OA โดยตรง)',
+                    text: 'ระบบบันทึกประวัติการประเมินของคุณลงในสารสนเทศ รพ.สวี เรียบร้อยแล้วครับ',
                     icon: 'success'
                 }).then(() => { liff.closeWindow(); });
                 return true; 
             }
         }
 
-        // ดึงชื่อหากมีอยู่ใน Database ประวัติ
-        function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
-        window.handleHistory = function(res) { 
-            if(res.status === 'found') { 
-                historyData = res.data; 
-                if(historyData.Name) {
-                    $('#name').val(historyData.Name);
-                }
-                checkHistoryDisplay(); 
-            } 
+        // --- ควบคุมการอ่านผลออกเสียงด้วยเสียงสังเคราะห์ ---
+        function readAloudResult() {
+            const btn = document.getElementById('btn-read-aloud');
+            if (tts.isPlaying) {
+                tts.stop();
+                return;
+            }
+            
+            let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
+            if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
+                let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
+                textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
+            }
+            textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
+            let cleanAdvice = generateSuggestionText(globalRiskData).text;
+            textToRead += cleanAdvice;
+
+            tts.onPlay = function() {
+                btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
+                btn.classList.remove('btn-outline-danger');
+                btn.classList.add('btn-danger');
+            };
+            
+            tts.onEnd = function() {
+                btn.innerHTML = '<span style="font-size: 22px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline-danger');
+            };
+            tts.speak(textToRead);
         }
-        function checkHistoryDisplay() {}
-        
+
         function calculateRisk() {
             const inputs = {
                 age: parseFloat($('#age').val()) || 0, sex: +$('input[name="sex"]:checked').val(),
                 smoke: +$('input[name="smoke"]:checked').val(), dm: +$('input[name="dm"]:checked').val(),
                 sbp: parseFloat($('#sbp').val()) || 0,
                 tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
-                wc_cm: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0, // ค่าเป็นเซนติเมตร
+                wc_cm: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0,
                 ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
                 hasStrokeHistory: $('#chk-stroke').is(':checked'),
                 medicines: extractedMedicines
@@ -1605,9 +1654,7 @@
                 tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: inputs.wc_cm
             };
             
-            // สูตร TASCVD รับค่าเป็นรอบเอวเซนติเมตร
             let [ , predicted_risk, , baseline_risk ] = TASCVDformular(clamped.age, inputs.smoke, inputs.dm, clamped.sbp, inputs.sex, clamped.tc, clamped.whr, clamped.wc_cm);
-            
             let riskPercent = predicted_risk * 100; let ratio = 0;
             if (baseline_risk > 0) { ratio = predicted_risk / baseline_risk; }
             if (inputs.hasStrokeHistory) { riskPercent = 40.00; } else { if (riskPercent > 30) riskPercent = 30.00; }
@@ -1625,7 +1672,7 @@
         function TASCVDformular(age, smoke, dm, sbp, sex, tc, whr, wc) { 
             var sur_root = 0.964588; var full_score = 0, compare_score = 0;
             var c_sbp = (sex==1 && age>60)?132 : (sex==0 && age<=60)?115 : (sex==0 && age>60)?130 : 120;
-            var c_whr = sex==0 ? 0.52667 : 0.58125; var c_wc = sex==0 ? 79 : 93; // c_wc ในสูตรเป็น cm
+            var c_whr = sex==0 ? 0.52667 : 0.58125; var c_wc = sex==0 ? 79 : 93; 
             if (tc > 0) { 
                 full_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * sbp) + (0.69974 * dm) + (0.00212 * tc) + (0.41916 * smoke); 
                 compare_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * c_sbp) + (0.00212 * 200);
