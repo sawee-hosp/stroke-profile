@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สวีรู้ทันสโตรก</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -138,7 +138,8 @@
         .risk-desc { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
         .progress-bar-bg { width: 100%; height: 25px; background: #e9ecef; border-radius: 15px; overflow: hidden; margin: 15px 0; }
         .progress-bar-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
-        .explanation-box { text-align: left; background: #fff; padding: 15px 20px; border-radius: 15px; margin-top: 15px; font-size: 18px; line-height: 1.4; border: 1px solid #dee2e6; color: #333; }
+        /* ปรับขนาดฟอนต์หน้าผลลัพธ์ให้ใหญ่ขึ้นสำหรับผู้สูงอายุ */
+        .explanation-box { text-align: left; background: #fff; padding: 15px 20px; border-radius: 15px; margin-top: 15px; font-size: 20px; line-height: 1.5; border: 1px solid #dee2e6; color: #333; }
 
         /* --- Navigation Buttons --- */
         .step-nav-buttons { display: flex; gap: 10px; margin-top: 25px; }
@@ -220,10 +221,7 @@
                     </p>
                     
                     <div class="row g-2">
-                        <div class="col-12">
-                            <label class="form-label mb-1 fw-bold fs-6">ชื่อ-สกุล</label>
-                            <input type="text" id="pv_name" class="form-control" placeholder="ชื่อ-สกุล">
-                        </div>
+                        <!-- ซ่อนช่องกรอกชื่อใน Preview เพราะจะไปให้กรอกข้างนอกแทน -->
                         <div class="col-6">
                             <label class="form-label mb-1 fw-bold fs-6">HN</label>
                             <input type="text" id="pv_hn" class="form-control" placeholder="เลข HN">
@@ -377,8 +375,8 @@
                     </div>
 
                     <div class="form-row">
-                        <label>ชื่อผู้รับการประเมิน:</label>
-                        <input type="text" id="name" placeholder="ชื่อเล่น หรือ ชื่อจริง">
+                        <label>ชื่อผู้รับการประเมิน <span class="text-danger">*</span></label>
+                        <input type="text" id="name" placeholder="อยากให้เอไอเรียกคุณว่าอะไร (ชื่อเล่นก็ได้)">
                     </div>
 
                     <div class="form-divider"></div>
@@ -401,7 +399,7 @@
 
                     <div class="step-nav-buttons">
                         <button type="button" class="btn-nav btn-back" onclick="goToStep('intro')">กลับหน้าแรก</button>
-                        <button type="button" class="btn-nav btn-next" onclick="goToStep(2)">ถัดไป</button>
+                        <button type="button" class="btn-nav btn-next" onclick="validateStep1AndProceed()">ถัดไป</button>
                     </div>
                 </div>
 
@@ -426,12 +424,12 @@
                     <div class="form-divider"></div>
 
                     <div class="form-row">
-                        <label>อายุ (ปี):</label>
+                        <label>อายุ (ปี) <span class="text-danger">*</span></label>
                         <input type="number" id="age" inputmode="numeric" placeholder="อายุ">
                     </div>
 
                     <div class="form-row">
-                        <label>เพศ:</label>
+                        <label>เพศ <span class="text-danger">*</span></label>
                         <div class="inline-group">
                             <label class="radio-label"><input type="radio" name="sex" value="0"> หญิง</label>
                             <label class="radio-label"><input type="radio" name="sex" value="1"> ชาย</label>
@@ -468,7 +466,7 @@
                     <div class="form-divider"></div>
 
                     <div class="form-row">
-                        <label>ความดันตัวบน (SBP):</label>
+                        <label>ความดันตัวบน (SBP) <span class="text-danger">*</span></label>
                         <input type="text" id="sbp" inputmode="numeric" placeholder="ระบุค่าความดันโลหิตตัวบน">
                     </div>
 
@@ -482,17 +480,17 @@
                     </div>
 
                     <div id="tc_group" class="form-row" style="display:none; background:#fff8f8; padding:15px; border-radius:10px; border:1px solid #ffcdd2;">
-                        <label>ค่าคอเลสเตอรอลรวม (TC):</label>
+                        <label>ค่าคอเลสเตอรอลรวม (TC) <span class="text-danger">*</span></label>
                         <input type="number" id="tc" inputmode="numeric" placeholder="หน่วย mg/dL">
                     </div>
 
                     <div id="body_measure_group" style="background:#f1fcf5; padding:15px; border-radius:10px; border:1px solid #c3e6cb;">
                         <div class="form-row mb-3">
-                            <label>รอบเอว (นิ้ว):</label>
-                            <input type="number" id="wc" inputmode="numeric" placeholder="ขนาดกางเกงที่ใส่">
+                            <label>รอบเอว (ซม.) <span class="text-danger">*</span></label>
+                            <input type="number" id="wc" inputmode="numeric" placeholder="ระบุรอบเอวเป็นเซนติเมตร">
                         </div>
                         <div class="form-row mb-0">
-                            <label>ส่วนสูง (ซม.):</label>
+                            <label>ส่วนสูง (ซม.) <span class="text-danger">*</span></label>
                             <input type="number" id="bdh" inputmode="numeric" placeholder="ส่วนสูง">
                         </div>
                     </div>
@@ -846,8 +844,24 @@
                     confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
                     allowOutsideClick: false,
                     allowEscapeKey: false
+                }).then(() => {
+                    // หากมีพารามิเตอร์ ?camera ให้เปิดกล้องอัตโนมัติ
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('camera')) {
+                        setTimeout(() => {
+                            $('#ocrConsentModal').modal('show');
+                        }, 500);
+                    }
                 });
                 sessionStorage.setItem('introShown', 'true');
+            } else {
+                // กรณีรีเฟรชหน้าแต่มี ?camera
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('camera')) {
+                    setTimeout(() => {
+                        $('#ocrConsentModal').modal('show');
+                    }, 500);
+                }
             }
             
             $('#custom-play-btn').click(function() {
@@ -878,12 +892,19 @@
             });
 
             $('#sbp').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
+            
+            // ตรวจสอบรอบเอว หาก < 50 ตีว่าอาจเป็นนิ้ว
             $('#wc').on('change', function() {
-                if(this.value > 60) { 
-                    swalCustom.fire({icon:'error', title:'เกิดข้อผิดพลาด', text:'กรุณาเช็คคำตอบ เป็นหน่วยนิ้ว (ค่าไม่ควรเกิน 60)'}); 
-                    $(this).val(''); 
+                const val = parseFloat(this.value);
+                if(val > 0 && val < 50) { 
+                    swalCustom.fire({
+                        icon: 'warning', 
+                        title: 'โปรดตรวจสอบ', 
+                        text: 'กรุณาระบุรอบเอวเป็น "เซนติเมตร" (ซม.) หากท่านใส่เป็นนิ้ว โปรดแก้ไขให้ถูกต้อง'
+                    }); 
                 }
             });
+
             $('input[name="useCholesterol"]').change(toggleMeasurementFields);
             $('#chk-stroke').change(function() {
                 this.checked ? $('#stroke-date-wrapper').removeClass('d-none') : $('#stroke-date-wrapper').addClass('d-none');
@@ -937,6 +958,13 @@
             swalCustom.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุ: ' + missingArr.join(", ") });
             selectors.forEach(sel => $(sel).addClass('highlight-flash'));
             setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
+        }
+
+        function validateStep1AndProceed() {
+            let missing = []; let selectors = [];
+            if(!$('#name').val()) { missing.push("ชื่อผู้รับการประเมิน"); selectors.push("#name"); }
+            if(missing.length > 0) return triggerError(missing, selectors);
+            goToStep(2);
         }
 
         function validateStep2AndProceed() {
@@ -996,17 +1024,17 @@
 
             let analogyHtml = `
                 <div style="background:#f1fcf5; border-radius:15px; padding:15px; margin-bottom:20px; border:1px solid #c3e6cb;">
-                    <div style="font-weight:bold; color:#003366; font-size:18px; text-align:center;">โอกาส ${result.riskPercentText}% ใน 10 ปี แปลว่าอะไร?</div>
-                    <div style="font-size:16px; color:#555; margin-top:10px; line-height: 1.4;">สมมติว่ามีคน 100 คน ที่มีสุขภาพ รูปร่าง อายุ ความดัน และผลเลือด เหมือนกับคุณเป๊ะๆ เดินมาอยู่รวมกัน<br>ในอีก 10 ปีข้างหน้า...</div>
+                    <div style="font-weight:bold; color:#003366; font-size:20px; text-align:center;">โอกาส ${result.riskPercentText}% ใน 10 ปี แปลว่าอะไร?</div>
+                    <div style="font-size:18px; color:#555; margin-top:10px; line-height: 1.4;">สมมติว่ามีคน 100 คน ที่มีสุขภาพ รูปร่าง อายุ ความดัน และผลเลือด เหมือนกับคุณเป๊ะๆ เดินมาอยู่รวมกัน<br>ในอีก 10 ปีข้างหน้า...</div>
                     <div style="display:flex; justify-content:space-around; align-items:center; margin-top:15px;">
                         <div style="text-align:center; width:45%;">
-                            <div style="font-size:26px; font-weight:bold; color:#dc3545;">${riskPercentInt} <span style="font-size:14px;">คน</span></div>
-                            <div style="font-size:14px; color:#dc3545; line-height:1.2;">จะโชคร้ายเกิดเส้นเลือดสมองตีบแตก (สโตรก)</div>
+                            <div style="font-size:28px; font-weight:bold; color:#dc3545;">${riskPercentInt} <span style="font-size:16px;">คน</span></div>
+                            <div style="font-size:16px; color:#dc3545; line-height:1.2;">จะโชคร้ายเกิดเส้นเลือดสมองตีบแตก (สโตรก)</div>
                         </div>
                         <div style="font-size:24px; color:#ccc;">|</div>
                         <div style="text-align:center; width:45%;">
-                            <div style="font-size:26px; font-weight:bold; color:#28a745;">${safeCount} <span style="font-size:14px;">คน</span></div>
-                            <div style="font-size:14px; color:#28a745; line-height:1.2;">ที่เหลือจะยังปลอดภัยดี</div>
+                            <div style="font-size:28px; font-weight:bold; color:#28a745;">${safeCount} <span style="font-size:16px;">คน</span></div>
+                            <div style="font-size:16px; color:#28a745; line-height:1.2;">ที่เหลือจะยังปลอดภัยดี</div>
                         </div>
                     </div>
                     ${iconsHtml}
@@ -1018,15 +1046,15 @@
             if(result.compareRatio !== 'N/A' && result.compareRatio > 1 && !result.hasStrokeHistory) {
                 compareHtml = `
                     <div style="background:#fff8f8; border-left: 4px solid #dc3545; padding:15px; margin-bottom:20px;">
-                        <div style="font-size:16px; line-height:1.4; color:#333;">และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${result.inputs.age} ปี ที่ไม่เป็นเบาหวาน ไม่สูบบุหรี่ ไขมันไม่สูงแล้ว<br><b>คุณมีความเสี่ยงมากกว่าพวกเขาถึง <span style="font-size:22px; color:#cc0000;">${result.compareRatio} เท่า</span> เลยนะ!</b></div>
+                        <div style="font-size:18px; line-height:1.4; color:#333;">และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${result.inputs.age} ปี ที่ไม่เป็นเบาหวาน ไม่สูบบุหรี่ ไขมันไม่สูงแล้ว<br><b>คุณมีความเสี่ยงมากกว่าพวกเขาถึง <span style="font-size:24px; color:#cc0000;">${result.compareRatio} เท่า</span> เลยนะ!</b></div>
                     </div>
                 `;
             } else if (!result.hasStrokeHistory) {
-                compareHtml = `<div style="background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; color:#155724;">✅ ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่าคนวัยเดียวกันที่สุขภาพดี</div>`;
+                compareHtml = `<div style="background:#e8f5e9; padding:15px; border-radius:10px; margin-bottom:20px; color:#155724; font-size:18px;">✅ ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่าคนวัยเดียวกันที่สุขภาพดี</div>`;
             }
 
             if(result.hasStrokeHistory) {
-                compareHtml = `<div style="background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:20px; color:#856404;">🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
+                compareHtml = `<div style="background:#fff3cd; padding:15px; border-radius:10px; margin-bottom:20px; color:#856404; font-size:18px;">🚨 เนื่องจากท่านมีประวัติสโตรก ความเสี่ยงจึงอยู่ในระดับ <b>สูงอันตราย</b> โดยอัตโนมัติ</div>`;
             }
 
             $('#basic-explain').html(analogyHtml + compareHtml);
@@ -1118,10 +1146,10 @@
                 else { 
                     swalCustom.fire({
                         title: 'เกิดข้อผิดพลาด', 
-                        text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลจากสมุดเพื่อวิเคราะห์ได้', 
+                        text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลด้วยตัวเองเพื่อวิเคราะห์ได้', 
                         icon: 'warning'
                     }).then(() => {
-                        goToStep(1); // บังคับกรอกข้อมูลเอง
+                        goToStep(1); 
                     }); 
                 }
             })
@@ -1129,10 +1157,10 @@
                 $('#ocrLoading').fadeOut();
                 swalCustom.fire({
                     title: 'เชื่อมต่อล้มเหลว', 
-                    text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลจากสมุดเพื่อวิเคราะห์ได้', 
+                    text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลด้วยตัวเองเพื่อวิเคราะห์ได้', 
                     icon: 'warning'
                 }).then(() => {
-                    goToStep(1); // บังคับกรอกข้อมูลเอง
+                    goToStep(1); 
                 });
             });
         }
@@ -1150,7 +1178,7 @@
                 }
             }
 
-            setField('pv_name', data.name);
+            // ไม่ดึงชื่อจาก AI
             setField('pv_hn', data.hn);
             setField('pv_age', data.age);
             setField('pv_sbp', data.sbp);
@@ -1211,14 +1239,13 @@
         }
 
         function confirmOcrData() {
-            const name = $('#pv_name').val(); const hn = $('#pv_hn').val();
+            const hn = $('#pv_hn').val();
             const age = $('#pv_age').val(); const sex = $('#pv_sex').val();
             const sbp = $('#pv_sbp').val(); const dm = $('#pv_dm').val();
             const stroke = $('#pv_stroke').val(); const smoke = $('#pv_smoke').val();
             const chol = $('#pv_chol').val(); const waist_cm = $('#pv_waist').val();
             const height = $('#pv_height').val();
 
-            if(name) $('#name').val(name);
             if(hn) $('#hn').val(hn);
             if(age) $('#age').val(age);
             if(sex) $(`input[name="sex"][value="${sex}"]`).prop('checked', true);
@@ -1241,8 +1268,7 @@
             } else if (waist_cm || height) {
                 $('input[name="useCholesterol"][value="0"]').prop('checked', true).change();
                 if(waist_cm) {
-                    let inch = (parseFloat(waist_cm) / 2.54).toFixed(1);
-                    $('#wc').val(inch);
+                    $('#wc').val(waist_cm); // ใส่ค่าเซนติเมตรโดยตรง ไม่ต้องแปลง
                 }
                 if(height) $('#bdh').val(height);
             }
@@ -1258,18 +1284,37 @@
             });
 
             $('#ocrPreviewModal').modal('hide');
-            swalCustom.fire({
-                title: 'นำเข้าสำเร็จ!',
-                text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย โปรดตรวจสอบความถูกต้อง',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // เด้งไปหน้าฟอร์ม (Step 2) ทันทีหลังถ่ายรูปเสร็จตามที่ต้องการ
-                if (currentStep === 'intro' || currentStep === 1) {
-                    goToStep(2);
-                }
-            });
+            
+            // เช็คว่า AI ขาดข้อมูลใดบ้าง และอธิบายผู้ใช้งาน
+            let isComplete = true;
+            if(!age || !sex || !sbp || (!chol && !waist_cm && !height)) {
+                isComplete = false;
+            }
+
+            if(!isComplete) {
+                swalCustom.fire({
+                    title: 'AI ช่วยกรอกข้อมูลแล้วบางส่วน',
+                    html: '<span style="color:#d9534f; font-weight:bold; font-size:18px;">⚠️ ยังมีข้อมูลสำคัญบางส่วนที่ขาดหายไป</span><br><br><span style="font-size:16px;">กรุณาตรวจสอบช่องที่มี <b>กรอบสีแดง</b> และกรอกให้ครบถ้วน จากนั้นค่อยกดประเมินผลในขั้นตอนถัดไป</span>',
+                    icon: 'info',
+                    confirmButtonText: 'ตกลง, ฉันจะกรอกเพิ่ม'
+                }).then(() => {
+                    goToStep(1); // นำไปสู่หน้า 1 เพื่อกรอกชื่อ และไล่ถัดไปเช็คข้อมูลที่ขาด
+                    setTimeout(() => {
+                        if(!$('#age').val()) $('#age').addClass('highlight-flash');
+                        if(!$('input[name="sex"]:checked').val()) $('input[name="sex"]').addClass('highlight-flash');
+                    }, 500);
+                });
+            } else {
+                swalCustom.fire({
+                    title: 'นำเข้าข้อมูลสำเร็จ!',
+                    text: 'ข้อมูลจากสมุดถูกเติมลงในแบบฟอร์มเรียบร้อย กรุณาตรวจสอบให้แน่ใจอีกครั้งก่อนกดประเมิน',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง'
+                }).then(() => {
+                    // หากดึงข้อมูลจำเป็นได้ครบแล้ว ส่งไปหน้าแบบสอบถาม (Step 4) เพื่อลดขั้นตอน
+                    goToStep(4);
+                });
+            }
         }
 
         function checkReferrer() {
@@ -1310,8 +1355,9 @@
             if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
             if(ins.sbp >= 130) sug.push(`💓 ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
             
-            let waistLimit = ins.sex === 1 ? 36 : 32;
-            if(ins.wc_inch > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_inch} นิ้ว): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
+            // รอบเอว เปลี่ยนเป็น ซม. (ชาย < 90 ซม., หญิง < 80 ซม.)
+            let waistLimitCm = ins.sex === 1 ? 90 : 80;
+            if(ins.wc_cm > waistLimitCm) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_cm} ซม.): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
 
             if (ins.medicines && ins.medicines.length > 0) {
                 let medPurposes = [];
@@ -1362,20 +1408,6 @@
             };
         }
 
-        function getMedicineAdvice(indication) {
-            let indStr = String(indication || "");
-            if (indStr.includes("ต้านเกล็ดเลือด")) {
-                return "ต้องรับประทานสม่ำเสมอตามแพทย์สั่ง ห้ามหยุดยาเองเด็ดขาด สังเกตภาวะเลือดออกผิดปกติ รอยจ้ำเลือด เลือดกำเดา หากมีให้พบแพทย์";
-            } else if (indStr.includes("แข็งตัวของเลือด")) {
-                return "ห้ามปรับเพิ่ม ลด หรือหยุดยาเอง ต้องมาตรวจเลือด (INR) ตามนัด ห้ามซื้อสมุนไพร อาหารเสริม หรือยาแก้ปวดมารับประทานเอง";
-            } else if (indStr.includes("ลดไขมัน")) {
-                return "รับประทานต่อเนื่องตามสั่ง แม้ไขมันจะปกติแล้ว หากปวดเมื่อย/กล้ามเนื้ออักเสบรุนแรงผิดปกติ ให้แจ้งแพทย์";
-            } else if (indStr.includes("ความดัน")) {
-                return "ต้องรับประทานทุกวันอย่างต่อเนื่อง ห้ามกินเฉพาะตอนปวดศีรษะ การขาดยาเพิ่มความเสี่ยงสโตรก";
-            }
-            return "รับประทานตามที่แพทย์สั่งอย่างเคร่งครัด";
-        }
-
         async function saveAndSend(actionType) {
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
             tts.stop(); 
@@ -1391,7 +1423,7 @@
                     telephone: $('#telephone').val(), line_id: '',
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
-                    waist: globalRiskData.inputs.wc_inch, height: globalRiskData.inputs.ht,
+                    waist: globalRiskData.inputs.wc_cm, height: globalRiskData.inputs.ht, // ส่งค่าเป็น ซม.
                     thai_cv_risk_score: globalRiskData.riskPercentText, risk_group: globalRiskData.riskGroup,
                     compare_risk: globalRiskData.compareRatio, suggestion: finalSuggestion.text, 
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
@@ -1442,7 +1474,7 @@
 
             let messagesToSend = [];
 
-            // --- 1. Flex Message: Risk Result ---
+            // --- 1. Flex Message: Risk Result เพียงอันเดียว ---
             let sickCount = Math.round(parseFloat(data.riskPercentText));
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
@@ -1491,6 +1523,14 @@
                             },
                             ...compareFlex,
 
+                            // เพิ่มแบนเนอร์สีแดง คำเตือนสโตรก
+                            {
+                                type: "box", layout: "vertical", backgroundColor: "#dc3545", paddingAll: "15px", margin: "lg", cornerRadius: "md",
+                                contents: [
+                                    { type: "text", text: "ถ้ามีอาการเสี่ยงสโตรก ต้องรีบมารพ.ทันที อย่ารอเด็ดขาด ลดโอกาสอัมพาตและเสียชีวิตได้", color: "#ffffff", weight: "bold", size: "xxl", wrap: true, align: "center" }
+                                ]
+                            },
+
                             { type: "separator", margin: "lg" },
                             { type: "text", text: "คำแนะนำและการปฏิบัติตัว:", weight: "bold", size: "md", color: "#333333", margin: "lg" }, 
                             ...adviceFlexContents
@@ -1500,79 +1540,16 @@
                         type: "box", layout: "vertical", spacing: "sm",
                         contents: [
                             { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
-                            { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
+                            { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } },
+                            { type: "button", style: "link", color: "#0d6efd", action: { type: "uri", label: "▶️ ดูวิดีโอแนะนำ", uri: "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4" } },
+                            { type: "button", style: "primary", color: "#dc3545", action: { type: "uri", label: "📌 ปักหมุดแอป", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                            { type: "button", style: "secondary", action: { type: "uri", label: "ส่งสติกเกอร์ให้กำลังใจ", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                            { type: "button", style: "link", action: { type: "uri", label: "ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
                         ]
                     }
                 }
             };
             messagesToSend.push(riskFlex);
-
-            // --- 2. Flex Message: สรุปรายการยา ---
-            let meds = data.inputs.medicines;
-            if (Array.isArray(meds) && meds.length > 0) {
-                let medContents = [
-                    { type: "text", text: "💊 สรุปรายการยาของคุณ", weight: "bold", size: "lg", color: "#0d6efd", align: "center", margin: "sm" },
-                    { type: "separator", margin: "md" }
-                ];
-
-                meds.forEach((med, idx) => {
-                    let indicationStr = med.indication ? String(med.indication) : "";
-                    let advice = getMedicineAdvice(indicationStr);
-                    let safeMedName = med.name ? String(med.name) : "ไม่ระบุชื่อ";
-                    let strength = med.strength ? String(med.strength) : "";
-                    let dosageText = translateDosage(med.dosage ? String(med.dosage) : "");
-
-                    medContents.push({
-                        type: "box", layout: "vertical", margin: "md",
-                        contents: [
-                            { type: "text", text: `${idx + 1}. ${safeMedName} ${strength}`.trim(), weight: "bold", size: "sm", color: "#333333", wrap: true },
-                            { type: "text", text: `วิธีกิน: ${dosageText}`, size: "xs", color: "#555555", wrap: true },
-                            { type: "text", text: `สรรพคุณ: ${indicationStr}`, size: "xs", color: "#0d6efd", wrap: true },
-                            { type: "text", text: `📌 คำแนะนำ: ${advice}`, size: "xs", color: "#dc3545", wrap: true, margin: "xs" },
-                            { type: "separator", margin: "md" }
-                        ]
-                    });
-                });
-
-                const medFlex = {
-                    type: "flex", altText: "สรุปรายการยาของคุณ",
-                    contents: {
-                        type: "bubble", size: "mega",
-                        body: {
-                            type: "box", layout: "vertical",
-                            contents: medContents
-                        }
-                    }
-                };
-                messagesToSend.push(medFlex);
-            }
-
-            // --- 3. Flex Message: Video แนะนำ (ปรับกลับเป็น Image Hero ผูกลิงก์ตามเดิม) ---
-            let vUrl = "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4";
-            let tUrl = "https://sawee-hosp.github.io/stroke-profile/video_preview.png";
-
-            const videoFlex = {
-                type: "flex", altText: "วิดีโอคำแนะนำสุขภาพ",
-                contents: {
-                    type: "bubble", size: "mega",
-                    hero: {
-                        type: "image", 
-                        url: tUrl, 
-                        size: "full", 
-                        aspectRatio: "9:16", 
-                        aspectMode: "cover",
-                        action: { type: "uri", uri: vUrl }
-                    },
-                    body: {
-                        type: "box", layout: "vertical", spacing: "sm",
-                        contents: [
-                            { type: "text", text: "🎬 วิดีโอคำแนะนำสำหรับคุณ", weight: "bold", size: "lg", color: "#cc0000" },
-                            { type: "text", text: "กดที่รูปด้านบน 👆 เพื่อรับชมวิดีโอความรู้เกี่ยวกับการดูแลสุขภาพและป้องกันสโตรกจากเรา", wrap: true, size: "sm", color: "#666666" }
-                        ]
-                    }
-                }
-            };
-            messagesToSend.push(videoFlex);
 
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa')) {
@@ -1598,8 +1575,17 @@
             }
         }
 
+        // ดึงชื่อหากมีอยู่ใน Database ประวัติ
         function checkUserRegistration(uid) { $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); }
-        window.handleHistory = function(res) { if(res.status === 'found') { historyData = res.data; checkHistoryDisplay(); } }
+        window.handleHistory = function(res) { 
+            if(res.status === 'found') { 
+                historyData = res.data; 
+                if(historyData.Name) {
+                    $('#name').val(historyData.Name);
+                }
+                checkHistoryDisplay(); 
+            } 
+        }
         function checkHistoryDisplay() {}
         
         function calculateRisk() {
@@ -1608,21 +1594,25 @@
                 smoke: +$('input[name="smoke"]:checked').val(), dm: +$('input[name="dm"]:checked').val(),
                 sbp: parseFloat($('#sbp').val()) || 0,
                 tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
-                wc_inch: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0,
+                wc_cm: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0, // ค่าเป็นเซนติเมตร
                 ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
                 hasStrokeHistory: $('#chk-stroke').is(':checked'),
                 medicines: extractedMedicines
             };
-            const wc_cm = inputs.wc_inch * 2.54; const whr = (wc_cm > 0 && inputs.ht > 0) ? wc_cm / inputs.ht : 0;
+            const whr = (inputs.wc_cm > 0 && inputs.ht > 0) ? inputs.wc_cm / inputs.ht : 0;
             const clamped = {
                 age: Math.max(30, Math.min(inputs.age, 70)), sbp: Math.max(70, Math.min(inputs.sbp, 220)),
-                tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: wc_cm
+                tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: inputs.wc_cm
             };
+            
+            // สูตร TASCVD รับค่าเป็นรอบเอวเซนติเมตร
             let [ , predicted_risk, , baseline_risk ] = TASCVDformular(clamped.age, inputs.smoke, inputs.dm, clamped.sbp, inputs.sex, clamped.tc, clamped.whr, clamped.wc_cm);
+            
             let riskPercent = predicted_risk * 100; let ratio = 0;
             if (baseline_risk > 0) { ratio = predicted_risk / baseline_risk; }
             if (inputs.hasStrokeHistory) { riskPercent = 40.00; } else { if (riskPercent > 30) riskPercent = 30.00; }
             const classification = classifyRisk(riskPercent);
+            
             return {
                 riskPercentText: riskPercent.toFixed(2), barValue: Math.min(riskPercent, 30),
                 riskGroup: inputs.hasStrokeHistory ? "สูงอันตราย (มีประวัติเดิม)" : classification.text,
@@ -1635,7 +1625,7 @@
         function TASCVDformular(age, smoke, dm, sbp, sex, tc, whr, wc) { 
             var sur_root = 0.964588; var full_score = 0, compare_score = 0;
             var c_sbp = (sex==1 && age>60)?132 : (sex==0 && age<=60)?115 : (sex==0 && age>60)?130 : 120;
-            var c_whr = sex==0 ? 0.52667 : 0.58125; var c_wc = sex==0 ? 79 : 93;
+            var c_whr = sex==0 ? 0.52667 : 0.58125; var c_wc = sex==0 ? 79 : 93; // c_wc ในสูตรเป็น cm
             if (tc > 0) { 
                 full_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * sbp) + (0.69974 * dm) + (0.00212 * tc) + (0.41916 * smoke); 
                 compare_score = (0.08183 * age) + (0.39499 * sex) + (0.02084 * c_sbp) + (0.00212 * 200);
