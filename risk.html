@@ -1453,7 +1453,7 @@
                 compareFlex = [
                     { type: "separator", margin: "md" },
                     { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่ไม่มีปัจจัยเสี่ยง:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    { type: "text", text: `ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
+                    { type: "text", text: `ความเสี่ยงใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
                 ];
             }
 
@@ -1475,7 +1475,7 @@
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
+                        { type: "text", text: "โอกาสเกิดสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
                         { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
                         { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
                         
@@ -1518,7 +1518,7 @@
                 };
             };
             const bubble2 = {
-                type: "bubble", size: "kilo",
+                type: "bubble", size: "mega",
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
                     contents: [
@@ -1540,7 +1540,7 @@
 
             // --- Bubble 3: Advice ---
             const bubble3 = {
-                type: "bubble", size: "kilo",
+                type: "bubble", size: "mega",
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
