@@ -159,8 +159,10 @@
         /* --- Footer Credit --- */
         .footer-credit { text-align: center; color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 15px; width: 100%; display: block;}
 
-        #loading, #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
-        #ocrLoading { display: none; background: rgba(0,0,0,0.8); color: white;}
+        /* แก้ไขหน้า Loading ให้ไม่โชว์ตอนแรกเริ่ม */
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
+        
+        #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; background: rgba(0,0,0,0.8); color: white;}
 
         .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
         .step-title { color: #003366; border-bottom: 3px solid #ff3654; padding-bottom: 5px; margin-bottom: 5px; font-weight: 800; font-size: 22px;}
@@ -177,7 +179,7 @@
 
     <div id="loading">
         <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div>
-        <div class="mt-2 text-danger fw-bold">กำลังโหลดข้อมูล...</div>
+        <div class="mt-2 text-danger fw-bold">กำลังประมวลผลข้อมูล...</div>
     </div>
     
     <div id="ocrLoading">
@@ -465,7 +467,7 @@
                     <div class="form-divider"></div>
 
                     <div class="form-row">
-                        <label>ความดันตัวบน (SBP) (ความดันค่าที่สูงกว่าแค่ค่าเดียว) <span class="text-danger">*</span></label>
+                        <label>ความดันตัวบน (SBP) <span style="font-size: 16px; color: #666; font-weight:normal;">(ความดันค่าที่สูงกว่าแค่ค่าเดียว)</span> <span class="text-danger">*</span></label>
                         <input type="text" id="sbp" inputmode="numeric" placeholder="ระบุค่าความดันโลหิตตัวบน">
                     </div>
 
@@ -1305,7 +1307,7 @@
                     const urlParams = new URLSearchParams(window.location.search);
                     const action = urlParams.get('action');
                     if (action === 'setNotify') {
-                        $('#loading').show();
+                        $('#loading').css('display', 'flex'); // โชว์โหลดเฉพาะตอนอัปเดต Quick Reply
                         const freq = urlParams.get('freq');
                         $.getJSON(GAS_URL, { action: 'updateNotify', uid: userProfile.userId, freq: freq }, function(res) {
                             swalCustom.fire({title: 'สำเร็จ', text: 'บันทึกการตั้งค่าการติดตามเรียบร้อยแล้ว', icon: 'success'}).then(() => liff.closeWindow());
@@ -1322,19 +1324,31 @@
                 } else { liff.login(); }
             } catch (e) { 
                 console.warn("LIFF SDK Warning: ", e); 
-                $('#loading').fadeOut(); // Hide on error so user can proceed manually
             }
         }
 
         function checkUserRegistration(uid) { 
             $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`); 
         }
+        
         window.handleHistory = function(res) { 
-            $('#loading').fadeOut(300);
+            // ไม่ต้องทำ hide loading เพราะเราซ่อนด้วย css แต่ต้นแล้ว เพื่อให้แสดงเว็บเร็วที่สุด
             if(res.status === 'found') { 
                 historyData = res.data; 
                 if (historyData.Address && historyData.Address.trim() !== '') {
                     hasAddressValue = true;
+                }
+                
+                // --- ระบบ Auto-fill ดึงข้อมูลเบื้องหลังมาเติมฟอร์ม ---
+                if ($('#name').val() === '' && historyData.Name) {
+                    $('#name').val(historyData.Name).addClass('is-valid');
+                }
+                if ($('#hn').val() === '' && historyData.hn) {
+                    $('#hn').val(historyData.hn).addClass('is-valid');
+                }
+                if ($('#telephone').val() === '' && historyData.Telephone) {
+                    let cleanPhone = String(historyData.Telephone).replace(/[^0-9]/g, '');
+                    $('#telephone').val(cleanPhone).addClass('is-valid');
                 }
             } 
         }
@@ -1503,7 +1517,7 @@
                     district: isSawi ? $('#district').val() : '', village: isSawi ? $('#village').val() : '', pcu: isSawi ? $('#pcu').val() : '',
                     "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
                     help: $('input[name="help"]:checked').val(), decision: $('input[name="decision"]:checked').val(),
-                    confident: $('input[name="confident"]:checked').val(), // เพิ่มบันทึกช่องมั่นใจ
+                    confident: $('input[name="confident"]:checked').val(), 
                     telephone: isSawi ? $('#telephone').val() : '', line_id: '',
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
@@ -1641,7 +1655,7 @@
             messagesToSend.push(textMessage);
 
             const currentUrl = window.location.search; 
-            if (currentUrl.includes('target=myoa')) {
+            if (currentUrl.includes('target=myoa') || liff.isInClient()) { // fallback if target=myoa is missing but inside liff
                 try { 
                     await liff.sendMessages(messagesToSend); 
                     return true;
