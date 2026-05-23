@@ -159,9 +159,6 @@
         /* --- Footer Credit --- */
         .footer-credit { text-align: center; color: #666; font-size: 14px; margin-top: 5px; margin-bottom: 15px; width: 100%; display: block;}
 
-        /* แก้ไขหน้า Loading ให้ไม่โชว์ตอนแรกเริ่ม */
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
-        
         #ocrLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; background: rgba(0,0,0,0.8); color: white;}
 
         .is-valid { border-color: #198754 !important; background-color: #f1fcf5 !important;}
@@ -176,11 +173,6 @@
 <body>
     <!-- ระบบเล่นเสียงอัตโนมัติ (DOM Audio Element) -->
     <audio id="tts-audio" style="display: none;"></audio>
-
-    <div id="loading">
-        <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;"></div>
-        <div class="mt-2 text-danger fw-bold">กำลังประมวลผลข้อมูล...</div>
-    </div>
     
     <div id="ocrLoading">
         <div class="spinner-border text-light mb-3" style="width: 4rem; height: 4rem;"></div>
@@ -656,9 +648,9 @@
         const totalSteps = 5; 
         
         let isOcrFlow = false;
-        let hasAddressValue = false; // เช็คว่าเคยมีประวัติที่อยู่ไหม
+        let hasAddressValue = false; // Flag เช็คประวัติที่อยู่
 
-        // ฟังก์ชันแปลวิธีกินยาเป็นภาษาไทยให้อ่านง่าย
+        // ฟังก์ชันแปลวิธีกินยา
         function translateDosage(text) {
             if (!text) return "-";
             let t = text.toLowerCase();
@@ -686,7 +678,7 @@
             return t;
         }
 
-        // --- Class สำหรับการอ่านออกเสียงด้วย Google Translate TTS ---
+        // --- Class อ่านออกเสียง (TTS) ---
         class ThaiTTSQueue {
             constructor() {
                 let audioEl = document.getElementById('tts-audio');
@@ -695,7 +687,6 @@
                 this.isPlaying = false;
                 this.onPlay = null;
                 this.onEnd = null;
-
                 this.audio.onended = () => { this.playNext(); };
                 this.audio.onerror = (e) => { this.playNext(); };
             }
@@ -749,7 +740,7 @@
         
         const tts = new ThaiTTSQueue();
 
-        // --- YouTube Player Logic ---
+        // --- YouTube Player ---
         let ytPlayer;
         let currentPlayingUrl = "https://youtube.com/shorts/MBf9xTkn_Sw";
         let playlistMap = { 
@@ -796,6 +787,7 @@
             }, buttonsStyling: true
         });
 
+        // --- Document Ready ---
         $(document).ready(() => {
             initializeLiff();
             populateVillageDropdown();
@@ -886,13 +878,13 @@
                 compressAndUploadImage(file);
             });
             
-            // Auto open camera if ?camera=1
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('camera') === '1') {
                 setTimeout(() => { $('#ocrConsentModal').modal('show'); }, 1000);
             }
         });
 
+        // --- Smart Navigation Flow ---
         function goToStep(step) {
             if(currentStep === 'intro' && step !== 'intro') {
                 if(ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
@@ -909,10 +901,10 @@
                 $('.progress-container').show();
                 $(`#step-${step}`).addClass('active');
                 
-                // Adjust progress calculation logically based on steps hit
+                // คำนวณ Progress แบบหลอกตาให้ดูต่อเนื่อง (เพราะ step-5 อยู่ตรงกลาง)
                 let visualStepCount = step;
-                if (step === 5) visualStepCount = 4; // Contact info feels like part 4
-                if (step === 4) visualStepCount = isOcrFlow ? 4 : 5;
+                if (step === 5) visualStepCount = 4;
+                if (step === 4) visualStepCount = isOcrFlow ? 4 : 5; 
 
                 const percent = (visualStepCount / totalSteps) * 100;
                 $('#progress-text').text(`ขั้นตอนที่ ${visualStepCount} / ${totalSteps}`);
@@ -928,18 +920,7 @@
             setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
         }
 
-        // Logic Back Flow
-        function handleBackFrom4() {
-            if (!isOcrFlow && $('input[name="isSawiPatient"]:checked').val() === '1') goToStep(5);
-            else if (isOcrFlow && !hasAddressValue) goToStep(5);
-            else goToStep(3);
-        }
-        function handleBackFrom5() {
-            if (isOcrFlow) goToStep(3);
-            else goToStep(4);
-        }
-
-        // Logic Next Flow
+        // Logic Next/Back (Smart Flow Sawi Patient)
         function validateStep2AndProceed() {
             let missing = []; let selectors = [];
             if(!$('#age').val()) { missing.push("อายุ"); selectors.push("#age"); }
@@ -961,13 +942,11 @@
             }
             if(missing.length > 0) return triggerError(missing, selectors);
             
-            // Smart Flow Logic
-            if (isOcrFlow && !hasAddressValue) {
-                goToStep(5);
-            } else if (!isOcrFlow && $('input[name="isSawiPatient"]:checked').val() === '1') {
-                goToStep(5);
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            if (isSawi && !hasAddressValue) {
+                goToStep(5); // ถาม Address
             } else {
-                goToStep(4);
+                goToStep(4); // ถาม Survey
             }
         }
 
@@ -977,11 +956,7 @@
             if(!$('#district').val()) { missing.push("ตำบล"); selectors.push("#district"); }
             if(missing.length > 0) return triggerError(missing, selectors);
 
-            if (isOcrFlow) {
-                goToStep(4);
-            } else {
-                calculateAndShowResult();
-            }
+            goToStep(4); // ทำ Survey ต่อ
         }
 
         function validateStep4AndProceed() {
@@ -995,6 +970,17 @@
             calculateAndShowResult();
         }
 
+        function handleBackFrom4() {
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            if (isSawi && !hasAddressValue) goToStep(5);
+            else goToStep(3);
+        }
+
+        function handleBackFrom5() {
+            goToStep(3);
+        }
+
+        // --- Calculate Result ---
         function calculateAndShowResult() {
             const result = calculateRisk();
             globalRiskData = result;
@@ -1059,37 +1045,29 @@
 
         function readAloudResult() {
             const btn = document.getElementById('btn-read-aloud');
-            if (tts.isPlaying) {
-                tts.stop();
-                return;
-            }
+            if (tts.isPlaying) { tts.stop(); return; }
             
             let textToRead = `ผลการประเมินความเสี่ยงโรคหลอดเลือดสมองของคุณคือ ${globalRiskData.riskPercentText} เปอร์เซ็นต์ อยู่ในเกณฑ์ ${globalRiskData.riskGroup} `;
-            
             if(globalRiskData.compareRatio !== 'N/A' && globalRiskData.compareRatio > 1 && !globalRiskData.hasStrokeHistory) {
                 let sexStr = globalRiskData.inputs.sex === 1 ? 'ชาย' : 'หญิง';
                 textToRead += `และเมื่อเทียบกับคนเพศ${sexStr} อายุ ${globalRiskData.inputs.age} ปี ที่แข็งแรง คุณมีความเสี่ยงมากกว่าพวกเขาถึง ${globalRiskData.compareRatio} เท่า `;
             }
-            
             textToRead += "คำแนะนำการปฏิบัติตัวคือ ";
             let cleanAdvice = generateSuggestionText(globalRiskData).text;
             textToRead += cleanAdvice;
 
             tts.onPlay = function() {
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">⏹️</span> หยุดอ่าน';
-                btn.classList.remove('btn-outline-danger');
-                btn.classList.add('btn-danger');
+                btn.classList.remove('btn-outline-danger'); btn.classList.add('btn-danger');
             };
-            
             tts.onEnd = function() {
                 btn.innerHTML = '<span style="font-size: 20px; vertical-align: middle;">🔊</span> อ่านผลให้ฟัง';
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline-danger');
+                btn.classList.remove('btn-danger'); btn.classList.add('btn-outline-danger');
             };
-
             tts.speak(textToRead);
         }
 
+        // --- OCR Flow ---
         function compressAndUploadImage(file) {
             $('#ocrLoading').css('display', 'flex');
             const reader = new FileReader();
@@ -1101,17 +1079,11 @@
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                     let width = img.width; let height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    
                     let base64String = canvas.toDataURL('image/jpeg', 0.6);
                     let base64Data = base64String.split(',')[1]; 
                     sendToGemini(base64Data);
@@ -1129,76 +1101,54 @@
             .then(res => {
                 $('#ocrLoading').fadeOut();
                 if(res.status === 'success' && res.data && !res.data.error) { 
-                    isOcrFlow = true; // Mark as OCR Flow
-                    $('input[name="isSawiPatient"][value="1"]').prop('checked', true).change(); // ยืนยันสิทธิ์เป็นคนไข้ รพ.สวี
+                    isOcrFlow = true; 
+                    $('input[name="isSawiPatient"][value="1"]').prop('checked', true).change(); 
                     fillDataFromOCR(res.data); 
-                } 
-                else { 
-                    swalCustom.fire({
-                        title: 'เกิดข้อผิดพลาด', 
-                        text: 'ขณะนี้มีผู้ใช้งานเอไอจำนวนมาก กรุณารอสักครู่แล้วค่อยเข้ามาใหม่ หรือสามารถกรอกข้อมูลจากสมุดเพื่อวิเคราะห์ได้', 
-                        icon: 'warning'
-                    }).then(() => { goToStep(1); }); 
+                } else { 
+                    swalCustom.fire({ title: 'เกิดข้อผิดพลาด', text: 'กรุณากรอกข้อมูลเพื่อวิเคราะห์ได้ด้วยตัวเอง', icon: 'warning' }).then(() => { goToStep(1); }); 
                 }
             })
             .catch(err => {
                 $('#ocrLoading').fadeOut();
-                swalCustom.fire({
-                    title: 'เชื่อมต่อล้มเหลว', 
-                    text: 'กรุณากรอกข้อมูลเพื่อวิเคราะห์ได้ด้วยตัวเอง', 
-                    icon: 'warning'
-                }).then(() => { goToStep(1); });
+                swalCustom.fire({ title: 'เชื่อมต่อล้มเหลว', text: 'กรุณากรอกข้อมูลเพื่อวิเคราะห์ได้ด้วยตัวเอง', icon: 'warning' }).then(() => { goToStep(1); });
             });
         }
 
         function fillDataFromOCR(data) {
             $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid highlight-flash');
-
             extractedMedicines = data.medicines || [];
 
             function setField(id, val) {
-                if (val !== null && val !== undefined && val !== "") { 
-                    $(`#${id}`).val(val).addClass('is-valid'); 
-                } else { 
-                    $(`#${id}`).val('').addClass('highlight-flash'); 
-                }
+                if (val !== null && val !== undefined && val !== "") { $(`#${id}`).val(val).addClass('is-valid'); } 
+                else { $(`#${id}`).val('').addClass('highlight-flash'); }
             }
 
-            // ถ้าใน Sheet มีชื่ออยู่แล้วดึงมาใช้เลย
-            if (historyData && historyData.Name) {
-                setField('pv_name', historyData.Name);
-            } else {
-                setField('pv_name', ''); // บังคับให้กรอกชื่อ
-            }
+            // ถ้าใน Sheet มีชื่ออยู่แล้วดึงมาใช้เลย โดยไม่ใช้ชื่อที่สกัดจาก OCR
+            if (historyData && historyData.Name) { setField('pv_name', historyData.Name); } 
+            else { setField('pv_name', ''); } // บังคับกรอก
 
-            setField('pv_hn', data.hn);
-            setField('pv_age', data.age);
-            setField('pv_sbp', data.sbp);
+            setField('pv_hn', data.hn || (historyData ? historyData.hn || historyData.HN : ''));
+            setField('pv_age', data.age); setField('pv_sbp', data.sbp);
             
             let genderVal = "";
             if (data.gender === 'female') genderVal = "0"; else if (data.gender === 'male') genderVal = "1";
             setField('pv_sex', genderVal);
 
-            let dmVal = "";
-            if (data.dm_status === true) dmVal = "1"; else if (data.dm_status === false) dmVal = "0";
+            let dmVal = ""; if (data.dm_status === true) dmVal = "1"; else if (data.dm_status === false) dmVal = "0";
             setField('pv_dm', dmVal);
 
-            let strokeVal = "";
-            if (data.stroke_status === true) strokeVal = "1"; else if (data.stroke_status === false) strokeVal = "0";
+            let strokeVal = ""; if (data.stroke_status === true) strokeVal = "1"; else if (data.stroke_status === false) strokeVal = "0";
             setField('pv_stroke', strokeVal);
 
-            let smokeVal = "";
-            if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
+            let smokeVal = ""; if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
             setField('pv_smoke', smokeVal);
 
             if (data.cholesterol) {
                 $('#pv_chol_box').show(); $('#pv_body_box').hide();
-                setField('pv_chol', data.cholesterol);
-                $('#pv_waist, #pv_height').removeClass('highlight-flash is-valid');
+                setField('pv_chol', data.cholesterol); $('#pv_waist, #pv_height').removeClass('highlight-flash is-valid');
             } else if (data.waist || data.height) {
                 $('#pv_chol_box').hide(); $('#pv_body_box').show();
-                setField('pv_waist', data.waist); setField('pv_height', data.height);
-                $('#pv_chol').removeClass('highlight-flash is-valid');
+                setField('pv_waist', data.waist); setField('pv_height', data.height); $('#pv_chol').removeClass('highlight-flash is-valid');
             } else {
                 $('#pv_chol_box').show(); $('#pv_body_box').show();
                 setField('pv_chol', ''); setField('pv_waist', ''); setField('pv_height', '');
@@ -1226,73 +1176,53 @@
 
         function confirmOcrData() {
             const name = $('#pv_name').val();
-            if(!name) { 
-                swalCustom.fire('ข้อมูลไม่ครบ', 'กรุณาระบุชื่อที่อยากให้เอไอเรียกคุณด้วยครับ', 'warning');
-                return;
-            }
+            if(!name) { swalCustom.fire('ข้อมูลไม่ครบ', 'กรุณาระบุชื่อที่อยากให้เอไอเรียกคุณด้วยครับ', 'warning'); return; }
 
-            const hn = $('#pv_hn').val();
-            const age = $('#pv_age').val(); const sex = $('#pv_sex').val();
+            const hn = $('#pv_hn').val(); const age = $('#pv_age').val(); const sex = $('#pv_sex').val();
             const sbp = $('#pv_sbp').val(); const dm = $('#pv_dm').val();
             const stroke = $('#pv_stroke').val(); const smoke = $('#pv_smoke').val();
-            const chol = $('#pv_chol').val(); const waist_cm = $('#pv_waist').val();
-            const height = $('#pv_height').val();
+            const chol = $('#pv_chol').val(); const waist_cm = $('#pv_waist').val(); const height = $('#pv_height').val();
 
-            if(name) $('#name').val(name);
-            if(hn) $('#hn').val(hn);
-            if(age) $('#age').val(age);
+            if(name) $('#name').val(name); if(hn) $('#hn').val(hn); if(age) $('#age').val(age);
             if(sex) $(`input[name="sex"][value="${sex}"]`).prop('checked', true);
             if(sbp) $('#sbp').val(sbp);
             if(dm) $(`input[name="dm"][value="${dm}"]`).prop('checked', true);
             
-            if(stroke === "1") {
-                $('#chk-stroke').prop('checked', true);
-                $('#stroke-date-wrapper').removeClass('d-none');
-            } else if (stroke === "0") {
-                $('#chk-stroke').prop('checked', false);
-                $('#stroke-date-wrapper').addClass('d-none');
-            }
-
+            if(stroke === "1") { $('#chk-stroke').prop('checked', true); $('#stroke-date-wrapper').removeClass('d-none'); } 
+            else if (stroke === "0") { $('#chk-stroke').prop('checked', false); $('#stroke-date-wrapper').addClass('d-none'); }
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
 
             if(chol) {
-                $('input[name="useCholesterol"][value="1"]').prop('checked', true).change();
-                $('#tc').val(chol);
+                $('input[name="useCholesterol"][value="1"]').prop('checked', true).change(); $('#tc').val(chol);
             } else if (waist_cm || height) {
                 $('input[name="useCholesterol"][value="0"]').prop('checked', true).change();
-                if(waist_cm) $('#wc').val(waist_cm); // ใช้ ซม. แล้ว
+                if(waist_cm) $('#wc').val(waist_cm); 
                 if(height) $('#bdh').val(height);
             }
 
             extractedMedicines = [];
             $('#pv_medicines_box .med-name').each(function() {
-                let idx = $(this).data('idx');
-                let medName = $(this).val();
-                let strength = $(`.med-strength[data-idx="${idx}"]`).val();
-                let dosage = $(`.med-dosage[data-idx="${idx}"]`).val();
-                let indication = $(`.med-indication[data-idx="${idx}"]`).val();
+                let idx = $(this).data('idx'); let medName = $(this).val();
+                let strength = $(`.med-strength[data-idx="${idx}"]`).val(); let dosage = $(`.med-dosage[data-idx="${idx}"]`).val(); let indication = $(`.med-indication[data-idx="${idx}"]`).val();
                 if(medName) extractedMedicines.push({name: medName, strength: strength, dosage: dosage, indication: indication});
             });
 
             $('#ocrPreviewModal').modal('hide');
-            swalCustom.fire({
-                title: 'นำเข้าสำเร็จ!',
-                text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย โปรดตรวจสอบความถูกต้อง',
-                icon: 'success', timer: 2000, showConfirmButton: false
-            }).then(() => {
-                goToStep(2);
+            swalCustom.fire({ title: 'นำเข้าสำเร็จ!', text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false }).then(() => {
+                // Bypass Logic: ถ่ายรูปเสร็จ ถ้าไม่มี Address ค่อยไปถาม, ถ้ามี Address แล้ว ข้ามไป Survey (Step 4) เลย
+                if (!hasAddressValue) { goToStep(5); } 
+                else { goToStep(4); }
             });
         }
 
+        // --- LIFF & Background Check ---
         function checkReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
             const refId = urlParams.get('ref');
             if (refId) {
                 $('#referrerId').val(refId);
                 $.getJSON(GAS_URL, { action: 'getReferrerName', refId: refId }, function(res) {
-                    if (res.success && res.name) {
-                        $('#referrer-display').html(`🤝 แนะนำให้มาประเมินโดย: <b>คุณ${res.name}</b>`).css('display', 'flex'); 
-                    }
+                    if (res.success && res.name) { $('#referrer-display').html(`🤝 แนะนำให้มาประเมินโดย: <b>คุณ${res.name}</b>`).css('display', 'flex'); }
                 });
             }
         }
@@ -1303,28 +1233,25 @@
                 if (liff.isLoggedIn()) {
                     userProfile = await liff.getProfile();
                     
-                    // --- Handle Quick Reply Action Update (URI Action) ---
+                    // --- Handle Quick Reply URI Action (Silent Save & Close) ---
                     const urlParams = new URLSearchParams(window.location.search);
-                    const action = urlParams.get('action');
-                    if (action === 'setNotify') {
-                        $('#loading').css('display', 'flex'); // โชว์โหลดเฉพาะตอนอัปเดต Quick Reply
+                    if (urlParams.get('action') === 'setNotify') {
+                        // ปิดหน้า UI ให้มืดลง
+                        document.body.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#fff;"><div class="spinner-border text-danger"></div></div>';
                         const freq = urlParams.get('freq');
                         $.getJSON(GAS_URL, { action: 'updateNotify', uid: userProfile.userId, freq: freq }, function(res) {
-                            swalCustom.fire({title: 'สำเร็จ', text: 'บันทึกการตั้งค่าการติดตามเรียบร้อยแล้ว', icon: 'success'}).then(() => liff.closeWindow());
+                            liff.closeWindow(); // ปิดรวดเร็วเมื่อเสร็จ
                         });
-                        return; // Stop rendering normal app flow
+                        return; // Stop flow
                     }
 
                     checkUserRegistration(userProfile.userId);
 
-                    const refId = urlParams.get('ref');
-                    if (refId) {
-                        $.getJSON(GAS_URL, { action: 'logVhvShare', refId: refId, page: 'risk_assessment', viewerId: userProfile.userId });
+                    if (urlParams.get('ref')) {
+                        $.getJSON(GAS_URL, { action: 'logVhvShare', refId: urlParams.get('ref'), page: 'risk_assessment', viewerId: userProfile.userId });
                     }
                 } else { liff.login(); }
-            } catch (e) { 
-                console.warn("LIFF SDK Warning: ", e); 
-            }
+            } catch (e) { console.warn("LIFF Warning: ", e); }
         }
 
         function checkUserRegistration(uid) { 
@@ -1332,51 +1259,46 @@
         }
         
         window.handleHistory = function(res) { 
-            // ไม่ต้องทำ hide loading เพราะเราซ่อนด้วย css แต่ต้นแล้ว เพื่อให้แสดงเว็บเร็วที่สุด
             if(res.status === 'found') { 
                 historyData = res.data; 
+                
+                // ตรวจสอบที่อยู่เพื่อการ Bypass
                 if (historyData.Address && historyData.Address.trim() !== '') {
                     hasAddressValue = true;
+                    // แตก ม. ต.
+                    let addrMatch = historyData.Address.match(/ม\.(\d+)\s+ต\.(.+)/);
+                    if (addrMatch) {
+                        $('#village').val(addrMatch[1]);
+                        $('#district').val(addrMatch[2]).change();
+                    }
                 }
                 
-                // --- ระบบ Auto-fill ดึงข้อมูลเบื้องหลังมาเติมฟอร์ม ---
-                if ($('#name').val() === '' && historyData.Name) {
-                    $('#name').val(historyData.Name).addClass('is-valid');
-                }
-                if ($('#hn').val() === '' && historyData.hn) {
-                    $('#hn').val(historyData.hn).addClass('is-valid');
-                }
-                if ($('#telephone').val() === '' && historyData.Telephone) {
+                // ระบบ Auto-fill เติมช่องเงียบๆ
+                if (!$('#name').val() && historyData.Name) { $('#name').val(historyData.Name).addClass('is-valid'); }
+                if (!$('#hn').val() && (historyData.HN || historyData.hn)) { $('#hn').val(historyData.HN || historyData.hn).addClass('is-valid'); }
+                if (!$('#telephone').val() && historyData.Telephone) {
                     let cleanPhone = String(historyData.Telephone).replace(/[^0-9]/g, '');
                     $('#telephone').val(cleanPhone).addClass('is-valid');
                 }
             } 
         }
 
+        // --- Core Risk Calculation & DB Save ---
         function generateSuggestionText(data) {
-            const ins = data.inputs; 
-            const sug = [];
-            
+            const ins = data.inputs; const sug = [];
             if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
             if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
             if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
             if(ins.sbp >= 130) sug.push(`💓 ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
             
-            let waistLimit = ins.sex === 1 ? 90 : 80; // ซม.
+            let waistLimit = ins.sex === 1 ? 90 : 80; 
             if(ins.wc_cm > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_cm.toFixed(1)} ซม.): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
 
             if (ins.medicines && ins.medicines.length > 0) {
                 let medPurposes = [];
-                ins.medicines.forEach(m => {
-                    if (m.indication && !medPurposes.includes(m.indication)) {
-                        medPurposes.push(m.indication);
-                    }
-                });
-                if (medPurposes.length > 0) {
-                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
-                } else {
-                    sug.push(`💊 การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
-                }
+                ins.medicines.forEach(m => { if (m.indication && !medPurposes.includes(m.indication)) medPurposes.push(m.indication); });
+                if (medPurposes.length > 0) sug.push(`💊 การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
+                else sug.push(`💊 การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
             }
 
             let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.4;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
@@ -1408,28 +1330,20 @@
             `;
             const principlesText = "⭐ หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น\n- ออกกำลังกาย: ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)\n- อารมณ์: ทำจิตใจให้แจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่\n- ลดดื่มสุรา: งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด";
 
-            return {
-                html: specificAlertsHtml + riskAdviceHtml + principlesHtml,
-                text: specificAlertsText + "\n\n" + riskAdviceText + "\n\n" + principlesText
-            };
+            return { html: specificAlertsHtml + riskAdviceHtml + principlesHtml, text: specificAlertsText + "\n\n" + riskAdviceText + "\n\n" + principlesText };
         }
 
         function calculateRisk() {
             const inputs = {
                 age: parseFloat($('#age').val()) || 0, sex: +$('input[name="sex"]:checked').val(),
                 smoke: +$('input[name="smoke"]:checked').val(), dm: +$('input[name="dm"]:checked').val(),
-                sbp: parseFloat($('#sbp').val()) || 0,
-                tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
-                wc_cm: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0, // Input เป็น CM แล้ว
+                sbp: parseFloat($('#sbp').val()) || 0, tc: $('input[name="useCholesterol"]:checked').val() === '1' ? parseFloat($('#tc').val()) || 0 : 0,
+                wc_cm: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#wc').val()) || 0 : 0, 
                 ht: $('input[name="useCholesterol"]:checked').val() === '0' ? parseFloat($('#bdh').val()) || 0 : 0,
-                hasStrokeHistory: $('#chk-stroke').is(':checked'),
-                medicines: extractedMedicines
+                hasStrokeHistory: $('#chk-stroke').is(':checked'), medicines: extractedMedicines
             };
             const whr = (inputs.wc_cm > 0 && inputs.ht > 0) ? inputs.wc_cm / inputs.ht : 0;
-            const clamped = {
-                age: Math.max(30, Math.min(inputs.age, 70)), sbp: Math.max(70, Math.min(inputs.sbp, 220)),
-                tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: inputs.wc_cm
-            };
+            const clamped = { age: Math.max(30, Math.min(inputs.age, 70)), sbp: Math.max(70, Math.min(inputs.sbp, 220)), tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: inputs.wc_cm };
             let [ , predicted_risk, , baseline_risk ] = TASCVDformular(clamped.age, inputs.smoke, inputs.dm, clamped.sbp, inputs.sex, clamped.tc, clamped.whr, clamped.wc_cm);
             let riskPercent = predicted_risk * 100; let ratio = 0;
             if (baseline_risk > 0) { ratio = predicted_risk / baseline_risk; }
@@ -1437,10 +1351,8 @@
             const classification = classifyRisk(riskPercent);
             return {
                 riskPercentText: riskPercent.toFixed(2), barValue: Math.min(riskPercent, 30),
-                riskGroup: inputs.hasStrokeHistory ? "สูงอันตราย (มีประวัติเดิม)" : classification.text,
-                riskColor: inputs.hasStrokeHistory ? "#b00020" : classification.color,
-                compareRatio: (ratio > 0 && !inputs.hasStrokeHistory) ? ratio.toFixed(1) : 'N/A',
-                hasStrokeHistory: inputs.hasStrokeHistory, inputs: inputs
+                riskGroup: inputs.hasStrokeHistory ? "สูงอันตราย (มีประวัติเดิม)" : classification.text, riskColor: inputs.hasStrokeHistory ? "#b00020" : classification.color,
+                compareRatio: (ratio > 0 && !inputs.hasStrokeHistory) ? ratio.toFixed(1) : 'N/A', hasStrokeHistory: inputs.hasStrokeHistory, inputs: inputs
             };
         }
 
@@ -1462,11 +1374,7 @@
                 return calc(full_score, 7.31047, compare_score);
             } 
             return [0,0,0,0];
-            function calc(score, mean, c_score) {
-                let risk = 1 - (Math.pow(sur_root, Math.exp(score - mean)));
-                let c_risk = 1 - (Math.pow(sur_root, Math.exp(c_score - mean)));
-                return [score, risk, c_score, c_risk];
-            }
+            function calc(score, mean, c_score) { let risk = 1 - (Math.pow(sur_root, Math.exp(score - mean))); let c_risk = 1 - (Math.pow(sur_root, Math.exp(c_score - mean))); return [score, risk, c_score, c_risk]; }
         }
         
         function classifyRisk(p) {
@@ -1486,21 +1394,24 @@
         function updateAddressAndHospital() {
             const moo = $('#village').val(); const tb = $('#district').val();
             const hospitals = { "ท่าหิน": "รพ.สต.ท่าหิน", "ด่านสวี": "รพ.สต.ด่านสวี", "เขาทะลุ": "รพ.สต.เขาทะลุ", "เขาค่าย": "รพ.สต.เขาค่าย", "ปากแพรก": "รพ.สต.ปากแพรก", "สวี": "รพ.สต.สวี", "นาสัก": { "1": "รพ.สต.บ้านแก่งกระทั่ง", "6": "รพ.สต.บ้านแก่งกระทั่ง", "11": "รพ.สต.บ้านแก่งกระทั่ง", "13": "รพ.สต.บ้านแก่งกระทั่ง", "18": "รพ.สต.บ้านแก่งกระทั่ง", "19": "รพ.สต.บ้านแก่งกระทั่ง", "7": "รพ.สต.บ้านไทยพัฒนา", "8": "รพ.สต.บ้านไทยพัฒนา", "9": "รพ.สต.บ้านไทยพัฒนา", "10": "รพ.สต.บ้านไทยพัฒนา", "12": "รพ.สต.บ้านไทยพัฒนา", "15": "รพ.สต.บ้านไทยพัฒนา", "16": "รพ.สต.บ้านไทยพัฒนา", "2": "รพ.สต.นาสัก", "3": "รพ.สต.นาสัก", "4": "รพ.สต.นาสัก", "5": "รพ.สต.นาสัก", "14": "รพ.สต.นาสัก", "17": "รพ.สต.นาสัก" }, "ทุ่งระยะ": { "5": "รพ.สต.บ้านคลองน้อย", "6": "รพ.สต.บ้านคลองน้อย", "7": "รพ.สต.บ้านคลองน้อย", "8": "รพ.สต.บ้านคลองน้อย", "9": "รพ.สต.บ้านคลองน้อย", "10": "รพ.สต.บ้านคลองน้อย", "1": "รพ.สต.ทุ่งระยะ", "2": "รพ.สต.ทุ่งระยะ", "3": "รพ.สต.ทุ่งระยะ", "4": "รพ.สต.ทุ่งระยะ", "11": "รพ.สต.ทุ่งระยะ" }, "วิสัยใต้": { "1": "รพ.สต.บ้านดอนทราย", "3": "รพ.สต.บ้านดอนทราย", "4": "รพ.สต.บ้านดอนทราย", "8": "รพ.สต.บ้านดอนทราย", "2": "รพ.สต.วิสัยใต้", "5": "รพ.สต.วิสัยใต้", "6": "รพ.สต.วิสัยใต้", "7": "รพ.สต.วิสัยใต้", "9": "รพ.สต.วิสัยใต้", "10": "รพ.สต.วิสัยใต้" }, "ครน": { "1": "รพ.สต.ครน", "2": "รพ.สต.ครน", "3": "รพ.สต.ครน", "4": "รพ.สต.ครน", "6": "รพ.สต.ครน", "12": "รพ.สต.ครน", "9": "รพ.สต.บ้านควนสามัคคี", "10": "รพ.สต.บ้านควนสามัคคี", "13": "รพ.สต.บ้านควนสามัคคี", "14": "รพ.สต.บ้านควนสามัคคี", "5": "รพ.สต.บ้านน้ำฉา", "7": "รพ.สต.บ้านน้ำฉา", "8": "รพ.สต.บ้านน้ำฉา", "11": "รพ.สต.บ้านน้ำฉา" }, "นาโพธิ์": "รพ.สวี (นาโพธิ์)" };
-            let hosp = hospitals[tb]; 
-            if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } 
-            $('#pcu').val(hosp || '');
+            let hosp = hospitals[tb]; if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } $('#pcu').val(hosp || '');
         }
 
         async function saveAndSend(actionType) {
-            // ระบบ PDPA Check ตรงปุ่มบันทึก
+            // ระบบ PDPA Check ตรงปุ่มบันทึกพร้อมทางเลือกกลับไปแก้ไข
             if (!$('#pdpa').is(':checked')) {
                 swalCustom.fire({
                     title: 'แจ้งเตือน',
                     text: 'ท่านคลิกไม่ยินยอม ระบบจะไม่ได้บันทึกข้อมูลในฐานข้อมูลและไม่ได้นำมาประมวลผลให้คำแนะนำ',
                     icon: 'warning',
-                    confirmButtonText: 'ปิดหน้าต่าง'
-                }).then(() => {
-                    if (liff.isInClient()) { liff.closeWindow(); } else { window.close(); }
+                    showCancelButton: true,
+                    confirmButtonText: 'กลับไปแก้ไข',
+                    cancelButtonText: 'ปิดหน้าต่าง (ไม่บันทึก)',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (!result.isConfirmed) {
+                        if (liff.isInClient()) { liff.closeWindow(); } else { window.close(); }
+                    }
                 });
                 return;
             }
@@ -1527,13 +1438,11 @@
                     userId: userProfile ? userProfile.userId : '', displayName: userProfile ? userProfile.displayName : '',
                     pictureUrl: userProfile ? userProfile.pictureUrl : '',
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: 'Yes', 
-                    area: '', referrerId: $('#referrerId').val(),
-                    medicines: globalRiskData.inputs.medicines
+                    area: '', referrerId: $('#referrerId').val(), medicines: globalRiskData.inputs.medicines
                 };
 
                 await fetch(GAS_URL, {
-                    method: 'POST', body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                    method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
 
                 if (liff.isInClient()) {
@@ -1545,14 +1454,9 @@
                         $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
                     }
                 } else {
-                    swalCustom.fire({
-                        title: 'บันทึกสำเร็จ!',
-                        text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ไม่สามารถส่ง Flex ได้เนื่องจากไม่ได้เปิดผ่านแอป LINE)',
-                        icon: 'success'
-                    });
+                    swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ไม่สามารถส่ง Flex ได้เนื่องจากไม่ได้เปิดผ่านแอป LINE)', icon: 'success' });
                     $('.btn-action').text('บันทึกเรียบร้อย');
                 }
-
             } catch(e) {
                 swalCustom.fire('ผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + e.message, 'error');
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
@@ -1604,7 +1508,7 @@
                         contents: [
                             { type: "box", layout: "vertical", backgroundColor: "#cc0000", paddingAll: "10px", margin: "none",
                                 contents: [
-                                    { type: "text", text: "หากมีอาการสโตรก ต้องรีบไป รพ. ทันที", size: "lg", weight: "bold", color: "#ffffff", align: "center", wrap: true },
+                                    { type: "text", text: "หากมีอาการสโตรก ต้องรีบไป รพ. ทันที", size: "xl", weight: "bold", color: "#ffffff", align: "center", wrap: true },
                                     { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้", size: "xs", color: "#ffffff", align: "center", wrap: true, margin: "xs" }
                                 ]
                             },
@@ -1630,7 +1534,7 @@
                             { type: "button", style: "primary", color: safeColor, action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                             { type: "button", style: "secondary", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } },
                             { type: "button", style: "secondary", color: "#e9ecef", action: { type: "uri", label: "🎬 ดูวิดีโอแนะนำ", uri: "https://youtube.com/shorts/MBf9xTkn_Sw" } },
-                            { type: "button", style: "primary", color: "#cc0000", action: { type: "uri", label: "📍 ปักหมุดบ้าน", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                            { type: "button", style: "primary", color: "#cc0000", action: { type: "uri", label: "📍 ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
                             { type: "button", style: "secondary", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                             { type: "button", style: "secondary", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
                         ]
@@ -1639,15 +1543,20 @@
             };
             messagesToSend.push(riskFlex);
 
-            // --- 2. Text Message with Quick Replies ---
+            // --- 2. Text Message & URI Quick Reply emulation ---
+            let freqText = "";
+            let p = parseFloat(data.riskPercentText);
+            if (data.hasStrokeHistory || p >= 30) { freqText = "ทุก 3-4 วัน"; } 
+            else if (p >= 20) { freqText = "สัปดาห์ละครั้ง"; } 
+            else if (p >= 10) { freqText = "2 สัปดาห์ครั้ง"; } 
+            else { freqText = "เดือนละครั้ง"; }
+
             const textMessage = {
                 type: "text",
-                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup} \n\n📍 อย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน) \n\n💬 อยากให้หมอสวีดูแลใกล้ชิดทางไลน์บ่อยแค่ไหนครับ`,
+                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup} \nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️ หมอสวีขออนุญาตเข้ามาดูแลทางไลน์ ${freqText} นะครับ อย่าเพิ่งบล็อกกันนะครับ ❤️`,
                 quickReply: {
                     items: [
-                        { type: "action", action: { type: "uri", label: "ทุกวัน", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=ทุกวัน" } },
-                        { type: "action", action: { type: "uri", label: "สัปดาห์ละครั้ง", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=สัปดาห์ละครั้ง" } },
-                        { type: "action", action: { type: "uri", label: "ทุกเดือน", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=ทุกเดือน" } },
+                        { type: "action", action: { type: "uri", label: "ตกลงให้ดูแลตามนั้น", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=${encodeURIComponent(freqText)}` } },
                         { type: "action", action: { type: "uri", label: "ไม่ต้อง", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=ไม่ต้อง" } }
                     ]
                 }
@@ -1655,25 +1564,17 @@
             messagesToSend.push(textMessage);
 
             const currentUrl = window.location.search; 
-            if (currentUrl.includes('target=myoa') || liff.isInClient()) { // fallback if target=myoa is missing but inside liff
+            if (currentUrl.includes('target=myoa') || liff.isInClient()) {
                 try { 
                     await liff.sendMessages(messagesToSend); 
                     return true;
                 } catch (err) { 
                     console.error("LIFF Send Error:", err); 
-                    swalCustom.fire({
-                        title: 'บันทึกสำเร็จ!',
-                        text: 'ไม่สามารถส่งข้อความลงแชท LINE ได้ (' + err.message + ')',
-                        icon: 'warning'
-                    }).then(() => { liff.closeWindow(); });
+                    swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ไม่สามารถส่งข้อความลงแชท LINE ได้ (' + err.message + ')', icon: 'warning' }).then(() => { liff.closeWindow(); });
                     return false;
                 }
             } else {
-                swalCustom.fire({
-                    title: 'บันทึกสำเร็จ!',
-                    text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ข้ามการส่งแชทอัตโนมัติเนื่องจากไม่ได้เปิดผ่านเมนู LINE OA โดยตรง)',
-                    icon: 'success'
-                }).then(() => { liff.closeWindow(); });
+                swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว (ข้ามการส่งแชทอัตโนมัติเนื่องจากไม่ได้เปิดผ่านเมนู LINE OA โดยตรง)', icon: 'success' }).then(() => { liff.closeWindow(); });
                 return true; 
             }
         }
