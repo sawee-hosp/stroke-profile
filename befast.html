@@ -185,14 +185,8 @@
             <div class="custom-modal-actions">
                 <a href="tel:1669" class="btn-action btn-pulse-danger" style="font-size: 36px !important; text-decoration: none; padding: 20px; font-weight: 900;" onclick="handleInitialRealCall()">📞 โทร 1669 ทันที</a>
                 
-                <button class="btn-action btn-ai" style="margin-top: 10px; font-size: 24px; padding: 15px;" onclick="handleInitialAiTest()">
-                    <span>ทดสอบอาการด้วย AI</span>
-                    <span class="iconify wink-icon-right" data-icon="mdi:sparkles"></span>
-                </button>
-
-                <!-- แก้ไขปุ่มเป็นสีฟ้า ปักหมุดบ้าน -->
                 <button class="btn-action btn-primary-custom" style="font-size: 24px; padding: 15px; margin-top: 10px;" onclick="handleInitialTestMode()">
-                    <span class="iconify" data-icon="mdi:map-marker-distance"></span> ปักหมุดบ้านถึง รพ.สวี
+                    <span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบอาการและปักหมุดบ้านไปรพ.
                 </button>
             </div>
         </div>
@@ -1326,6 +1320,9 @@
                 sessionData.ambulanceEstimate = `${ambMins} นาที`;
                 sessionData.duration = `${travelMins} นาที`;
                 sessionData.nearestHospitalName = nearestHospital.name;
+                sessionData.nearestHospitalLat = nearestHospital.lat;
+                sessionData.nearestHospitalLon = nearestHospital.lon;
+                sessionData.selfTravelMins = travelMins;
                 
                 html += createTableRow('mdi:map-marker-distance', `ห่างจาก ${nearestHospital.name}`, sessionData.distance, false, 'distance-row');
                 html += createTableRow('mdi:car-clock', 'ไปเองใช้เวลา', sessionData.selfTravelEstimate, false, 'distance-row');
@@ -1461,11 +1458,18 @@
 
     function createFlexMessage(data) {
         const isAbnormal = data.isEmergency || (data.isAiAssessment && data.riskScore >= 50);
-        let headerText = data.isTestMode ? "[กำลังทดสอบ ไม่ได้ใช้งานจริง]\nประเมินอาการสโตรก" : "ประเมินอาการสโตรก";
+        let headerText = "ประเมินอาการสโตรก";
         
+        let headerContents = [];
+        if (data.isTestMode) {
+            headerContents.push({ type: "text", text: "[กำลังทดสอบ ไม่ได้ใช้งานจริง]", color: "#FFD700", weight: "bold", size: "xs", align: "center", margin: "none" });
+        }
+        headerContents.push({ type: "text", text: headerText, color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true });
+
         let bodyContents = [
             { type: "text", text: "ชื่อ: " + String(data.registeredName || data.userName || "-"), weight: "bold", size: "lg", wrap: true }, 
-            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "sm", color: "#666666" }
+            { type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "sm", color: "#d9534f", weight: "bold" },
+            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "xs", color: "#888888", margin: "md" }
         ];
         
         if (data.isAiAssessment && data.fileUrls) {
@@ -1490,68 +1494,69 @@
         
         let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis||'-'}` : (data.symptomDetail||"ไม่มีอาการ");
         displayAnalysis = displayAnalysis.replace(/<br>/g, '\n').replace(/<b>/g, '').replace(/<\/b>/g, '');
-        bodyContents.push({ type: "text", text: "ผล: " + displayAnalysis, wrap: true, size: "md", color: "#333333", margin: "sm" });
+        bodyContents.push({ type: "separator", margin: "lg" });
+        bodyContents.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: "#333333", margin: "md", weight: "bold" });
 
-        let adviceBox = { type: "box", layout: "vertical", margin: "md", backgroundColor: isAbnormal ? "#FFEBEE" : "#E8F5E9", cornerRadius: "md", paddingAll: "md", contents: [] };
-        if (isAbnormal) {
-             if (data.onsetTime) bodyContents.push({ type: "text", text: "เริ่มเป็น: " + data.onsetTime, size: "sm", color: "#D32F2F", weight: "bold" });
-             if (data.rtpaDeadline) bodyContents.push({ type: "text", text: "หมดเวลาให้ยา: " + data.rtpaDeadline, size: "sm", color: "#D32F2F", weight: "bold" });
-             
-             adviceBox.contents = [{ type: "text", text: "คำแนะนำเบื้องต้น:", weight: "bold", size: "md", color: "#D32F2F" }, { type: "text", text: "1. โทร 1669 ทันที\n2. ให้นอนราบหรือเอนศีรษะสูงเล็กน้อย\n3. ห้ามกินยาหรือดื่มน้ำป้องกันสำลัก", size: "md", wrap: true }];
-        } else {
-             let normalAdvice = "AI อาจผิดพลาดได้มาก หากมีความสงสัย โปรดปรึกษาแพทย์เสมอ";
-             if (data.frequency === 'เกิดขึ้นเรื้อรัง/ค่อยๆ เป็น' || data.onsetTime === 'เรื้อรัง/หลายวัน' || String(data.symptomDetail).includes('เรื้อรัง')) {
-                 normalAdvice = "อาการสโตรกมักจะเกิดขึ้นอย่างเฉียบพลัน ทันทีทันใด อาการที่เป็นแบบเรื้อรังมักจะไม่เข้าข่าย หากมีความสงสัย โปรดปรึกษาแพทย์เสมอ";
-             }
-             adviceBox.contents = [ { type: "text", text: "คำแนะนำ:", weight: "bold", size: "md", color: "#2E7D32" }, { type: "text", text: normalAdvice, wrap: true, size: "md", margin: "sm", color: "#666666" } ];
-        }
-        
-        bodyContents.push(adviceBox); 
-
-        // ย้ายการแสดงผลเรื่องข้อมูลการเดินทาง (พิกัด/เวลา) มาแสดงให้ทุกคน ไม่ว่าปกติหรือเสี่ยง
+        // ข้อมูลการเดินทางแบบใหม่
         let locText = "";
         if (data.distance) {
-            locText = data.nearestHospitalName ? `เดินทางไป ${data.nearestHospitalName}:\n` : "การเดินทาง:\n";
-            locText += `🚗 ขับรถไปเอง: ${data.selfTravelEstimate}\n`;
-            locText += `🚑 รอรถ รพ.รับ: ${data.ambulanceEstimate}\n`;
-            locText += `📍 ระยะทาง: ${data.distance}`;
-        }
-        if (locText) {
-             bodyContents.push({
-                 type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", borderColor: "#cccccc", borderWidth: "1px", cornerRadius: "md",
+            locText += `🏥 รพ.สโตรกที่ใกล้ที่สุด: ${data.nearestHospitalName || 'รพ.สวี'}\n`;
+            locText += `📍 ระยะทางไปรพ.: ${data.distance}\n`;
+            locText += `🚗 ไปเองใช้เวลา: ${data.selfTravelEstimate}\n`;
+            locText += `🚑 รถ รพ.ไปรับใช้เวลา: ${data.ambulanceEstimate}`;
+            
+            bodyContents.push({
+                 type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", borderColor: "#cccccc", borderWidth: "1px", cornerRadius: "md", backgroundColor: "#f8f9fa",
                  contents: [
                      { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" },
                      { type: "text", text: locText, size: "sm", color: "#333333", wrap: true }
                  ]
-             });
+            });
         }
 
-        bodyContents.push({ type: "separator", margin: "lg" }); 
-        bodyContents.push({ type: "text", text: (data.isTestMode ? "[โหมดทดสอบ] " : "") + "หมายเหตุ: จัดทำเพื่อการประเมินเบื้องต้น อาจมีข้อมีผิดพลาด โปรดยืนยันอาการกับแพทย์ก่อนทุกครั้ง", size: "xs", color: "#aaaaaa", wrap: true, margin: "md", align: "center" });
+        // กรอบความคิดเห็นเวลา
+        let adviceStr = "ถ้ามีอาการสโตรกให้ออกมา รพ.ทันที ต้องไปถึง รพ. ให้เร็วที่สุดภายใน 3 ชั่วโมงครึ่ง";
+        if (data.onsetTime && data.onsetTime !== 'เรื้อรัง/หลายวัน') {
+            let arrivalStr = data.arrivalDeadline || "ไม่ระบุ";
+            adviceStr = `ถ้ามีอาการสโตรกให้ออกมา รพ.ทันที โดยถ้าเริ่มอาการตอน ${data.onsetTime} ต้องไปถึง รพ. ให้เร็วที่สุด ก่อนเวลา ${arrivalStr} น.`;
 
-        let footerContents = [];
-        if (isAbnormal) {
-            let mapUri = `https://www.google.com/maps/dir/?api=1&destination=10.229937,99.109073`; 
-            if (data.nearestHospitalName && nearestHospital) {
-                mapUri = `https://www.google.com/maps/dir/?api=1&destination=${nearestHospital.lat},${nearestHospital.lon}`;
+            if (data.onsetTimeObject && data.selfTravelMins) {
+                let onsetTimeMs = new Date(data.onsetTimeObject).getTime();
+                let deadlineTimeMs = onsetTimeMs + (3.5 * 60 * 60 * 1000);
+                let arrivalTimeMs = new Date().getTime() + (data.selfTravelMins * 60 * 1000);
+
+                if (arrivalTimeMs <= deadlineTimeMs) {
+                    adviceStr += "\n\n✅ วิเคราะห์: หากออกเดินทางตอนนี้ คาดว่าจะไปถึงทันช่วงเวลาทอง (Golden Hour)";
+                } else {
+                    adviceStr += "\n\n⚠️ วิเคราะห์: หากออกเดินทางตอนนี้ คาดว่าอาจจะไปไม่ทันเวลา 3.5 ชม. แนะนำให้โทร 1669 เพื่อให้รถฉุกเฉินช่วยประสานงานดูแลระหว่างทาง!";
+                }
             }
-            footerContents.push({ type: "button", style: "secondary", height: "sm", action: { type: "uri", label: `📍 นำทางไป รพ.`, uri: mapUri } });
-            footerContents.push({ type: "button", style: "primary", color: "#D32F2F", height: "sm", margin: "sm", action: { type: "uri", label: "📞 โทรฉุกเฉิน 1669", uri: "tel:1669" } });
-            
-            if (!data.nearestHospitalName || data.nearestHospitalName === 'รพ.สวี') {
-                 footerContents.push({ type: "button", style: "primary", color: "#F57C00", height: "sm", margin: "sm", action: { type: "uri", label: "📞 โทร รพ.สวี", uri: "tel:0894745523" } });
-            }
-            footerContents.push({ type: "separator", margin: "md" });
+        } else if (data.onsetTime === 'เรื้อรัง/หลายวัน') {
+            adviceStr = "อาการที่เป็นแบบเรื้อรังมักจะไม่เข้าข่ายสโตรกเฉียบพลัน หากกังวลหรือมีอาการรุนแรงขึ้น โปรดปรึกษาแพทย์หรือรีบมา รพ.";
         }
-        // อัปเดตปุ่ม 3 ปุ่มใหม่สำหรับทุกคน
-        footerContents.push({
-            type: "box", layout: "horizontal", margin: "md", spacing: "sm",
+
+        let timeCommentBox = {
+            type: "box", layout: "vertical", margin: "md", paddingAll: "md",
+            borderColor: isAbnormal ? "#D32F2F" : "#F57C00", borderWidth: "2px", cornerRadius: "md",
+            backgroundColor: isAbnormal ? "#ffe6e6" : "#fff8e1",
             contents: [
-                { type: "button", style: "primary", color: "#17a2b8", height: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: `https://liff.line.me/${LIFF_ID}` } },
-                { type: "button", style: "primary", color: "#007bff", height: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: `https://liff.line.me/${DAILY_CHECK_LIFF_ID}` } },
-                { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ดูประวัติ", uri: `https://liff.line.me/${HEALTH_INFO_LIFF_ID}` } }
+                { type: "text", text: "💡 ความเห็นและคำแนะนำ", weight: "bold", size: "sm", color: isAbnormal ? "#D32F2F" : "#E65100" },
+                { type: "text", text: adviceStr, size: "sm", color: "#333333", wrap: true, margin: "sm" }
             ]
-        });
+        };
+        bodyContents.push(timeCommentBox); 
+
+        // ปุ่ม Footer จัดแบบแนวตั้ง แถวละ 1 ปุ่ม
+        let mapUri = `https://www.google.com/maps/dir/?api=1&destination=${data.nearestHospitalLat || 10.229937},${data.nearestHospitalLon || 99.109073}`; 
+        
+        let footerContents = [
+            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: `https://liff.line.me/${LIFF_ID}` } },
+            { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่ไป รพ.", uri: mapUri } },
+            { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินอาการใหม่", uri: `https://liff.line.me/${DAILY_CHECK_LIFF_ID}` } },
+            { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: `https://liff.line.me/${HEALTH_INFO_LIFF_ID}` } },
+            { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "📞 โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
+            { type: "text", text: "จัดทำโดย สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
+        ];
 
         return { 
             type: "flex", 
@@ -1561,8 +1566,13 @@
                 size: "mega", 
                 header: { 
                     type: "box", layout: "vertical", 
-                    backgroundColor: isAbnormal ? "#D32F2F" : "#2E7D32", 
-                    contents: [{ type: "text", text: headerText, color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }] 
+                    background: {
+                        type: "linearGradient",
+                        angle: "90deg",
+                        startColor: isAbnormal ? "#D32F2F" : "#2E7D32", 
+                        endColor: isAbnormal ? "#000000" : "#0B3D0B"
+                    },
+                    contents: headerContents
                 }, 
                 body: { type: "box", layout: "vertical", contents: bodyContents }, 
                 footer: { type: "box", layout: "vertical", contents: footerContents } 
