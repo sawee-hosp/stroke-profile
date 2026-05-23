@@ -190,9 +190,9 @@
                     <span class="iconify wink-icon-right" data-icon="mdi:sparkles"></span>
                 </button>
 
-                <button class="btn-action" style="background-color: #6c757d; color: white; font-size: 20px; flex-direction:column; margin-top: 10px; padding: 15px;" onclick="handleInitialTestMode()">
-                    ฉันต้องการทดสอบสถานการณ์เรียกรถพยาบาล<br>
-                    <span style="font-size: 18px; font-weight: normal;">(ไม่ได้เรียกรถจริง)</span>
+                <!-- แก้ไขปุ่มเป็นสีฟ้า ปักหมุดบ้าน -->
+                <button class="btn-action btn-primary-custom" style="font-size: 24px; padding: 15px; margin-top: 10px;" onclick="handleInitialTestMode()">
+                    <span class="iconify" data-icon="mdi:map-marker-distance"></span> ปักหมุดบ้านถึง รพ.สวี
                 </button>
             </div>
         </div>
@@ -203,7 +203,6 @@
         <div id="loading-text" style="color: #ff3654; font-weight: bold; font-size: 30px;">กำลังโหลด...</div>
     </div>
 
-    <!-- Floating Buttons (กระตุกๆ โทรด่วน) -->
     <div class="floating-actions">
         <div class="float-btn float-sawi" id="float-sawi-btn" onclick="handleCallClick(this, 'tel_sawee', '0894745523', 'รพ.สวี')">
             <span class="iconify" data-icon="mdi:phone-in-talk" style="font-size: 45px;"></span>
@@ -224,7 +223,6 @@
         </div>
 
         <div class="main-card">
-            <!-- ย้ายปุ่ม Toggle มาไว้ด้านบน -->
             <div class="toggle-wrapper" style="padding: 10px; margin-bottom: 15px;">
                 <label class="switch"><input type="checkbox" id="test-mode-toggle" onchange="toggleTestMode(this)"><span class="slider"></span></label>
                 <div class="toggle-label-text" style="font-size: 20px;">จำลองสถานการณ์</div>
@@ -249,7 +247,6 @@
         <div class="footer-credit">จัดทำโดย "สวีรู้ทันสโตรก" รพ.สวี จ.ชุมพร</div>
     </div>
 
-    <!-- Modals -->
     <div id="custom-alert-modal" class="custom-modal">
         <div class="custom-modal-content">
             <div id="custom-alert-title" class="custom-modal-title">แจ้งเตือน</div>
@@ -286,7 +283,6 @@
         <div class="btn-back" style="color: white; border-color: white; width: auto; padding: 15px 50px; margin-top: 30px; cursor:pointer;" onclick="this.style.display='none'">ปิด</div>
     </div>
 
-    <!-- Cropper Modal -->
     <div id="crop-modal" style="display: none;">
         <div class="crop-text-guide">เลื่อนและขยายรูปให้พอดีกรอบเขียว</div>
         <div class="crop-container">
@@ -305,7 +301,7 @@
     const DAILY_CHECK_LIFF_ID = "2009491708-x6ELpJLW";
     const REGISTER_LIFF_ID = "2005789397-nebQ8oJy";
     
-    let sessionData = { assessorType: 'myself', isTestMode: false, isRisk: false, telephone: '' };
+    let sessionData = { assessorType: 'myself', isTestMode: false, isRisk: false, telephone: '', already_home: '' };
     let aiInputs = { face: null, baselineFaceUrl: null, arm: null, audio: null };
     let mediaRecorder;
     let audioChunks = [];
@@ -320,7 +316,6 @@
     let hospitalList = []; 
     let nearestHospital = null; 
 
-    // อัปเดตลิงก์รูปภาพทั้งหมดตามที่ต้องการ
     const symptomTranslations = { 'Balance': 'การทรงตัว', 'Eye': 'การมองเห็น', 'Face': 'ใบหน้า', 'Arm': 'แขนขา', 'Speech': 'การพูด' };
     const symptomImages = {
         'Balance': 'https://lh3.googleusercontent.com/d/1oMxfes0ZeRgg3PSONzkwtTM6DCz-xOwg',
@@ -351,13 +346,19 @@
     };
     window.closeCustomModal = function(id) { document.getElementById(id).style.display = 'none'; };
     
-    window.showCustomConfirm = function(msg, title, onConfirm, onCancel) {
+    // อัปเดต showCustomConfirm เพื่อรองรับการปรับเปลี่ยนข้อความปุ่ม
+    window.showCustomConfirm = function(msg, title, onConfirm, onCancel, confirmText = "ยืนยัน", cancelText = "ยกเลิก") {
         document.getElementById('custom-confirm-title').textContent = title || "ยืนยัน";
         document.getElementById('custom-confirm-body').innerHTML = msg;
         const btnYes = document.getElementById('btn-confirm-yes');
         const btnNo = document.querySelector('#custom-confirm-modal .btn-modal-secondary');
+        
         const newBtnYes = btnYes.cloneNode(true); btnYes.parentNode.replaceChild(newBtnYes, btnYes);
         const newBtnNo = btnNo.cloneNode(true); btnNo.parentNode.replaceChild(newBtnNo, btnNo);
+        
+        newBtnYes.textContent = confirmText;
+        newBtnNo.textContent = cancelText;
+
         newBtnYes.onclick = function() { closeCustomModal('custom-confirm-modal'); if (onConfirm) onConfirm(); };
         newBtnNo.onclick = function() { closeCustomModal('custom-confirm-modal'); if (onCancel) onCancel(); };
         document.getElementById('custom-confirm-modal').style.display = 'flex';
@@ -627,7 +628,6 @@
         document.getElementById('layer-3').innerHTML = `<h2 class="section-title">อาการเกิดขึ้นอย่างไร?</h2><div class="d-flex flex-column gap-3"><button class="btn-likely" onclick="handleSeveritySelection('เกิดขึ้นอย่างเฉียบพลัน')">เกิดขึ้นอย่างเฉียบพลัน</button><button class="btn-action" style="background-color: #E67E22; color: white; flex-direction:row;" onclick="handleChronicSymptom('เกิดขึ้นเรื้อรัง/ค่อยๆ เป็น')">เป็นมานาน/ค่อยๆเป็น</button></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-2')">ย้อนกลับ</button></div>`;
         document.getElementById('layer-4').innerHTML = `<h2 class="section-title">อาการเริ่มเป็นเมื่อไหร่?</h2><div id="time-options-container" class="d-flex flex-wrap gap-2 justify-content-center"></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-3')">ย้อนกลับ</button></div>`;
         
-        // อัปเดต layer-5 ให้มี ID สำหรับเปลี่ยนค่ากรณีไม่ใช่ Risk
         document.getElementById('layer-5').innerHTML = `<div class="alert-stroke-detected mb-4"><span class="iconify alert-icon" data-icon="mdi:alarm-light"></span><p class="mb-2 fs-3">อาการของท่าน เข้าข่าย</p><p class="fw-bold" style="font-size: 36px; line-height:1.1;">เป็นอาการของสโตรก</p><p class="fw-bold fs-3 mt-2" id="urgency-text">โปรดกดส่งพิกัด และโทรออกหา รพ.ด้วยตัวเอง</p><div id="countdown-timer" class="fw-bold mt-3 fs-3 border-top pt-2" style="color: #FFD700;"></div></div><div id="action-grid-container" class="action-buttons-grid"></div><table id="summary-table" class="table table-borderless mt-4 fs-4"></table><div id="map-card-container" class="mt-4 mb-4" style="display:none; width: 100%; border-radius: 20px; overflow: hidden; border: 2px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 250px;"></div><div id="contact-buttons" class="mt-4"></div><div id="route-button-container" class="mt-4"></div><button id="layer-5-save-btn" class="btn-action btn-pulse-jerky">บันทึกข้อมูลและปิดหน้าต่าง</button><button class="btn-action btn-share" onclick="handleShare()">แชร์ผลการประเมินให้คนอื่น</button><button class="btn-action btn-test-close" onclick="handleTestClose()">ออกจากการทดสอบโดยไม่บันทึก</button><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-4')">ย้อนกลับ</button></div>`;
         
         document.getElementById('layer-6').innerHTML = `<div id="final-emoji" style="text-align:center; font-size: 100px; margin-bottom: 20px;"></div><h2 id="final-title" class="section-title" style="font-size:36px;"></h2><p id="final-text" class="text-center" style="font-size:28px;"></p><div id="layer-6-extra-buttons" class="d-flex flex-column gap-3 mt-4"></div><div class="btn-back-container"><button class="btn-back" onclick="showLayer('layer-1')">ย้อนกลับหน้าแรก</button></div>`;
@@ -871,23 +871,30 @@
         buildSummaryPage();
     };
 
-    // --- ฟังก์ชันสำหรับให้ปุ่ม "ทดสอบระยะทางไป รพ." ในกรณีที่ไม่มีความเสี่ยง ---
+    window.askHomeStatusAndTestDistance = function() {
+        showCustomConfirm(
+            "ตอนนี้ท่านอยู่ที่บ้านใช่หรือไม่?",
+            "ยืนยันสถานที่",
+            () => { sessionData.already_home = "YES"; testDistanceToHospital(); },
+            () => { sessionData.already_home = "NO"; testDistanceToHospital(); },
+            "อยู่บ้าน", "ไม่ได้อยู่บ้าน"
+        );
+    };
+
     window.testDistanceToHospital = function() {
+        document.getElementById('loading-text').textContent = 'กำลังหาพิกัด...';
+        document.getElementById('loading').style.display = 'flex';
+        
         if (!sessionData.onsetTimeObject) {
             sessionData.onsetTimeObject = new Date();
             saveData('onsetTime', formatFullDateTime(sessionData.onsetTimeObject));
         }
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(p => {
-                sessionData.location = `${p.coords.latitude},${p.coords.longitude}`;
-                nearestHospital = findNearestHospital(p.coords.latitude, p.coords.longitude);
-                if (document.getElementById('layer-5').classList.contains('hidden') === false) {
-                     updateSummaryAndActions(); 
-                }
-            }, e => { console.log("Silent GPS failed"); });
-        }
-        showLayer('layer-5');
-        buildSummaryPage();
+        
+        getLocation(false, false, () => {
+            document.getElementById('loading').style.display = 'none';
+            showLayer('layer-5');
+            buildSummaryPage();
+        });
     };
 
     function applyGridAndBadge(base64Str, label, callback) {
@@ -1170,7 +1177,7 @@
                     innerHtml += `<button class="btn-action btn-pulse-danger" onclick="showLayer('layer-3'); saveData('symptomDetail', 'AI: ' + currentAnalysisResult.analysis);">ประเมินความฉับพลันต่อ</button>`;
                 } else {
                     innerHtml += `<button class="btn-action btn-pulse-jerky mt-3" onclick="saveData('symptomDetail', 'AI: Low Risk'); handleFinalSave(this, false, true);">บันทึกและปิดโดยไม่ประเมินต่อ</button>`;
-                    innerHtml += `<button class="btn-action mt-3" style="background-color: #17a2b8; color: white; flex-direction:row;" onclick="saveData('symptomDetail', 'AI: Low Risk'); testDistanceToHospital();"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
+                    innerHtml += `<button class="btn-action mt-3" style="background-color: #17a2b8; color: white; flex-direction:row;" onclick="saveData('symptomDetail', 'AI: Low Risk'); askHomeStatusAndTestDistance();"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
                 }
                 innerHtml += `<button class="btn-action btn-share" onclick="handleShare()">แชร์ผลการประเมินนี้</button>`;
                 innerHtml += `<button class="btn-action btn-back" onclick="showLayer('layer-ai-input')">กลับไปแก้ไข</button>`;
@@ -1225,12 +1232,17 @@
         if (!hospitalList || hospitalList.length === 0) {
             return { name: 'รพ.สวี', lat: 10.229937, lon: 99.109073, dist: getDistanceFromLatLonInKm(lat, lon, 10.229937, 99.109073) };
         }
+        
         let nearest = null;
         let minDist = Infinity;
+        
+        // Loop หา รพ. ที่ใกล้ที่สุดเสมอ
         hospitalList.forEach(h => {
             let d = getDistanceFromLatLonInKm(lat, lon, h.lat, h.lon);
             if (d < minDist) { minDist = d; nearest = { ...h, dist: d }; }
         });
+        
+        // หมายเหตุ: ตาม Logic นี้ ถ้ารพ.สวี ไกลเกิน > 2 ชม. (ระยะทางไกล) ระบบจะเลือก รพ. อื่นที่ใกล้ที่สุดแทนให้อยู่แล้ว
         return nearest;
     }
 
@@ -1319,6 +1331,11 @@
                 html += createTableRow('mdi:car-clock', 'ไปเองใช้เวลา', sessionData.selfTravelEstimate, false, 'distance-row');
                 html += createTableRow('mdi:ambulance', 'รถ รพ.รับใช้เวลา', sessionData.ambulanceEstimate, false, 'distance-row');
                 
+                // แจ้งเตือนถ้าระยะทางใช้เวลาขับรถมากกว่า 2 ชั่วโมง (120 นาที)
+                if (travelMins > 120) {
+                    html += `<tr><td colspan="3"><div class="alert alert-warning border text-start fs-5"><span class="iconify" data-icon="mdi:alert"></span> ท่านอยู่ไกลจากโรงพยาบาลมาก โปรดวางแผนการเดินทางอย่างรัดกุม</div></td></tr>`;
+                }
+
                 document.getElementById('route-button-container').innerHTML = `<a href="https://www.google.com/maps/dir/?api=1&destination=${nearestHospital.lat},${nearestHospital.lon}" target="_blank" class="contact-button route-button text-white" style="background-color:#17a2b8; flex-direction:row;"><span class="iconify" data-icon="mdi:directions"></span> นำทางไป ${nearestHospital.name}</a>`;
                 
                 const locs = sessionData.location.split(',');
@@ -1480,10 +1497,6 @@
              if (data.onsetTime) bodyContents.push({ type: "text", text: "เริ่มเป็น: " + data.onsetTime, size: "sm", color: "#D32F2F", weight: "bold" });
              if (data.rtpaDeadline) bodyContents.push({ type: "text", text: "หมดเวลาให้ยา: " + data.rtpaDeadline, size: "sm", color: "#D32F2F", weight: "bold" });
              
-             let locText = data.distance ? `ระยะทาง: ${data.distance}` : "";
-             if (data.nearestHospitalName) locText = `ไป ${data.nearestHospitalName}: ${data.distance}`;
-             if (locText) bodyContents.push({ type: "text", text: locText, size: "sm", color: "#D32F2F", weight: "bold" });
-
              adviceBox.contents = [{ type: "text", text: "คำแนะนำเบื้องต้น:", weight: "bold", size: "md", color: "#D32F2F" }, { type: "text", text: "1. โทร 1669 ทันที\n2. ให้นอนราบหรือเอนศีรษะสูงเล็กน้อย\n3. ห้ามกินยาหรือดื่มน้ำป้องกันสำลัก", size: "md", wrap: true }];
         } else {
              let normalAdvice = "AI อาจผิดพลาดได้มาก หากมีความสงสัย โปรดปรึกษาแพทย์เสมอ";
@@ -1494,6 +1507,25 @@
         }
         
         bodyContents.push(adviceBox); 
+
+        // ย้ายการแสดงผลเรื่องข้อมูลการเดินทาง (พิกัด/เวลา) มาแสดงให้ทุกคน ไม่ว่าปกติหรือเสี่ยง
+        let locText = "";
+        if (data.distance) {
+            locText = data.nearestHospitalName ? `เดินทางไป ${data.nearestHospitalName}:\n` : "การเดินทาง:\n";
+            locText += `🚗 ขับรถไปเอง: ${data.selfTravelEstimate}\n`;
+            locText += `🚑 รอรถ รพ.รับ: ${data.ambulanceEstimate}\n`;
+            locText += `📍 ระยะทาง: ${data.distance}`;
+        }
+        if (locText) {
+             bodyContents.push({
+                 type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", borderColor: "#cccccc", borderWidth: "1px", cornerRadius: "md",
+                 contents: [
+                     { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" },
+                     { type: "text", text: locText, size: "sm", color: "#333333", wrap: true }
+                 ]
+             });
+        }
+
         bodyContents.push({ type: "separator", margin: "lg" }); 
         bodyContents.push({ type: "text", text: (data.isTestMode ? "[โหมดทดสอบ] " : "") + "หมายเหตุ: จัดทำเพื่อการประเมินเบื้องต้น อาจมีข้อมีผิดพลาด โปรดยืนยันอาการกับแพทย์ก่อนทุกครั้ง", size: "xs", color: "#aaaaaa", wrap: true, margin: "md", align: "center" });
 
@@ -1511,7 +1543,15 @@
             }
             footerContents.push({ type: "separator", margin: "md" });
         }
-        footerContents.push({ type: "box", layout: "horizontal", margin: "md", spacing: "sm", contents: [{ type: "button", style: "primary", color: "#17a2b8", height: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: `https://liff.line.me/${DAILY_CHECK_LIFF_ID}` } }, { type: "button", style: "primary", color: "#6c757d", height: "sm", action: { type: "uri", label: "ข้อมูลส่วนตัว", uri: `https://liff.line.me/${HEALTH_INFO_LIFF_ID}` } }] });
+        // อัปเดตปุ่ม 3 ปุ่มใหม่สำหรับทุกคน
+        footerContents.push({
+            type: "box", layout: "horizontal", margin: "md", spacing: "sm",
+            contents: [
+                { type: "button", style: "primary", color: "#17a2b8", height: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: `https://liff.line.me/${LIFF_ID}` } },
+                { type: "button", style: "primary", color: "#007bff", height: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: `https://liff.line.me/${DAILY_CHECK_LIFF_ID}` } },
+                { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ดูประวัติ", uri: `https://liff.line.me/${HEALTH_INFO_LIFF_ID}` } }
+            ]
+        });
 
         return { 
             type: "flex", 
@@ -1535,10 +1575,13 @@
         document.getElementById('final-text').textContent = txt; 
         document.getElementById('final-emoji').textContent = '👍'; 
         
-        let extraHtml = `<button class="btn-action btn-pulse-jerky" onclick="handleFinalSave(this, false, true)">บันทึกและปิดหน้าต่าง</button>`;
-        
+        let extraHtml = '';
         if (!sessionData.isRisk) {
-            extraHtml += `<button class="btn-action" style="background-color: #17a2b8; color: white; flex-direction:row;" onclick="testDistanceToHospital()"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
+            // โหมดปกติ ให้ปุ่มทดสอบระยะทางเด้งขึ้นมาก่อน และปุ่มบันทึกปกติอยู่ด้านล่าง
+            extraHtml += `<button class="btn-action btn-pulse-jerky" style="background-color: #17a2b8 !important; color: white !important; flex-direction:row;" onclick="askHomeStatusAndTestDistance()"><span class="iconify" data-icon="mdi:map-marker-distance"></span> ทดสอบระยะทางไป รพ.</button>`;
+            extraHtml += `<button class="btn-action btn-secondary" style="background-color: #6c757d; color: white;" onclick="handleFinalSave(this, false, true)">บันทึกและปิดหน้าต่าง</button>`;
+        } else {
+            extraHtml += `<button class="btn-action btn-pulse-jerky" onclick="handleFinalSave(this, false, true)">บันทึกและปิดหน้าต่าง</button>`;
         }
         
         document.getElementById('layer-6-extra-buttons').innerHTML = extraHtml;
