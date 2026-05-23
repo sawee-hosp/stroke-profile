@@ -1479,19 +1479,21 @@
         const isAbnormal = data.isEmergency || (data.isAiAssessment && data.riskScore >= 50);
         let headerText = "ประเมินอาการสโตรก";
         
+        // 1. Header (โลโก้ทดสอบ + ไล่สี)
         let headerContents = [];
         if (data.isTestMode) {
-            // แสดงแค่จุดเดียวด้านบน และลดขนาดเป็น xxs
             headerContents.push({ type: "text", text: "[กำลังทดสอบ ไม่ได้ใช้งานจริง]", color: "#FFD700", weight: "bold", size: "xxs", align: "center", margin: "none" });
         }
         headerContents.push({ type: "text", text: headerText, color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true });
 
+        // 2. ข้อมูลส่วนตัวพื้นฐาน
         let bodyContents = [
             { type: "text", text: "ชื่อ: " + String(data.registeredName || data.userName || "-"), weight: "bold", size: "lg", wrap: true }, 
             { type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "sm", color: "#d9534f", weight: "bold" },
-            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "xs", color: "#888888", margin: "sm" }
+            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "xs", color: "#666666", margin: "sm" }
         ];
         
+        // 3. รูปภาพ AI (ถ้ามี)
         if (data.isAiAssessment && data.fileUrls) {
             let imgBoxFace = { type: "box", layout: "horizontal", contents: [] };
             if (data.normal_face && String(data.normal_face).startsWith('http')) {
@@ -1512,12 +1514,15 @@
             }
         }
         
+        // 4. ผลประเมิน + Frequency
         let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis||'-'}` : (data.symptomDetail||"ไม่มีอาการ");
         displayAnalysis = displayAnalysis.replace(/<br>/g, '\n').replace(/<b>/g, '').replace(/<\/b>/g, '');
+        let freqText = data.frequency ? `\n(ลักษณะ: ${data.frequency})` : "";
+        
         bodyContents.push({ type: "separator", margin: "lg" });
-        bodyContents.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: "#333333", margin: "md", weight: "bold" });
+        bodyContents.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis + freqText, wrap: true, size: "md", color: "#333333", margin: "md", weight: "bold" });
 
-        // กรอบข้อมูลการเดินทางไปโรงพยาบาล
+        // 5. ข้อมูลการเดินทางไปโรงพยาบาล
         let locText = `🏥 รพ.สโตรกที่ใกล้ที่สุด: ${data.nearestHospitalName || 'รพ.สวี'}\n` +
                       `📍 ระยะทางไปรพ.: ${data.distance || '-'}\n` +
                       `🚗 ไปเองใช้เวลา: ${data.selfTravelEstimate || '-'}\n` +
@@ -1525,46 +1530,88 @@
                       
         bodyContents.push({
              type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", 
-             borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#f8f9fa",
+             borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#ffffffcc", // ใส่สีขาวโปร่งแสงเพื่อให้กลืนกับ Gradient
              contents: [
                  { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" },
                  { type: "text", text: locText, size: "sm", color: "#333333", wrap: true }
              ]
         });
 
-        // กรอบวิเคราะห์เวลา 3.5 ชม.
-        let onsetStr = data.onsetTime || "ไม่ระบุ";
-        let arrivalStr = data.arrivalDeadline || "ไม่ระบุ";
-        let adviceStr = `ถ้ามีอาการสโตรกให้ออกมา รพ.ทันที โดยถ้าเริ่มอาการตอน ${onsetStr} ต้องไปถึง รพ. ให้เร็วที่สุด ก่อนเวลา ${arrivalStr} น.`;
-
-        if (data.onsetTimeObject && data.selfTravelMins) {
-            let onsetTimeMs = new Date(data.onsetTimeObject).getTime();
-            let deadlineTimeMs = onsetTimeMs + (3.5 * 60 * 60 * 1000);
-            let arrivalTimeMs = new Date().getTime() + (data.selfTravelMins * 60 * 1000);
-
-            if (arrivalTimeMs <= deadlineTimeMs) {
-                adviceStr += "\n\n✅ วิเคราะห์: หากออกเดินทางตอนนี้ คาดว่าจะไปถึงทันช่วงเวลาทอง (Golden Hour)";
-            } else {
-                adviceStr += "\n\n⚠️ วิเคราะห์: หากออกเดินทางตอนนี้ คาดว่าอาจจะไปไม่ทันเวลา 3.5 ชม. แนะนำให้โทร 1669 เพื่อให้รถฉุกเฉินช่วยประสานงานดูแลระหว่างทาง!";
-            }
-        } else if (data.onsetTime === 'เรื้อรัง/หลายวัน') {
-            adviceStr = "อาการที่เป็นแบบเรื้อรังมักจะไม่เข้าข่ายสโตรกเฉียบพลัน หากกังวลหรือมีอาการรุนแรงขึ้น โปรดปรึกษาแพทย์หรือรีบมา รพ.";
-        } else if (!data.isRisk) {
-            adviceStr = "ไม่พบความเสี่ยงชัดเจน แต่หากมีความสงสัยหรืออาการแย่ลง โปรดปรึกษาแพทย์ทันที";
+        // 6. คำนวณเวลา (Timeline ETA)
+        const now = new Date();
+        const formatTimeOnly = (dateObj) => { return dateObj ? dateObj.toTimeString().slice(0,5) : "-"; };
+        
+        let onsetTimeStr = "ไม่ระบุ";
+        if (data.onsetTimeObject) {
+            onsetTimeStr = formatTimeOnly(new Date(data.onsetTimeObject));
+        } else if (data.onsetTime && data.onsetTime.includes(' ')) {
+             onsetTimeStr = data.onsetTime.split(' ')[1] || data.onsetTime;
         }
 
-        let timeCommentBox = {
-            type: "box", layout: "vertical", margin: "md", paddingAll: "md",
-            borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "bold", cornerRadius: "md",
-            backgroundColor: isAbnormal ? "#ffe6e6" : "#E8F5E9",
-            contents: [
-                { type: "text", text: "💡 ความเห็นและคำแนะนำ", weight: "bold", size: "sm", color: isAbnormal ? "#D32F2F" : "#2E7D32" },
-                { type: "text", text: adviceStr, size: "sm", color: "#333333", wrap: true, margin: "sm" }
-            ]
-        };
-        bodyContents.push(timeCommentBox); 
+        let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "ไม่ระบุ";
+        let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "ไม่ระบุ";
 
-        // ปุ่ม Footer (จัดแถวละ 1 ปุ่มตามคำขอ)
+        let selfEtaStr = "ไม่ระบุ";
+        let ambEtaStr = "ไม่ระบุ";
+
+        if (data.selfTravelMins) {
+            let selfEtaDate = new Date(now.getTime() + (data.selfTravelMins * 60000));
+            selfEtaStr = `${formatTimeOnly(selfEtaDate)} น.`;
+
+            let ambMins = Math.round((data.selfTravelMins * 2) + 10);
+            let ambEtaDate = new Date(now.getTime() + (ambMins * 60000));
+            ambEtaStr = `${formatTimeOnly(ambEtaDate)} น.`;
+        }
+
+        // กล่องคำแนะนำเวลา
+        let timelineBox = {
+             type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
+             borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "normal", cornerRadius: "md",
+             backgroundColor: "#ffffffcc",
+             contents: [
+                 {
+                    type: "box", layout: "horizontal",
+                    contents: [
+                        { type: "text", text: "เวลาที่เริ่มมีอาการ:", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: onsetTimeStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
+                    ]
+                 },
+                 {
+                    type: "box", layout: "horizontal",
+                    contents: [
+                        { type: "text", text: "เวลาที่ต้องถึงรพ. (+3.5ชม):", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: arrivalDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
+                    ]
+                 },
+                 {
+                    type: "box", layout: "horizontal",
+                    contents: [
+                        { type: "text", text: "เวลาที่ต้องได้รับยา (+4.5ชม):", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: rtpaDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
+                    ]
+                 },
+                 { type: "separator", margin: "sm" },
+                 {
+                    type: "box", layout: "horizontal", margin: "sm",
+                    contents: [
+                        { type: "text", text: "เวลาที่ขับรถเองถึง รพ.:", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: selfEtaStr, size: "sm", weight: "bold", color: "#17a2b8", flex: 4, align: "end" }
+                    ]
+                 },
+                 {
+                    type: "box", layout: "horizontal",
+                    contents: [
+                        { type: "text", text: "เวลาที่รอรถ รพ.ไปรับ:", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: ambEtaStr, size: "sm", weight: "bold", color: "#f39c12", flex: 4, align: "end" }
+                    ]
+                 },
+                 { type: "separator", margin: "sm" },
+                 { type: "text", text: "คำแนะนำ : ออกมารพ.ทันที อย่ารีรอ", size: "md", weight: "bold", color: "#D32F2F", margin: "md", align: "center", wrap: true }
+             ]
+        };
+        bodyContents.push(timelineBox); 
+
+        // 7. ปุ่ม Footer (จัดแถวละ 1 ปุ่ม)
         let mapUri = `https://www.google.com/maps/dir/?api=1&destination=${data.nearestHospitalLat || 10.229937},${data.nearestHospitalLon || 99.109073}`; 
         
         let footerContents = [
@@ -1592,7 +1639,16 @@
                     },
                     contents: headerContents
                 }, 
-                body: { type: "box", layout: "vertical", contents: bodyContents }, 
+                body: { 
+                    type: "box", layout: "vertical", 
+                    background: {
+                        type: "linearGradient",
+                        angle: "180deg",
+                        startColor: isAbnormal ? "#ef3b36" : "#a5d6a7", // สีแดงอ่อน(เสี่ยง) หรือ สีเขียวอ่อน(ไม่เสี่ยง)
+                        endColor: "#ffffff" // ไล่ลงมาหาขาว
+                    },
+                    contents: bodyContents 
+                }, 
                 footer: { type: "box", layout: "vertical", contents: footerContents } 
             } 
         };
