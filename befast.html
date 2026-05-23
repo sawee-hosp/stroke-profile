@@ -260,6 +260,20 @@
         </div>
     </div>
 
+    <div id="local-contact-consent-modal" class="custom-modal">
+        <div class="custom-modal-content" style="border: 3px solid #f39c12;">
+            <div class="custom-modal-title text-warning" style="font-size: 30px;"><span class="iconify" data-icon="mdi:shield-account"></span> ยืนยันการติดต่อ</div>
+            <div class="custom-modal-body" style="font-size: 22px;">
+                การกดโทรออกผ่านระบบนี้ ระบบจะ<b>ทำการระบุตัวตนและบันทึกข้อมูลการติดต่อของคุณ</b> เพื่อให้เจ้าหน้าที่ในพื้นที่สามารถช่วยเหลือได้อย่างถูกต้อง<br><br>
+                ท่านยินยอมให้เปิดเผยข้อมูลการติดต่อนี้หรือไม่?
+            </div>
+            <div class="custom-modal-actions">
+                <button id="btn-local-consent-yes" class="btn-action" style="background-color:#28A745; color:white;">ยินยอม และ โทรออก</button>
+                <button class="btn-action btn-modal-secondary" onclick="closeCustomModal('local-contact-consent-modal')">ไม่โทร</button>
+            </div>
+        </div>
+    </div>
+
     <div id="disclaimerModal" class="custom-modal" style="display:none;">
         <div class="custom-modal-content">
             <div class="custom-modal-title">จัดทำโดย รพ.สวี จ.ชุมพร</div>
@@ -309,6 +323,8 @@
 
     let hospitalList = []; 
     let nearestHospital = null; 
+
+    let localContacts = [];
 
     const symptomTranslations = { 'Balance': 'การทรงตัว', 'Eye': 'การมองเห็น', 'Face': 'ใบหน้า', 'Arm': 'แขนขา', 'Speech': 'การพูด' };
     const symptomImages = {
@@ -481,6 +497,10 @@
             bar.style.display = 'flex';
             if (regBtn) regBtn.style.display = 'none'; 
             updateBaselineFaceUI();
+            
+            // ดึงเบอร์โทรผู้เกี่ยวข้องในพื้นที่เมื่อพบข้อมูลผู้ใช้
+            fetchLocalContacts(sessionData.targetUserId || sessionData.userID);
+
         } else {
             sessionData.registeredName = `ผู้ป่วยไม่มีประวัติ`;
             sessionData.risk_group = "ไม่ระบุ";
@@ -492,8 +512,24 @@
             bar.style.display = 'flex'; 
             if (regBtn) regBtn.style.display = 'block'; 
             updateBaselineFaceUI();
+            
+            // ล้างข้อมูลเบอร์โทรพื้นที่
+            localContacts = [];
+            renderLocalContacts();
         }
     };
+
+    function fetchLocalContacts(userId) {
+        if (!userId) return;
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getLocalContacts', userId: userId }) })
+        .then(r => r.json()).then(res => {
+            if(res.status === 'success') {
+                localContacts = res.data || [];
+                sessionData.address = res.address || '';
+                renderLocalContacts();
+            }
+        }).catch(e => console.log("Failed to fetch local contacts", e));
+    }
 
     window.handleAssessorChange = function(select) {
         sessionData.assessorType = select.value;
@@ -1313,6 +1349,9 @@
         
         const floatSawiBtn = document.getElementById('float-sawi-btn');
 
+        // แสดงเบอร์ติดต่อในพื้นที่
+        renderLocalContacts();
+
         if (sessionData.location && nearestHospital) {
             let html = '';
             const urgencyText = document.getElementById('urgency-text');
@@ -1368,6 +1407,52 @@
 
     function createTableRow(icon, label, val, urgent, cls='') { return `<tr class="${cls}"><td><span class="iconify fs-2" data-icon="${icon}"></span></td><td>${label}</td><td class="${urgent?'text-warning fw-bold':'fw-bold'}">${val||'N/A'}</td></tr>`; }
     
+    function renderLocalContacts() {
+        const container = document.getElementById('contact-buttons');
+        if (!container) return;
+        
+        if (localContacts && localContacts.length > 0) {
+            let html = `<h4 class="text-center fw-bold mt-4 mb-3 text-secondary" style="font-size:24px;">เบอร์โทรฉุกเฉินในพื้นที่<br><small class="text-muted fs-6">(${sessionData.address})</small></h4>`;
+            html += `<div class="d-flex flex-column gap-2">`;
+            
+            localContacts.forEach(contact => {
+                let roleKey = 'tel_pcu'; // ค่าเริ่มต้น
+                if (contact.role.includes('อสม')) roleKey = 'tel_asm1';
+                if (contact.role.includes('ผู้ใหญ่')) roleKey = 'tel_header';
+
+                html += `<button class="btn-action" style="background-color: #6c757d; color: white; flex-direction:row; font-size:22px; padding: 10px;" onclick="handleLocalContactCall('${contact.role}', '${contact.tel}', '${roleKey}')">
+                            <span class="iconify" data-icon="mdi:phone-classic"></span> ติดต่อ ${contact.role}
+                        </button>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '';
+        }
+    }
+
+    window.handleLocalContactCall = function(role, tel, logKey) {
+        document.getElementById('local-contact-consent-modal').style.display = 'flex';
+        
+        document.getElementById('btn-local-consent-yes').onclick = function() {
+            document.getElementById('local-contact-consent-modal').style.display = 'none';
+            
+            // เตรียมส่ง Log เข้า Tel_log
+            const callData = { 
+                ...sessionData, 
+                isEmergency: true, 
+                tel: tel, 
+                ui: logKey,
+                contactedVia: logKey
+            };
+            
+            fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveData', data: callData }) }).catch(e => console.log(e));
+            
+            // โทรออก
+            window.location.href = `tel:${tel}`;
+        };
+    };
+
     function buildActionContainer() {
         let buttonsHtml = '';
         buttonsHtml += `<div class="action-button-wrapper"><div id="location-action" class="action-button location-button ${sessionData.location?'success':''}" onclick="getLocation(false, false)"><span class="iconify" data-icon="${sessionData.location?'mdi:check-circle':'mdi:map-marker'}"></span></div><p class="action-button-text" id="location-text">${sessionData.location?'ส่งพิกัดแล้ว':'ส่งพิกัดที่อยู่'}</p></div>`;
