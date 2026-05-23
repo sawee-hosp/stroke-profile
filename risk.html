@@ -1305,7 +1305,10 @@
         }
 
         function checkUserRegistration(uid) { 
-            $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory`).fail(function() {
+            // เพิ่ม cache buster &_=(เวลาปัจจุบัน) ป้องกัน LINE Browser จำข้อมูลเก่า
+            const cacheBuster = new Date().getTime();
+            $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory&_=${cacheBuster}`)
+             .fail(function() {
                 $('.loading-pulse').removeClass('loading-pulse');
             }); 
         }
@@ -1458,6 +1461,7 @@
             }
 
             // --- Bubble 1: Risk Result & Action Buttons ---
+            // เอา Emoji ออกจาก Label เพื่อกันปัญหา INVALID_MESSAGE ของ LINE
             const bubble1 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1496,13 +1500,13 @@
                             { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                             { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
                         ]},
-                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "📍 ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "📞 โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
                         { type: "box", layout: "horizontal", spacing: "sm", contents: [
-                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
-                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
                         ]},
-                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
+                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
                     ]
                 }
             };
