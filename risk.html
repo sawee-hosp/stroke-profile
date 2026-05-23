@@ -873,7 +873,6 @@
                 $('.progress-container').show();
                 $(`#step-${step}`).addClass('active');
                 
-                // คำนวณ Progress ให้ดูต่อเนื่อง
                 let totalVisSteps = 5;
                 const percent = (step / totalVisSteps) * 100;
                 $('#progress-text').text(`ขั้นตอนที่ ${step} / ${totalVisSteps}`);
@@ -1171,6 +1170,7 @@
             });
         }
 
+        // --- STREAMING_CHUNK: Integrating Data from AI to UI Form ---
         function fillDataFromOCR(data) {
             $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid highlight-flash loading-pulse');
             extractedMedicines = data.medicines || [];
@@ -1282,12 +1282,15 @@
             const refId = urlParams.get('ref');
             if (refId) {
                 $('#referrerId').val(refId);
-                $.getJSON(GAS_URL, { action: 'getReferrerName', refId: refId }, function(res) {
-                    if (res.success && res.name) { $('#referrer-display').html(`🤝 แนะนำให้มาประเมินโดย: <b>คุณ${res.name}</b>`).css('display', 'flex'); }
-                });
+                fetch(`${GAS_URL}?action=getReferrerName&refId=${refId}&_=${new Date().getTime()}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success && res.name) { $('#referrer-display').html(`🤝 แนะนำให้มาประเมินโดย: <b>คุณ${res.name}</b>`).css('display', 'flex'); }
+                    });
             }
         }
 
+        // --- STREAMING_CHUNK: Modifying to FETCH API for LIFF User Profile ---
         async function initializeLiff() {
             try {
                 await liff.init({ liffId: LIFF_ID });
@@ -1298,51 +1301,49 @@
                     checkUserRegistration(userProfile.userId);
 
                     if (urlParams.get('ref')) {
-                        $.getJSON(GAS_URL, { action: 'logVhvShare', refId: urlParams.get('ref'), page: 'risk_assessment', viewerId: userProfile.userId });
+                        fetch(`${GAS_URL}?action=logVhvShare&refId=${urlParams.get('ref')}&page=risk_assessment&viewerId=${userProfile.userId}&_=${new Date().getTime()}`);
                     }
                 } else { liff.login(); }
             } catch (e) { console.warn("LIFF Warning: ", e); }
         }
 
         function checkUserRegistration(uid) { 
-            // เพิ่ม cache buster &_=(เวลาปัจจุบัน) ป้องกัน LINE Browser จำข้อมูลเก่า
-            const cacheBuster = new Date().getTime();
-            $.getScript(`${GAS_URL}?userId=${encodeURIComponent(uid)}&callback=handleHistory&_=${cacheBuster}`)
-             .fail(function() {
+            fetch(`${GAS_URL}?action=getUser&userId=${encodeURIComponent(uid)}&_=${new Date().getTime()}`)
+            .then(res => res.json())
+            .then(res => {
+                $('.loading-pulse').removeClass('loading-pulse'); 
+                if(res.status === 'found') { 
+                    historyData = res.data; 
+                    
+                    // เติมฟอร์มหลักถ้าผู้ใช้ยังไม่ได้พิมพ์
+                    if (!$('#name').val() && historyData.Name) { $('#name').val(historyData.Name).addClass('is-valid'); }
+                    if (!$('#hn').val() && (historyData.HN || historyData.hn)) { $('#hn').val(historyData.HN || historyData.hn).addClass('is-valid'); }
+                    if (!$('#telephone').val() && historyData.Telephone) {
+                        let cleanPhone = String(historyData.Telephone).replace(/[^0-9]/g, '');
+                        $('#telephone').val(cleanPhone).addClass('is-valid');
+                    }
+                    if (historyData.Address && historyData.Address.trim() !== '') {
+                        let addrMatch = historyData.Address.match(/ม\.(\d+)\s+ต\.(.+)/);
+                        if (addrMatch) {
+                            $('#village').val(addrMatch[1]);
+                            $('#district').val(addrMatch[2]).change();
+                        }
+                    }
+
+                    // เติม OCR Modal ถ้ากำลังเปิดอยู่แล้วข้อมูลยังว่าง
+                    if ($('#pv_name').length && !$('#pv_name').val() && historyData.Name) { 
+                        $('#pv_name').val(historyData.Name).addClass('is-valid').removeClass('highlight-flash'); 
+                    }
+                    if ($('#pv_hn').length && !$('#pv_hn').val() && (historyData.HN || historyData.hn)) { 
+                        $('#pv_hn').val(historyData.HN || historyData.hn).addClass('is-valid').removeClass('highlight-flash'); 
+                    }
+                } 
+            })
+            .catch(err => {
                 $('.loading-pulse').removeClass('loading-pulse');
-            }); 
+            });
         }
         
-        window.handleHistory = function(res) { 
-            $('.loading-pulse').removeClass('loading-pulse'); // เอาคลาสกระพริบออกเมื่อดึงข้อมูลเสร็จ
-            if(res.status === 'found') { 
-                historyData = res.data; 
-                
-                // เติมฟอร์มหลักถ้าผู้ใช้ยังไม่ได้พิมพ์
-                if (!$('#name').val() && historyData.Name) { $('#name').val(historyData.Name).addClass('is-valid'); }
-                if (!$('#hn').val() && (historyData.HN || historyData.hn)) { $('#hn').val(historyData.HN || historyData.hn).addClass('is-valid'); }
-                if (!$('#telephone').val() && historyData.Telephone) {
-                    let cleanPhone = String(historyData.Telephone).replace(/[^0-9]/g, '');
-                    $('#telephone').val(cleanPhone).addClass('is-valid');
-                }
-                if (historyData.Address && historyData.Address.trim() !== '') {
-                    let addrMatch = historyData.Address.match(/ม\.(\d+)\s+ต\.(.+)/);
-                    if (addrMatch) {
-                        $('#village').val(addrMatch[1]);
-                        $('#district').val(addrMatch[2]).change();
-                    }
-                }
-
-                // เติม OCR Modal ถ้ากำลังเปิดอยู่แล้วข้อมูลยังว่าง
-                if ($('#pv_name').length && !$('#pv_name').val() && historyData.Name) { 
-                    $('#pv_name').val(historyData.Name).addClass('is-valid').removeClass('highlight-flash'); 
-                }
-                if ($('#pv_hn').length && !$('#pv_hn').val() && (historyData.HN || historyData.hn)) { 
-                    $('#pv_hn').val(historyData.HN || historyData.hn).addClass('is-valid').removeClass('highlight-flash'); 
-                }
-            } 
-        }
-
         function populateVillageDropdown() { for (let i=1; i<=19; i++) $('#village').append(`<option value="${i}">${i}</option>`); }
         function toggleMeasurementFields() {
             const useChol = $('input[name="useCholesterol"]:checked').val() === '1';
@@ -1456,12 +1457,11 @@
                 compareFlex = [
                     { type: "separator", margin: "md" },
                     { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่ไม่มีปัจจัยเสี่ยง:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    { type: "text", text: `ความเสี่ยงใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
+                    { type: "text", text: `ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
                 ];
             }
 
             // --- Bubble 1: Risk Result & Action Buttons ---
-            // เอา Emoji ออกจาก Label เพื่อกันปัญหา INVALID_MESSAGE ของ LINE
             const bubble1 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1479,7 +1479,7 @@
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "โอกาสเกิดสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
+                        { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
                         { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
                         { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
                         
@@ -1500,13 +1500,14 @@
                             { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                             { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
                         ]},
-                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "📍 ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                        // แก้ไข: ลดคำให้ไม่เกิน 20 ตัวอักษร
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "📞 โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
                         { type: "box", layout: "horizontal", spacing: "sm", contents: [
-                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
-                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
                         ]},
-                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
+                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
                     ]
                 }
             };
@@ -1522,7 +1523,7 @@
                 };
             };
             const bubble2 = {
-                type: "bubble", size: "mega",
+                type: "bubble", size: "mega", // แก้ไข: ตั้ง size ให้เท่ากันทั้งหมด
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
                     contents: [
@@ -1544,7 +1545,7 @@
 
             // --- Bubble 3: Advice ---
             const bubble3 = {
-                type: "bubble", size: "mega",
+                type: "bubble", size: "mega", // แก้ไข: ตั้ง size ให้เท่ากันทั้งหมด
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
