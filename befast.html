@@ -1489,14 +1489,14 @@
         .then(res => res.json()).then(res => {
             if(res.status==='success') {
                 if(liff.isInClient()) { 
-                    // ส่ง Flex ทันทีโดยไม่ต้องมีเงื่อนไข isMyOA บล็อกไว้
-                    liff.sendMessages([createFlexMessage(sessionData)]).then(() => {
+                    // ส่ง Flex ทั้ง 2 กล่อง (สรุปผล + คำแนะนำ) ทันที
+                    liff.sendMessages([createFlexMessage(sessionData), createGuideFlexMessage()]).then(() => {
                         liff.closeWindow();
                     }).catch(e => { 
                         console.error(e);
                         document.getElementById('loading').style.display = 'none';
                         showCustomAlert("เกิดข้อผิดพลาดในการส่งแชท: " + e.message); 
-                        setTimeout(() => liff.closeWindow(), 3000); // ดีเลย์ให้ผู้ใช้อ่าน Error แล้วค่อยปิด
+                        setTimeout(() => liff.closeWindow(), 3000);
                     }); 
                 } else { 
                     document.getElementById('loading').style.display = 'none'; showCustomAlert("บันทึกข้อมูลเรียบร้อยแล้ว"); 
@@ -1513,7 +1513,7 @@
     window.handleShare = function() {
         if (!liff.isInClient()) { showCustomAlert("ฟังก์ชันนี้ใช้ได้เฉพาะใน LINE เท่านั้น"); return; }
         showCustomConfirm("เมื่อกดปุ่มนี้จะแชร์ข้อมูลผลการประเมินไปให้คนที่ท่านเลือกใน LINE\n\nคำเตือน: โปรดระมัดระวังข้อมูลส่วนบุคคล (PDPA)", "ยืนยันการแชร์", () => {
-            liff.shareTargetPicker([createFlexMessage(sessionData)]).then(res => { 
+            liff.shareTargetPicker([createFlexMessage(sessionData), createGuideFlexMessage()]).then(res => { 
                 if (res) showCustomAlert("แชร์ข้อมูลเรียบร้อย"); 
             }).catch(err => { 
                 showCustomAlert("การแชร์ล้มเหลว หรือ Flex ไม่ถูกต้อง: " + err.message); 
@@ -1564,6 +1564,9 @@
         const isAbnormal = data.isEmergency || (data.isAiAssessment && data.riskScore >= 50);
         let headerText = "ประเมินอาการสโตรก";
         
+        let riskColor = isAbnormal ? "#ffffff" : "#d9534f";
+        let timeColor = isAbnormal ? "#e0e0e0" : "#666666";
+
         // 1. Header (โลโก้ทดสอบ + ไล่สี)
         let headerContents = [];
         if (data.isTestMode) {
@@ -1574,8 +1577,8 @@
         // 2. ข้อมูลส่วนตัวพื้นฐาน
         let bodyContents = [
             { type: "text", text: "ชื่อ: " + String(data.registeredName || data.userName || "-"), weight: "bold", size: "lg", wrap: true }, 
-            { type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "sm", color: "#d9534f", weight: "bold" },
-            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "xs", color: "#666666", margin: "sm" }
+            { type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "sm", color: riskColor, weight: "bold" },
+            { type: "text", text: "เวลาประเมิน: " + formatFullDateTime(new Date()), size: "xs", color: timeColor, margin: "sm" }
         ];
         
         // 3. รูปภาพ AI (ถ้ามี)
@@ -1615,7 +1618,7 @@
                       
         bodyContents.push({
              type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", 
-             borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#ffffffcc", // ใส่สีขาวโปร่งแสงเพื่อให้กลืนกับ Gradient
+             borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#ffffffcc",
              contents: [
                  { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" },
                  { type: "text", text: locText, size: "sm", color: "#333333", wrap: true }
@@ -1640,6 +1643,7 @@
         let ambEtaStr = "ไม่ระบุ";
 
         if (data.selfTravelMins) {
+            // คำนวณเวลาปัจจุบัน + เวลาเดินทาง
             let selfEtaDate = new Date(now.getTime() + (data.selfTravelMins * 60000));
             selfEtaStr = `${formatTimeOnly(selfEtaDate)} น.`;
 
@@ -1648,7 +1652,7 @@
             ambEtaStr = `${formatTimeOnly(ambEtaDate)} น.`;
         }
 
-        // กล่องคำแนะนำเวลา
+        // กล่องวิเคราะห์เวลา (Timeline Box)
         let timelineBox = {
              type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
              borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "normal", cornerRadius: "md",
@@ -1658,20 +1662,20 @@
                     type: "box", layout: "horizontal",
                     contents: [
                         { type: "text", text: "เวลาที่เริ่มมีอาการ:", size: "xs", color: "#333333", flex: 6 },
-                        { type: "text", text: onsetTimeStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
+                        { type: "text", text: onsetTimeStr, size: "sm", weight: "bold", color: "#333333", flex: 4, align: "end" }
                     ]
                  },
                  {
                     type: "box", layout: "horizontal",
                     contents: [
-                        { type: "text", text: "เวลาที่ต้องถึงรพ. (+3.5ชม):", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: "เวลาที่ต้องถึงรพ. (+3.5 ชม.):", size: "xs", color: "#333333", flex: 6 },
                         { type: "text", text: arrivalDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
                     ]
                  },
                  {
                     type: "box", layout: "horizontal",
                     contents: [
-                        { type: "text", text: "เวลาที่ต้องได้รับยา (+4.5ชม):", size: "xs", color: "#333333", flex: 6 },
+                        { type: "text", text: "เวลาที่ต้องได้รับยา (+4.5 ชม.):", size: "xs", color: "#333333", flex: 6 },
                         { type: "text", text: rtpaDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" }
                     ]
                  },
@@ -1717,8 +1721,7 @@
                 header: { 
                     type: "box", layout: "vertical", 
                     background: {
-                        type: "linearGradient",
-                        angle: "90deg",
+                        type: "linearGradient", angle: "90deg",
                         startColor: isAbnormal ? "#D32F2F" : "#2E7D32", 
                         endColor: isAbnormal ? "#000000" : "#0B3D0B"
                     },
@@ -1727,15 +1730,59 @@
                 body: { 
                     type: "box", layout: "vertical", 
                     background: {
-                        type: "linearGradient",
-                        angle: "180deg",
-                        startColor: isAbnormal ? "#ef3b36" : "#a5d6a7", // สีแดงอ่อน(เสี่ยง) หรือ สีเขียวอ่อน(ไม่เสี่ยง)
-                        endColor: "#ffffff" // ไล่ลงมาหาขาว
+                        type: "linearGradient", angle: "180deg",
+                        startColor: isAbnormal ? "#ef3b36" : "#a5d6a7",
+                        endColor: "#ffffff"
                     },
                     contents: bodyContents 
                 }, 
                 footer: { type: "box", layout: "vertical", contents: footerContents } 
             } 
+        };
+    }
+
+    function createGuideFlexMessage() {
+        return {
+            type: "flex",
+            altText: "การเตรียมตัวและนำส่งผู้ป่วยสโตรก",
+            contents: {
+                type: "bubble",
+                size: "mega",
+                header: {
+                    type: "box", layout: "vertical",
+                    background: {
+                        type: "linearGradient", angle: "90deg",
+                        startColor: "#F57F17", // เหลืองเข้ม
+                        endColor: "#000000" // ไปหาดำ
+                    },
+                    contents: [
+                        { type: "text", text: "การเตรียมตัวและนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "lg", align: "center", wrap: true }
+                    ]
+                },
+                body: {
+                    type: "box", layout: "vertical",
+                    background: {
+                        type: "linearGradient", angle: "180deg",
+                        startColor: "#FFF9C4", // เหลืองอ่อน
+                        endColor: "#ffffff" // ไปหาขาว
+                    },
+                    spacing: "sm",
+                    contents: [
+                        { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง \"เวลาคือสิ่งสำคัญที่สุด\" กรุณาปฏิบัติตามคำแนะนำนี้ระหว่างเดินทาง:", size: "xs", weight: "bold", wrap: true, color: "#d35400" },
+                        { type: "separator", margin: "sm" },
+                        { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                        { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา เด็ดขาด\n✅ ให้นอนราบ ตะแคงหน้า (กันสำลัก)\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการให้แม่นยำ\n✅ ถ้ารู้สึกว่าไปช้า โทร 1669 ทันที", size: "xs", wrap: true, color: "#444444" },
+                        { type: "separator", margin: "sm" },
+                        { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                        { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัวทั้งหมด (หรือถ่ายรูปมา)\n👉 ประวัติแพ้ยา/โรคประจำตัว\n👉 ญาติที่สามารถตัดสินใจได้", size: "xs", wrap: true, color: "#444444" },
+                        { type: "separator", margin: "sm" },
+                        { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                        { type: "text", text: "🏥 เข้าห้องฉุกเฉิน (ER) แจ้งทันทีว่า \"สงสัยสโตรก\" หรือแขนขาอ่อนแรง\n🧠 ทำ CT Scan ด่วน ดูเส้นเลือดตีบ/แตก\n💉 พิจารณายาละลายลิ่มเลือด (ถ้าทันเวลา) หรือผ่าตัด/ลากลิ่มเลือด", size: "xs", wrap: true, color: "#444444" },
+                        { type: "separator", margin: "lg" },
+                        { type: "text", text: "จัดทำโดย สวีรู้ทันสโตรก รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", wrap: true }
+                    ]
+                }
+            }
         };
     }
 
