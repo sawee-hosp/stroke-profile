@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบโทรฉุกเฉิน (สโตรก)</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+
+    <style>
+        :root {
+            --primary-red: #D32F2F;
+            --bg-color: #f8f9fa;
+        }
+
+        body { 
+            font-family: "Noto Sans Thai", sans-serif; 
+            margin: 0; color: #333;
+            min-height: 100vh; font-size: 20px;
+            background: linear-gradient(180deg, var(--primary-red) 0%, #ffffff 300px);
+            background-repeat: no-repeat; background-attachment: fixed;
+        }
+        
+        .container { max-width: 600px; padding: 15px; margin: 0 auto; position: relative; z-index: 10; }
+
+        .app-header { text-align: center; margin-bottom: 25px; padding-top: 15px; }
+        h1.main-title { color: #ffffff; font-weight: 900; font-size: 32px; margin: 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+
+        .main-card { background: #ffffff; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; border: 1px solid #f0f0f0; }
+
+        .btn-huge {
+            width: 100%; border-radius: 25px; font-weight: 900; padding: 25px 20px; border: none; box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            transition: transform 0.1s; margin-bottom: 15px; font-size: 36px; display: flex; align-items: center; justify-content: center; gap: 15px;
+            cursor: pointer; text-decoration: none; color: white; flex-direction: row;
+        }
+        .btn-huge:active { transform: scale(0.96); }
+        
+        .btn-1669 { background: linear-gradient(135deg, #FF0000, #B71C1C); border: 4px solid #880e4f; animation: pulse-danger-btn 1.5s infinite; }
+        @keyframes pulse-danger-btn { 0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
+
+        .btn-sawi { background: linear-gradient(135deg, #f39c12, #d35400); border: 4px solid #e67e22; font-size: 28px;}
+        .btn-rescue { background: linear-gradient(135deg, #34495e, #2c3e50); border: 4px solid #2c3e50; font-size: 24px;}
+        .btn-local { background-color: #6c757d; color: white; border-radius: 50px; font-weight: 700; padding: 15px; font-size: 22px; width: 100%; margin-bottom: 10px; border: none; display: flex; justify-content: center; gap: 10px; align-items: center;}
+
+        /* Loading Spinner */
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .spinner { border: 12px solid #f3f3f3; border-top: 12px solid #ff3654; border-radius: 50%; width: 100px; height: 100px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loading" style="display: none;">
+        <div class="spinner"></div>
+        <div id="loading-text" style="color: #FFD700; font-weight: bold; font-size: 26px; text-align: center; padding: 20px;">กำลังส่งพิกัดและเตรียมโทรออก...</div>
+    </div>
+
+    <div class="container">
+        <div class="app-header">
+            <h1 class="main-title"><span class="iconify" data-icon="mdi:phone-classic"></span> โทรฉุกเฉิน</h1>
+            <p class="text-white mt-2 mb-0" style="font-size: 18px;">ระบบจะส่งพิกัดของคุณไปยัง รพ. ทันทีที่กดโทร</p>
+        </div>
+
+        <div class="main-card">
+            <!-- ปุ่มสายด่วนหลัก -->
+            <button class="btn-huge btn-1669" onclick="initiateCall('1669', '1669', 'tel_1669_initial')">
+                <span class="iconify" data-icon="mdi:phone-alert" style="font-size: 50px;"></span> 1669
+            </button>
+
+            <button class="btn-huge btn-sawi" onclick="initiateCall('รพ.สวี', '0894745523', 'tel_sawee')">
+                <span class="iconify" data-icon="mdi:hospital-building" style="font-size: 40px;"></span> รพ.สวี
+            </button>
+
+            <button class="btn-huge btn-rescue" onclick="initiateCall('กู้ภัยสายชล', '0810814201', 'tel_rescue')">
+                <span class="iconify" data-icon="mdi:car-emergency" style="font-size: 35px;"></span> กู้ภัยสายชล
+            </button>
+
+            <hr class="my-4">
+
+            <!-- ส่วนของเบอร์ติดต่อในพื้นที่ (ดึงอัตโนมัติ) -->
+            <h4 class="text-center fw-bold mb-3 text-secondary" style="font-size: 22px;">หน่วยงานในพื้นที่ของคุณ</h4>
+            <div id="local-address" class="text-center text-primary fw-bold mb-3" style="font-size: 18px;">กำลังค้นหาข้อมูล...</div>
+            <div id="local-contacts-container">
+                <div class="text-center text-muted">...</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxm8ZJnPV-d_im3ySH19t84deJ3ym10ZvJxFfBQndImpvqdYeCQrvnY6HLN5xS8Wb6r/exec"; 
+    const LIFF_ID = "2009491708-ULIwgKkN"; // LIFF ID สำหรับหน้าโทรออก
+    
+    let userData = {
+        userId: '',
+        name: 'ผู้ป่วยฉุกเฉิน',
+        address: '',
+        lat: '',
+        lon: ''
+    };
+
+    window.onload = async () => {
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                userData.userId = profile.userId;
+                userData.name = profile.displayName;
+                fetchLocalContacts(profile.userId);
+            } else {
+                liff.login();
+            }
+        } catch (e) {
+            console.error("LIFF Init Error:", e);
+            document.getElementById('local-address').innerText = "ไม่สามารถเชื่อมต่อ LINE ได้";
+        }
+    };
+
+    function fetchLocalContacts(userId) {
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getLocalContacts', userId: userId }) })
+        .then(r => r.json()).then(res => {
+            if(res.status === 'success') {
+                userData.address = res.address || 'ไม่พบข้อมูลที่อยู่ในระบบ';
+                document.getElementById('local-address').innerText = userData.address;
+                renderLocalContacts(res.data || []);
+            } else {
+                document.getElementById('local-address').innerText = "ไม่พบประวัติผู้ป่วย";
+                document.getElementById('local-contacts-container').innerHTML = '';
+            }
+        }).catch(e => {
+            console.log(e);
+            document.getElementById('local-address').innerText = "เชื่อมต่อฐานข้อมูลล้มเหลว";
+        });
+    }
+
+    function renderLocalContacts(contacts) {
+        const container = document.getElementById('local-contacts-container');
+        if (contacts.length === 0) {
+            container.innerHTML = `<div class="alert alert-light text-center text-muted">ไม่พบข้อมูลหน่วยงานใกล้บ้านท่าน</div>`;
+            return;
+        }
+
+        let html = '';
+        contacts.forEach(contact => {
+            let roleKey = 'tel_pcu'; 
+            if (contact.role.includes('อสม')) roleKey = 'tel_asm1';
+            if (contact.role.includes('ผู้ใหญ่')) roleKey = 'tel_header';
+
+            html += `<button class="btn-local" onclick="initiateCall('${contact.role}', '${contact.tel}', '${roleKey}')">
+                        <span class="iconify" data-icon="mdi:phone-in-talk"></span> โทร ${contact.role}
+                    </button>`;
+        });
+        container.innerHTML = html;
+    }
+
+    window.initiateCall = function(targetName, targetNumber, logKey) {
+        document.getElementById('loading').style.display = 'flex';
+        
+        // ขอพิกัดก่อนโทร
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => { processCall(targetName, targetNumber, logKey, position.coords.latitude, position.coords.longitude); },
+                error => { processCall(targetName, targetNumber, logKey, '', ''); } // ยอมให้โทรแม้ไม่ให้พิกัด
+            );
+        } else {
+            processCall(targetName, targetNumber, logKey, '', '');
+        }
+    };
+
+    function processCall(targetName, targetNumber, logKey, lat, lon) {
+        userData.lat = lat;
+        userData.lon = lon;
+        const locationStr = (lat && lon) ? `${lat},${lon}` : '';
+        const callTime = new Date();
+
+        // 1. บันทึกข้อมูลไปที่ Google Sheet (daily_check ให้ Is Risk = TRUE และ tel_log)
+        const payloadData = {
+            action: 'saveData',
+            data: {
+                userID: userData.userId,
+                userName: userData.name,
+                isEmergency: true,
+                isRisk: true, // บังคับให้เป็นเคสเสี่ยงทันที
+                symptomCategory: "โทรฉุกเฉิน",
+                symptomDetail: `เปิดแอปและกดโทรหา ${targetName}`,
+                contactedVia: logKey,
+                tel: targetNumber,
+                location: locationStr,
+                onsetTime: `${callTime.getDate()}/${callTime.getMonth()+1} ${callTime.getHours()}:${String(callTime.getMinutes()).padStart(2, '0')}`
+            }
+        };
+
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payloadData) }).catch(e => console.error("GAS Save Error"));
+
+        // 2. ส่ง Flex Message
+        if (liff.isInClient()) {
+            const flexMsg = createCallFlexMessage(targetName, targetNumber, locationStr, callTime);
+            liff.sendMessages([flexMsg])
+            .then(() => {
+                // 3. ปิด LIFF และสั่งโทรออก
+                window.location.href = `tel:${targetNumber}`;
+                setTimeout(() => { liff.closeWindow(); }, 500); 
+            })
+            .catch(err => {
+                console.error("Flex Send Error:", err);
+                window.location.href = `tel:${targetNumber}`;
+                setTimeout(() => { liff.closeWindow(); }, 500);
+            });
+        } else {
+            window.location.href = `tel:${targetNumber}`;
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function createCallFlexMessage(targetName, targetNumber, locationStr, timeObj) {
+        const timeStr = `${timeObj.getDate()}/${timeObj.getMonth()+1}/${timeObj.getFullYear()+543} เวลา ${timeObj.getHours()}:${String(timeObj.getMinutes()).padStart(2, '0')} น.`;
+        
+        let mapUri = `https://www.google.com/maps/search/?api=1&query=10.229937,99.109073`; // รพ.สวี ค่าเริ่มต้น
+        let locStatusText = "ไม่ได้ส่งพิกัด";
+        let locStatusColor = "#aaaaaa";
+
+        if (locationStr) {
+            mapUri = `https://www.google.com/maps/search/?api=1&query=${locationStr}`;
+            locStatusText = "พิกัดถูกส่งไปยังระบบของ รพ.สวี แล้ว";
+            locStatusColor = "#2E7D32";
+        }
+
+        return {
+            type: "flex",
+            altText: "แจ้งเตือนการโทรฉุกเฉิน",
+            contents: {
+                type: "bubble",
+                size: "mega",
+                header: {
+                    type: "box", layout: "vertical",
+                    backgroundColor: "#D32F2F", // แดงฉุกเฉิน
+                    contents: [
+                        { type: "text", text: "🚨 แจ้งเหตุฉุกเฉิน", color: "#ffffff", weight: "bold", size: "xl", align: "center" }
+                    ]
+                },
+                body: {
+                    type: "box", layout: "vertical", spacing: "md",
+                    contents: [
+                        { type: "text", text: "บันทึกการโทรออก", weight: "bold", size: "lg", align: "center", color: "#333333" },
+                        { type: "separator", margin: "md" },
+                        {
+                            type: "box", layout: "horizontal", margin: "md",
+                            contents: [
+                                { type: "text", text: "หน่วยงาน:", size: "sm", color: "#666666", flex: 3 },
+                                { type: "text", text: targetName, size: "sm", weight: "bold", color: "#D32F2F", flex: 7, wrap: true }
+                            ]
+                        },
+                        {
+                            type: "box", layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "เบอร์โทร:", size: "sm", color: "#666666", flex: 3 },
+                                { type: "text", text: targetNumber, size: "sm", weight: "bold", color: "#333333", flex: 7 }
+                            ]
+                        },
+                        {
+                            type: "box", layout: "horizontal",
+                            contents: [
+                                { type: "text", text: "วัน-เวลา:", size: "sm", color: "#666666", flex: 3 },
+                                { type: "text", text: timeStr, size: "sm", weight: "bold", color: "#333333", flex: 7, wrap: true }
+                            ]
+                        },
+                        { type: "separator", margin: "lg" },
+                        {
+                            type: "box", layout: "vertical", margin: "md",
+                            contents: [
+                                { type: "text", text: "📍 สถานะพิกัด:", size: "xs", color: "#666666", align: "center" },
+                                { type: "text", text: locStatusText, size: "sm", weight: "bold", color: locStatusColor, align: "center", wrap: true }
+                            ]
+                        }
+                    ]
+                },
+                footer: {
+                    type: "box", layout: "vertical", spacing: "sm",
+                    contents: [
+                        { type: "button", style: "primary", color: "#007bff", action: { type: "uri", label: "🗺️ ดูพิกัดที่โทร (แผนที่)", uri: mapUri } },
+                        { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: `📞 โทรซ้ำ (${targetNumber})`, uri: `tel:${targetNumber}` } }
+                    ]
+                }
+            }
+        };
+    }
+</script>
+</body>
+</html>
