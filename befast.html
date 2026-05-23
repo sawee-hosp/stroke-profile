@@ -364,6 +364,8 @@
         sessionData.isTestMode = false;
         sessionData.isEmergency = true;
         sessionData.contactedVia = 'tel_1669_initial';
+        sessionData.symptomDetail = "ไม่ได้ประเมิน (กดโทร 1669 ด่วน)";
+        sessionData.symptomCategory = "โทรฉุกเฉิน";
         
         document.getElementById('test-mode-toggle').checked = false;
         document.getElementById('test-watermark').classList.remove('active');
@@ -1506,7 +1508,7 @@
             locText += `🚑 รถ รพ.ไปรับใช้เวลา: ${data.ambulanceEstimate}`;
             
             bodyContents.push({
-                 type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", borderColor: "#cccccc", borderWidth: "1px", cornerRadius: "md", backgroundColor: "#f8f9fa",
+                 type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#f8f9fa",
                  contents: [
                      { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" },
                      { type: "text", text: locText, size: "sm", color: "#333333", wrap: true }
@@ -1537,7 +1539,7 @@
 
         let timeCommentBox = {
             type: "box", layout: "vertical", margin: "md", paddingAll: "md",
-            borderColor: isAbnormal ? "#D32F2F" : "#F57C00", borderWidth: "2px", cornerRadius: "md",
+            borderColor: isAbnormal ? "#D32F2F" : "#F57C00", borderWidth: "bold", cornerRadius: "md",
             backgroundColor: isAbnormal ? "#ffe6e6" : "#fff8e1",
             contents: [
                 { type: "text", text: "💡 ความเห็นและคำแนะนำ", weight: "bold", size: "sm", color: isAbnormal ? "#D32F2F" : "#E65100" },
