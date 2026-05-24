@@ -720,10 +720,8 @@
             $('input[name="isSawiPatient"]').change(function() {
                 if($(this).val() === '1') { 
                     $('#sawi-ocr-box').slideDown(); 
-                    $('#address-box').slideDown();
                 } else { 
                     $('#sawi-ocr-box').slideUp(); 
-                    $('#address-box').slideUp();
                 }
             });
             
@@ -828,6 +826,7 @@
             if(!$('input[name="confident"]:checked').val()) { missing.push("ความมั่นใจในการพาส่ง รพ."); }
             
             if(missing.length > 0) return triggerError(missing, selectors);
+            
             // ข้ามขั้นตอนที่ 5 (หน้าหมู่บ้าน) ถ้าไม่ใช่คนไข้ รพ.สวี
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
             if(isSawi) {
@@ -1298,72 +1297,67 @@
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
+        
         async function sendFlex(data, name, suggestionText) {
-            const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
-            let startColor = "#444444"; let endColor = "#111111";
-            let p = parseFloat(data.riskPercentText);
-            
-            if (data.hasStrokeHistory || p >= 30) { startColor = "#dc3545"; endColor = "#7a0010"; } 
-            else if (p >= 20) { startColor = "#fd7e14"; endColor = "#c6600c"; } 
-            else if (p >= 10) { startColor = "#ffc107"; endColor = "#d39e00"; } 
-            else { startColor = "#28a745"; endColor = "#1e7e34"; }
+            const safeName = (name && String(name).trim() !== "") ? String(name).substring(0, 30) : "ผู้รับบริการ";
+            let riskBgColor = "#28a745"; 
+            let p = parseFloat(data.riskPercentText) || 0;
+
+            if (data.hasStrokeHistory || p >= 30) { riskBgColor = "#dc3545"; } 
+            else if (p >= 20) { riskBgColor = "#fd7e14"; } 
+            else if (p >= 10) { riskBgColor = "#ffc107"; } 
+
             const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
-            const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
+            const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "ไม่ทราบ";
             const picUrl = (userProfile && userProfile.pictureUrl) ? userProfile.pictureUrl : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-            let sickCount = Math.round(parseFloat(data.riskPercentText));
+
+            let sickCount = Math.round(p);
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
-            
+
             let redDots = Math.max(1, Math.ceil(sickCount / 10));
             if (sickCount === 0) redDots = 0; 
             let greenDots = 10 - redDots;
-            let emojiStr = "";
-            for(let i=0; i<redDots; i++) emojiStr += "🔴";
-            for(let i=0; i<greenDots; i++) emojiStr += "🟢";
-            
-            let compareFlex = [];
-            if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
-                compareFlex = [
+            let emojiStr = "🔴".repeat(redDots) + "🟢".repeat(greenDots);
+
+            let compareBoxes = [];
+            if (data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
+                compareBoxes = [
                     { type: "separator", margin: "md" },
                     { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
                     { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "sm", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
                 ];
             } else if (!data.hasStrokeHistory) {
-                compareFlex = [
+                compareBoxes = [
                     { type: "separator", margin: "md" },
-                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่ไม่มีปัจจัยเสี่ยง:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    { type: "text", text: `ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
+                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ไม่มีปัจจัยเสี่ยง:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
+                    { type: "text", text: `ความเสี่ยงใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
                 ];
             }
-            // --- Bubble 1: Risk Result & Action Buttons ---
+
             const bubble1 = {
                 type: "bubble", size: "mega",
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: riskBgColor, paddingAll: "15px",
                     contents: [
                         { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
-                        { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center",
-                            contents: [
-                                { type: "image", url: picUrl, flex: 0, size: "xxs", align: "center", gravity: "center" },
-                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "sm", wrap: true }
-                            ]
-                        }
+                        { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center", contents: [
+                            { type: "image", url: picUrl, flex: 0, size: "xxs", align: "center" },
+                            { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "sm", wrap: true }
+                        ]}
                     ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
-                        { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
+                        { type: "text", text: "โอกาสเกิดสโตรกใน 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
+                        { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: riskBgColor, align: "center", margin: "xs" }, 
                         { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
-                        
-                        { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "10px", margin: "md", cornerRadius: "md",
-                            contents: [
-                                { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
-                                { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
-                                { type: "text", text: emojiStr, size: "md", align: "center", margin: "xs" }
-                            ]
-                        }
+                        { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "10px", margin: "md", cornerRadius: "md", contents: [
+                            { type: "text", text: "จาก 100 คนที่มีสุขภาพแบบคุณ", size: "xxs", color: "#003366", weight: "bold", align: "center" },
+                            { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
+                            { type: "text", text: emojiStr, size: "md", align: "center", margin: "xs" }
+                        ]}
                     ]
                 },
                 footer: {
@@ -1384,26 +1378,20 @@
                 }
             };
             
-            // หลีกเลี่ยง Spread Operator ด้วยการ push เข้า Array ตรงๆ
-            if (compareFlex.length > 0) {
-                compareFlex.forEach(item => bubble1.body.contents.push(item));
-            }
+            compareBoxes.forEach(b => bubble1.body.contents.push(b));
 
-            // --- Bubble 2: Urgent Action ---
-            const createIconBox = (imgUrl, txt) => {
-                return {
-                    type: "box", layout: "vertical", alignItems: "center", margin: "xs",
-                    action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" },
-                    contents: [
-                        { type: "image", url: imgUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover" },
-                        { type: "text", text: txt, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
-                    ]
-                };
-            };
+            const makeIcon = (url, txt) => ({
+                type: "box", layout: "vertical", alignItems: "center", margin: "xs",
+                contents: [
+                    { type: "image", url: url, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                    { type: "text", text: txt, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } }
+                ]
+            });
+
             const bubble2 = {
-                type: "bubble", size: "mega", 
+                type: "bubble", size: "mega",
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: "#cc0000", paddingAll: "15px",
                     contents: [
                         { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "sm", align: "center" },
                         { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" }
@@ -1412,42 +1400,45 @@
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "🚨 อย่ารอเด็ดขาด! 🚨", size: "xl", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "md" },
-                        { type: "text", text: "ลดโอกาสอัมพาตและเสียชีวิตได้", size: "md", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "sm" },
-                        { type: "text", text: "อาการสโตรก ได้แก่:", size: "sm", color: "#666666", align: "center", wrap: true, margin: "xs" },
-                        { type: "box", layout: "horizontal", margin: "md", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/b.png", "เซมึนหัว"), createIconBox("https://sawee-hosp.github.io/stroke-profile/e.png", "ตามัวมาก") ] },
-                        { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), createIconBox("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
-                        { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/s.png", "ลำบากพูด"), createIconBox("https://sawee-hosp.github.io/stroke-profile/t.png", "มารพ.ทันที") ] }
+                        { type: "text", text: "อย่ารอเด็ดขาด!", size: "xl", weight: "bold", color: "#dc3545", align: "center", margin: "md" },
+                        { type: "text", text: "ลดโอกาสอัมพาตและเสียชีวิตได้", size: "sm", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "xs" },
+                        { type: "text", text: "อาการสโตรก ได้แก่:", size: "xs", color: "#666666", align: "center", wrap: true, margin: "md" },
+                        { type: "box", layout: "horizontal", margin: "md", contents: [ makeIcon("https://sawee-hosp.github.io/stroke-profile/b.png", "เซมึนหัว"), makeIcon("https://sawee-hosp.github.io/stroke-profile/e.png", "ตามัวมาก") ] },
+                        { type: "box", layout: "horizontal", margin: "xs", contents: [ makeIcon("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), makeIcon("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
+                        { type: "box", layout: "horizontal", margin: "xs", contents: [ makeIcon("https://sawee-hosp.github.io/stroke-profile/s.png", "ลำบากพูด"), makeIcon("https://sawee-hosp.github.io/stroke-profile/t.png", "มารพ.ทันที") ] }
                     ]
                 }
             };
-            // --- Bubble 3: Advice ---
+
+            const adviceBlocks = String(suggestionText).split('\n').filter(b => b.trim() !== "").map(block => ({
+                type: "text", text: String(block).trim(), wrap: true, size: "sm", color: "#444444", margin: "sm"
+            }));
+
             const bubble3 = {
-                type: "bubble", size: "mega", 
+                type: "bubble", size: "mega",
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: riskBgColor, paddingAll: "15px",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "sm", color: "#444444" }
+                        { type: "text", text: "👨‍⚕️ หมอสวีขอแนะนำให้:", weight: "bold", size: "md", color: "#003366", margin: "sm" },
+                        ...adviceBlocks
                     ]
                 }
             };
-            const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
-            let messagesToSend = [carouselFlex];
-            // --- Text Message Follow-up ---
-            let freqText = "";
-            if (data.hasStrokeHistory || p >= 30) { freqText = "ทุก 3-4 วัน"; } 
-            else if (p >= 20) { freqText = "สัปดาห์ละครั้ง"; } 
-            else if (p >= 10) { freqText = "2 สัปดาห์ครั้ง"; } 
-            else { freqText = "เดือนละครั้ง"; }
+
+            const carouselFlex = { type: "flex", altText: "ผลประเมินสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
+            
+            let freqText = (data.hasStrokeHistory || p >= 30) ? "ทุก 3-4 วัน" : (p >= 20) ? "สัปดาห์ละครั้ง" : (p >= 10) ? "2 สัปดาห์ครั้ง" : "เดือนละครั้ง";
             const textMessage = {
                 type: "text",
                 text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️ หมอสวีขออนุญาตเข้ามาดูแลทางไลน์ ${freqText} นะครับ อย่าเพิ่งบล็อกกันนะครับ ❤️`
             };
-            messagesToSend.push(textMessage);
+
+            let messagesToSend = [carouselFlex, textMessage];
+
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa') || liff.isInClient()) {
                 try { 
