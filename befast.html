@@ -1438,10 +1438,23 @@
         const container = document.getElementById('contact-buttons');
         if (!container) return;
         
+        let html = `<h4 class="text-center fw-bold mt-4 mb-3 text-secondary" style="font-size:24px;">เบอร์โทรฉุกเฉินในพื้นที่<br><small class="text-muted fs-6">(${sessionData.address || 'กำลังค้นหาพิกัด'})</small></h4>`;
+        html += `<div class="d-flex flex-column gap-2 mb-3">`;
+        
+        // 1669 และเบอร์ รพ. (แสดงซ้ำเหนือเบอร์พื้นที่)
+        html += `<button class="btn-action" style="background-color: #D32F2F; color: white; flex-direction:row; font-size:24px; padding: 15px;" onclick="handleCallClick(this, 'tel_1669', '1669', '1669')">
+                    <span class="iconify" data-icon="mdi:phone-alert"></span> โทรฉุกเฉิน 1669
+                 </button>`;
+                 
+        let hospName = nearestHospital ? nearestHospital.name : 'รพ.สวี';
+        let hospTel = '0894745523'; 
+        html += `<button class="btn-action" style="background-color: #f39c12; color: white; flex-direction:row; font-size:24px; padding: 15px;" onclick="handleCallClick(this, 'tel_sawee', '${hospTel}', '${hospName}')">
+                    <span class="iconify" data-icon="mdi:hospital-building"></span> โทร ${hospName}
+                 </button>`;
+        html += `</div>`;
+
         if (localContacts && localContacts.length > 0) {
-            let html = `<h4 class="text-center fw-bold mt-4 mb-3 text-secondary" style="font-size:24px;">เบอร์โทรฉุกเฉินในพื้นที่<br><small class="text-muted fs-6">(${sessionData.address})</small></h4>`;
             html += `<div class="d-flex flex-column gap-2">`;
-            
             localContacts.forEach(contact => {
                 let roleKey = 'tel_pcu'; // ค่าเริ่มต้น
                 if (contact.role.includes('อสม')) roleKey = 'tel_asm1';
@@ -1452,10 +1465,8 @@
                         </button>`;
             });
             html += `</div>`;
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = '';
         }
+        container.innerHTML = html;
     }
 
     window.handleLocalContactCall = function(role, tel, logKey) {
