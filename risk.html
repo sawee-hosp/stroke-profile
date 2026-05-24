@@ -287,7 +287,6 @@
     </div>
     <!-- Hidden Input For Camera -->
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
-    
     <div class="container">
         <div class="header-group">
             <h1>สวีรู้ทันสโตรก</h1>
@@ -481,7 +480,7 @@
                     </div>
                 </div>
                 
-                <!-- ================= STEP 5: ข้อมูลติดต่อ (หน้าสุดท้ายก่อนประเมิน) ================= -->
+                <!-- ================= STEP 5: ข้อมูลติดต่อ (เฉพาะ Sawi Patient) ================= -->
                 <div id="step-5" class="step-section">
                     <div class="step-title">ข้อมูลติดต่อ</div>
                     <div class="step-subtitle">ใช้เพื่อการติดตามดูแลที่ต่อเนื่อง (ข้ามได้ถ้าไม่ทราบ)</div>
@@ -567,7 +566,6 @@
         </div>
         <div class="footer-credit">จัดทำโดย "สวีรู้ทันสโตรก" รพ.สวี จ.ชุมพร</div>
     </div>
-    
     <script>
         const LIFF_ID = '2009491708-pTYytCZA'; 
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDdj6WzkazrnUNm62d6dSBXRZkM_5zQaDwF2nWH3Rx6qkNQsyl_4-vLn3xNQyKf7EN/exec';
@@ -578,7 +576,6 @@
         let extractedMedicines = []; 
         let currentStep = 'intro';
         let isOcrFlow = false;
-        
         // --- Class อ่านออกเสียง (TTS) ---
         class ThaiTTSQueue {
             constructor() {
@@ -636,7 +633,6 @@
         }
         
         const tts = new ThaiTTSQueue();
-        
         // --- YouTube Player ---
         let ytPlayer;
         let currentPlayingUrl = "https://youtube.com/shorts/MBf9xTkn_Sw";
@@ -678,14 +674,13 @@
                 cancelButton: 'btn btn-light text-dark border px-4 py-2 fs-5 rounded-pill mx-2'
             }, buttonsStyling: true
         });
-        
         // --- Document Ready ---
         $(document).ready(() => {
             initializeLiff();
             populateVillageDropdown();
             toggleMeasurementFields();
             checkReferrer(); 
-            $.getJSON(`${GAS_URL}?action=getPlaylist&_=${new Date().getTime()}`, function(res) {
+            $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
                 if(res && res.data) {
                     Object.assign(playlistMap, res.data);
                     currentPlayingUrl = playlistMap['risk_intro'] || currentPlayingUrl;
@@ -725,8 +720,10 @@
             $('input[name="isSawiPatient"]').change(function() {
                 if($(this).val() === '1') { 
                     $('#sawi-ocr-box').slideDown(); 
+                    $('#address-box').slideDown();
                 } else { 
                     $('#sawi-ocr-box').slideUp(); 
+                    $('#address-box').slideUp();
                 }
             });
             
@@ -734,9 +731,7 @@
                 const phone = $(this).val();
                 if(phone.length === 10) {
                     $('#phone-msg').hide().text('');
-                    fetch(`${GAS_URL}?checkPhone=${phone}&_=${new Date().getTime()}`)
-                    .then(r => r.json())
-                    .then(res => {
+                    $.getJSON(GAS_URL, { checkPhone: phone }, function(res) {
                         if(res.status === 'found') {
                             $('#phone-msg').html(`⚠️ หมายเลขนี้มีประวัติของคุณ <b>${res.name}</b> แล้ว`).slideDown();
                         }
@@ -773,8 +768,7 @@
                 setTimeout(() => { $('#ocrConsentModal').modal('show'); }, 1000);
             }
         });
-
-        // --- STREAMING_CHUNK: Navigation and Risk Calculation Flow ---
+        // --- Smart Navigation Flow ---
         function goToStep(step) {
             if(currentStep === 'intro' && step !== 'intro') {
                 if(ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
@@ -804,6 +798,7 @@
             selectors.forEach(sel => $(sel).addClass('highlight-flash'));
             setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
         }
+        // Logic Next/Back Flow
         function validateStep2AndProceed() {
             let missing = []; let selectors = [];
             if(!$('#age').val()) { missing.push("อายุ"); selectors.push("#age"); }
@@ -823,6 +818,7 @@
                 }
             }
             if(missing.length > 0) return triggerError(missing, selectors);
+            
             goToStep(4); 
         }
         function validateStep4AndProceed() {
@@ -832,21 +828,31 @@
             if(!$('input[name="confident"]:checked').val()) { missing.push("ความมั่นใจในการพาส่ง รพ."); }
             
             if(missing.length > 0) return triggerError(missing, selectors);
-            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
             // ข้ามขั้นตอนที่ 5 (หน้าหมู่บ้าน) ถ้าไม่ใช่คนไข้ รพ.สวี
-            if(isSawi || isOcrFlow) {
+            const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
+            if(isSawi) {
                 goToStep(5);
             } else {
                 calculateAndShowResult();
             }
         }
         function handleBackFrom4() {
-            if(isOcrFlow) { $('#ocrPreviewModal').modal('show'); } else { goToStep(3); }
+            if(isOcrFlow) {
+                $('#ocrPreviewModal').modal('show'); 
+            } else {
+                goToStep(3);
+            }
         }
-        function handleBackFrom5() { goToStep(4); }
+        function handleBackFrom5() {
+            goToStep(4);
+        }
         function goBackToEdit() {
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1';
-            if(isSawi || isOcrFlow) { goToStep(5); } else { goToStep(4); }
+            if(isSawi) {
+                goToStep(5);
+            } else {
+                goToStep(4);
+            }
         }
         // --- Calculate Result ---
         function calculateAndShowResult() {
@@ -926,8 +932,6 @@
             };
             tts.speak(textToRead);
         }
-        
-        // --- STREAMING_CHUNK: Suggestion Text and Core Calculation Formula ---
         function generateSuggestionText(data) {
             const ins = data.inputs; const sug = [];
             if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
@@ -1012,14 +1016,14 @@
             return [0,0,0,0];
             function calc(score, mean, c_score) { let risk = 1 - (Math.pow(sur_root, Math.exp(score - mean))); let c_risk = 1 - (Math.pow(sur_root, Math.exp(c_score - mean))); return [score, risk, c_score, c_risk]; }
         }
+        
         function classifyRisk(p) {
             if (p < 10) return { text: "ต่ำ", color: "#28a745" };
             if (p < 20) return { text: "ปานกลาง", color: "#ffc107" };
             if (p < 30) return { text: "สูง", color: "#fd7e14" };
             return { text: "สูงมาก/อันตราย", color: "#dc3545" };
         }
-        
-        // --- STREAMING_CHUNK: OCR AI Logic ---
+        // --- OCR Flow ---
         function compressAndUploadImage(file) {
             $('#ocrLoading').css('display', 'flex');
             const reader = new FileReader();
@@ -1071,14 +1075,16 @@
                 if (val !== null && val !== undefined && val !== "") { $(`#${id}`).val(val).addClass('is-valid'); } 
                 else { $(`#${id}`).val('').addClass('highlight-flash'); }
             }
-            
-            // ใช้ชื่อจากฐานข้อมูลเป็นหลัก ถ้าไม่มีปล่อยว่างให้พิมพ์
+            // Fallback for Name logic
             let existingName = $('#name').val() || (historyData && historyData.Name ? historyData.Name : '');
-            if (existingName) { setField('pv_name', existingName); } else { setField('pv_name', ''); }
+            if (existingName) {
+                setField('pv_name', existingName);
+            } else {
+                setField('pv_name', ''); 
+            }
             
             if ($('#hn').val() && !$('#pv_hn').val()) setField('pv_hn', $('#hn').val());
             else setField('pv_hn', data.hn || '');
-            
             setField('pv_age', data.age); setField('pv_sbp', data.sbp);
             
             let genderVal = "";
@@ -1155,8 +1161,7 @@
                 goToStep(4);
             });
         }
-        
-        // --- STREAMING_CHUNK: LIFF Initialization and Auto-fetching user history ---
+        // --- LIFF & Background Check ---
         function checkReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
             const refId = urlParams.get('ref');
@@ -1231,8 +1236,6 @@
             const hospitals = { "ท่าหิน": "รพ.สต.ท่าหิน", "ด่านสวี": "รพ.สต.ด่านสวี", "เขาทะลุ": "รพ.สต.เขาทะลุ", "เขาค่าย": "รพ.สต.เขาค่าย", "ปากแพรก": "รพ.สต.ปากแพรก", "สวี": "รพ.สต.สวี", "นาสัก": { "1": "รพ.สต.บ้านแก่งกระทั่ง", "6": "รพ.สต.บ้านแก่งกระทั่ง", "11": "รพ.สต.บ้านแก่งกระทั่ง", "13": "รพ.สต.บ้านแก่งกระทั่ง", "18": "รพ.สต.บ้านแก่งกระทั่ง", "19": "รพ.สต.บ้านแก่งกระทั่ง", "7": "รพ.สต.บ้านไทยพัฒนา", "8": "รพ.สต.บ้านไทยพัฒนา", "9": "รพ.สต.บ้านไทยพัฒนา", "10": "รพ.สต.บ้านไทยพัฒนา", "12": "รพ.สต.บ้านไทยพัฒนา", "15": "รพ.สต.บ้านไทยพัฒนา", "16": "รพ.สต.บ้านไทยพัฒนา", "2": "รพ.สต.นาสัก", "3": "รพ.สต.นาสัก", "4": "รพ.สต.นาสัก", "5": "รพ.สต.นาสัก", "14": "รพ.สต.นาสัก", "17": "รพ.สต.นาสัก" }, "ทุ่งระยะ": { "5": "รพ.สต.บ้านคลองน้อย", "6": "รพ.สต.บ้านคลองน้อย", "7": "รพ.สต.บ้านคลองน้อย", "8": "รพ.สต.บ้านคลองน้อย", "9": "รพ.สต.บ้านคลองน้อย", "10": "รพ.สต.บ้านคลองน้อย", "1": "รพ.สต.ทุ่งระยะ", "2": "รพ.สต.ทุ่งระยะ", "3": "รพ.สต.ทุ่งระยะ", "4": "รพ.สต.ทุ่งระยะ", "11": "รพ.สต.ทุ่งระยะ" }, "วิสัยใต้": { "1": "รพ.สต.บ้านดอนทราย", "3": "รพ.สต.บ้านดอนทราย", "4": "รพ.สต.บ้านดอนทราย", "8": "รพ.สต.บ้านดอนทราย", "2": "รพ.สต.วิสัยใต้", "5": "รพ.สต.วิสัยใต้", "6": "รพ.สต.วิสัยใต้", "7": "รพ.สต.วิสัยใต้", "9": "รพ.สต.วิสัยใต้", "10": "รพ.สต.วิสัยใต้" }, "ครน": { "1": "รพ.สต.ครน", "2": "รพ.สต.ครน", "3": "รพ.สต.ครน", "4": "รพ.สต.ครน", "6": "รพ.สต.ครน", "12": "รพ.สต.ครน", "9": "รพ.สต.บ้านควนสามัคคี", "10": "รพ.สต.บ้านควนสามัคคี", "13": "รพ.สต.บ้านควนสามัคคี", "14": "รพ.สต.บ้านควนสามัคคี", "5": "รพ.สต.บ้านน้ำฉา", "7": "รพ.สต.บ้านน้ำฉา", "8": "รพ.สต.บ้านน้ำฉา", "11": "รพ.สต.บ้านน้ำฉา" }, "นาโพธิ์": "รพ.สวี (นาโพธิ์)" };
             let hosp = hospitals[tb]; if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } $('#pcu').val(hosp || '');
         }
-        
-        // --- STREAMING_CHUNK: Save Data and Send Robust Flex Message ---
         async function saveAndSend(actionType) {
             if (!$('#pdpa').is(':checked')) {
                 swalCustom.fire({
@@ -1295,7 +1298,6 @@
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
-        
         async function sendFlex(data, name, suggestionText) {
             const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
             let startColor = "#444444"; let endColor = "#111111";
@@ -1305,7 +1307,6 @@
             else if (p >= 20) { startColor = "#fd7e14"; endColor = "#c6600c"; } 
             else if (p >= 10) { startColor = "#ffc107"; endColor = "#d39e00"; } 
             else { startColor = "#28a745"; endColor = "#1e7e34"; }
-            
             const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
             const picUrl = (userProfile && userProfile.pictureUrl) ? userProfile.pictureUrl : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
@@ -1334,57 +1335,61 @@
                     { type: "text", text: `ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" }
                 ];
             }
-            
-            // ใช้ Label ที่ตัด Emoji ออกทั้งหมด ป้องกันข้อผิดพลาด Label ยาวเกิน 20 ตัวอักษร
+            // --- Bubble 1: Risk Result & Action Buttons ---
             const bubble1 = {
                 type: "bubble", size: "mega",
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "lg",
+                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [
                         { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
-                        { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center", spacing: "md",
+                        { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center",
                             contents: [
-                                { type: "image", url: picUrl, size: "xs", align: "center" },
-                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", wrap: true }
+                                { type: "image", url: picUrl, flex: 0, size: "xxs", align: "center", gravity: "center" },
+                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "sm", wrap: true }
                             ]
                         }
                     ]
                 },
                 body: {
-                    type: "box", layout: "vertical", paddingAll: "lg",
+                    type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
                         { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
                         { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
                         { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
-                        { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "md", margin: "md", cornerRadius: "md",
+                        
+                        { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "10px", margin: "md", cornerRadius: "md",
                             contents: [
                                 { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
                                 { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
                                 { type: "text", text: emojiStr, size: "md", align: "center", margin: "xs" }
                             ]
-                        },
-                        ...compareFlex
+                        }
                     ]
                 },
                 footer: {
-                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "md",
+                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
                     contents: [
                         { type: "box", layout: "horizontal", spacing: "sm", contents: [
                             { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                             { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
                         ]},
-                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดไป รพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
                         { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
                         { type: "box", layout: "horizontal", spacing: "sm", contents: [
                             { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                             { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
                         ]},
-                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "วิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
+                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
                     ]
                 }
             };
             
-            // แบบกล่องไอคอนที่ถูกต้องตามหลัก LINE Flex API
+            // หลีกเลี่ยง Spread Operator ด้วยการ push เข้า Array ตรงๆ
+            if (compareFlex.length > 0) {
+                compareFlex.forEach(item => bubble1.body.contents.push(item));
+            }
+
+            // --- Bubble 2: Urgent Action ---
             const createIconBox = (imgUrl, txt) => {
                 return {
                     type: "box", layout: "vertical", alignItems: "center", margin: "xs",
@@ -1395,21 +1400,20 @@
                     ]
                 };
             };
-            
             const bubble2 = {
                 type: "bubble", size: "mega", 
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "lg",
+                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
                     contents: [
                         { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "sm", align: "center" },
                         { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" }
                     ]
                 },
                 body: {
-                    type: "box", layout: "vertical", paddingAll: "lg",
+                    type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
                         { type: "text", text: "🚨 อย่ารอเด็ดขาด! 🚨", size: "xl", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "md" },
-                        { type: "text", text: "ลดโอกาสอัมพาตและเสียชีวิตได้", size: "sm", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "sm" },
+                        { type: "text", text: "ลดโอกาสอัมพาตและเสียชีวิตได้", size: "md", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "sm" },
                         { type: "text", text: "อาการสโตรก ได้แก่:", size: "sm", color: "#666666", align: "center", wrap: true, margin: "xs" },
                         { type: "box", layout: "horizontal", margin: "md", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/b.png", "เซมึนหัว"), createIconBox("https://sawee-hosp.github.io/stroke-profile/e.png", "ตามัวมาก") ] },
                         { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), createIconBox("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
@@ -1417,22 +1421,22 @@
                     ]
                 }
             };
+            // --- Bubble 3: Advice ---
             const bubble3 = {
                 type: "bubble", size: "mega", 
                 header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "lg",
+                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
                 },
                 body: {
-                    type: "box", layout: "vertical", paddingAll: "lg",
+                    type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
                         { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "sm", color: "#444444" }
                     ]
                 }
             };
-            const carouselFlex = { type: "flex", altText: "ผลประเมินสวีรู้ทันสโตรก", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
+            const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
             let messagesToSend = [carouselFlex];
-            
             // --- Text Message Follow-up ---
             let freqText = "";
             if (data.hasStrokeHistory || p >= 30) { freqText = "ทุก 3-4 วัน"; } 
@@ -1444,7 +1448,6 @@
                 text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️ หมอสวีขออนุญาตเข้ามาดูแลทางไลน์ ${freqText} นะครับ อย่าเพิ่งบล็อกกันนะครับ ❤️`
             };
             messagesToSend.push(textMessage);
-            
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa') || liff.isInClient()) {
                 try { 
