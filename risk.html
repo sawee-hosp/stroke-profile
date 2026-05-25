@@ -1405,7 +1405,7 @@
             }
         }
 
-         async function sendFlex(data, name, suggestionText) {
+        async function sendFlex(data, name, suggestionText) {
             const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
             let startColor = "#444444"; let endColor = "#111111";
             let p = parseFloat(data.riskPercentText);
