@@ -325,7 +325,7 @@
             </div>
 
             <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2 pb-1" id="ipd-container">
-                <!-- IPD items จะถูกสร้างจาก JS -->
+                <!- - IPD items จะถูกสร้างจาก JS - ->
             </div>
 
             <div class="flex justify-between mt-1 pt-1 shrink-0 h-[65px] border-t-2 border-slate-400/30 gap-1.5">
@@ -357,7 +357,7 @@
             ========================================== -->
 
             <!-- ใส่ Iframe แทนที่ใน Column 2 -->
-            <iframe src="https://192.168.1.229/bq_pharmacy.aspx?room_code=030" class="w-full h-full border-0 rounded-lg bg-white/50" title="คิวรับยา"></iframe>
+            <iframe src="http://192.168.1.229/bq_pharmacy.aspx?room_code=030" class="w-full h-full border-0 rounded-lg bg-white/50" title="คิวรับยา"></iframe>
             
         </section>
 
@@ -487,57 +487,9 @@
         let isFirstLoadIPD = true; 
 
         function renderIPDList() {
-            const container = document.getElementById('ipd-container');
-            if(!container) return;
-            container.innerHTML = '';
-            
-            ipdData.forEach(ipd => {
-                const row = document.createElement('div');
-                row.className = `card-3d-ipd relative flex items-center justify-between ${ipd.isNew ? 'alert-new' : ''} h-[32px] overflow-hidden pl-[48px]`;
-                row.innerHTML = `
-                    <div class="ipd-badge ${ipd.bg}">${ipd.bed}</div>
-                    <div class="flex-1 flex items-center justify-between px-3">
-                        <span class="text-slate-800 font-black text-lg font-mono leading-none ${ipd.isNew ? 'tracking-widest' : ''}">${ipd.hn}</span>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <span class="text-xs font-bold text-slate-700 bg-white/90 px-2 py-0.5 rounded border border-slate-200 leading-none shadow-sm">${ipd.status}</span>
-                            <span class="text-[11px] font-bold text-slate-500 leading-none">${ipd.time}</span>
-                        </div>
-                    </div>
-                    <div class="w-8 flex justify-center shrink-0"><i class="${ipd.icon} text-lg ${ipd.isNew ? 'drop-shadow-sm' : ''}"></i></div>
-                `;
-                container.appendChild(row);
-
-                if (!spokenIPDs.has(ipd.id)) {
-                    spokenIPDs.add(ipd.id);
-                    
-                    if (!isFirstLoadIPD) {
-                        let statusText = "ออร์เดอร์ใหม่";
-                        if(ipd.status === 'Admit' || ipd.status.toLowerCase() === 'admit') statusText = 'แอดมิด';
-                        else if(ipd.status === 'D/C' || ipd.status.toLowerCase() === 'd/c') statusText = 'ดิสชาร์จ';
-                        
-                        voiceQueue.push(`ผู้ป่วยใน เตียง ${ipd.bed} ${statusText} ค่ะ`);
-                        processVoiceQueue();
-                    }
-                }
-            });
-            isFirstLoadIPD = false;
+            // ฟังก์ชันเดิมของตาราง IPD ถูกข้ามไป เนื่องจากเอา Container ออกไปใส่เป็น Iframe แล้ว
+            return;
         }
-
-        setTimeout(() => {
-            const now = new Date();
-            const timeStr = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
-            ipdData.unshift({
-                id: 'ipd-demo-new-' + Date.now(),
-                bed: 'M02',
-                hn: '102030405',
-                status: 'Admit',
-                time: timeStr,
-                bg: 'bg-emerald-500',
-                icon: 'fas fa-check-circle text-emerald-500',
-                isNew: true
-            });
-            renderIPDList();
-        }, 10000);
 
         // --- Fetch GAS Schedule & Alerts ---
         async function fetchSchedule() {
