@@ -1252,48 +1252,21 @@
                 });
                 return;
             }
-
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
             tts.stop(); 
-
             try {
-                // FALLBACK PROTECTIONS
                 let submitName = $('#name').val();
                 if ((!submitName || submitName.trim() === '') && historyData && historyData.Name) {
                     submitName = historyData.Name;
                 }
-                
-                let submitHN = $('#hn').val();
-                if ((!submitHN || submitHN.trim() === '') && historyData && (historyData.HN || historyData.hn)) {
-                    submitHN = historyData.HN || historyData.hn;
-                }
-                
-                let submitTel = $('#telephone').val();
-                if ((!submitTel || submitTel.trim() === '') && historyData && historyData.Telephone) {
-                    submitTel = historyData.Telephone;
-                }
-                
-                let submitDistrict = $('#district').val();
-                let submitVillage = $('#village').val();
-                let submitPCU = $('#pcu').val();
-                
-                if (historyData && historyData.Address) {
-                    let addrMatch = historyData.Address.match(/ม\.(\d+)\s+ต\.(.+)/);
-                    if ((!submitVillage || submitVillage.trim() === '') && addrMatch) submitVillage = addrMatch[1];
-                    if ((!submitDistrict || submitDistrict.trim() === '') && addrMatch) submitDistrict = addrMatch[2];
-                }
-                if ((!submitPCU || submitPCU.trim() === '') && historyData && historyData.PCU) {
-                    submitPCU = historyData.PCU;
-                }
-
                 const finalSuggestion = generateSuggestionText(globalRiskData);
                 const payload = {
-                    timestamp: new Date(), name: submitName, role: $('#role').val(), hn: submitHN,
-                    district: submitDistrict, village: submitVillage, pcu: submitPCU,
+                    timestamp: new Date(), name: submitName, role: $('#role').val(), hn: $('#hn').val(),
+                    district: $('#district').val(), village: $('#village').val(), pcu: $('#pcu').val(),
                     "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
                     help: $('input[name="help"]:checked').val(), decision: $('input[name="decision"]:checked').val(),
                     confident: $('input[name="confident"]:checked').val(), 
-                    telephone: submitTel, line_id: '',
+                    telephone: $('#telephone').val(), line_id: '',
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_cm, height: globalRiskData.inputs.ht,
@@ -1304,11 +1277,9 @@
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: 'Yes', 
                     area: '', referrerId: $('#referrerId').val(), medicines: globalRiskData.inputs.medicines
                 };
-
                 await fetch(GAS_URL, {
                     method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
-
                 if (liff.isInClient()) {
                     let flexSuccess = await sendFlex(globalRiskData, submitName, finalSuggestion.text);
                     if (flexSuccess) {
@@ -1326,40 +1297,7 @@
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
-
- // ฟังก์ชัน makeIcon ที่ถูกต้อง (เหลือ action ที่รูปอย่างเดียว)
-function makeIcon(url, txt) {
-    return {
-        type: "box",
-        layout: "vertical",
-        alignItems: "center",
-        margin: "xs",
-        contents: [
-            {
-                type: "image",
-                url: url,
-                size: "full",
-                aspectRatio: "1:1",
-                aspectMode: "cover",
-                action: {
-                    type: "uri",
-                    uri: "https://liff.line.me/2009491708-x6ELpJLW"
-                }
-            },
-            {
-                type: "text",
-                text: txt,
-                size: "xs",
-                color: "#dc3545",
-                weight: "bold",
-                align: "center",
-                margin: "xs"
-                // ไม่มี action ที่นี่
-            }
-        ]
-    };
-}
-
+        
         async function sendFlex(data, name, suggestionText) {
             const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
             let startColor = "#444444"; let endColor = "#111111";
