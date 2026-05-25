@@ -186,6 +186,7 @@
             </div>
         </div>
     </div>
+
     <!-- Modal แสดงข้อมูลหลังอ่าน AI (Preview & Edit) -->
     <div class="modal fade" id="ocrPreviewModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -285,6 +286,7 @@
             </div>
         </div>
     </div>
+
     <!-- Hidden Input For Camera -->
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
     <div class="container">
@@ -301,6 +303,7 @@
                 </div>
             </div>
             <div id="referrer-display" class="referrer-box"></div>
+            
             <form id="mainForm">
                 <input type="hidden" id="referrerId"> 
                 <!-- ================= INTRO STEP ================= -->
@@ -320,6 +323,7 @@
                         <button type="button" id="btn-next-video" class="btn-red-flat btn-next-video" style="background:#0d6efd; display:block;" onclick="playNextVideo()">ดูวิดีโอถัดไป</button>
                     </div>
                 </div>
+
                 <!-- ================= STEP 1: ข้อมูลผู้ประเมิน ================= -->
                 <div id="step-1" class="step-section">
                     <div class="step-title">ข้อมูลเบื้องต้น</div>
@@ -356,6 +360,7 @@
                         <button type="button" class="btn-nav btn-next" onclick="goToStep(2)">ถัดไป</button>
                     </div>
                 </div>
+
                 <!-- ================= STEP 2: ข้อมูลสุขภาพ 1 ================= -->
                 <div id="step-2" class="step-section">
                     <div class="step-title">ข้อมูลสุขภาพ (1/2)</div>
@@ -389,6 +394,7 @@
                         <button type="button" class="btn-nav btn-next" onclick="validateStep2AndProceed()">ถัดไป</button>
                     </div>
                 </div>
+
                 <!-- ================= STEP 3: ข้อมูลสุขภาพ 2 ================= -->
                 <div id="step-3" class="step-section">
                     <div class="step-title">ข้อมูลสุขภาพ (2/2)</div>
@@ -439,6 +445,7 @@
                         <button type="button" class="btn-nav btn-next" onclick="validateStep3AndProceed()">ถัดไป</button>
                     </div>
                 </div>
+
                 <!-- ================= STEP 4: แบบสอบถามการอยู่อาศัย ================= -->
                 <div id="step-4" class="step-section">
                     <div class="step-title">แบบสอบถามเพิ่มเติม</div>
@@ -530,6 +537,7 @@
                     </div>
                 </div>
             </form>
+
             <!-- ================= STEP 6: ผลการประเมิน ================= -->
             <div id="step-6" class="step-section">
                 <div id="result-container">
@@ -566,6 +574,7 @@
         </div>
         <div class="footer-credit">จัดทำโดย "สวีรู้ทันสโตรก" รพ.สวี จ.ชุมพร</div>
     </div>
+
     <script>
         const LIFF_ID = '2009491708-pTYytCZA'; 
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDdj6WzkazrnUNm62d6dSBXRZkM_5zQaDwF2nWH3Rx6qkNQsyl_4-vLn3xNQyKf7EN/exec';
@@ -576,6 +585,7 @@
         let extractedMedicines = []; 
         let currentStep = 'intro';
         let isOcrFlow = false;
+
         // --- Class อ่านออกเสียง (TTS) ---
         class ThaiTTSQueue {
             constructor() {
@@ -633,6 +643,7 @@
         }
         
         const tts = new ThaiTTSQueue();
+
         // --- YouTube Player ---
         let ytPlayer;
         let currentPlayingUrl = "https://youtube.com/shorts/MBf9xTkn_Sw";
@@ -641,12 +652,14 @@
             "advice_mp4": "https://sawee-hosp.github.io/stroke-profile/befast_check.mp4",
             "advice_thumbnail": "https://sawee-hosp.github.io/stroke-profile/video_preview.png"
         };
+
         function extractVideoID(url) {
             if (!url) return null;
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
             var match = url.match(regExp);
             return (match && match[2].length == 11) ? match[2] : null;
         }
+
         function onYouTubeIframeAPIReady() {
             let ytId = extractVideoID(currentPlayingUrl);
             ytPlayer = new YT.Player('youtube-player', {
@@ -655,9 +668,11 @@
                 events: { 'onStateChange': onPlayerStateChange }
             });
         }
+
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) { $('#next-video-container').fadeIn(); }
         }
+
         function playNextVideo() {
             let rand = Math.floor(Math.random() * 10) + 1;
             let nextId = 'risk_' + (rand < 10 ? '0'+rand : rand);
@@ -667,6 +682,7 @@
                 ytPlayer.loadVideoById(extractVideoID(url));
             }
         }
+
         const swalCustom = Swal.mixin({
             confirmButtonColor: '#dc3545', cancelButtonColor: '#f8f9fa',
             customClass: {
@@ -674,22 +690,25 @@
                 cancelButton: 'btn btn-light text-dark border px-4 py-2 fs-5 rounded-pill mx-2'
             }, buttonsStyling: true
         });
+
         // --- Document Ready ---
         $(document).ready(() => {
             initializeLiff();
             populateVillageDropdown();
             toggleMeasurementFields();
             checkReferrer(); 
+            
             $.getJSON(GAS_URL, { action: 'getPlaylist' }, function(res) {
                 if(res && res.data) {
                     Object.assign(playlistMap, res.data);
                     currentPlayingUrl = playlistMap['risk_intro'] || currentPlayingUrl;
-                    if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+                    if (currentStep === 'intro' && ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
                         let newYtId = extractVideoID(currentPlayingUrl);
                         if (newYtId) { ytPlayer.loadVideoById(newYtId); ytPlayer.mute(); }
                     }
                 }
             });
+
             if (!sessionStorage.getItem('introShown')) {
                 swalCustom.fire({
                     title: '<h3 style="color:#cc0000; font-weight:900; margin:0; font-size:32px;">สวีรู้ทันสโตรก</h3>',
@@ -717,11 +736,14 @@
                     $('#floating-btn-container').remove();
                 }
             });
+
             $('input[name="isSawiPatient"]').change(function() {
                 if($(this).val() === '1') { 
                     $('#sawi-ocr-box').slideDown(); 
+                    $('#address-box').slideDown();
                 } else { 
                     $('#sawi-ocr-box').slideUp(); 
+                    $('#address-box').slideUp();
                 }
             });
             
@@ -736,6 +758,7 @@
                     });
                 } else { $('#phone-msg').hide(); }
             });
+
             $('#sbp').on('input', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
             
             $('#wc').on('change', function() {
@@ -745,16 +768,19 @@
                     setTimeout(() => $(this).removeClass('highlight-flash'), 3000);
                 }
             });
+
             $('input[name="useCholesterol"]').change(toggleMeasurementFields);
             $('#chk-stroke').change(function() {
                 this.checked ? $('#stroke-date-wrapper').removeClass('d-none') : $('#stroke-date-wrapper').addClass('d-none');
             });
             
             $('#village, #district').change(updateAddressAndHospital);
+
             $('#btnAcceptOcr').click(function() {
                 $('#ocrConsentModal').modal('hide');
                 $('#cameraInput').click();
             });
+
             $('#cameraInput').change(function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -766,6 +792,7 @@
                 setTimeout(() => { $('#ocrConsentModal').modal('show'); }, 1000);
             }
         });
+
         // --- Smart Navigation Flow ---
         function goToStep(step) {
             if(currentStep === 'intro' && step !== 'intro') {
@@ -791,11 +818,13 @@
             currentStep = step;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
         function triggerError(missingArr, selectors) {
             swalCustom.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณาระบุ: ' + missingArr.join(", ") });
             selectors.forEach(sel => $(sel).addClass('highlight-flash'));
             setTimeout(() => $('.highlight-flash').removeClass('highlight-flash'), 3000);
         }
+
         // Logic Next/Back Flow
         function validateStep2AndProceed() {
             let missing = []; let selectors = [];
@@ -804,6 +833,7 @@
             if(missing.length > 0) return triggerError(missing, selectors);
             goToStep(3);
         }
+
         function validateStep3AndProceed() {
             let missing = []; let selectors = [];
             if(!$('#sbp').val()) { missing.push("ความดันตัวบน (SBP)"); selectors.push("#sbp"); }
@@ -819,6 +849,7 @@
             
             goToStep(4); 
         }
+
         function validateStep4AndProceed() {
             let missing = []; let selectors = [];
             if(!$('input[name="decision"]:checked').val()) { missing.push("การจัดการอาการเบื้องต้น"); }
@@ -846,9 +877,11 @@
                 goToStep(3);
             }
         }
+
         function handleBackFrom5() {
             goToStep(4);
         }
+
         function goBackToEdit() {
             const isSawi = $('input[name="isSawiPatient"]:checked').val() === '1' || isOcrFlow;
             if (isSawi) {
@@ -881,6 +914,7 @@
                 iconsHtml += `<svg width="30" height="30" viewBox="0 0 24 24" fill="${color}" style="margin:2px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
             }
             iconsHtml += `</div>`;
+
             let analogyHtml = `
                 <div style="background:#f1fcf5; border-radius:15px; padding:15px; margin-bottom:20px; border:1px solid #c3e6cb;">
                     <div style="font-weight:bold; color:#003366; font-size:22px; text-align:center;">โอกาส ${result.riskPercentText}% ใน 10 ปี แปลว่าอะไร?</div>
@@ -918,6 +952,7 @@
             $('#full-advice-display').html(fullAdvice.html);
             goToStep(6); 
         }
+
         function readAloudResult() {
             const btn = document.getElementById('btn-read-aloud');
             if (tts.isPlaying) { tts.stop(); return; }
@@ -940,35 +975,41 @@
             };
             tts.speak(textToRead);
         }
+
         function generateSuggestionText(data) {
             const ins = data.inputs; const sug = [];
-            if(ins.dm === 1) sug.push('🍬 ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
-            if(ins.tc >= 200) sug.push(`🍳 ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
-            if(ins.smoke === 1) sug.push('⛔ ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
-            if(ins.sbp >= 130) sug.push(`💓 ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
+            if(ins.dm === 1) sug.push('ท่านเป็นเบาหวาน: ควรควบคุมระดับน้ำตาลในเลือดให้เป็นปกติ (ทานยาและพบแพทย์สม่ำเสมอ)');
+            if(ins.tc >= 200) sug.push(`ไขมันในเลือดสูง (${ins.tc} mg/dL): ควรควบคุมอาหาร ลดของทอด ของมัน กะทิ`);
+            if(ins.smoke === 1) sug.push('ท่านสูบบุหรี่: แนะนำให้ "เลิกสูบเด็ดขาด" และหลีกเลี่ยงควันบุหรี่');
+            if(ins.sbp >= 130) sug.push(`ความดันเริ่มสูง (${ins.sbp} mmHg): ควรลดอาหารรสเค็ม ออกกำลังกาย และควบคุมความดันให้อยู่ในเกณฑ์ปกติ`);
             
             let waistLimit = ins.sex === 1 ? 90 : 80; 
-            if(ins.wc_cm > waistLimit) sug.push(`🏋️‍♀️ รอบเอวเกินเกณฑ์ (${ins.wc_cm.toFixed(1)} ซม.): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
+            if(ins.wc_cm > waistLimit) sug.push(`รอบเอวเกินเกณฑ์ (${ins.wc_cm.toFixed(1)} ซม.): ควรลดน้ำหนักและลดรอบเอวเพื่อลดความเสี่ยงอ้วนลงพุง`);
+
             if (ins.medicines && ins.medicines.length > 0) {
                 let medPurposes = [];
                 ins.medicines.forEach(m => { if (m.indication && !medPurposes.includes(m.indication)) medPurposes.push(m.indication); });
-                if (medPurposes.length > 0) sug.push(`💊 การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
-                else sug.push(`💊 การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
+                if (medPurposes.length > 0) sug.push(`การรับประทานยา: กรุณารับประทานยาอย่างเคร่งครัดตามที่แพทย์สั่ง โดยเฉพาะยาในกลุ่ม: ${medPurposes.join(', ')} เพื่อป้องกันอาการกำเริบ`);
+                else sug.push(`การรับประทานยา: กรุณารับประทานยาประจำตัวตามที่แพทย์สั่งอย่างเคร่งครัด`);
             }
+
             let specificAlertsHtml = sug.length > 0 ? `<div style="color:#d9534f; font-weight:bold; margin-bottom:5px;">⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:</div><ul style="margin-top:0; margin-bottom:15px; padding-left:20px; line-height:1.4;"><li>${sug.join('</li><li>')}</li></ul>` : `<div style="color:#28a745; font-weight:bold; margin-bottom:15px;">✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป</div>`;
-            let specificAlertsText = sug.length > 0 ? "⚠️ ข้อควรระวังและการปรับพฤติกรรมของคุณ:\n- " + sug.join('\n- ') : "✅ ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
+            let specificAlertsText = sug.length > 0 ? "ข้อควรระวังและการปรับพฤติกรรมของคุณ:\n- " + sug.join('\n- ') : "ท่านดูแลสุขภาพเบื้องต้นได้ดี ขอให้รักษามาตรฐานนี้ต่อไป";
+            
             let riskPercent = parseFloat(data.riskPercentText);
             let riskAdviceHtml = ""; let riskAdviceText = "";
+
             if(riskPercent < 10) {
                 riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#28a745; font-weight:bold;">🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)</span><br><b>สิ่งที่ต้องทำ:</b> รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น</div>`;
-                riskAdviceText = "🟢 กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)\nสิ่งที่ต้องทำ: รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น";
+                riskAdviceText = "กลุ่มสีเขียว (ความเสี่ยงต่ำ < 10%)\nสิ่งที่ต้องทำ: รักษาสุขภาพให้ดีต่อไป ปฏิบัติตามหลัก 3อ. 2ส. ในชีวิตประจำวันเพื่อป้องกันไม่ให้ความเสี่ยงเพิ่มขึ้น";
             } else if (riskPercent < 30) {
                 riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#fd7e14; font-weight:bold;">🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)</div>`;
-                riskAdviceText = "🟡🟠 กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)\nสิ่งที่ต้องทำ: ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต\n📌 การติดตาม: ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)";
+                riskAdviceText = "กลุ่มสีเหลืองและสีส้ม (ความเสี่ยงปานกลางถึงสูง)\nสิ่งที่ต้องทำ: ต้องเริ่มปรับพฤติกรรม 3อ. 2ส. อย่างจริงจังและเข้มข้น โดยเน้นการลดรอบเอวและควบคุมความดันโลหิต\nการติดตาม: ต้องวัดความดันและประเมินความเสี่ยงซ้ำอย่างน้อยทุกๆ 6 เดือน (หากยังปรับพฤติกรรมไม่ได้ผล แนะนำให้ไปพบแพทย์)";
             } else {
                 riskAdviceHtml = `<div style="margin-bottom:20px; line-height:1.5;"><span style="color:#dc3545; font-weight:bold;">🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)</span><br><b>สิ่งที่ต้องทำ:</b> ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน<br><span style="font-weight:bold; color:#0056b3;">📌 การติดตาม:</span> ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน</div>`;
-                riskAdviceText = "🔴 กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)\nสิ่งที่ต้องทำ: ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน\n📌 การติดตาม: ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน";
+                riskAdviceText = "กลุ่มสีแดง (ความเสี่ยงสูงมากถึงอันตราย)\nสิ่งที่ต้องทำ: ต้องไปพบแพทย์ทันที! และต้องปรับพฤติกรรม 3อ. 2ส. อย่างเข้มข้นแบบเร่งด่วนที่สุดภายใน 1 เดือน\nการติดตาม: ต้องติดตามวัดความดันโลหิต วัดรอบเอว และประเมินความเสี่ยงซ้ำอย่างใกล้ชิดในทุกๆ 3 เดือน";
             }
+            
             const principlesHtml = `
                 <div style="font-weight:bold; color:#003366; margin-bottom:8px;">⭐ หลัก 3อ. 2ส. แบบจำง่าย</div>
                 <ul style="margin-top:0; padding-left:25px; line-height:1.4; margin-bottom:5px; font-size:18px;">
@@ -979,9 +1020,11 @@
                     <li><b>ลดดื่มสุรา:</b> งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด</li>
                 </ul>
             `;
-            const principlesText = "⭐ หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น\n- ออกกำลังกาย: ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)\n- อารมณ์: ทำจิตใจให้แจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่\n- ลดดื่มสุรา: งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด";
+            const principlesText = "หลัก 3อ. 2ส. แบบจำง่าย\n- อาหาร: ลดหวาน มัน เค็ม เน้นกินผักและผลไม้สดให้มากขึ้น\n- ออกกำลังกาย: ขยับร่างกายวันละ 30 นาที (อย่างน้อย 5 วันต่อสัปดาห์)\n- อารมณ์: ทำจิตใจให้แจ่มใส ไม่เครียด\n- งดสูบบุหรี่: เลิกสูบเด็ดขาด และหลีกเลี่ยงควันบุหรี่\n- ลดดื่มสุรา: งดหรือจำกัดปริมาณการดื่มให้น้อยที่สุด";
+            
             return { html: specificAlertsHtml + riskAdviceHtml + principlesHtml, text: specificAlertsText + "\n\n" + riskAdviceText + "\n\n" + principlesText };
         }
+
         function calculateRisk() {
             const inputs = {
                 age: parseFloat($('#age').val()) || 0, sex: +$('input[name="sex"]:checked').val(),
@@ -994,9 +1037,11 @@
             const whr = (inputs.wc_cm > 0 && inputs.ht > 0) ? inputs.wc_cm / inputs.ht : 0;
             const clamped = { age: Math.max(30, Math.min(inputs.age, 70)), sbp: Math.max(70, Math.min(inputs.sbp, 220)), tc: inputs.tc > 0 ? Math.min(inputs.tc, 280) : 0, whr: whr, wc_cm: inputs.wc_cm };
             let [ , predicted_risk, , baseline_risk ] = TASCVDformular(clamped.age, inputs.smoke, inputs.dm, clamped.sbp, inputs.sex, clamped.tc, clamped.whr, clamped.wc_cm);
+            
             let riskPercent = predicted_risk * 100; let ratio = 0;
             if (baseline_risk > 0) { ratio = predicted_risk / baseline_risk; }
             if (inputs.hasStrokeHistory) { riskPercent = 40.00; } else { if (riskPercent > 30) riskPercent = 30.00; }
+            
             const classification = classifyRisk(riskPercent);
             return {
                 riskPercentText: riskPercent.toFixed(2), barValue: Math.min(riskPercent, 30),
@@ -1004,6 +1049,7 @@
                 compareRatio: (ratio > 0 && !inputs.hasStrokeHistory) ? ratio.toFixed(1) : 'N/A', hasStrokeHistory: inputs.hasStrokeHistory, inputs: inputs
             };
         }
+
         function TASCVDformular(age, smoke, dm, sbp, sex, tc, whr, wc) { 
             var sur_root = 0.964588; var full_score = 0, compare_score = 0;
             var c_sbp = (sex==1 && age>60)?132 : (sex==0 && age<=60)?115 : (sex==0 && age>60)?130 : 120;
@@ -1031,6 +1077,7 @@
             if (p < 30) return { text: "สูง", color: "#fd7e14" };
             return { text: "สูงมาก/อันตราย", color: "#dc3545" };
         }
+
         // --- OCR Flow ---
         function compressAndUploadImage(file) {
             $('#ocrLoading').css('display', 'flex');
@@ -1054,6 +1101,7 @@
                 }
             }
         }
+
         function sendToGemini(base64Data) {
             const payload = { action: 'ocr', imageBase64: base64Data };
             fetch(GAS_URL, {
@@ -1076,14 +1124,16 @@
                 swalCustom.fire({ title: 'เชื่อมต่อล้มเหลว', text: 'กรุณากรอกข้อมูลเพื่อวิเคราะห์ได้ด้วยตัวเอง', icon: 'warning' }).then(() => { goToStep(1); });
             });
         }
+
         function fillDataFromOCR(data) {
             $('#ocrPreviewModal input, #ocrPreviewModal select').removeClass('is-valid highlight-flash loading-pulse');
             extractedMedicines = data.medicines || [];
+            
             function setField(id, val) {
                 if (val !== null && val !== undefined && val !== "") { $(`#${id}`).val(val).addClass('is-valid'); } 
                 else { $(`#${id}`).val('').addClass('highlight-flash'); }
             }
-            // Fallback for Name logic
+
             let existingName = $('#name').val() || (historyData && historyData.Name ? historyData.Name : '');
             if (existingName) {
                 setField('pv_name', existingName);
@@ -1093,17 +1143,23 @@
             
             if ($('#hn').val() && !$('#pv_hn').val()) setField('pv_hn', $('#hn').val());
             else setField('pv_hn', data.hn || '');
-            setField('pv_age', data.age); setField('pv_sbp', data.sbp);
+            
+            setField('pv_age', data.age); 
+            setField('pv_sbp', data.sbp);
             
             let genderVal = "";
             if (data.gender === 'female') genderVal = "0"; else if (data.gender === 'male') genderVal = "1";
             setField('pv_sex', genderVal);
+            
             let dmVal = ""; if (data.dm_status === true) dmVal = "1"; else if (data.dm_status === false) dmVal = "0";
             setField('pv_dm', dmVal);
+            
             let strokeVal = ""; if (data.stroke_status === true) strokeVal = "1"; else if (data.stroke_status === false) strokeVal = "0";
             setField('pv_stroke', strokeVal);
+            
             let smokeVal = ""; if (data.smoker_status === true) smokeVal = "1"; else if (data.smoker_status === false) smokeVal = "0";
             setField('pv_smoke', smokeVal);
+            
             if (data.cholesterol) {
                 $('#pv_chol_box').show(); $('#pv_body_box').hide();
                 setField('pv_chol', data.cholesterol); $('#pv_waist, #pv_height').removeClass('highlight-flash is-valid');
@@ -1114,6 +1170,7 @@
                 $('#pv_chol_box').show(); $('#pv_body_box').show();
                 setField('pv_chol', ''); setField('pv_waist', ''); setField('pv_height', '');
             }
+
             let medsHtml = '';
             if (extractedMedicines.length > 0) {
                 extractedMedicines.forEach((med, idx) => {
@@ -1129,19 +1186,23 @@
                 });
             } else { medsHtml = '<div class="text-muted text-center p-2">ไม่พบรายการยาบนสมุด</div>'; }
             $('#pv_medicines_box').html(medsHtml);
+            
             const modal = new bootstrap.Modal(document.getElementById('ocrPreviewModal'));
             modal.show();
         }
+
         function confirmOcrData() {
             let finalName = $('#pv_name').val();
             if ((!finalName || finalName.trim() === '') && historyData && historyData.Name) {
                 finalName = historyData.Name;
             }
             if(!finalName) { swalCustom.fire('ข้อมูลไม่ครบ', 'กรุณาระบุชื่อที่อยากให้เอไอเรียกคุณด้วยครับ', 'warning'); return; }
+            
             const hn = $('#pv_hn').val(); const age = $('#pv_age').val(); const sex = $('#pv_sex').val();
             const sbp = $('#pv_sbp').val(); const dm = $('#pv_dm').val();
             const stroke = $('#pv_stroke').val(); const smoke = $('#pv_smoke').val();
             const chol = $('#pv_chol').val(); const waist_cm = $('#pv_waist').val(); const height = $('#pv_height').val();
+            
             $('#name').val(finalName); 
             if(hn) $('#hn').val(hn); if(age) $('#age').val(age);
             if(sex) $(`input[name="sex"][value="${sex}"]`).prop('checked', true);
@@ -1151,6 +1212,7 @@
             if(stroke === "1") { $('#chk-stroke').prop('checked', true); $('#stroke-date-wrapper').removeClass('d-none'); } 
             else if (stroke === "0") { $('#chk-stroke').prop('checked', false); $('#stroke-date-wrapper').addClass('d-none'); }
             if(smoke) $(`input[name="smoke"][value="${smoke}"]`).prop('checked', true);
+            
             if(chol) {
                 $('input[name="useCholesterol"][value="1"]').prop('checked', true).change(); $('#tc').val(chol);
             } else if (waist_cm || height) {
@@ -1158,17 +1220,20 @@
                 if(waist_cm) $('#wc').val(waist_cm); 
                 if(height) $('#bdh').val(height);
             }
+            
             extractedMedicines = [];
             $('#pv_medicines_box .med-name').each(function() {
                 let idx = $(this).data('idx'); let medName = $(this).val();
                 let strength = $(`.med-strength[data-idx="${idx}"]`).val(); let dosage = $(`.med-dosage[data-idx="${idx}"]`).val(); let indication = $(`.med-indication[data-idx="${idx}"]`).val();
                 if(medName) extractedMedicines.push({name: medName, strength: strength, dosage: dosage, indication: indication});
             });
+            
             $('#ocrPreviewModal').modal('hide');
             swalCustom.fire({ title: 'นำเข้าสำเร็จ!', text: 'นำข้อมูลจากสมุดเติมลงในแบบฟอร์มเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false }).then(() => {
                 goToStep(4);
             });
         }
+
         // --- LIFF & Background Check ---
         function checkReferrer() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1182,6 +1247,7 @@
                     });
             }
         }
+
         async function initializeLiff() {
             try {
                 await liff.init({ liffId: LIFF_ID });
@@ -1196,6 +1262,7 @@
                 } else { liff.login(); }
             } catch (e) { console.warn("LIFF Warning: ", e); }
         }
+
         function checkUserRegistration(uid) { 
             fetch(`${GAS_URL}?action=getUser&userId=${encodeURIComponent(uid)}&_=${new Date().getTime()}`)
             .then(res => res.json())
@@ -1233,6 +1300,7 @@
         }
         
         function populateVillageDropdown() { for (let i=1; i<=19; i++) $('#village').append(`<option value="${i}">${i}</option>`); }
+        
         function toggleMeasurementFields() {
             const useChol = $('input[name="useCholesterol"]:checked').val() === '1';
             if(useChol) { $('#tc_group').slideDown(); $('#body_measure_group').slideUp(); }
@@ -1244,6 +1312,7 @@
             const hospitals = { "ท่าหิน": "รพ.สต.ท่าหิน", "ด่านสวี": "รพ.สต.ด่านสวี", "เขาทะลุ": "รพ.สต.เขาทะลุ", "เขาค่าย": "รพ.สต.เขาค่าย", "ปากแพรก": "รพ.สต.ปากแพรก", "สวี": "รพ.สต.สวี", "นาสัก": { "1": "รพ.สต.บ้านแก่งกระทั่ง", "6": "รพ.สต.บ้านแก่งกระทั่ง", "11": "รพ.สต.บ้านแก่งกระทั่ง", "13": "รพ.สต.บ้านแก่งกระทั่ง", "18": "รพ.สต.บ้านแก่งกระทั่ง", "19": "รพ.สต.บ้านแก่งกระทั่ง", "7": "รพ.สต.บ้านไทยพัฒนา", "8": "รพ.สต.บ้านไทยพัฒนา", "9": "รพ.สต.บ้านไทยพัฒนา", "10": "รพ.สต.บ้านไทยพัฒนา", "12": "รพ.สต.บ้านไทยพัฒนา", "15": "รพ.สต.บ้านไทยพัฒนา", "16": "รพ.สต.บ้านไทยพัฒนา", "2": "รพ.สต.นาสัก", "3": "รพ.สต.นาสัก", "4": "รพ.สต.นาสัก", "5": "รพ.สต.นาสัก", "14": "รพ.สต.นาสัก", "17": "รพ.สต.นาสัก" }, "ทุ่งระยะ": { "5": "รพ.สต.บ้านคลองน้อย", "6": "รพ.สต.บ้านคลองน้อย", "7": "รพ.สต.บ้านคลองน้อย", "8": "รพ.สต.บ้านคลองน้อย", "9": "รพ.สต.บ้านคลองน้อย", "10": "รพ.สต.บ้านคลองน้อย", "1": "รพ.สต.ทุ่งระยะ", "2": "รพ.สต.ทุ่งระยะ", "3": "รพ.สต.ทุ่งระยะ", "4": "รพ.สต.ทุ่งระยะ", "11": "รพ.สต.ทุ่งระยะ" }, "วิสัยใต้": { "1": "รพ.สต.บ้านดอนทราย", "3": "รพ.สต.บ้านดอนทราย", "4": "รพ.สต.บ้านดอนทราย", "8": "รพ.สต.บ้านดอนทราย", "2": "รพ.สต.วิสัยใต้", "5": "รพ.สต.วิสัยใต้", "6": "รพ.สต.วิสัยใต้", "7": "รพ.สต.วิสัยใต้", "9": "รพ.สต.วิสัยใต้", "10": "รพ.สต.วิสัยใต้" }, "ครน": { "1": "รพ.สต.ครน", "2": "รพ.สต.ครน", "3": "รพ.สต.ครน", "4": "รพ.สต.ครน", "6": "รพ.สต.ครน", "12": "รพ.สต.ครน", "9": "รพ.สต.บ้านควนสามัคคี", "10": "รพ.สต.บ้านควนสามัคคี", "13": "รพ.สต.บ้านควนสามัคคี", "14": "รพ.สต.บ้านควนสามัคคี", "5": "รพ.สต.บ้านน้ำฉา", "7": "รพ.สต.บ้านน้ำฉา", "8": "รพ.สต.บ้านน้ำฉา", "11": "รพ.สต.บ้านน้ำฉา" }, "นาโพธิ์": "รพ.สวี (นาโพธิ์)" };
             let hosp = hospitals[tb]; if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } $('#pcu').val(hosp || '');
         }
+
         async function saveAndSend(actionType) {
             if (!$('#pdpa').is(':checked')) {
                 swalCustom.fire({
@@ -1261,21 +1330,48 @@
                 });
                 return;
             }
+
             $('.btn-action').prop('disabled', true).text('กำลังส่งข้อมูล...');
             tts.stop(); 
+
             try {
+                // FALLBACK PROTECTIONS
                 let submitName = $('#name').val();
                 if ((!submitName || submitName.trim() === '') && historyData && historyData.Name) {
                     submitName = historyData.Name;
                 }
+                
+                let submitHN = $('#hn').val();
+                if ((!submitHN || submitHN.trim() === '') && historyData && (historyData.HN || historyData.hn)) {
+                    submitHN = historyData.HN || historyData.hn;
+                }
+                
+                let submitTel = $('#telephone').val();
+                if ((!submitTel || submitTel.trim() === '') && historyData && historyData.Telephone) {
+                    submitTel = historyData.Telephone;
+                }
+                
+                let submitDistrict = $('#district').val();
+                let submitVillage = $('#village').val();
+                let submitPCU = $('#pcu').val();
+                
+                if (historyData && historyData.Address) {
+                    let addrMatch = historyData.Address.match(/ม\.(\d+)\s+ต\.(.+)/);
+                    if ((!submitVillage || submitVillage.trim() === '') && addrMatch) submitVillage = addrMatch[1];
+                    if ((!submitDistrict || submitDistrict.trim() === '') && addrMatch) submitDistrict = addrMatch[2];
+                }
+                if ((!submitPCU || submitPCU.trim() === '') && historyData && historyData.PCU) {
+                    submitPCU = historyData.PCU;
+                }
+
                 const finalSuggestion = generateSuggestionText(globalRiskData);
                 const payload = {
-                    timestamp: new Date(), name: submitName, role: $('#role').val(), hn: $('#hn').val(),
-                    district: $('#district').val(), village: $('#village').val(), pcu: $('#pcu').val(),
+                    timestamp: new Date(), name: submitName, role: $('#role').val(), hn: submitHN,
+                    district: submitDistrict, village: submitVillage, pcu: submitPCU,
                     "u/d": $('input[name="ud"]:checked').map(function(){return this.value}).get().join(','),
                     help: $('input[name="help"]:checked').val(), decision: $('input[name="decision"]:checked').val(),
                     confident: $('input[name="confident"]:checked').val(), 
-                    telephone: $('#telephone').val(), line_id: '',
+                    telephone: submitTel, line_id: '',
                     gender: globalRiskData.inputs.sex, age: globalRiskData.inputs.age, smoke: globalRiskData.inputs.smoke,
                     dm: globalRiskData.inputs.dm, sbp: globalRiskData.inputs.sbp, cholesterol: globalRiskData.inputs.tc,
                     waist: globalRiskData.inputs.wc_cm, height: globalRiskData.inputs.ht,
@@ -1286,9 +1382,11 @@
                     allow_tel: $('#allowTel').is(':checked')?'Yes':'No', pdpa: 'Yes', 
                     area: '', referrerId: $('#referrerId').val(), medicines: globalRiskData.inputs.medicines
                 };
+
                 await fetch(GAS_URL, {
                     method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
+
                 if (liff.isInClient()) {
                     let flexSuccess = await sendFlex(globalRiskData, submitName, finalSuggestion.text);
                     if (flexSuccess) {
@@ -1306,7 +1404,7 @@
                 $('.btn-action').prop('disabled', false).text('ลองใหม่อีกครั้ง');
             }
         }
-        
+
         async function sendFlex(data, name, suggestionText) {
             const safeName = (name && String(name).trim() !== "") ? String(name).substring(0, 30) : "ผู้รับบริการ";
             
@@ -1337,46 +1435,43 @@
             const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
             
-            if (data.hasStrokeHistory || p >= 30) { startColor = "#dc3545"; endColor = "#7a0010"; } 
-            else if (p >= 20) { startColor = "#fd7e14"; endColor = "#c6600c"; } 
-            else if (p >= 10) { startColor = "#ffc107"; endColor = "#d39e00"; } 
-            else { startColor = "#28a745"; endColor = "#1e7e34"; }
-
-            const safeRiskText = data.riskPercentText ? String(data.riskPercentText) : "0";
-            const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
-            const picUrl = (userProfile && userProfile.pictureUrl) ? userProfile.pictureUrl : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-
-            let sickCount = Math.round(parseFloat(data.riskPercentText));
+            let picUrl = null;
+            if (userProfile && userProfile.pictureUrl && userProfile.pictureUrl.startsWith("http")) {
+                picUrl = userProfile.pictureUrl;
+            }
+            
+            let sickCount = Math.round(p);
             let safeCount = 100 - sickCount;
             let sexStr = data.inputs.sex === 1 ? 'ชาย' : 'หญิง';
             
             let redDots = Math.max(1, Math.ceil(sickCount / 10));
             if (sickCount === 0) redDots = 0; 
             let greenDots = 10 - redDots;
-            let emojiStr = "";
-            for(let i=0; i<redDots; i++) emojiStr += "🔴";
-            for(let i=0; i<greenDots; i++) emojiStr += "🟢";
-            
-            let compareFlex = [];
-            if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
-                compareFlex = [
-                    { type: "separator", margin: "md" },
-                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "sm", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
-                ];
+            let emojiStr = "🔴".repeat(redDots) + "🟢".repeat(greenDots);
+
+            let bubble1BodyContents = [
+                { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
+                { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: headerColor, align: "center", margin: "xs" }, 
+                { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
+                { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md", borderWidth: "1px", borderColor: "#eeeeee",
+                    contents: [
+                        { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
+                        { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
+                        { type: "text", text: emojiStr, size: "md", align: "center", margin: "xs" }
+                    ]
+                }
+            ];
+
+            if (data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
+                bubble1BodyContents.push({ type: "separator", margin: "md" });
+                bubble1BodyContents.push({ type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" });
+                bubble1BodyContents.push({ type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "sm", color: "#dc3545", weight: "bold", wrap: true, align: "center" });
+            } else if (!data.hasStrokeHistory) {
+                bubble1BodyContents.push({ type: "separator", margin: "md" });
+                bubble1BodyContents.push({ type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่ไม่มีปัจจัยเสี่ยง:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" });
+                bubble1BodyContents.push({ type: "text", text: `ความเสี่ยงของคุณใกล้เคียงหรือต่ำกว่า`, size: "sm", color: "#28a745", weight: "bold", wrap: true, align: "center" });
             }
 
-            // --- Bubble 1: Risk Result ---
-            const bubble1 = {
-                type: "bubble", size: "kilo",
-                header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
-                    contents: [
-                        { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
-                        { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center",
-                            contents: [
-                                { type: "image", url: picUrl, flex: 0, size: "xxs", align: "center", gravity: "center" },
-                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "sm", wrap: true }
             const headerContents = [
                 { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" }
             ];
@@ -1401,22 +1496,30 @@
                 footer: {
                     type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
                     contents: [
-                        { type: "button", style: "primary", color: startColor, height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
-                        { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
+                        { type: "box", layout: "horizontal", spacing: "sm", contents: [
+                            { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
+                        ]},
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                        { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
+                        { type: "box", layout: "horizontal", spacing: "sm", contents: [
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                            { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                        ]},
+                        { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
                     ]
                 }
             };
 
-            // --- Bubble 2: Urgent Action ---
-            const createIconBox = (imgUrl, txt) => {
-                return {
-                    type: "box", layout: "vertical", alignItems: "center", margin: "xs",
-                    contents: [
-                        { type: "image", url: imgUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                        { type: "text", text: txt, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
-                    ]
-                };
-            };
+            const makeIcon = (url, txt) => ({
+                type: "box", layout: "vertical", alignItems: "center", margin: "xs",
+                action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" },
+                contents: [
+                    { type: "image", url: url, size: "full", aspectRatio: "1:1", aspectMode: "cover" },
+                    { type: "text", text: txt, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
+                ]
+            });
+
             const bubble2 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1441,18 +1544,11 @@
             };
 
             const cleanAdvice = String(suggestionText).substring(0, 1500); 
-                }
-            };
+            const adviceBlocks = cleanAdvice.split('\n').filter(b => b.trim() !== "").map(block => ({
+                type: "text", text: String(block).trim(), wrap: true, size: "sm", color: "#444444", margin: "sm"
+            }));
 
-            // --- Bubble 3: Advice ---
             const bubble3 = {
-                type: "bubble", size: "kilo",
-                header: {
-                    type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
-                    contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
-                },
-                body: {
-                    type: "box", layout: "vertical", paddingAll: "15px",
                 type: "bubble", size: "mega",
                 header: {
                     type: "box", layout: "vertical", backgroundColor: headerColor, paddingAll: "15px",
@@ -1468,28 +1564,18 @@
             };
 
             const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
-            messagesToSend = [carouselFlex];
 
-            // --- Text Message Follow-up ---
-            let freqText = ""; let freqParam = "";
-            if (data.hasStrokeHistory || p >= 30) { freqText = "ทุก 3-4 วัน"; freqParam = "3-4 วัน"; } 
-            else if (p >= 20) { freqText = "สัปดาห์ละครั้ง"; freqParam = "รายสัปดาห์"; } 
-            else if (p >= 10) { freqText = "2 สัปดาห์ครั้ง"; freqParam = "2 สัปดาห์"; } 
-            else { freqText = "เดือนละครั้ง"; freqParam = "รายเดือน"; }
+            let freqText = "";
+            if (data.hasStrokeHistory || p >= 20) { freqText = "ทุก 2-3 วัน"; } 
+            else if (p >= 10) { freqText = "สัปดาห์ละครั้ง"; } 
+            else { freqText = "เดือนละครั้ง"; }
 
             const textMessage = {
                 type: "text",
-                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\nอยากให้หมอสวีดูแลใกล้ชิดทางไลน์บ่อยแค่ไหนครับ`,
-                quickReply: {
-                    items: [
-                        { type: "action", action: { type: "uri", label: "ทุกวัน", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายวัน` } },
-                        { type: "action", action: { type: "uri", label: "สัปดาห์ละครั้ง", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายสัปดาห์` } },
-                        { type: "action", action: { type: "uri", label: "ทุกเดือน", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายเดือน` } },
-                        { type: "action", action: { type: "uri", label: "ไม่ต้อง", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=ไม่ต้อง" } }
-                    ]
-                }
+                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️ หมอสวีขออนุญาตเข้ามาดูแลทางไลน์ ${freqText} นะครับ อย่าเพิ่งบล็อกกันนะครับ ❤️`
             };
-            messagesToSend.push(textMessage);
+
+            let messagesToSend = [carouselFlex, textMessage];
 
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa') || liff.isInClient()) {
@@ -1498,7 +1584,27 @@
                     return true;
                 } catch (err) { 
                     console.error("LIFF Send Error:", err); 
-                    swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ไม่สามารถส่งข้อความลงแชท LINE ได้ (' + err.message + ')', icon: 'warning' }).then(() => { liff.closeWindow(); });
+                    const jsonStr = JSON.stringify(messagesToSend, null, 2);
+                    swalCustom.fire({ 
+                        title: 'ข้อความถูกปฏิเสธ (INVALID_MESSAGE)', 
+                        html: `<p style="font-size:16px;">LINE ไม่สามารถแสดงผล Flex ได้เนื่องจากโครงสร้างผิดพลาด</p>
+                               <p style="font-size:14px; color:#d9534f; margin-bottom:5px;">รายละเอียด: ${err.message}</p>
+                               <textarea id="errJsonBox" style="width:100%; height:120px; font-size:11px;">${jsonStr}</textarea>`, 
+                        icon: 'error',
+                        confirmButtonText: 'คัดลอกโค้ดไปตรวจ',
+                        showCancelButton: true,
+                        cancelButtonText: 'ปิด',
+                        reverseButtons: true
+                    }).then((r) => { 
+                        if(r.isConfirmed) {
+                            let copyText = document.getElementById("errJsonBox");
+                            copyText.select();
+                            document.execCommand("copy");
+                            Swal.fire('คัดลอกสำเร็จ', 'กรุณานำไปเช็คใน LINE Flex Simulator', 'success').then(()=>liff.closeWindow());
+                        } else {
+                            liff.closeWindow(); 
+                        }
+                    });
                     return false;
                 }
             } else {
