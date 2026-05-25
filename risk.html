@@ -1449,11 +1449,12 @@ async function sendFlex(data, name, suggestionText) {
     let greenDots = 10 - redDots;
     let emojiStr = "🔴".repeat(redDots) + "🟢".repeat(greenDots);
 
+    // --- BUBBLE 1: ผลประเมิน ---
     let bubble1BodyContents = [
         { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
         { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: headerColor, align: "center", margin: "xs" }, 
         { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
-        { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md", borderWidth: "xs", borderColor: "#eeeeee", // แก้ตรงนี้จาก "1px" เป็น "xs"
+        { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md", borderWidth: "1px", borderColor: "#eeeeee",
             contents: [
                 { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
                 { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
@@ -1499,18 +1500,12 @@ async function sendFlex(data, name, suggestionText) {
                 { type: "box", layout: "horizontal", spacing: "sm", contents: [
                     { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                     { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
-                ]},
-                { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
-                { type: "box", layout: "horizontal", spacing: "sm", contents: [
-                    { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
-                    { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
-                ]},
-                { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "ดูวิดีโอแนะนำ", text: "ดูวิดีโอแนะนำ" } }
+                ]}
             ]
         }
     };
 
+    // --- BUBBLE 2: เตือนอาการสโตรก ---
     const makeIcon = (url, txt) => ({
         type: "box", layout: "vertical", alignItems: "center", margin: "xs",
         action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" },
@@ -1540,9 +1535,17 @@ async function sendFlex(data, name, suggestionText) {
                 { type: "box", layout: "horizontal", margin: "xs", contents: [ makeIcon("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), makeIcon("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
                 { type: "box", layout: "horizontal", margin: "xs", contents: [ makeIcon("https://sawee-hosp.github.io/stroke-profile/s.png", "ลำบากพูด"), makeIcon("https://sawee-hosp.github.io/stroke-profile/t.png", "มารพ.ทันที") ] }
             ]
+        },
+        footer: {
+            type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+            contents: [
+                { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+                { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } }
+            ]
         }
     };
 
+    // --- BUBBLE 3: คำแนะนำ ---
     const cleanAdvice = String(suggestionText).substring(0, 1500); 
     const adviceBlocks = cleanAdvice.split('\n').filter(b => b.trim() !== "").map(block => ({
         type: "text", text: String(block).trim(), wrap: true, size: "sm", color: "#444444", margin: "sm"
@@ -1560,9 +1563,20 @@ async function sendFlex(data, name, suggestionText) {
                 { type: "text", text: "หมอสวีขอแนะนำให้:", weight: "bold", size: "sm", color: "#003366", margin: "sm" },
                 ...adviceBlocks
             ]
+        },
+        footer: {
+            type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+            contents: [
+                { type: "box", layout: "horizontal", spacing: "sm", contents: [
+                    { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                    { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                ]},
+                { type: "button", style: "secondary", height: "sm", action: { type: "message", label: "วิดีโอสโตรก", text: "ดูวิดีโอแนะนำ" } }
+            ]
         }
     };
 
+    // --- ประกอบมวลสารเป็น Carousel ---
     const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
 
     let freqText = "";
@@ -1584,26 +1598,13 @@ async function sendFlex(data, name, suggestionText) {
             return true;
         } catch (err) { 
             console.error("LIFF Send Error:", err); 
-            const jsonStr = JSON.stringify(messagesToSend, null, 2);
             swalCustom.fire({ 
-                title: 'ข้อความถูกปฏิเสธ (INVALID_MESSAGE)', 
-                html: `<p style="font-size:16px;">LINE ไม่สามารถแสดงผล Flex ได้เนื่องจากโครงสร้างผิดพลาด</p>
-                       <p style="font-size:14px; color:#d9534f; margin-bottom:5px;">รายละเอียด: ${err.message}</p>
-                       <textarea id="errJsonBox" style="width:100%; height:120px; font-size:11px;">${jsonStr}</textarea>`, 
+                title: 'การส่งข้อความผิดพลาด', 
+                text: 'ระบบไม่สามารถส่งผลประเมินไปยัง LINE Chat ได้ในขณะนี้', 
                 icon: 'error',
-                confirmButtonText: 'คัดลอกโค้ดไปตรวจ',
-                showCancelButton: true,
-                cancelButtonText: 'ปิด',
-                reverseButtons: true
-            }).then((r) => { 
-                if(r.isConfirmed) {
-                    let copyText = document.getElementById("errJsonBox");
-                    copyText.select();
-                    document.execCommand("copy");
-                    Swal.fire('คัดลอกสำเร็จ', 'กรุณานำไปเช็คใน LINE Flex Simulator', 'success').then(()=>liff.closeWindow());
-                } else {
-                    liff.closeWindow(); 
-                }
+                confirmButtonText: 'ตกลง'
+            }).then(() => {
+                liff.closeWindow();
             });
             return false;
         }
@@ -1612,6 +1613,5 @@ async function sendFlex(data, name, suggestionText) {
         return true; 
     }
 }
-    </script>
 </body>
 </html>
