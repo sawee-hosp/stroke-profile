@@ -1537,14 +1537,13 @@
 
             const currentUrl = window.location.search; 
             if (currentUrl.includes('target=myoa') || liff.isInClient()) {
-                try { 
-                    await liff.sendMessages(messagesToSend); 
-                    return true;
-                } catch (err) { 
-                    console.error("LIFF Send Error:", err); 
-                    swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ไม่สามารถส่งข้อความลงแชท LINE ได้ (' + err.message + ')', icon: 'warning' }).then(() => { liff.closeWindow(); });
-                    return false;
-                }
+try {
+  await liff.sendMessages(messagesToSend);
+} catch (err) {
+  console.error(JSON.stringify(err, null, 2));
+  // err.response.data.details จะบอกว่า field ไหนผิด
+  alert(JSON.stringify(err.response?.data));
+}
             } else {
                 swalCustom.fire({ title: 'บันทึกสำเร็จ!', text: 'ระบบบันทึกข้อมูลเรียบร้อยแล้ว', icon: 'success' }).then(() => { liff.closeWindow(); });
                 return true; 
