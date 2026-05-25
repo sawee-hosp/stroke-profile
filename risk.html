@@ -1405,7 +1405,7 @@
             }
         }
 
-         async function sendFlex(data, name, suggestionText) {
+async function sendFlex(data, name, suggestionText) {
             const safeName = (name && name.trim() !== "") ? String(name) : "ผู้รับบริการ";
             let startColor = "#444444"; let endColor = "#111111";
             let p = parseFloat(data.riskPercentText);
@@ -1543,24 +1543,23 @@
             const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: [bubble1, bubble2, bubble3] } };
             messagesToSend = [carouselFlex];
 
-            // --- Text Message Follow-up ---
-            let freqText = ""; let freqParam = "";
-            if (data.hasStrokeHistory || p >= 30) { freqText = "ทุก 3-4 วัน"; freqParam = "3-4 วัน"; } 
-            else if (p >= 20) { freqText = "สัปดาห์ละครั้ง"; freqParam = "รายสัปดาห์"; } 
-            else if (p >= 10) { freqText = "2 สัปดาห์ครั้ง"; freqParam = "2 สัปดาห์"; } 
-            else { freqText = "เดือนละครั้ง"; freqParam = "รายเดือน"; }
+            // --- Text Message Follow-up (อัพเดทใหม่) ---
+            // จัดกลุ่มความถี่ส่งข้อความใหม่ตามระดับความเสี่ยง
+            let freqText = ""; 
+            if (p < 10) { 
+                freqText = "ทุกเดือน"; 
+            } 
+            else if (p >= 10 && p < 30 && !data.hasStrokeHistory) { 
+                freqText = "ทุกสัปดาห์"; 
+            } 
+            else { 
+                freqText = "ทุก 3-4 วัน"; 
+            }
 
+            // ปรับเปลี่ยนข้อความทิ้งท้ายตามโครงสร้างที่ต้องการ
             const textMessage = {
                 type: "text",
-                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืมปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\nอยากให้หมอสวีดูแลใกล้ชิดทางไลน์บ่อยแค่ไหนครับ`,
-                quickReply: {
-                    items: [
-                        { type: "action", action: { type: "uri", label: "ทุกวัน", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายวัน` } },
-                        { type: "action", action: { type: "uri", label: "สัปดาห์ละครั้ง", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายสัปดาห์` } },
-                        { type: "action", action: { type: "uri", label: "ทุกเดือน", uri: `https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=รายเดือน` } },
-                        { type: "action", action: { type: "uri", label: "ไม่ต้อง", uri: "https://liff.line.me/2009491708-pTYytCZA?action=setNotify&freq=ไม่ต้อง" } }
-                    ]
-                }
+                text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืม📍ปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\nหมอสวีขออนุญาตส่งความรู้ดีๆทางไลน์ ${freqText} นะครับ  เป็นห่วงนะ อย่าเพิ่งบล็อกไลน์กันนะครับ`
             };
             messagesToSend.push(textMessage);
 
