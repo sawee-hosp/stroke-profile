@@ -1495,7 +1495,7 @@ async function sendFlex(data, name, suggestionText) {
                 ...compareFlex,
                 { type: "separator", margin: "md" },
                 // ปรับจาก sm เป็น md
-                { type: "text", text: "ความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) สามารถลดได้ถ้าปฏิบัติตามนี้ (อ่านต่อ ➡️)", size: "md", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
+                { type: "text", text: "สามารถลดได้ความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) ถ้าปฏิบัติตามนี้ (อ่านต่อ ➡️)", size: "md", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
             ]
         },
         footer: {
@@ -1571,8 +1571,7 @@ async function sendFlex(data, name, suggestionText) {
             contents: [
                 { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                 { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-                // เปลี่ยนจาก uri เป็น message
-{ type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "uri", label: "🎬 ดูวิดีโอแนะนำ", uri: "https://line.me/R/msg/text/?ดูวิดีโอสโตรก" } }            ]
+              { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "uri", label: "🎬 ดูวิดีโอแนะนำ", uri: "https://youtube.com/playlist?list=PLYL0K4M9qlStvC4aoX02KnN4cCmBz2yUy&si=-phGnX4witgR1n1t" } }       ]
         }
     };
 
@@ -1593,7 +1592,7 @@ async function sendFlex(data, name, suggestionText) {
 
     const textMessage = {
         type: "text",
-        text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืม📍ปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\nหมอสวีขออนุญาตส่งความรู้ดีๆทางไลน์ ${freqText} นะครับ  เป็นห่วงนะ อย่าเพิ่งบล็อกไลน์กันนะครับ`
+        text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืม📍ปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️หมอสวีขออนุญาตส่งความรู้ดีๆทางไลน์ ${freqText} นะครับ  เป็นห่วงนะ อย่าเพิ่งบล็อกไลน์กันนะครับ❤️
     };
     messagesToSend.push(textMessage);
 
