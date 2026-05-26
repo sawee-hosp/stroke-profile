@@ -1445,16 +1445,15 @@ async function sendFlex(data, name, suggestionText) {
             if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
                 compareFlex = [
                     { type: "separator", margin: "md" },
-                    // เปลี่ยนคำ นำ 📊 ออก และปรับขนาดขึ้น 1 step เป็น sm
+                    // ปรับขนาดขึ้น 1 step (เป็น sm) อย่างปลอดภัย
                     { type: "text", text: `เทียบกับคนอื่นๆ เพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "sm", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    // ปรับขนาดขึ้น 1 step เป็น md
                     { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "md", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
                 ];
             }
 
             // --- Bubble 1: Risk Result ---
             const bubble1 = {
-                type: "bubble", size: "kilo",
+                type: "bubble", size: "mega", // เปลี่ยนเป็น mega ตามต้องการ
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [
@@ -1472,8 +1471,9 @@ async function sendFlex(data, name, suggestionText) {
                     background: { type: "linearGradient", angle: "180deg", startColor: lightBgColor, endColor: "#ffffff" },
                     contents: [
                         { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "md", color: "#000000", align: "center" }, 
-                        { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
-                        { type: "text", text: displayRiskGroup, size: "xxl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
+                        // ใช้ไซส์ 4xl และ xl ตามมาตรฐาน ป้องกัน error บนบางเวอร์ชัน
+                        { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
+                        { type: "text", text: displayRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
                         
                         { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md",
                             contents: [
@@ -1484,7 +1484,6 @@ async function sendFlex(data, name, suggestionText) {
                         },
                         ...compareFlex,
                         { type: "separator", margin: "md" },
-                        // เปลี่ยน /n/n เป็น \n\n และปรับขนาดขึ้นเป็น md
                         { type: "text", text: "สามารถลดความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) ได้ถ้าปฏิบัติตามนี้\n\nอ่านต่อ ➡️", size: "md", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
                     ]
                 },
@@ -1503,26 +1502,25 @@ async function sendFlex(data, name, suggestionText) {
                     type: "box", layout: "vertical", alignItems: "center", margin: "xs",
                     contents: [
                         { type: "image", url: imgUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                        // ปรับขนาดข้อความอาการขึ้น 2 step (จาก xs -> md)
+                        // ขยับไซส์ขึ้น 2 step เป็น md
                         { type: "text", text: txt, size: "md", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
                     ]
                 };
             };
             const bubble2 = {
-                type: "bubble", size: "kilo",
+                type: "bubble", size: "mega", // เปลี่ยนเป็น mega
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
                     contents: [
                         { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
-                        { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xxl", align: "center" }
+                        { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" }
                     ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
-                    // เพิ่มพื้นหลังไล่สีแดงอ่อนมาขาว
                     background: { type: "linearGradient", angle: "180deg", startColor: "#ffe6e6", endColor: "#ffffff" },
                     contents: [
-                        { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้ อาการสโตรก ได้แก่", size: "sm", color: "#666666", align: "center", wrap: true, margin: "none" },
+                        { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้ อาการสโตรก ได้แก่", size: "sm", color: "#666666", align: "center", wrap: true },
                         { type: "box", layout: "horizontal", margin: "md", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/b.png", "เซมึนหัว"), createIconBox("https://sawee-hosp.github.io/stroke-profile/e.png", "ตามัวมาก") ] },
                         { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), createIconBox("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
                         { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/s.png", "ลำบากพูด"), createIconBox("https://sawee-hosp.github.io/stroke-profile/t.png", "มารพ.ทันที") ] }
@@ -1539,15 +1537,13 @@ async function sendFlex(data, name, suggestionText) {
 
             // --- Bubble 3: Advice ---
             const bubble3 = {
-                type: "bubble", size: "kilo",
+                type: "bubble", size: "mega", // เปลี่ยนเป็น mega
                 header: {
-                    // Header สีน้ำเงินเข้มไล่ไปดำ
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#003399", endColor: "#000000" }, paddingAll: "15px",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "lg", align: "center" } ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
-                    // Body สีฟ้าอ่อนมากไล่ไปขาว
                     background: { type: "linearGradient", angle: "180deg", startColor: "#f0f8ff", endColor: "#ffffff" },
                     contents: [
                         { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "sm", color: "#444444" }
@@ -1558,7 +1554,7 @@ async function sendFlex(data, name, suggestionText) {
                     contents: [
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-                        // เปลี่ยน Action ของวิดีโอเป็น message
+                        // เปลี่ยนเป็น Message action เพื่อพิมพ์ข้อความตอบกลับแชทอัตโนมัติ
                         { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอสโตรก" } }
                     ]
                 }
@@ -1579,7 +1575,6 @@ async function sendFlex(data, name, suggestionText) {
                 freqText = "ทุก 3-4 วัน"; 
             }
 
-            // เพิ่ม Emoji ตามที่ร้องขอ
             const textMessage = {
                 type: "text",
                 text: `คุณ ${safeName} มีความเสี่ยงสโตรกระดับ ${safeRiskGroup}\nอย่าลืม📍ปักหมุดบ้านให้หมอด้วยนะ(คลิกปุ่มด้านบน)\n\n👨‍⚕️หมอสวีขออนุญาตส่งความรู้ดีๆทางไลน์ ${freqText} นะครับ  เป็นห่วงนะ อย่าเพิ่งบล็อกไลน์กันนะครับ❤️`
@@ -1601,6 +1596,5 @@ async function sendFlex(data, name, suggestionText) {
                 return true; 
             }
         }
-    </script>
 </body>
 </html>
