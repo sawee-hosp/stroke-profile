@@ -1452,6 +1452,7 @@ async function sendFlex(data, name, suggestionText) {
             }
 
             // --- Bubble 1: Risk Result ---
+            // เปลี่ยนขนาดจาก kilo เป็น mega
             const bubble1 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1506,6 +1507,7 @@ async function sendFlex(data, name, suggestionText) {
                 };
             };
             
+            // เปลี่ยนขนาดจาก kilo เป็น mega
             const bubble2 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1534,6 +1536,7 @@ async function sendFlex(data, name, suggestionText) {
             };
 
             // --- Bubble 3: Advice ---
+            // เปลี่ยนขนาดจาก kilo เป็น mega
             const bubble3 = {
                 type: "bubble", size: "mega",
                 header: {
@@ -1551,8 +1554,7 @@ async function sendFlex(data, name, suggestionText) {
                     contents: [
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-                        // แก้ไขจุดนี้: เปลี่ยนจาก uri เป็น message
-                        //{ type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอสโตรก" } }
+                        { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "uri", label: "🎬 ดูวิดีโอแนะนำ", uri: "https://youtube.com/shorts/MBf9xTkn_Sw" } }
                     ]
                 }
             };
