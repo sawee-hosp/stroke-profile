@@ -1446,8 +1446,8 @@ async function sendFlex(data, name, suggestionText) {
             if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
                 compareFlex = [
                     { type: "separator", margin: "md" },
-                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "sm", color: "#666666", wrap: true, margin: "sm", align: "center" },
-                    { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "sm", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
+                    { type: "text", text: `📊 เทียบกับคนเพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "md", color: "#666666", wrap: true, margin: "sm", align: "center" },
+                    { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "md", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
                 ];
             }
 
@@ -1458,11 +1458,11 @@ async function sendFlex(data, name, suggestionText) {
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
+                        { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "lg", align: "center" },
                         { type: "box", layout: "horizontal", margin: "md", alignItems: "center", justifyContent: "center",
                             contents: [
                                 { type: "image", url: picUrl, flex: 0, size: "xxs", align: "center", gravity: "center" },
-                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "lg", align: "center", margin: "sm", wrap: true }
+                                { type: "text", text: `คุณ ${safeName}`, weight: "bold", color: "#ffffff", size: "xl", align: "center", margin: "sm", wrap: true }
                             ]
                         }
                     ]
@@ -1471,20 +1471,20 @@ async function sendFlex(data, name, suggestionText) {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     background: { type: "linearGradient", angle: "180deg", startColor: lightBgColor, endColor: "#ffffff" },
                     contents: [
-                        { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#000000", align: "center" }, 
-                        { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
-                        { type: "text", text: displayRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
+                        { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "md", color: "#000000", align: "center" }, 
+                        { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
+                        { type: "text", text: displayRiskGroup, size: "xxl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
                         
                         { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md",
                             contents: [
-                                { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
-                                { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
-                                { type: "text", text: emojiStr, size: "md", align: "center", margin: "xs" }
+                                { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xs", color: "#003366", weight: "bold", align: "center" },
+                                { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "sm", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
+                                { type: "text", text: emojiStr, size: "lg", align: "center", margin: "xs" }
                             ]
                         },
                         ...compareFlex,
                         { type: "separator", margin: "md" },
-                        { type: "text", text: "ความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) สามารถลดได้ถ้าปฏิบัติตามนี้ (อ่านต่อ ➡️)", size: "sm", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
+                        { type: "text", text: "ความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) สามารถลดได้ถ้าปฏิบัติตามนี้ (อ่านต่อ ➡️)", size: "md", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
                     ]
                 },
                 footer: {
@@ -1502,7 +1502,7 @@ async function sendFlex(data, name, suggestionText) {
                     type: "box", layout: "vertical", alignItems: "center", margin: "xs",
                     contents: [
                         { type: "image", url: imgUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                        { type: "text", text: txt, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
+                        { type: "text", text: txt, size: "sm", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
                     ]
                 };
             };
@@ -1513,14 +1513,14 @@ async function sendFlex(data, name, suggestionText) {
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "sm", align: "center" },
-                        { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" }
+                        { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
+                        { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xxl", align: "center" }
                     ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้ อาการสโตรก ได้แก่", size: "xs", color: "#666666", align: "center", wrap: true, margin: "none" },
+                        { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้ อาการสโตรก ได้แก่", size: "sm", color: "#666666", align: "center", wrap: true, margin: "none" },
                         { type: "box", layout: "horizontal", margin: "md", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/b.png", "เซมึนหัว"), createIconBox("https://sawee-hosp.github.io/stroke-profile/e.png", "ตามัวมาก") ] },
                         { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/f.png", "มุมปากตก"), createIconBox("https://sawee-hosp.github.io/stroke-profile/a.png", "ยกแขนยาก") ] },
                         { type: "box", layout: "horizontal", margin: "xs", contents: [ createIconBox("https://sawee-hosp.github.io/stroke-profile/s.png", "ลำบากพูด"), createIconBox("https://sawee-hosp.github.io/stroke-profile/t.png", "มารพ.ทันที") ] }
@@ -1541,20 +1541,21 @@ async function sendFlex(data, name, suggestionText) {
                 type: "bubble", size: "mega",
                 header: {
                     type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
-                    contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
+                    contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "lg", align: "center" } ]
                 },
                 body: {
                     type: "box", layout: "vertical", paddingAll: "15px",
                     contents: [
-                        { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "xs", color: "#444444" }
+                        { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "sm", color: "#444444" }
                     ]
                 },
                 footer: {
                     type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
                     contents: [
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
-                        { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-{ type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอสโตรก" } }                    ]
+                        { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                     //   { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอสโตรก" } }
+                    ]
                 }
             };
 
