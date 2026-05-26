@@ -1446,9 +1446,7 @@ async function sendFlex(data, name, suggestionText) {
     if(data.compareRatio !== 'N/A' && data.compareRatio > 1 && !data.hasStrokeHistory) {
         compareFlex = [
             { type: "separator", margin: "md" },
-            // ปรับข้อความตามที่ขอ และยึดขนาด xs
             { type: "text", text: `เทียบกับคนอื่นๆ เพศ${sexStr} วัย ${data.inputs.age} ปี ที่สุขภาพดี:`, size: "xs", color: "#666666", wrap: true, margin: "sm", align: "center" },
-            // บรรทัดนี้บวก 1 step จากเดิม (sm -> md)
             { type: "text", text: `เสี่ยงมากกว่าถึง ${data.compareRatio} เท่า!`, size: "md", color: "#dc3545", weight: "bold", wrap: true, align: "center" }
         ];
     }
@@ -1473,8 +1471,8 @@ async function sendFlex(data, name, suggestionText) {
             background: { type: "linearGradient", angle: "180deg", startColor: lightBgColor, endColor: "#ffffff" },
             contents: [
                 { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "md", color: "#000000", align: "center" }, 
-                { type: "text", text: `${safeRiskText}%`, size: "5xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, 
-                { type: "text", text: displayRiskGroup, size: "xxl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
+                { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: startColor, align: "center", margin: "xs" }, // ตรึงไว้ที่ 4xl เพื่อความปลอดภัย
+                { type: "text", text: displayRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, // ตรึงไว้ที่ xl
                 
                 { type: "box", layout: "vertical", backgroundColor: "#ffffff", paddingAll: "10px", margin: "md", cornerRadius: "md",
                     contents: [
@@ -1485,8 +1483,8 @@ async function sendFlex(data, name, suggestionText) {
                 },
                 ...compareFlex,
                 { type: "separator", margin: "md" },
-                // ปรับข้อความตามที่ขอ (ใช้ \n\n แทน /n/n เพื่อให้ LINE Flex เว้นบรรทัดได้จริง) และยึดขนาด sm
-                { type: "text", text: "สามารถลดความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) ได้ถ้าปฏิบัติตามนี้ \n\n อ่านต่อ ➡️", size: "sm", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
+                // เคลียร์ช่องว่างตรง \n\n ให้ JSON อ่านง่ายไม่ error
+                { type: "text", text: "สามารถลดความเสี่ยงสโตรก(โรคหลอดเลือดสมอง) ได้ถ้าปฏิบัติตามนี้\n\nอ่านต่อ ➡️", size: "sm", color: "#222222", weight: "bold", wrap: true, margin: "md", align: "center" }
             ]
         },
         footer: {
@@ -1504,7 +1502,7 @@ async function sendFlex(data, name, suggestionText) {
             type: "box", layout: "vertical", alignItems: "center", margin: "xs",
             contents: [
                 { type: "image", url: imgUrl, size: "full", aspectRatio: "1:1", aspectMode: "cover", action: { type: "uri", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-                // ปรับขนาดข้อความอาการขึ้น 2 step (xs -> sm -> md)
+                // ปรับขนาดข้อความอาการขึ้น 2 step
                 { type: "text", text: txt, size: "md", color: "#dc3545", weight: "bold", align: "center", margin: "xs" }
             ]
         };
@@ -1516,12 +1514,11 @@ async function sendFlex(data, name, suggestionText) {
             type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#cc0000", endColor: "#220000" }, paddingAll: "15px",
             contents: [
                 { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "md", align: "center" },
-                { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xxl", align: "center" }
+                { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" } // ตรึงไว้ที่ xl
             ]
         },
         body: {
             type: "box", layout: "vertical", paddingAll: "15px",
-            // ไล่จากแดงอ่อนลงมาขาว
             background: { type: "linearGradient", angle: "180deg", startColor: "#ffe6e6", endColor: "#ffffff" },
             contents: [
                 { type: "text", text: "อย่ารอเด็ดขาด! ลดโอกาสอัมพาตและเสียชีวิตได้ อาการสโตรก ได้แก่", size: "sm", color: "#666666", align: "center", wrap: true, margin: "none" },
@@ -1543,13 +1540,11 @@ async function sendFlex(data, name, suggestionText) {
     const bubble3 = {
         type: "bubble", size: "mega",
         header: {
-            // น้ำเงินไล่ดำ
             type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#0033cc", endColor: "#111111" }, paddingAll: "15px",
             contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "lg", align: "center" } ]
         },
         body: {
             type: "box", layout: "vertical", paddingAll: "15px",
-            // ฟ้าอ่อนสุดๆไล่ขาว
             background: { type: "linearGradient", angle: "180deg", startColor: "#e6f2ff", endColor: "#ffffff" },
             contents: [
                 { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${suggestionText}`, wrap: true, size: "sm", color: "#444444" }
@@ -1560,7 +1555,6 @@ async function sendFlex(data, name, suggestionText) {
             contents: [
                 { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
                 { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-                // เปลี่ยนเป็นแบบ message แทนการเปิด url
                 { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "message", label: "🎬 ดูวิดีโอแนะนำ", text: "ดูวิดีโอสโตรก" } }
             ]
         }
