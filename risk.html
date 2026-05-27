@@ -17,7 +17,7 @@
         /* --- Base Styles & Background --- */
         body { 
             font-family: "Noto Sans Thai", sans-serif; 
-            font-size: 20px; /* ปรับขนาดจาก 18px เป็น 20px */
+            font-size: 20px;
             margin: 0; color: #333;
             line-height: 1.4; 
             min-height: 100vh;
@@ -29,7 +29,7 @@
         
         /* --- Header --- */
         .header-group { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; padding-top: 10px; }
-        h1 { color: #ffffff; font-weight: 900; font-size: 28px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); } /* ใหญ่ขึ้น */
+        h1 { color: #ffffff; font-weight: 900; font-size: 28px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); }
         
         /* --- Main Card & Steps --- */
         .main-card {
@@ -640,17 +640,24 @@
                 this.audio.onended = () => { this.playNext(); };
                 this.audio.onerror = (e) => { this.playNext(); };
             }
+            // ปรับปรุงการตัดคำให้เนียนขึ้นสำหรับภาษาไทย โดยอิงจำนวนตัวอักษรและพยายามหาช่องว่างใกล้เคียงที่สุด
             splitText(text, maxLength = 150) {
-                const words = text.split(' ');
                 let chunks = [];
-                let currentChunk = '';
-                words.forEach(word => {
-                    if ((currentChunk + word).length > maxLength) {
-                        chunks.push(currentChunk.trim());
-                        currentChunk = word + ' ';
-                    } else { currentChunk += word + ' '; }
-                });
-                if (currentChunk.trim().length > 0) chunks.push(currentChunk.trim());
+                let str = text;
+                while (str.length > 0) {
+                    if (str.length <= maxLength) {
+                        chunks.push(str);
+                        break;
+                    }
+                    let splitAt = maxLength;
+                    // พยายามหาจุดตัดเว้นวรรคในช่วง 40 ตัวอักษรก่อนจะถึง maxLength เพื่อไม่ให้ตัดกลางคำ
+                    let spaceIdx = str.lastIndexOf(' ', maxLength);
+                    if (spaceIdx > maxLength - 40 && spaceIdx > 0) {
+                        splitAt = spaceIdx;
+                    }
+                    chunks.push(str.substring(0, splitAt));
+                    str = str.substring(splitAt).trim();
+                }
                 return chunks;
             }
             speak(text) {
@@ -707,8 +714,19 @@
             ytPlayer = new YT.Player('youtube-player', {
                 height: '100%', width: '100%', videoId: ytId,
                 playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 1, 'playsinline': 1, 'rel': 0, 'loop': 1 },
-                events: { 'onStateChange': onPlayerStateChange }
+                events: { 
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange 
+                }
             });
+        }
+
+        function onPlayerReady(event) {
+            // เล่นวิดีโอ (Muted) อัตโนมัติเมื่ออยู่หน้า intro 
+            if (currentStep === 'intro') {
+                event.target.mute();
+                event.target.playVideo();
+            }
         }
 
         function onPlayerStateChange(event) {
@@ -748,7 +766,11 @@
                     // ป้องกันวิดีโอโหลดใหม่แล้วกระชากหน้าจอตอนกำลังทำรายการ
                     if (currentStep === 'intro' && ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
                         let newYtId = extractVideoID(currentPlayingUrl);
-                        if (newYtId) { ytPlayer.loadVideoById(newYtId); ytPlayer.mute(); }
+                        if (newYtId) { 
+                            ytPlayer.loadVideoById(newYtId); 
+                            ytPlayer.mute(); 
+                            ytPlayer.playVideo(); // สั่งให้เล่นวิดีโอทันทีหลังจากดึง Playlist เสร็จ
+                        }
                     }
                 }
             });
@@ -765,7 +787,7 @@
                             <p style="font-size:16px; color:#666; margin-bottom:0;"><i>*โรงพยาบาลสวีขออนุญาตนำข้อมูลที่ท่านบันทึกไปใช้ในการวางแผนดูแลสุขภาพและป้องกันโรคในชุมชนต่อไป</i></p>
                         </div>
                     `,
-                    icon: 'info', confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
+                    confirmButtonText: 'ตกลง, ฉันเข้าใจแล้ว',
                     allowOutsideClick: false, allowEscapeKey: false
                 });
                 sessionStorage.setItem('introShown', 'true');
@@ -797,10 +819,7 @@
             $('input[name="help"]').change(function() {
                 $('html, body').animate({ scrollTop: $('#confident-group').offset().top - 20 }, 300);
             });
-            $('input[name="confident"]').change(function() {
-                // เลื่อนลงไปแสดงปุ่มถัดไป
-                $('html, body').animate({ scrollTop: $('.step-nav-buttons').offset().top }, 300);
-            });
+            // ข้อสุดท้าย (confident) นำ Auto-Scroll ออกตาม Requirement
 
             $('#telephone').on('change', function() {
                 const phone = $(this).val();
@@ -808,8 +827,6 @@
                     $('#phone-msg').hide().text('');
                     $.getJSON(GAS_URL, { checkPhone: phone }, function(res) {
                         if(res.status === 'found') {
-                            // ควรถอดรหัสก่อนแสดงผล แต่สำหรับตัวอย่างการ checkPhone ส่วนใหญ่ไม่ได้คืนค่า Name ตรงๆ หรืออาจจะคืนแล้ว 
-                            // ถ้าอยากให้แสดงชัวร์ๆ ให้ decrypt
                             let decName = decryptName(res.name);
                             $('#phone-msg').html(`⚠️ หมายเลขนี้มีประวัติของคุณ <b>${decName}</b> แล้ว`).slideDown();
                         }
@@ -853,9 +870,10 @@
 
         // --- Smart Navigation Flow ---
         function goToStep(step) {
+            // สั่งหยุดวิดีโอทันทีเมื่อผู้ใช้คลิกเข้าไปทำแบบประเมิน (ฟอร์ม)
             if(currentStep === 'intro' && step !== 'intro') {
                 if(ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
-                $('#step-intro').hide(); // ซ่อนอย่างเด็ดขาด กันวิดีโอกระชาก
+                $('#step-intro').hide(); 
             }
             $('.step-section').removeClass('active');
             
@@ -917,7 +935,7 @@
             
             if(missing.length > 0) return triggerError(missing, selectors);
             
-            goToStep(5); // เปลี่ยนให้ไปหน้า 5 เสมอ เพราะคำถาม รพ.สวี ย้ายมาหน้านี้แล้ว
+            goToStep(5); 
         }
 
         function handleBackFrom4() {
@@ -1489,7 +1507,7 @@
             const safeRiskGroup = data.riskGroup ? String(data.riskGroup) : "-";
             
             let picUrl = null;
-            if (userProfile && userProfile.pictureUrl && userProfile.pictureUrl.startsWith("http")) {
+            if (userProfile && userProfile.pictureUrl && userProfile.pictureUrl.startsWith("https://")) {
                 picUrl = userProfile.pictureUrl;
             }
             
@@ -1506,7 +1524,7 @@
                 { type: "text", text: "โอกาสเกิดสโตรกในอีก 10 ปี", size: "sm", color: "#aaaaaa", align: "center" }, 
                 { type: "text", text: `${safeRiskText}%`, size: "4xl", weight: "bold", color: headerColor, align: "center", margin: "xs" }, 
                 { type: "text", text: safeRiskGroup, size: "xl", weight: "bold", color: "#555555", align: "center", wrap: true }, 
-                { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "10px", margin: "md", cornerRadius: "md", borderWidth: "1px", borderColor: "#c3e6cb",
+                { type: "box", layout: "vertical", backgroundColor: "#f1fcf5", paddingAll: "sm", margin: "md", cornerRadius: "md", borderWidth: "light", borderColor: "#c3e6cb",
                     contents: [
                         { type: "text", text: `จาก 100 คนที่มีสุขภาพแบบคุณ`, size: "xxs", color: "#003366", weight: "bold", align: "center" },
                         { type: "text", text: `🚨 ${sickCount} คน โชคร้ายเป็นสโตรก`, size: "xs", color: "#dc3545", weight: "bold", align: "center", margin: "xs" },
@@ -1538,17 +1556,17 @@
 
             // --- Bubble 1: สรุปความเสี่ยง ---
             const bubble1 = {
-                type: "bubble", size: "mega",
+                type: "bubble",
                 header: {
-                    type: "box", layout: "vertical", backgroundColor: headerColor, paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: headerColor, paddingAll: "md",
                     contents: headerContents
                 },
                 body: {
-                    type: "box", layout: "vertical", background: bodyBgGradient, paddingAll: "15px",
+                    type: "box", layout: "vertical", background: bodyBgGradient, paddingAll: "md",
                     contents: bubble1BodyContents
                 },
                 footer: {
-                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "sm",
                     contents: [
                         { type: "button", style: "primary", color: "#28a745", height: "sm", action: { type: "uri", label: "ประเมินซ้ำ", uri: "https://liff.line.me/2009491708-pTYytCZA?target=myoa" } },
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ประวัติส่วนตัว", uri: "https://liff.line.me/2009491708-PgcjtJDL" } }
@@ -1567,16 +1585,16 @@
 
             // --- Bubble 2: แจ้งเตือนอาการฉุกเฉิน ---
             const bubble2 = {
-                type: "bubble", size: "mega",
+                type: "bubble",
                 header: {
-                    type: "box", layout: "vertical", backgroundColor: "#cc0000", paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: "#cc0000", paddingAll: "md",
                     contents: [
                         { type: "text", text: "หากมีอาการสโตรก", weight: "bold", color: "#ffffff", size: "sm", align: "center" },
                         { type: "text", text: "ต้องรีบไป รพ. ทันที", weight: "bold", color: "#ffffff", size: "xl", align: "center" }
                     ]
                 },
                 body: {
-                    type: "box", layout: "vertical", background: redBodyGradient, paddingAll: "15px",
+                    type: "box", layout: "vertical", background: redBodyGradient, paddingAll: "md",
                     contents: [
                         { type: "text", text: "อย่ารอเด็ดขาด!", size: "xl", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "md" },
                         { type: "text", text: "ลดโอกาสอัมพาตและเสียชีวิตได้", size: "md", weight: "bold", color: "#dc3545", align: "center", wrap: true, margin: "sm" },
@@ -1588,7 +1606,7 @@
                     ]
                 },
                 footer: {
-                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "sm",
                     contents: [
                         { type: "button", style: "primary", color: "#cc0000", height: "sm", action: { type: "uri", label: "ปักหมุดบ้านไปรพ.", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
                         { type: "button", style: "secondary", color: "#ffcccc", height: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } }
@@ -1603,20 +1621,20 @@
 
             // --- Bubble 3: คำแนะนำปฏิบัติตัว ---
             const bubble3 = {
-                type: "bubble", size: "mega",
+                type: "bubble",
                 header: {
-                    type: "box", layout: "vertical", backgroundColor: headerColor, paddingAll: "15px",
+                    type: "box", layout: "vertical", backgroundColor: headerColor, paddingAll: "md",
                     contents: [ { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "md", align: "center" } ]
                 },
                 body: {
-                    type: "box", layout: "vertical", background: bodyBgGradient, paddingAll: "15px",
+                    type: "box", layout: "vertical", background: bodyBgGradient, paddingAll: "md",
                     contents: [
                         { type: "text", text: "หมอสวีขอแนะนำให้:", weight: "bold", size: "sm", color: "#003366", margin: "sm" },
                         ...adviceBlocks
                     ]
                 },
                 footer: {
-                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+                    type: "box", layout: "vertical", spacing: "sm", paddingAll: "sm",
                     contents: [
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ความรู้สโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
                         { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
@@ -1647,10 +1665,10 @@
                     return true;
                 } catch (err) { 
                     console.error("LIFF Send Error:", err); 
-                    // แสดงแจ้งเตือนสั้นๆ กรณีที่เกิด INVALID_MESSAGE หรือส่งผิดพลาด
+                    // แสดงแจ้งเตือนสั้นๆ กรณีที่เกิดการส่งข้อมูลผิดพลาด
                     swalCustom.fire({ 
                         title: 'บันทึกสำเร็จ!', 
-                        text: 'แต่เกิดข้อผิดพลาดในการส่งข้อความสรุปผลลงในแชท LINE', 
+                        text: 'แต่ไม่สามารถส่งข้อความสรุปผลลงในแชท LINE ได้', 
                         icon: 'warning' 
                     }).then(() => { liff.closeWindow(); });
                     return false;
