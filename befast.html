@@ -377,6 +377,14 @@
     
     window.closeCustomModal = function(id) { document.getElementById('loading').style.display = 'none'; document.getElementById(id).style.display = 'none'; };
 
+    // เพิ่มฟังก์ชัน handleInitialTestMode ที่ขาดหายไป
+    window.handleInitialTestMode = function() {
+        sessionData.isTestMode = true;
+        document.getElementById('test-mode-toggle').checked = true;
+        document.getElementById('test-watermark').classList.add('active');
+        document.getElementById('initial-warning-modal').style.display = 'none';
+    };
+
     window.onload = async () => {
         buildInitialHTML();
         buildAILayers(); 
@@ -1462,6 +1470,9 @@
     };
 
     window.handleCallClick = function(el, key, tel, name, isInitial = false) { 
+        if (isInitial) {
+            document.getElementById('initial-warning-modal').style.display = 'none';
+        }
         currentActionKey = key; 
         pendingCallUrl = `tel:${tel}`; 
         currentTel = tel;
@@ -1525,6 +1536,10 @@
             if(cb) cb(); 
         });
     };
+
+จัดให้ตามคำขอครับ! ผมได้ย้ายข้อความ **[จำลองสถานการณ์...]** ลงมาไว้ต่อท้าย `timelineBox` (กล่องเวลา) ซึ่งจะเป็นพื้นที่สีขาวด้านล่างของเนื้อหาพอดี ทำให้เมื่อเราเปลี่ยนตัวอักษรเป็น **สีแดง (`#D32F2F`)** จะมองเห็นได้ชัดเจนมากๆ และอยู่เหนือปุ่มเมนูต่างๆ อย่างสวยงามครับ
+
+คัดลอกโค้ดนี้ไปใช้งานทับของเดิมได้เลยครับ:
 
 function getFlexMessages(data) {
     try {
