@@ -1635,9 +1635,19 @@ function getFlexMessages(data) {
         const isAbnormal = Boolean(data.isEmergency || (data.isAiAssessment && data.riskScore >= 50));
         const riskColor = isAbnormal ? "#ffffff" : "#d9534f";
 
-        let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis || '-'}` : (data.symptomDetail || "-");
-        displayAnalysis = displayAnalysis.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '');
-        if (!displayAnalysis || displayAnalysis.trim() === "") displayAnalysis = "-";
+        // --- จัดการข้อความผลการประเมิน (อาการ + ความเฉียบพลัน) ---
+        let symptomText = data.isAiAssessment ? `AI: ${data.analysis || ''}` : (data.symptomDetail || "");
+        symptomText = symptomText.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '').trim();
+
+        if (symptomText === "ฉันไม่มีอาการอะไรเลย" || symptomText === "ไม่มีอาการ" || symptomText === "") {
+            symptomText = "ไม่มีอาการสโตรก";
+        } else {
+            let freqText = data.frequency ? ` ${data.frequency}` : "";
+            symptomText = symptomText + freqText;
+            if (isAbnormal) {
+                symptomText += " [อาการเสี่ยงสโตรก]";
+            }
+        }
 
         let travelText = `🏥 รพ.: ${data.nearestHospitalName || '-'}\n` +
                          `📍 ระยะทาง: ${data.distance || '-'}\n` +
@@ -1653,7 +1663,7 @@ function getFlexMessages(data) {
             ]
         };
 
-        // --- คำนวณเวลา ETA โดยอิงจากเวลาปัจจุบัน (now) แบบให้คำนวณเสมอ ---
+        // --- คำนวณเวลา ETA โดยอิงจากเวลาปัจจุบัน (now) ---
         const formatTimeSafe = (d) => {
             let h = d.getHours().toString().padStart(2, '0');
             let m = d.getMinutes().toString().padStart(2, '0');
@@ -1661,7 +1671,6 @@ function getFlexMessages(data) {
         };
 
         let travelMins = Number(data.selfTravelMins);
-        // สกัดตัวเลขเผื่อมีข้อความ "นาที" ติดมาด้วย
         if (isNaN(travelMins) || travelMins <= 0) {
             if (data.selfTravelEstimate) {
                 let match = String(data.selfTravelEstimate).match(/(\d+)/);
@@ -1670,7 +1679,6 @@ function getFlexMessages(data) {
         }
         if (isNaN(travelMins) || travelMins < 0) travelMins = 0;
 
-        // สกัดเวลาของรถพยาบาลจาก ambulanceEstimate (ถ้าไม่มีใช้ x2 ของเวลาปกติ)
         let ambMins = travelMins * 2;
         if (data.ambulanceEstimate) {
             let matchAmb = String(data.ambulanceEstimate).match(/(\d+)/);
@@ -1680,11 +1688,7 @@ function getFlexMessages(data) {
         let onsetTimeStr = "-";
         if (data.onsetTime) onsetTimeStr = String(data.onsetTime).substring(0, 30);
         if (!onsetTimeStr || onsetTimeStr.trim() === "") onsetTimeStr = "-";
-
-        let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "-";
-        let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "-";
         
-        // คำนวณเวลาแบบไม่มีเงื่อนไขข้าม
         const now = new Date(); 
         let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
         let selfEtaStr = formatTimeSafe(selfEtaDate) + " น.";
@@ -1692,14 +1696,33 @@ function getFlexMessages(data) {
         let ambEtaDate = new Date(now.getTime() + (ambMins * 60000));
         let ambEtaStr = formatTimeSafe(ambEtaDate) + " น.";
 
+        // --- Helper Function สร้างกล่องเวลา + คำว่า "ก่อน" ---
+        const buildDeadlineBox = (label, timeVal) => {
+            let rightContent;
+            if (!timeVal) {
+                rightContent = { type: "text", text: "-", size: "md", weight: "bold", color: "#333333", flex: 5, align: "end" };
+            } else {
+                rightContent = {
+                    type: "box", layout: "horizontal", flex: 5, spacing: "xs",
+                    contents: [
+                        { type: "text", text: "ก่อน", size: "xs", color: "#333333", align: "end", gravity: "bottom", flex: 3 },
+                        { type: "text", text: `${timeVal} น.`, size: "md", weight: "bold", color: "#D32F2F", align: "end", flex: 7 }
+                    ]
+                };
+            }
+            return {
+                type: "box", layout: "horizontal",
+                contents: [ { type: "text", text: label, size: "sm", color: "#333333", flex: 5 }, rightContent ]
+            };
+        };
+
         let timelineBox = {
             type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
             borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "bold", cornerRadius: "md", backgroundColor: "#ffffff",
             contents: [
-                // เพิ่ม wrap: true ให้ onsetTimeStr สามารถขึ้นบรรทัดใหม่ได้
                 { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เริ่มมีอาการ:", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: onsetTimeStr, size: "md", weight: "bold", color: "#333333", flex: 5, align: "end", wrap: true } ] },
-                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "ถึงรพ. (+3.5ชม.):", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: arrivalDeadlineStr, size: "md", weight: "bold", color: "#D32F2F", flex: 5, align: "end" } ] },
-                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "ได้ยา (+4.5ชม.):", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: rtpaDeadlineStr, size: "md", weight: "bold", color: "#D32F2F", flex: 5, align: "end" } ] },
+                buildDeadlineBox("ถึงรพ. (+3.5ชม.):", data.arrivalDeadline),
+                buildDeadlineBox("ได้ยา (+4.5ชม.):", data.rtpaDeadline),
                 { type: "separator", margin: "sm" },
                 { type: "box", layout: "horizontal", margin: "sm", contents: [ { type: "text", text: "ขับรถเองถึง รพ.:", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: selfEtaStr, size: "md", weight: "bold", color: "#17a2b8", flex: 5, align: "end" } ] },
                 { type: "box", layout: "horizontal", contents: [ { type: "text", text: "รอรถ รพ.รับ:", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: ambEtaStr, size: "md", weight: "bold", color: "#f39c12", flex: 5, align: "end" } ] },
@@ -1710,27 +1733,25 @@ function getFlexMessages(data) {
 
         const lat = parseFloat(data.nearestHospitalLat) || 10.229937;
         const lon = parseFloat(data.nearestHospitalLon) || 99.109073;
-        
-        // ใช้ URL สำหรับนำทาง (Directions)
         const mapUri = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lon;
 
         let bodyContents1 = [];
         if (data.isTestMode) {
-            // เปลี่ยนข้อความและใช้สีแดง
-            bodyContents1.push({ type: "text", text: "[ไม่ได้เรียกรถรพ.จริง โปรดโทรด้วยตัวเอง]", color: "#D32F2F", weight: "bold", size: "sm", align: "center", margin: "sm" });
+            bodyContents1.push({ type: "text", text: "[จำลองสถานการณ์ ไม่ได้เรียกรถโรงพยาบาลจริง หากมีอาการโปรดโทรออกด้วยตัวเอง]", color: "#FFD700", weight: "bold", size: "sm", align: "center", margin: "sm", wrap: true });
         }
         
         bodyContents1.push({ type: "text", text: "ชื่อ: " + String(data.registeredName || data.userName || "-"), color: (isAbnormal ? "#ffffff" : "#000000"), weight: "bold", size: "xl", wrap: true });
         bodyContents1.push({ type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "md", color: riskColor, weight: "bold", margin: "md", wrap: true });
-        
         bodyContents1.push({ type: "separator", margin: "md", color: isAbnormal ? "#eeeeee" : "#dddddd" });
-        bodyContents1.push({ type: "text", text: "ผล: " + displayAnalysis, wrap: true, size: "lg", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
+        
+        bodyContents1.push({ type: "text", text: "ผลการประเมิน: " + symptomText, wrap: true, size: "lg", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
+        
         bodyContents1.push(travelBox);
         bodyContents1.push(timelineBox); 
 
         let footerContents1 = [
-            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
-            { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่", uri: mapUri } },
+            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ประเมินอาการซ้ำ", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
+            { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "นำทางไปรพ.", uri: mapUri } },
             { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินความเสี่ยง", uri: "https://liff.line.me/2009491708-pTYytCZA" } },
             { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: "https://liff.line.me/2009491708-n0nHmuOI" } },
             { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
@@ -1772,7 +1793,6 @@ function getFlexMessages(data) {
                 background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
                 spacing: "sm",
                 contents: [
-                    // เพิ่มขนาด Size เป็น lg และ xl
                     { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง \"เวลาคือสิ่งสำคัญที่สุด\" กรุณาปฏิบัติตามคำแนะนำนี้ระหว่างเดินทาง:", size: "lg", weight: "bold", wrap: true, color: "#d35400" },
                     { type: "separator", margin: "sm" },
                     { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "xl", color: "#333333", margin: "sm" },
@@ -1798,7 +1818,7 @@ function getFlexMessages(data) {
         return [
             {
                 type: "flex",
-                altText: data.isTestMode ? "[ทดสอบ] สรุปผลประเมินสโตรก" : "สรุปผลประเมินสโตรก",
+                altText: data.isTestMode ? "[จำลองสถานการณ์] สรุปผลประเมินสโตรก" : "สรุปผลประเมินสโตรก",
                 contents: {
                     type: "carousel",
                     contents: [bubble1, bubble2]
