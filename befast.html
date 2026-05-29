@@ -1631,53 +1631,88 @@
     };
 
 function getFlexMessages(data) {
-    // 1. ดึงแค่ชื่อมาทดสอบ ถ้าไม่มีให้ใช้ "ไม่ระบุชื่อ" ป้องกัน undefined หลุดไป
+    // --- 1. เตรียมตัวแปรแบบปลอดภัยที่สุด (แปลงเป็น String หรือ Boolean เสมอ) ---
     const name = String(data.registeredName || data.userName || "ไม่ระบุชื่อ");
+    const isAbnormal = Boolean(data.isEmergency || (data.isAiAssessment && data.riskScore >= 50));
+    
+    // สี Hex ต้องมี 7 ตัวอักษรเสมอ (LINE บังคับ)
+    const riskColor = isAbnormal ? "#ffffff" : "#d9534f";
+    
+    // ดึงข้อความผลประเมิน พร้อมเคลียร์ Tag HTML ออก ป้องกันการล่ม
+    let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis || '-'}` : (data.symptomDetail || "ไม่มีอาการ");
+    displayAnalysis = displayAnalysis.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '');
+    if (!displayAnalysis) displayAnalysis = "-";
 
-    // ================= Bubble 1 =================
+    // ================= Bubble 1: สรุปผล (ใส่ Gradient และข้อมูลพื้นฐาน) =================
     const bubble1 = {
         type: "bubble",
-        body: {
-            type: "box",
+        size: "mega",
+        header: {
+            type: "box", 
             layout: "vertical",
+            background: {
+                type: "linearGradient", angle: "90deg",
+                startColor: isAbnormal ? "#D32F2F" : "#2E7D32", 
+                endColor: isAbnormal ? "#000000" : "#0B3D0B"
+            },
             contents: [
-                { 
-                    type: "text", 
-                    text: "บับเบิ้ลที่ 1: ข้อมูลผู้ป่วย", 
-                    weight: "bold", 
-                    size: "md",
-                    color: "#000000"
-                },
-                { 
-                    type: "text", 
-                    text: "ชื่อ: " + name, 
-                    margin: "md",
-                    wrap: true 
-                }
+                { type: "text", text: "ประเมินอาการสโตรก", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }
+            ]
+        },
+        body: {
+            type: "box", 
+            layout: "vertical",
+            background: {
+                type: "linearGradient", angle: "180deg",
+                startColor: isAbnormal ? "#ef3b36" : "#a5d6a7",
+                endColor: "#ffffff"
+            },
+            contents: [
+                { type: "text", text: "ชื่อ: " + name, color: (isAbnormal ? "#ffffff" : "#000000"), weight: "bold", size: "lg", wrap: true },
+                { type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "sm", color: riskColor, weight: "bold", margin: "md", wrap: true },
+                { type: "separator", margin: "md" },
+                { type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" }
+            ]
+        },
+        footer: {
+            type: "box", 
+            layout: "vertical", 
+            spacing: "sm",
+            contents: [
+                // ใช้ URI แบบตายตัวก่อน เพื่อรับประกันว่าปุ่มจะไม่พา Flex ล่ม
+                { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "tel:1669" } },
+                { type: "button", style: "secondary", action: { type: "uri", label: "ประเมินใหม่", uri: "https://liff.line.me/2009491708-pTYytCZA" } }
             ]
         }
     };
 
-    // ================= Bubble 2 =================
+    // ================= Bubble 2: คู่มือนำส่ง (ข้อความและสีล้วน ปลอดภัย 100%) =================
     const bubble2 = {
         type: "bubble",
-        body: {
-            type: "box",
+        size: "mega",
+        header: {
+            type: "box", 
             layout: "vertical",
+            background: {
+                type: "linearGradient", angle: "90deg",
+                startColor: "#F57F17", endColor: "#000000"
+            },
             contents: [
-                { 
-                    type: "text", 
-                    text: "บับเบิ้ลที่ 2: คำแนะนำ", 
-                    weight: "bold", 
-                    size: "md",
-                    color: "#D32F2F"
-                },
-                { 
-                    type: "text", 
-                    text: "ทดสอบการแสดงผล Carousel แบบเรียบง่าย", 
-                    margin: "md", 
-                    wrap: true 
-                }
+                { type: "text", text: "การเตรียมตัวและนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }
+            ]
+        },
+        body: {
+            type: "box", 
+            layout: "vertical", 
+            spacing: "sm",
+            background: {
+                type: "linearGradient", angle: "180deg",
+                startColor: "#FFF9C4", endColor: "#ffffff"
+            },
+            contents: [
+                { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง", size: "sm", weight: "bold", wrap: true, color: "#d35400" },
+                { type: "separator", margin: "sm" },
+                { type: "text", text: "1️⃣ ห้ามป้อนน้ำ อาหาร ยา\n2️⃣ ให้นอนราบ ตะแคงหน้า\n3️⃣ คลายเสื้อผ้าให้หลวม\n4️⃣ จำ \"เวลา\" ที่เริ่มมีอาการ", size: "sm", wrap: true, color: "#333333", margin: "md" }
             ]
         }
     };
@@ -1686,7 +1721,7 @@ function getFlexMessages(data) {
     return [
         {
             type: "flex",
-            altText: "ข้อความทดสอบจากระบบ",
+            altText: "สรุปผลประเมินสโตรก",
             contents: {
                 type: "carousel",
                 contents: [bubble1, bubble2]
@@ -1694,7 +1729,6 @@ function getFlexMessages(data) {
         }
     ];
 }
-
     window.showFinalMessage = function(t, txt) { 
         document.getElementById('final-title').textContent = t; 
         document.getElementById('final-text').textContent = txt; 
