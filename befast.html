@@ -1723,18 +1723,19 @@ function getFlexMessages(data) {
     bodyContents1.push({ type: "separator", margin: "md", color: isAbnormal ? "#eeeeee" : "#dddddd" });
     bodyContents1.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
     bodyContents1.push(travelBox);
-    bodyContents1.push(timelineBox); // เติมกล่องเวลาเข้าไป
+    bodyContents1.push(timelineBox); 
 
     // --- 5. จัดการ Footer & Liff ID อย่างปลอดภัย ---
     const lat = data.nearestHospitalLat || 10.229937;
     const lon = data.nearestHospitalLon || 99.109073;
-    // ปรับ URL Google Maps ให้เป็นมาตรฐานที่สุดสำหรับมือถือ ลดโอกาสตี Invalid URI
+    
+    // ✅ แก้ไขแล้ว: ใส่ $ ครบถ้วน และใช้โครงสร้าง Google Maps ที่ถูกต้อง
     const mapUri = `https://maps.google.com/?q=${lat},${lon}`;
     
-    // ตรวจสอบว่ามีตัวแปร LIFF เหล่านี้อยู่ในระบบหรือไม่ หากไม่มีให้ใช้เว็บเปล่าๆ กันล่ม
-    const safeLiffId = typeof LIFF_ID !== 'undefined' ? LIFF_ID : 'none';
-    const safeDailyId = typeof DAILY_CHECK_LIFF_ID !== 'undefined' ? DAILY_CHECK_LIFF_ID : 'none';
-    const safeHealthId = typeof HEALTH_INFO_LIFF_ID !== 'undefined' ? HEALTH_INFO_LIFF_ID : 'none';
+    // ✅ ใช้ LIFF_ID เดิมของคุณเป็น Fallback เพื่อป้องกันกรณีตัวแปรหลักหาย
+    const safeLiffId = typeof LIFF_ID !== 'undefined' ? LIFF_ID : '2009491708-pTYytCZA';
+    const safeDailyId = typeof DAILY_CHECK_LIFF_ID !== 'undefined' ? DAILY_CHECK_LIFF_ID : '2009491708-pTYytCZA';
+    const safeHealthId = typeof HEALTH_INFO_LIFF_ID !== 'undefined' ? HEALTH_INFO_LIFF_ID : '2009491708-pTYytCZA';
 
     // ================= Bubble 1: สรุปผล =================
     const bubble1 = {
