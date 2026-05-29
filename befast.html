@@ -1653,8 +1653,7 @@ function getFlexMessages(data) {
             ]
         };
 
-        // --- คำนวณเวลา ETA โดยอิงจากเวลาปัจจุบัน (now) แบบปลอดภัย ---
-        // ฟังก์ชันช่วยจัดฟอร์แมตเวลาให้เป็น HH:MM
+        // --- คำนวณเวลา ETA โดยอิงจากเวลาปัจจุบัน (now) แบบให้คำนวณเสมอ ---
         const formatTimeSafe = (d) => {
             let h = d.getHours().toString().padStart(2, '0');
             let m = d.getMinutes().toString().padStart(2, '0');
@@ -1662,7 +1661,7 @@ function getFlexMessages(data) {
         };
 
         let travelMins = Number(data.selfTravelMins);
-        // ถ้า selfTravelMins ใช้ไม่ได้ ให้ไปดึงตัวเลขออกจาก selfTravelEstimate แทน (เช่น "15 นาที" -> 15)
+        // สกัดตัวเลขเผื่อมีข้อความ "นาที" ติดมาด้วย
         if (isNaN(travelMins) || travelMins <= 0) {
             if (data.selfTravelEstimate) {
                 let match = String(data.selfTravelEstimate).match(/(\d+)/);
@@ -1671,6 +1670,13 @@ function getFlexMessages(data) {
         }
         if (isNaN(travelMins) || travelMins < 0) travelMins = 0;
 
+        // สกัดเวลาของรถพยาบาลจาก ambulanceEstimate (ถ้าไม่มีใช้ x2 ของเวลาปกติ)
+        let ambMins = travelMins * 2;
+        if (data.ambulanceEstimate) {
+            let matchAmb = String(data.ambulanceEstimate).match(/(\d+)/);
+            if (matchAmb) ambMins = parseInt(matchAmb[1], 10);
+        }
+
         let onsetTimeStr = "-";
         if (data.onsetTime) onsetTimeStr = String(data.onsetTime).substring(0, 30);
         if (!onsetTimeStr || onsetTimeStr.trim() === "") onsetTimeStr = "-";
@@ -1678,25 +1684,20 @@ function getFlexMessages(data) {
         let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "-";
         let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "-";
         
-        let selfEtaStr = "-";
-        let ambEtaStr = "-";
-
-        if (travelMins > 0) {
-            const now = new Date(); 
-            // เวลาไปเอง = now + เวลาเดินทาง
-            let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
-            selfEtaStr = formatTimeSafe(selfEtaDate) + " น.";
-            
-            // เวลารถ รพ. ไปรับ = now + (เวลาเดินทาง x 2)
-            let ambEtaDate = new Date(now.getTime() + (travelMins * 2 * 60000));
-            ambEtaStr = formatTimeSafe(ambEtaDate) + " น.";
-        }
+        // คำนวณเวลาแบบไม่มีเงื่อนไขข้าม
+        const now = new Date(); 
+        let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
+        let selfEtaStr = formatTimeSafe(selfEtaDate) + " น.";
+        
+        let ambEtaDate = new Date(now.getTime() + (ambMins * 60000));
+        let ambEtaStr = formatTimeSafe(ambEtaDate) + " น.";
 
         let timelineBox = {
             type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
             borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "bold", cornerRadius: "md", backgroundColor: "#ffffff",
             contents: [
-                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เริ่มมีอาการ:", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: onsetTimeStr, size: "md", weight: "bold", color: "#333333", flex: 5, align: "end" } ] },
+                // เพิ่ม wrap: true ให้ onsetTimeStr สามารถขึ้นบรรทัดใหม่ได้
+                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เริ่มมีอาการ:", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: onsetTimeStr, size: "md", weight: "bold", color: "#333333", flex: 5, align: "end", wrap: true } ] },
                 { type: "box", layout: "horizontal", contents: [ { type: "text", text: "ถึงรพ. (+3.5ชม.):", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: arrivalDeadlineStr, size: "md", weight: "bold", color: "#D32F2F", flex: 5, align: "end" } ] },
                 { type: "box", layout: "horizontal", contents: [ { type: "text", text: "ได้ยา (+4.5ชม.):", size: "sm", color: "#333333", flex: 5 }, { type: "text", text: rtpaDeadlineStr, size: "md", weight: "bold", color: "#D32F2F", flex: 5, align: "end" } ] },
                 { type: "separator", margin: "sm" },
@@ -1707,17 +1708,18 @@ function getFlexMessages(data) {
             ]
         };
 
-        // --- เตรียมเนื้อหาและลิงก์ ---
         const lat = parseFloat(data.nearestHospitalLat) || 10.229937;
         const lon = parseFloat(data.nearestHospitalLon) || 99.109073;
-        const mapUri = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
+        
+        // ใช้ URL สำหรับนำทาง (Directions)
+        const mapUri = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lon;
 
         let bodyContents1 = [];
         if (data.isTestMode) {
-            bodyContents1.push({ type: "text", text: "[ไม่ได้เรียกรพ.จริง โปรดโทรด้วยตัวเอง]", color: "#FFD700", weight: "bold", size: "sm", align: "center", margin: "sm" });
+            // เปลี่ยนข้อความและใช้สีแดง
+            bodyContents1.push({ type: "text", text: "[ไม่ได้เรียกรถรพ.จริง โปรดโทรด้วยตัวเอง]", color: "#D32F2F", weight: "bold", size: "sm", align: "center", margin: "sm" });
         }
         
-        // ดึงตัวแปรแท้ของคุณมาใช้ตรงๆ เพื่อให้ค่าแสดงแน่นอน
         bodyContents1.push({ type: "text", text: "ชื่อ: " + String(data.registeredName || data.userName || "-"), color: (isAbnormal ? "#ffffff" : "#000000"), weight: "bold", size: "xl", wrap: true });
         bodyContents1.push({ type: "text", text: "ความเสี่ยงเดิม: " + String(data.risk_group || "ไม่ระบุ"), size: "md", color: riskColor, weight: "bold", margin: "md", wrap: true });
         
@@ -1727,7 +1729,7 @@ function getFlexMessages(data) {
         bodyContents1.push(timelineBox); 
 
         let footerContents1 = [
-            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: "https://liff.line.me/2009491708-PgcjtJDL" } },
+            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: "https://liff.line.me/2009491708-x6ELpJLW" } },
             { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่", uri: mapUri } },
             { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินความเสี่ยง", uri: "https://liff.line.me/2009491708-pTYytCZA" } },
             { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: "https://liff.line.me/2009491708-n0nHmuOI" } },
@@ -1770,18 +1772,18 @@ function getFlexMessages(data) {
                 background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
                 spacing: "sm",
                 contents: [
-                    { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง \"เวลาคือสิ่งสำคัญที่สุด\" กรุณาปฏิบัติตามคำแนะนำนี้ระหว่างเดินทาง:", size: "sm", weight: "bold", wrap: true, color: "#d35400" },
+                    // เพิ่มขนาด Size เป็น lg และ xl
+                    { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง \"เวลาคือสิ่งสำคัญที่สุด\" กรุณาปฏิบัติตามคำแนะนำนี้ระหว่างเดินทาง:", size: "lg", weight: "bold", wrap: true, color: "#d35400" },
                     { type: "separator", margin: "sm" },
-                    { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "md", color: "#333333", margin: "sm" },
-                    { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการ\n✅ ถ้ารู้สึกว่าไปช้า โทร 1669", size: "sm", wrap: true, color: "#444444" },
+                    { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "xl", color: "#333333", margin: "sm" },
+                    { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการ\n✅ ถ้ารู้สึกว่าไปช้า โทร 1669", size: "lg", wrap: true, color: "#444444" },
                     { type: "separator", margin: "sm" },
-                    { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "md", color: "#333333", margin: "sm" },
-                    { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัว (หรือถ่ายรูปมา)\n👉 ประวัติแพ้ยา/โรคประจำตัว\n👉 ญาติที่สามารถตัดสินใจได้", size: "sm", wrap: true, color: "#444444" },
+                    { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "xl", color: "#333333", margin: "sm" },
+                    { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัว (หรือถ่ายรูปมา)\n👉 ประวัติแพ้ยา/โรคประจำตัว\n👉 ญาติที่สามารถตัดสินใจได้", size: "lg", wrap: true, color: "#444444" },
                     { type: "separator", margin: "sm" },
-                    { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "md", color: "#333333", margin: "sm" },
-                    { type: "text", text: "🏥 เข้าห้องฉุกเฉิน แจ้งว่า \"สงสัยสโตรก\"\n🧠 ทำ CT Scan ด่วน\n💉 พิจารณายาละลายลิ่มเลือด", size: "sm", wrap: true, color: "#444444" },
+                    { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "xl", color: "#333333", margin: "sm" },
+                    { type: "text", text: "🏥 เข้าห้องฉุกเฉิน แจ้งว่า \"สงสัยสโตรก\"\n🧠 ทำ CT Scan ด่วน\n💉 พิจารณายาละลายลิ่มเลือด", size: "lg", wrap: true, color: "#444444" },
                     
-                    // แทรกรูปภาพล่างสุดใน Body
                     { type: "image", url: "https://sawee-hosp.github.io/stroke-profile/fast-track.png", size: "full", aspectRatio: "1:1", aspectMode: "fit", margin: "lg" }
                 ]
             },
