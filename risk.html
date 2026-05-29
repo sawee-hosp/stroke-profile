@@ -1526,7 +1526,6 @@ async function sendFlex(data, name, suggestionText) {
     const bubble1 = {
         type: "bubble", size: "mega",
         header: {
-            // Header แสดงแค่หัวข้อ สีตามความเสี่ยงเดิม
             type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: startColor, endColor: endColor }, paddingAll: "15px",
             contents: [
                 { type: "text", text: "ผลประเมินสวีรู้ทันสโตรก", weight: "bold", color: "#ffffff", size: "lg", align: "center" }
@@ -1534,10 +1533,8 @@ async function sendFlex(data, name, suggestionText) {
         },
         body: {
             type: "box", layout: "vertical", paddingAll: "15px",
-            // Body ไล่สีอ่อนตามความเสี่ยง
             background: { type: "linearGradient", angle: "180deg", startColor: lightBgColor, endColor: "#ffffff" },
             contents: [
-                // ย้ายรูปภาพและชื่อมาแสดงตรงนี้ 
                 { type: "box", layout: "horizontal", margin: "none", alignItems: "center", justifyContent: "center",
                     contents: [
                         { type: "image", url: picUrl, flex: 0, size: "xs", align: "center", gravity: "center" },
@@ -1611,7 +1608,8 @@ async function sendFlex(data, name, suggestionText) {
     // --- จัดการตัดคำสำหรับ Bubble 3 และ 4 ---
     let advicePart1 = suggestionText || "";
     let advicePart2 = "";
-    const keywordSplit = "การติดตาม";
+    // เปลี่ยนคำตัดคำเป็น "หลัก"
+    const keywordSplit = "หลัก";
     const splitIndex = advicePart1.indexOf(keywordSplit);
     
     if (splitIndex !== -1) {
@@ -1623,7 +1621,6 @@ async function sendFlex(data, name, suggestionText) {
     const bubble3 = {
         type: "bubble", size: "mega",
         header: {
-            // ปรับสีพื้นหลัง Header เป็นไล่สี น้ำเงิน ไป ดำ
             type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#003399", endColor: "#111111" }, paddingAll: "15px",
             contents: [ 
                 { type: "text", text: "คำแนะนำการปฏิบัติตัว", weight: "bold", color: "#ffffff", size: "lg", align: "center" } 
@@ -1631,47 +1628,66 @@ async function sendFlex(data, name, suggestionText) {
         },
         body: {
             type: "box", layout: "vertical", paddingAll: "15px",
-            // ปรับสีพื้นหลัง Body เป็นไล่สี ฟ้าอ่อน (บน) ไป ขาว (ล่าง)
             background: { type: "linearGradient", angle: "180deg", startColor: "#e6f2ff", endColor: "#ffffff" },
             contents: [
-                // ปรับจาก sm เป็น md เพื่อให้อ่านง่ายขึ้น
-                { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${advicePart1}`, wrap: true, size: "md", color: "#333333" }
+                // เพิ่มขนาดตัวอักษรเป็น lg
+                { type: "text", text: `👨‍⚕️ หมอสวีขอแนะนำให้:\n\n${advicePart1}`, wrap: true, size: "lg", color: "#333333" }
             ]
         },
         footer: {
             type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
             contents: [
-                { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } },
+                // ย้ายปุ่ม "ส่งสติกเกอร์" ไปยัง Flex 4 แล้ว
                 { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🧠 ความรู้เรื่องสโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
                 { type: "button", style: "secondary", color: "#e9ecef", height: "sm", action: { type: "uri", label: "🎬 ดูวิดีโอแนะนำ", uri: "https://youtube.com/playlist?list=PLYL0K4M9qlStvC4aoX02KnN4cCmBz2yUy&si=-phGnX4witgR1n1t" } }
             ]
         }
     };
 
-    // --- เตรียมรวม Carousel (อาจมี หรือ ไม่มี Bubble 4 ขึ้นอยู่กับคำว่า "การติดตาม") ---
     let carouselBubbles = [bubble1, bubble2, bubble3];
 
-    // --- Bubble 4: Advice (Part 2) - แบบไม่มีปุ่มกด ---
+    // --- Bubble 4: Advice (Part 2) + ข้อความเพิ่มเติมและปุ่มใหม่ ---
+    let bubble4Contents = [];
     if (advicePart2 !== "") {
-        const bubble4 = {
-            type: "bubble", size: "mega",
-            header: {
-                type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#003399", endColor: "#111111" }, paddingAll: "15px",
-                contents: [ 
-                    { type: "text", text: "คำแนะนำการปฏิบัติตัว (ต่อ)", weight: "bold", color: "#ffffff", size: "lg", align: "center" } 
-                ]
-            },
-            body: {
-                type: "box", layout: "vertical", paddingAll: "15px",
-                background: { type: "linearGradient", angle: "180deg", startColor: "#e6f2ff", endColor: "#ffffff" },
-                contents: [
-                    { type: "text", text: advicePart2, wrap: true, size: "md", color: "#333333" }
-                ]
-            }
-            // ไม่มี footer (ปุ่มกด) ตามที่ต้องการ
-        };
-        carouselBubbles.push(bubble4);
+        bubble4Contents.push({ type: "text", text: advicePart2, wrap: true, size: "lg", color: "#333333" });
+        bubble4Contents.push({ type: "separator", margin: "md", color: "#cccccc" });
     }
+    
+    // เพิ่ม Paragraph ใหม่ต่อท้าย
+    bubble4Contents.push({ 
+        type: "text", 
+        text: "และแนะนำให้ประเมินความเสี่ยงสโตรกทุกครั้งที่มาพบแพทย์ตามนัด หรือไป โรงพยาบาลส่งเสริมสุขภาพตำบล หรือ สถานีสุขภาพ ประจำหมู่บ้าน ด้วยการวัดความดันโลหิต วัดรอบเอว เจาะน้ำตาลในเลือด เพื่อใช้ปรับพฤติกรรม ป้องกันสโตรก\n\nค้นหาสถานีสุขภาพใกล้ฉัน คลิกที่ปุ่มได้เลย", 
+        wrap: true, 
+        size: "lg", 
+        color: "#333333", 
+        margin: advicePart2 !== "" ? "md" : "none" 
+    });
+
+    const bubble4 = {
+        type: "bubble", size: "mega",
+        header: {
+            type: "box", layout: "vertical", background: { type: "linearGradient", angle: "90deg", startColor: "#003399", endColor: "#111111" }, paddingAll: "15px",
+            contents: [ 
+                { type: "text", text: "คำแนะนำการปฏิบัติตัว (ต่อ)", weight: "bold", color: "#ffffff", size: "lg", align: "center" } 
+            ]
+        },
+        body: {
+            type: "box", layout: "vertical", paddingAll: "15px",
+            background: { type: "linearGradient", angle: "180deg", startColor: "#e6f2ff", endColor: "#ffffff" },
+            contents: bubble4Contents
+        },
+        footer: {
+            type: "box", layout: "vertical", spacing: "sm", paddingAll: "10px",
+            contents: [
+                // เพิ่ม 2 ปุ่มใหม่ (ไปสถานีสุขภาพ และ ส่งสติกเกอร์ที่ถูกย้ายมา)
+                { type: "button", style: "primary", color: "#003399", height: "sm", action: { type: "uri", label: "🏥 ไปสถานีสุขภาพ", uri: "https://liff.line.me/2009491708-PjfTqBxS" } },
+                { type: "button", style: "secondary", height: "sm", action: { type: "uri", label: "🎁 ส่งสติกเกอร์", uri: "https://liff.line.me/2009491708-5rdtlMJ1" } }
+            ]
+        }
+    };
+    
+    // ดัน Bubble 4 เข้า Carousel เสมอเพื่อแสดงปุ่มไปสถานีสุขภาพ
+    carouselBubbles.push(bubble4);
 
     const carouselFlex = { type: "flex", altText: "ผลประเมินและคำแนะนำสโตรกของคุณ", contents: { type: "carousel", contents: carouselBubbles } };
     let messagesToSend = [carouselFlex];
