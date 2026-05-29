@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <title>ประเมินอาการสโตรก (AI)</title>
+    <title>ประเมินอาการสโตรก</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -141,8 +141,9 @@
         input:checked + .slider { background-color: #ff3654; }
         input:checked + .slider:before { transform: translateX(32px); }
 
-        .watermark { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        .watermark.active { opacity: 0.15; }
+        /* อัปเดต CSS ลายน้ำ ให้ซ่อนทันทีถ้าไม่ได้เปิดใช้ */
+        .watermark { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; align-items: center; justify-content: center; opacity: 0.15; }
+        .watermark.active { display: flex; }
         .watermark-text { font-size: 40px; font-weight: 900; color: red; transform: rotate(-30deg); white-space: nowrap; text-align: center; line-height: 1.2; text-shadow: 2px 2px 0px white, -2px -2px 0px white, 2px -2px 0px white, -2px 2px 0px white; }
 
         .full-img-view { width: 100%; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); margin-bottom: 20px; pointer-events: none; }
@@ -395,12 +396,22 @@
     
     window.closeCustomModal = function(id) { document.getElementById('loading').style.display = 'none'; document.getElementById(id).style.display = 'none'; };
 
-    // เพิ่มฟังก์ชัน handleInitialTestMode ที่ขาดหายไป
+    // เพิ่มฟังก์ชัน handleInitialTestMode
     window.handleInitialTestMode = function() {
         sessionData.isTestMode = true;
         document.getElementById('test-mode-toggle').checked = true;
         document.getElementById('test-watermark').classList.add('active');
         document.getElementById('initial-warning-modal').style.display = 'none';
+    };
+
+    window.toggleTestMode = function(checkbox) {
+        sessionData.isTestMode = checkbox.checked;
+        const watermark = document.getElementById('test-watermark');
+        if (checkbox.checked) {
+            watermark.classList.add('active');
+        } else {
+            watermark.classList.remove('active');
+        }
     };
 
     window.onload = async () => {
@@ -671,7 +682,7 @@
 
             <!-- ปุ่มลอยหน้าสรุป -->
             <div style="position: fixed; bottom: 45px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 4500; padding: 0 15px; pointer-events: none;">
-                <button id="layer-5-save-btn" class="btn-action btn-pulse-jerky shadow-lg" style="pointer-events: auto; width: 100%; max-width: 500px; margin-bottom: 0; font-size: 24px; border: 3px solid #fff;">บันทึกข้อมูลและปิดหน้าต่าง</button>
+                <button id="layer-5-save-btn" class="btn-action btn-pulse-jerky shadow-lg" style="pointer-events: auto; width: 100%; max-width: 500px; margin-bottom: 0; font-size: 24px; border: 3px solid #fff;" onclick="handleFinalSave(this, sessionData.isRisk)">บันทึกข้อมูลและปิดหน้าต่าง</button>
             </div>
         `;
         
@@ -1305,8 +1316,11 @@
         tableHtml += `</tbody>`;
         document.getElementById('summary-table').innerHTML = tableHtml;
         
+        // --- ส่วนที่อัปเดต ให้ปุ่มบันทึกทำงานอย่างถูกต้อง ---
         const saveBtn = document.getElementById('layer-5-save-btn');
         if (saveBtn) {
+            // ไม่ต้องผูก onclick ผ่าน JS เพื่อกันมันซ้อนทับ เพราะใน HTML ผมใส่ onclick="handleFinalSave(this, sessionData.isRisk)" ไว้ให้แล้ว
+            // แต่จะแก้ให้ปลอดภัยที่สุดคือผูกในนี้
             saveBtn.onclick = function() { handleFinalSave(this, sessionData.isRisk); };
         }
         
@@ -1449,7 +1463,7 @@
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveData', data: safePayload }) })
         .then(res => res.json()).then(res => {
             if(res.status==='success') {
-                if(liff.isInClient()) { 
+                if(typeof liff !== 'undefined' && liff.isInClient()) { 
                     liff.sendMessages(getFlexMessages(sessionData)).then(() => {
                         liff.closeWindow();
                     }).catch(e => { 
@@ -1459,7 +1473,9 @@
                         setTimeout(() => liff.closeWindow(), 3000);
                     }); 
                 } else { 
-                    document.getElementById('loading').style.display = 'none'; showCustomAlert("บันทึกข้อมูลเรียบร้อยแล้ว"); 
+                    document.getElementById('loading').style.display = 'none'; 
+                    showCustomAlert("บันทึกข้อมูลเรียบร้อยแล้ว");
+                    setTimeout(() => window.close(), 1000);
                 }
             } else { 
                 document.getElementById('loading').style.display = 'none'; showCustomAlert("บันทึกไม่สำเร็จ"); if(btn) btn.disabled=false; 
@@ -1481,9 +1497,21 @@
         });
     };
 
+    // --- อัปเดตฟังก์ชัน handleTestClose พร้อม Fallback ที่ปลอดภัย ---
     window.handleTestClose = function() {
         showCustomConfirm("ยืนยันการปิดหน้าต่าง?\n(ข้อมูลจะไม่ถูกบันทึก และไม่แจ้งเตือน รพ.)", "ออกจากการทดสอบ", () => {
-            if(liff.isInClient()) liff.closeWindow(); else window.close();
+            try {
+                if(typeof liff !== 'undefined' && liff.isInClient()) {
+                    liff.closeWindow();
+                } else {
+                    window.close();
+                    setTimeout(() => {
+                        document.body.innerHTML = "<div style='text-align:center; padding: 50px; font-family: Noto Sans Thai;'><h2 style='color:#333; font-weight:bold;'>สิ้นสุดการทดสอบ</h2><p style='color:#666;'>คุณสามารถปิดหน้าต่างเบราว์เซอร์นี้ได้เลยครับ</p></div>";
+                    }, 500);
+                }
+            } catch(e) {
+                window.close();
+            }
         });
     };
 
@@ -1531,7 +1559,7 @@
             let safePayload = getEncryptedPayload(callData);
             fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveData', data: safePayload }) }).catch(e => console.log(e));
             
-            if (isInitial && liff.isInClient()) {
+            if (isInitial && typeof liff !== 'undefined' && liff.isInClient()) {
                 liff.sendMessages(getFlexMessages(sessionData)).catch(e => console.log("Flex Error", e));
             }
 
@@ -1568,9 +1596,9 @@
             if (symptomText === "ฉันไม่มีอาการอะไรเลย" || symptomText === "ไม่มีอาการ" || symptomText === "") {
                 symptomText = "ไม่มีอาการสโตรก";
             } else {
-                let freqText = data.frequency ? ` (${data.frequency})` : "";
+                let freqText = data.frequency ? ` ${data.frequency}` : "";
                 symptomText = symptomText + freqText;
-                if (isAbnormal && !symptomText.includes("เสี่ยง")) {
+                if (isAbnormal) {
                     symptomText += " [อาการเสี่ยงสโตรก]";
                 }
             }
