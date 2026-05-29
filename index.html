@@ -247,9 +247,9 @@
             <div class="col-6"><div class="quick-action-btn text-danger" onclick="scrollToCard('card-risk')"><i class="bi bi-clipboard2-pulse"></i>ประเมินความเสี่ยง</div></div>
             <div class="col-6"><div class="quick-action-btn text-danger" onclick="scrollToCard('card-stroke-history')"><i class="bi bi-person-bounding-box"></i>เช็คอาการ</div></div>
             <div class="col-6"><div class="quick-action-btn text-primary" onclick="scrollToCard('card-hospital')"><i class="bi bi-geo-alt"></i>ปักหมุดบ้าน</div></div>
-            <div class="col-6"><div class="quick-action-btn text-danger" onclick="location.href=LINKS.PHONE"><i class="bi bi-telephone"></i>เบอร์ฉุกเฉิน</div></div>
-            <div class="col-6"><div class="quick-action-btn text-success" onclick="location.href=LINKS.STICKER"><i class="bi bi-line"></i>แชร์สติกเกอร์</div></div>
-            <div class="col-6"><div class="quick-action-btn text-warning" style="color: #b78a00 !important;" onclick="location.href=LINKS.KNOWLEDGE"><i class="bi bi-journal-text"></i>ทดสอบความรู้</div></div>
+            <div class="col-6"><div class="quick-action-btn text-danger" onclick="scrollToCard('card-helper')"><i class="bi bi-telephone"></i>เบอร์ฉุกเฉิน</div></div>
+            <div class="col-6"><div class="quick-action-btn text-success" onclick="scrollToCard('card-sticker')"><i class="bi bi-line"></i>แชร์สติกเกอร์</div></div>
+            <div class="col-6"><div class="quick-action-btn text-warning" style="color: #b78a00 !important;" onclick="scrollToCard('card-knowledge')"><i class="bi bi-journal-text"></i>ทดสอบความรู้</div></div>
         </div>
 
         <!-- SCORE -->
@@ -280,6 +280,18 @@
         <div id="card-helper" class="card-box">
             <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
             <div class="card-loader text-primary"><div class="spinner-border"></div></div>
+        </div>
+        
+        <!-- STICKER CARD -->
+        <div id="card-sticker" class="card-box text-center py-4">
+            <h5 class="card-title justify-content-center mb-3"><i class="bi bi-line text-success"></i> สถิติการแชร์สติกเกอร์</h5>
+            <div class="card-loader text-success"><div class="spinner-border"></div></div>
+        </div>
+        
+        <!-- KNOWLEDGE CARD -->
+        <div id="card-knowledge" class="card-box text-center py-4">
+            <h5 class="card-title justify-content-center mb-3"><i class="bi bi-journal-text text-warning"></i> คะแนนสอบวัดความรู้</h5>
+            <div class="card-loader text-warning"><div class="spinner-border"></div></div>
         </div>
 
         <!-- VHV Registration Button (Visible only to non-VHV) -->
@@ -640,12 +652,15 @@
         if (DATA.communityLeaders) {
             const l = DATA.communityLeaders;
             let pcuHtml = `<div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital fs-1 text-danger me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">${l.pcu}</div><div class="small text-muted">รพ.สต. ในพื้นที่</div></div>${l.pcuTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}</div>`;
-            let headHtml = (l.village_headman && l.village_headman !== '-' && l.area) ? `<div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">${l.village_headman}</div><div class="small text-muted">ผู้ใหญ่บ้าน ${l.area} (${l.village_name})</div></div>${l.headTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}</div>` : '';
+            
+            // เปลี่ยนให้แสดงแค่ตำแหน่งผู้ใหญ่บ้านและหมู่ โดยไม่แสดงชื่อจริง
+            let headHtml = (l.village_name && l.area) ? `<div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">ผู้ใหญ่บ้าน ${l.village_name}</div><div class="small text-muted">ผู้นำชุมชน</div></div>${l.headTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}</div>` : '';
 
+            // เปลี่ยนให้แสดงแค่คำว่า อสม.สโตรก ตามด้วยหมู่
             document.getElementById('card-helper').innerHTML = `
                 <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
                 ${pcuHtml} ${headHtml}
-                <div class="d-flex align-items-center py-3"><div class="me-3 position-relative"><i class="bi bi-search fs-2 text-warning icon-pulse position-absolute" style="top:-10px;left:-10px;"></i><i class="bi bi-person-heart fs-1 text-secondary"></i></div><div class="flex-grow-1 ms-2"><div class="fw-bold text-secondary">มี อสม.สโตรกในเขตของท่าน</div><div class="fw-bold text-warning fs-4">${l.vhvCount} คน</div></div></div>`;
+                <div class="d-flex align-items-center py-3"><div class="me-3 position-relative"><i class="bi bi-search fs-2 text-warning icon-pulse position-absolute" style="top:-10px;left:-10px;"></i><i class="bi bi-person-heart fs-1 text-secondary"></i></div><div class="flex-grow-1 ms-2"><div class="fw-bold fs-5 text-secondary">อสม.สโตรก ${l.village_name || ''}</div><div class="text-muted small">พร้อมช่วยเหลือดูแล ${l.vhvCount} ท่าน</div></div></div>`;
         } else {
              document.getElementById('card-helper').innerHTML = `<h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5><div class="empty-state"><i class="bi bi-people"></i>ยังไม่มีข้อมูลในพื้นที่ของท่าน</div>`;
         }
@@ -653,6 +668,7 @@
 
     function renderGamificationUI() {
         const g = DATA.gamification || { total:0, level:'-', care:0, prep:0, share:0, know:0 };
+        const k = DATA.knowledgeData || { pre:'-', post:'-', review:0, total:0 };
         
         let w = Math.min(100, Math.max(5, g.total));
         let lvlC = g.total>=61?'lvl-4':g.total>=41?'lvl-3':g.total>=21?'lvl-2':'lvl-1';
@@ -667,6 +683,32 @@
                 <div class="col-3"><div class="score-item-box"><i class="bi bi-share-fill score-icon text-success"></i><div class="score-num">${g.share}</div><div class="score-label">บอกต่อ</div></div></div>
                 <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
             </div>`;
+            
+        // ดึงการ์ดสติกเกอร์มาแสดงด้านล่าง
+        document.getElementById('card-sticker').innerHTML = `
+            <h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> สถิติการแชร์สติกเกอร์</h5>
+            <div class="display-4 fw-bold text-success mb-2">${g.share||0}</div>
+            <div class="text-muted small mb-3">จำนวนครั้งที่ส่งต่อความห่วงใย</div>
+        `;
+        
+        // ดึงการ์ดแบบทดสอบมาแสดงด้านล่าง
+        document.getElementById('card-knowledge').innerHTML = `
+            <h5 class="card-title justify-content-center mb-2"><i class="bi bi-journal-text text-warning"></i> คะแนนสอบวัดความรู้</h5>
+            <div class="d-flex justify-content-center gap-2 mt-3 text-center mb-0">
+                <div class="bg-light p-2 rounded flex-fill border">
+                    <div class="small text-muted">ก่อนเรียน</div>
+                    <div class="fw-bold fs-4">${k.pre}</div>
+                </div>
+                 <div class="bg-light p-2 rounded flex-fill border">
+                    <div class="small text-muted">หลังเรียน</div>
+                    <div class="fw-bold fs-4 text-warning">${k.post}</div>
+                </div>
+                 <div class="bg-light p-2 rounded flex-fill border">
+                    <div class="small text-muted">ทบทวน</div>
+                    <div class="fw-bold fs-4 text-success">${k.review}</div>
+                </div>
+            </div>
+        `;
     }
 
     function renderVhvDataUI() {
@@ -908,7 +950,13 @@
                 <div class="d-flex justify-content-between mb-2"><span>คนดูแล:</span><strong class="text-primary fs-6">${e.help}</strong></div>
                 <div class="d-flex justify-content-between"><span>ตัดสินใจ:</span><strong class="text-primary fs-6">${e.decision}</strong></div>
             </div>
-            <button class="btn btn-outline btn-pill btn-sm w-100" onclick="openEditEmg('${e.help}','${e.decision}')">แก้ไขข้อมูลเตรียมความพร้อม</button>
+            <div class="d-grid gap-2 mt-3">
+                <button class="btn btn-outline btn-pill btn-sm w-100" onclick="openEditEmg('${e.help}','${e.decision}')">แก้ไขข้อมูลเตรียมความพร้อม</button>
+                <div class="row g-2">
+                    <div class="col-6"><button class="btn btn-dark btn-pill btn-sm w-100" onclick="MODALS.modalPinUser.show()"><i class="bi bi-geo-alt"></i> อัปเดตพิกัด</button></div>
+                    <div class="col-6"><a href="${LINKS.BEFAST}" class="btn btn-red btn-pill btn-sm w-100">ปักหมุดใหม่</a></div>
+                </div>
+            </div>
         `;
     }
 
