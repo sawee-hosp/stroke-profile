@@ -1632,7 +1632,6 @@
 
 function getFlexMessages(data) {
     try {
-        // --- 1. เตรียมตัวแปรให้ปลอดภัย (ไม่มีสิทธิ์เป็นค่าว่าง "" หรือ null แน่นอน) ---
         const name = String(data.registeredName || data.userName || "-");
         const isAbnormal = Boolean(data.isEmergency || (data.isAiAssessment && data.riskScore >= 50));
         const riskColor = isAbnormal ? "#ffffff" : "#d9534f";
@@ -1642,7 +1641,6 @@ function getFlexMessages(data) {
         displayAnalysis = displayAnalysis.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '');
         if (!displayAnalysis || displayAnalysis.trim() === "") displayAnalysis = "-";
 
-        // --- 2. ข้อมูลการเดินทาง (เป็น Text ธรรมดา ปลอดภัย) ---
         let travelText = `🏥 รพ.: ${data.nearestHospitalName || '-'}\n` +
                          `📍 ระยะทาง: ${data.distance || '-'}\n` +
                          `🚗 ขับเอง: ${data.selfTravelEstimate || '-'}\n` +
@@ -1657,26 +1655,30 @@ function getFlexMessages(data) {
             ]
         };
 
-        // --- 3. กล่องเวลา Timeline (ดักจับ NaN และค่าผิดปกติทั้งหมด) ---
+        // --- คำนวณเวลา ETA โดยอิงจากเวลาปัจจุบัน (now) ---
         let travelMins = Number(data.selfTravelMins);
         if (isNaN(travelMins) || travelMins < 0) travelMins = 0;
 
         let onsetTimeStr = "-";
-        if (data.onsetTime) onsetTimeStr = String(data.onsetTime).substring(0, 30); // ตัดสตริงเผื่อยาวเกิน
+        if (data.onsetTime) onsetTimeStr = String(data.onsetTime).substring(0, 30);
         if (!onsetTimeStr || onsetTimeStr.trim() === "") onsetTimeStr = "-";
 
         let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "-";
         let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "-";
+        
         let selfEtaStr = "-";
         let ambEtaStr = "-";
 
         if (travelMins > 0) {
-            const now = new Date();
-            let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
-            selfEtaStr = `${selfEtaDate.toTimeString().slice(0,5)} น.`;
+            const now = new Date(); // ดึงเวลาปัจจุบัน
             
-            let ambEtaDate = new Date(now.getTime() + ((travelMins * 2) + 10) * 60000);
-            ambEtaStr = `${ambEtaDate.toTimeString().slice(0,5)} น.`;
+            // เวลาไปเอง = now + เวลาเดินทาง
+            let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
+            selfEtaStr = selfEtaDate.toTimeString().slice(0,5) + " น.";
+            
+            // เวลารถ รพ. ไปรับ = now + (เวลาเดินทาง x 2)
+            let ambEtaDate = new Date(now.getTime() + (travelMins * 2 * 60000));
+            ambEtaStr = ambEtaDate.toTimeString().slice(0,5) + " น.";
         }
 
         let timelineBox = {
@@ -1694,15 +1696,13 @@ function getFlexMessages(data) {
             ]
         };
 
-        // --- 4. จัดเตรียม URI อย่างปลอดภัยที่สุด ---
+        // --- เตรียมเนื้อหาและลิงก์ ---
         const lat = parseFloat(data.nearestHospitalLat) || 10.229937;
         const lon = parseFloat(data.nearestHospitalLon) || 99.109073;
-        const safeMapUri = `https://www.google.com/maps?q=$${lat},${lon}`;
         
-        // ใช้ Hardcode URI ไปเลย ป้องกันตัวแปรหาย
-        const mainLiffUri = "https://liff.line.me/2009491708-pTYytCZA";
+        // รูปแบบ Google Maps API ที่ถูกต้องแบบไม่ใช้ $
+        const mapUri = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
 
-        // --- 5. จัดเรียงเนื้อหาลง Bubble 1 ---
         let bodyContents1 = [];
         if (data.isTestMode) {
             bodyContents1.push({ type: "text", text: "[ทดสอบ]", color: "#FFD700", weight: "bold", size: "xs", align: "center", margin: "sm" });
@@ -1713,6 +1713,16 @@ function getFlexMessages(data) {
         bodyContents1.push({ type: "text", text: "ผล: " + displayAnalysis, wrap: true, size: "md", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
         bodyContents1.push(travelBox);
         bodyContents1.push(timelineBox); 
+
+        // ปุ่มตามที่กำหนด (แก้ไขลบปีกกา } ตรงท้ายลิงก์ประเมินความเสี่ยงออกแล้ว)
+        let footerContents1 = [
+            { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: "https://liff.line.me/2009491708-PgcjtJDL" } },
+            { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่", uri: mapUri } },
+            { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินความเสี่ยง", uri: "https://liff.line.me/2009491708-pTYytCZA" } },
+            { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: "https://liff.line.me/2009491708-n0nHmuOI" } },
+            { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "https://liff.line.me/2009491708-ULIwgKkN" } },
+            { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
+        ];
 
         const bubble1 = {
             type: "bubble",
@@ -1729,45 +1739,51 @@ function getFlexMessages(data) {
             },
             footer: {
                 type: "box", layout: "vertical", spacing: "sm",
-                contents: [
-                    { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: mainLiffUri } },
-                    { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "แผนที่", uri: safeMapUri } },
-                    { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: mainLiffUri } },
-                    { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "โทร 1669", uri: "tel:1669" } }
-                ]
+                contents: footerContents1
             }
         };
 
-        // --- 6. Bubble 2 (Static ล้วนๆ) ---
+        // ================= Bubble 2: คู่มือนำส่ง =================
         const bubble2 = {
             type: "bubble",
             size: "mega",
             header: {
                 type: "box", layout: "vertical",
                 background: { type: "linearGradient", angle: "90deg", startColor: "#F57F17", endColor: "#000000" },
-                contents: [{ type: "text", text: "การนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }]
-            },
-            body: {
-                type: "box", layout: "vertical", spacing: "sm",
-                background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
                 contents: [
-                    { type: "text", text: "เวลาคือสิ่งสำคัญที่สุด:", size: "sm", weight: "bold", wrap: true, color: "#d35400" },
-                    { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ เตรียมบัตรประชาชน+ยาประจำตัว", size: "sm", wrap: true, color: "#444444", margin: "md" }
+                    { type: "text", text: "การเตรียมตัวและนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }
                 ]
             },
+            body: {
+                type: "box", layout: "vertical",
+                background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
+                spacing: "sm",
+                contents: [
+                    { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง \"เวลาคือสิ่งสำคัญที่สุด\" กรุณาปฏิบัติตามคำแนะนำนี้ระหว่างเดินทาง:", size: "xs", weight: "bold", wrap: true, color: "#d35400" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการ\n✅ ถ้ารู้สึกว่าไปช้า โทร 1669", size: "xs", wrap: true, color: "#444444" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัว (หรือถ่ายรูปมา)\n👉 ประวัติแพ้ยา/โรคประจำตัว\n👉 ญาติที่สามารถตัดสินใจได้", size: "xs", wrap: true, color: "#444444" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "🏥 เข้าห้องฉุกเฉิน แจ้งว่า \"สงสัยสโตรก\"\n🧠 ทำ CT Scan ด่วน\n💉 พิจารณายาละลายลิ่มเลือด", size: "xs", wrap: true, color: "#444444" }
+                ]
+            },
+            // ตัดปุ่มออกทั้งหมด แต่เก็บข้อความจัดทำโดยไว้
             footer: {
                 type: "box", layout: "vertical", spacing: "sm",
                 contents: [
-                    { type: "button", style: "primary", color: "#F57C00", margin: "sm", action: { type: "uri", label: "ความรู้สโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } }
+                    { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
                 ]
             }
         };
 
-        // ส่งค่ากลับแบบ 2 บับเบิ้ล + 1 ข้อความ Text
         return [
             {
                 type: "flex",
-                altText: data.isTestMode ? "[ทดสอบ] สรุปผลประเมิน" : "สรุปผลประเมินสโตรก",
+                altText: data.isTestMode ? "[ทดสอบ] สรุปผลประเมินสโตรก" : "สรุปผลประเมินสโตรก",
                 contents: {
                     type: "carousel",
                     contents: [bubble1, bubble2]
@@ -1779,8 +1795,7 @@ function getFlexMessages(data) {
             }
         ];
     } catch (e) {
-        // Fallback สุดท้ายถ้าโค้ดพัง
-        return [{ type: "text", text: "ระบบสรุปผลทำงานผิดพลาด กรุณาติดต่อแอดมิน" }];
+        return [{ type: "text", text: "พบข้อผิดพลาดในการแสดงผล กรุณาติดต่อแอดมินระบบ" }];
     }
 }
     window.showFinalMessage = function(t, txt) { 
