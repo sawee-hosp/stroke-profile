@@ -8,7 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         :root {
@@ -21,7 +23,7 @@
             margin: 0; color: #333;
             min-height: 100vh; font-size: 20px;
             background: linear-gradient(180deg, var(--primary-red) 0%, #ffffff 300px);
-            background-repeat: no-repeat; background-attachment: fixed;
+            background-repeat: no-repeat; background-attachment: fixed; padding-bottom: 50px;
         }
         
         .container { max-width: 600px; padding: 15px; margin: 0 auto; position: relative; z-index: 10; }
@@ -43,19 +45,47 @@
 
         .btn-sawi { background: linear-gradient(135deg, #f39c12, #d35400); border: 4px solid #e67e22; font-size: 28px;}
         .btn-rescue { background: linear-gradient(135deg, #34495e, #2c3e50); border: 4px solid #2c3e50; font-size: 24px;}
-        .btn-local { background-color: #6c757d; color: white; border-radius: 50px; font-weight: 700; padding: 15px; font-size: 22px; width: 100%; margin-bottom: 10px; border: none; display: flex; justify-content: center; gap: 10px; align-items: center;}
+        .btn-local { background-color: #6c757d; color: white; border-radius: 50px; font-weight: 700; padding: 15px; font-size: 22px; width: 100%; margin-bottom: 10px; border: none; display: flex; justify-content: center; gap: 10px; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
 
-        /* Loading Spinner */
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        .spinner { border: 12px solid #f3f3f3; border-top: 12px solid #ff3654; border-radius: 50%; width: 100px; height: 100px; animation: spin 1s linear infinite; margin-bottom: 20px;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Modal แจ้งเตือน */
+        .custom-modal { display: none; position: fixed; z-index: 6000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .custom-modal-content { background-color: #fefefe; margin: auto; padding: 30px; width: 90%; max-width: 450px; border-radius: 30px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .toast-sync {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background-color: #333; color: white; padding: 15px 25px; border-radius: 50px;
+            font-size: 18px; font-weight: bold; z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: top 0.4s ease-in-out;
+            display: flex; align-items: center; gap: 10px; white-space: nowrap;
+        }
+        .toast-sync.show { top: 20px; }
+        .spinner-small { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid white; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
     </style>
 </head>
 <body>
 
-    <div id="loading" style="display: none;">
-        <div class="spinner"></div>
-        <div id="loading-text" style="color: #FFD700; font-weight: bold; font-size: 26px; text-align: center; padding: 20px;">กำลังส่งพิกัดและเตรียมโทรออก...</div>
+    <div id="toast-sync" class="toast-sync">
+        <div class="spinner-small"></div>
+        กำลังส่งพิกัดให้โรงพยาบาล...
+    </div>
+
+    <div id="local-contact-consent-modal" class="custom-modal">
+        <div class="custom-modal-content" style="border: 4px solid #f39c12;">
+            <div class="text-warning mb-3" style="font-size: 50px;"><span class="iconify" data-icon="mdi:shield-account"></span></div>
+            <div style="font-size: 26px; font-weight: 800; color: #333; margin-bottom: 15px;">ยืนยันการติดต่อ</div>
+            <div style="font-size: 20px; color: #555; line-height: 1.4; margin-bottom: 25px;">
+                เมื่อกดโทรออก ระบบจะ<b>ระบุตัวตนและส่งพิกัด</b>ของคุณไปยัง รพ.สวี เพื่อให้เจ้าหน้าที่ในพื้นที่เข้าช่วยเหลือได้อย่างถูกต้อง<br><br>
+                ท่านยินยอมให้เปิดเผยข้อมูลนี้หรือไม่?
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button id="btn-local-consent-yes" style="background-color: #D32F2F; color: white; border: none; border-radius: 50px; padding: 15px; font-size: 24px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; animation: pulse-danger-btn 1.5s infinite;">
+                    <span class="iconify" data-icon="mdi:phone"></span> ยินยอมและโทรออก
+                </button>
+                <button onclick="document.getElementById('local-contact-consent-modal').style.display='none'" style="background-color: #6c757d; color: white; border: none; border-radius: 50px; padding: 15px; font-size: 20px; font-weight: bold;">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -65,34 +95,50 @@
         </div>
 
         <div class="main-card">
-            <!-- ปุ่มสายด่วนหลัก -->
-            <button class="btn-huge btn-1669" onclick="initiateCall('1669', '1669', 'tel_1669_initial')">
+            <button class="btn-huge btn-1669" onclick="executeInstantCall('1669', '1669', 'tel_1669')">
                 <span class="iconify" data-icon="mdi:phone-alert" style="font-size: 50px;"></span> 1669
             </button>
 
-            <button class="btn-huge btn-sawi" onclick="initiateCall('รพ.สวี', '0894745523', 'tel_sawee')">
-                <span class="iconify" data-icon="mdi:hospital-building" style="font-size: 40px;"></span> รพ.สวี
+            <button class="btn-huge btn-sawi" onclick="executeInstantCall('ฉุกเฉิน รพ.สวี', '0894745523', 'tel_sawee')">
+                <span class="iconify" data-icon="mdi:hospital-building" style="font-size: 40px;"></span> ฉุกเฉิน รพ.สวี
             </button>
 
-            <button class="btn-huge btn-rescue" onclick="initiateCall('กู้ภัยสายชล', '0810814201', 'tel_rescue')">
+            <button class="btn-huge btn-rescue" onclick="executeInstantCall('กู้ภัยสายชล', '0810814201', 'tel_rescue')">
                 <span class="iconify" data-icon="mdi:car-emergency" style="font-size: 35px;"></span> กู้ภัยสายชล
             </button>
 
             <hr class="my-4">
 
-            <!-- ส่วนของเบอร์ติดต่อในพื้นที่ (ดึงอัตโนมัติ) -->
             <h4 class="text-center fw-bold mb-3 text-secondary" style="font-size: 22px;">หน่วยงานในพื้นที่ของคุณ</h4>
-            <div id="local-address" class="text-center text-primary fw-bold mb-3" style="font-size: 18px;">กำลังค้นหาข้อมูล...</div>
+            <div id="local-address" class="text-center text-primary fw-bold mb-3" style="font-size: 18px;">กำลังตรวจสอบพิกัด...</div>
             <div id="local-contacts-container">
-                <div class="text-center text-muted">...</div>
+                <div class="text-center text-muted" style="font-size: 16px;">กำลังดึงข้อมูล...</div>
             </div>
         </div>
     </div>
 
 <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxm8ZJnPV-d_im3ySH19t84deJ3ym10ZvJxFfBQndImpvqdYeCQrvnY6HLN5xS8Wb6r/exec"; 
-    const LIFF_ID = "2009491708-ULIwgKkN"; // LIFF ID สำหรับหน้าโทรออก
+    const LIFF_ID = "2009491708-ULIwgKkN"; 
     
+    // --- ระบบเข้ารหัส (CryptoJS) ---
+    const SECRET_KEY = "SawiStrokeSecretKey2026";
+    function encryptName(text) {
+        if(!text) return "";
+        return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
+    }
+    function decryptName(ciphertext) {
+        if(!ciphertext) return "";
+        try {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
+            const originalText = bytes.toString(CryptoJS.enc.Utf8);
+            return originalText || ciphertext;
+        } catch(e) { 
+            return ciphertext; 
+        }
+    }
+    // ------------------------------
+
     let userData = {
         userId: '',
         name: 'ผู้ป่วยฉุกเฉิน',
@@ -102,21 +148,43 @@
     };
 
     window.onload = async () => {
+        // แอบขอพิกัด GPS เก็บไว้เบื้องหลังทันทีที่เปิดหน้าเว็บ
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => { userData.lat = pos.coords.latitude; userData.lon = pos.coords.longitude; },
+                err => { console.log("GPS Pre-fetch blocked"); }
+            );
+        }
+
         try {
             await liff.init({ liffId: LIFF_ID });
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 userData.userId = profile.userId;
-                userData.name = profile.displayName;
-                fetchLocalContacts(profile.userId);
+                userData.name = profile.displayName; 
+                fetchUserData(profile.userId);
             } else {
                 liff.login();
             }
         } catch (e) {
-            console.error("LIFF Init Error:", e);
             document.getElementById('local-address').innerText = "ไม่สามารถเชื่อมต่อ LINE ได้";
         }
     };
+
+    // ดึงประวัติผู้ใช้เพื่อเอาที่อยู่ และ ถอดรหัสชื่อแท้จริง
+    function fetchUserData(userId) {
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getUserData', userId: userId }) })
+        .then(r => r.json()).then(res => {
+            if(res.status === 'found' && res.data) {
+                userData.name = decryptName(res.data.name);
+                fetchLocalContacts(userId); // ไปดึงเบอร์ต่อ
+            } else {
+                fetchLocalContacts(userId); // ถ้าไม่เจอก็ลองดึงเบอร์ (เผื่อมีข้อมูล address ติดอยู่)
+            }
+        }).catch(e => {
+            fetchLocalContacts(userId);
+        });
+    }
 
     function fetchLocalContacts(userId) {
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getLocalContacts', userId: userId }) })
@@ -126,11 +194,10 @@
                 document.getElementById('local-address').innerText = userData.address;
                 renderLocalContacts(res.data || []);
             } else {
-                document.getElementById('local-address').innerText = "ไม่พบประวัติผู้ป่วย";
+                document.getElementById('local-address').innerText = "ไม่พบประวัติพื้นที่ของท่าน";
                 document.getElementById('local-contacts-container').innerHTML = '';
             }
         }).catch(e => {
-            console.log(e);
             document.getElementById('local-address').innerText = "เชื่อมต่อฐานข้อมูลล้มเหลว";
         });
     }
@@ -138,7 +205,7 @@
     function renderLocalContacts(contacts) {
         const container = document.getElementById('local-contacts-container');
         if (contacts.length === 0) {
-            container.innerHTML = `<div class="alert alert-light text-center text-muted">ไม่พบข้อมูลหน่วยงานใกล้บ้านท่าน</div>`;
+            container.innerHTML = `<div class="alert alert-light text-center text-muted" style="font-size: 16px;">ไม่พบข้อมูลหน่วยงานในฐานข้อมูล</div>`;
             return;
         }
 
@@ -148,83 +215,100 @@
             if (contact.role.includes('อสม')) roleKey = 'tel_asm1';
             if (contact.role.includes('ผู้ใหญ่')) roleKey = 'tel_header';
 
-            html += `<button class="btn-local" onclick="initiateCall('${contact.role}', '${contact.tel}', '${roleKey}')">
-                        <span class="iconify" data-icon="mdi:phone-in-talk"></span> โทร ${contact.role}
+            html += `<button class="btn-local" onclick="promptLocalCall('${contact.role}', '${contact.tel}', '${roleKey}')">
+                        <span class="iconify" data-icon="mdi:phone-in-talk"></span> ติดต่อ ${contact.role}
                     </button>`;
         });
         container.innerHTML = html;
     }
 
-    window.initiateCall = function(targetName, targetNumber, logKey) {
-        document.getElementById('loading').style.display = 'flex';
-        
-        // ขอพิกัดก่อนโทร
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                position => { processCall(targetName, targetNumber, logKey, position.coords.latitude, position.coords.longitude); },
-                error => { processCall(targetName, targetNumber, logKey, '', ''); } // ยอมให้โทรแม้ไม่ให้พิกัด
-            );
+    // Modal สำหรับเบอร์พื้นที่
+    window.promptLocalCall = function(role, tel, roleKey) {
+        document.getElementById('local-contact-consent-modal').style.display = 'flex';
+        document.getElementById('btn-local-consent-yes').onclick = function() {
+            document.getElementById('local-contact-consent-modal').style.display = 'none';
+            executeInstantCall(role, tel, roleKey);
+        };
+    };
+
+    // ฟังก์ชันหลัก: โทรทันที และ ส่งข้อมูลเบื้องหลัง
+    window.executeInstantCall = function(targetName, targetNumber, logKey) {
+        // 1. สั่งเปิดหน้าจอโทรออกของมือถือ "ทันที"
+        window.location.href = `tel:${targetNumber}`;
+
+        // 2. แสดง Toast แจ้งเตือนว่ากำลังส่งพิกัดเบื้องหลัง
+        const toast = document.getElementById('toast-sync');
+        toast.classList.add('show');
+
+        // 3. ตรวจสอบพิกัดแล้วยิง API (ไม่ขวางการโทร)
+        if (userData.lat && userData.lon) {
+            backgroundSync(targetName, targetNumber, logKey, userData.lat, userData.lon);
         } else {
-            processCall(targetName, targetNumber, logKey, '', '');
+            // ถ้าพิกัด pre-fetch ยังไม่มา ให้ลองขออีกครั้ง (รอแค่ 3 วิ)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => { backgroundSync(targetName, targetNumber, logKey, pos.coords.latitude, pos.coords.longitude); },
+                    err => { backgroundSync(targetName, targetNumber, logKey, '', ''); },
+                    { timeout: 3000 }
+                );
+            } else {
+                backgroundSync(targetName, targetNumber, logKey, '', '');
+            }
         }
     };
 
-    function processCall(targetName, targetNumber, logKey, lat, lon) {
-        userData.lat = lat;
-        userData.lon = lon;
+    function backgroundSync(targetName, targetNumber, logKey, lat, lon) {
         const locationStr = (lat && lon) ? `${lat},${lon}` : '';
         const callTime = new Date();
 
-        // 1. บันทึกข้อมูลไปที่ Google Sheet (daily_check ให้ Is Risk = TRUE และ tel_log)
-        const payloadData = {
-            action: 'saveData',
-            data: {
-                userID: userData.userId,
-                userName: userData.name,
-                isEmergency: true,
-                isRisk: true, // บังคับให้เป็นเคสเสี่ยงทันที
-                symptomCategory: "โทรฉุกเฉิน",
-                symptomDetail: `เปิดแอปและกดโทรหา ${targetName}`,
-                contactedVia: logKey,
-                tel: targetNumber,
-                location: locationStr,
-                onsetTime: `${callTime.getDate()}/${callTime.getMonth()+1} ${callTime.getHours()}:${String(callTime.getMinutes()).padStart(2, '0')}`
-            }
+        let payloadData = {
+            userID: userData.userId,
+            userName: encryptName(userData.name),
+            isEmergency: true,
+            isRisk: true, 
+            symptomCategory: "โทรฉุกเฉิน",
+            symptomDetail: `เปิดแอปและกดโทรหา ${targetName}`,
+            contactedVia: logKey,
+            tel: targetNumber,
+            location: locationStr,
+            onsetTime: `${callTime.getDate()}/${callTime.getMonth()+1}/${callTime.getFullYear()+543} ${callTime.getHours()}:${String(callTime.getMinutes()).padStart(2, '0')}`
         };
 
-        fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payloadData) }).catch(e => console.error("GAS Save Error"));
+        // ยิง API บันทึกข้อมูล
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'saveData', data: payloadData }) })
+        .catch(e => console.error("GAS Sync Error"));
 
-        // 2. ส่ง Flex Message
+        // สร้าง Flex Message และส่งแชท
         if (liff.isInClient()) {
             const flexMsg = createCallFlexMessage(targetName, targetNumber, locationStr, callTime);
             liff.sendMessages([flexMsg])
             .then(() => {
-                // 3. ปิด LIFF และสั่งโทรออก
-                window.location.href = `tel:${targetNumber}`;
-                setTimeout(() => { liff.closeWindow(); }, 500); 
+                // หน่วงเวลาเล็กน้อยเพื่อให้ระบบส่งแชทเสร็จ แล้วค่อยปิด LIFF
+                setTimeout(() => { liff.closeWindow(); }, 1500); 
             })
             .catch(err => {
-                console.error("Flex Send Error:", err);
-                window.location.href = `tel:${targetNumber}`;
-                setTimeout(() => { liff.closeWindow(); }, 500);
+                setTimeout(() => { liff.closeWindow(); }, 1500);
             });
-        } else {
-            window.location.href = `tel:${targetNumber}`;
-            document.getElementById('loading').style.display = 'none';
         }
     }
 
     function createCallFlexMessage(targetName, targetNumber, locationStr, timeObj) {
         const timeStr = `${timeObj.getDate()}/${timeObj.getMonth()+1}/${timeObj.getFullYear()+543} เวลา ${timeObj.getHours()}:${String(timeObj.getMinutes()).padStart(2, '0')} น.`;
         
-        let mapUri = `https://www.google.com/maps/search/?api=1&query=10.229937,99.109073`; // รพ.สวี ค่าเริ่มต้น
-        let locStatusText = "ไม่ได้ส่งพิกัด";
+        let mapUri = `https://www.google.com/maps/search/?api=1&query=10.229937,99.109073`; // ค่าเริ่มต้น
+        let locStatusText = "ไม่ได้ส่งพิกัด (ดึงตำแหน่งไม่สำเร็จ)";
         let locStatusColor = "#aaaaaa";
 
         if (locationStr) {
-            mapUri = `https://www.google.com/maps/search/?api=1&query=${locationStr}`;
+            mapUri = `https://www.google.com/maps/search/?api=1&query=$${locationStr}`;
             locStatusText = "พิกัดถูกส่งไปยังระบบของ รพ.สวี แล้ว";
             locStatusColor = "#2E7D32";
+        }
+
+        // --- ปิดบังเบอร์ส่วนตัวใน Flex ---
+        let displayTel = targetNumber;
+        if (targetNumber && targetNumber.startsWith('0') && targetNumber.length >= 9) {
+            displayTel = targetNumber.substring(0, 2) + "xxxxxxxx"; 
         }
 
         return {
@@ -235,7 +319,7 @@
                 size: "mega",
                 header: {
                     type: "box", layout: "vertical",
-                    backgroundColor: "#D32F2F", // แดงฉุกเฉิน
+                    backgroundColor: "#D32F2F", 
                     contents: [
                         { type: "text", text: "🚨 แจ้งเหตุฉุกเฉิน", color: "#ffffff", weight: "bold", size: "xl", align: "center" }
                     ]
@@ -256,7 +340,7 @@
                             type: "box", layout: "horizontal",
                             contents: [
                                 { type: "text", text: "เบอร์โทร:", size: "sm", color: "#666666", flex: 3 },
-                                { type: "text", text: targetNumber, size: "sm", weight: "bold", color: "#333333", flex: 7 }
+                                { type: "text", text: displayTel, size: "sm", weight: "bold", color: "#333333", flex: 7 }
                             ]
                         },
                         {
@@ -280,7 +364,8 @@
                     type: "box", layout: "vertical", spacing: "sm",
                     contents: [
                         { type: "button", style: "primary", color: "#007bff", action: { type: "uri", label: "🗺️ ดูพิกัดที่โทร (แผนที่)", uri: mapUri } },
-                        { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: `📞 โทรซ้ำ (${targetNumber})`, uri: `tel:${targetNumber}` } }
+                        { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: `📞 โทรซ้ำ`, uri: `tel:${targetNumber}` } },
+                        { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
                     ]
                 }
             }
