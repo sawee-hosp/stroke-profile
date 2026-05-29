@@ -1631,189 +1631,198 @@
     };
 
 function getFlexMessages(data) {
-    // --- 1. เตรียมตัวแปรพื้นฐานแบบปลอดภัย (ป้องกัน undefined, null และค่าว่าง "") ---
-    const name = String(data.registeredName || data.userName || "ไม่ระบุชื่อ");
-    const isAbnormal = Boolean(data.isEmergency || (data.isAiAssessment && data.riskScore >= 50));
-    const riskColor = isAbnormal ? "#ffffff" : "#d9534f";
+    try {
+        // --- 1. เตรียมตัวแปรพื้นฐานแบบปลอดภัย ---
+        const name = String(data.registeredName || data.userName || "ไม่ระบุชื่อ");
+        const isAbnormal = Boolean(data.isEmergency || (data.isAiAssessment && data.riskScore >= 50));
+        const riskColor = isAbnormal ? "#ffffff" : "#d9534f";
 
-    let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis || '-'}` : (data.symptomDetail || "ไม่มีอาการ");
-    displayAnalysis = displayAnalysis.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '');
-    if (!displayAnalysis || displayAnalysis.trim() === "") displayAnalysis = "-";
+        let displayAnalysis = data.isAiAssessment ? `AI: ${data.analysis || '-'}` : (data.symptomDetail || "ไม่มีอาการ");
+        displayAnalysis = displayAnalysis.replace(/<br>/gi, '\n').replace(/<b>|<\/b>/gi, '');
+        if (!displayAnalysis || displayAnalysis.trim() === "") displayAnalysis = "-";
 
-    // --- 2. จัดการรูปภาพ (ปลอดภัย 100% + การเข้ารหัส URL เผื่อมีภาษาไทย/ช่องว่าง) ---
-    let imageContents = [];
-    if (data.isAiAssessment && data.fileUrls) {
-        let faceUrl = "", armUrl = "";
-        try {
-            faceUrl = typeof formatDriveUrl === 'function' ? formatDriveUrl(data.fileUrls?.face) : data.fileUrls?.face;
-            armUrl = typeof formatDriveUrl === 'function' ? formatDriveUrl(data.fileUrls?.arm) : data.fileUrls?.arm;
-        } catch (e) {}
+        // --- 2. จัดการรูปภาพ (บังคับ HTTPS เสมอ เพราะ LINE ไม่ยอมรับ HTTP) ---
+        let imageContents = [];
+        if (data.isAiAssessment && data.fileUrls) {
+            let faceUrl = "", armUrl = "";
+            try {
+                faceUrl = typeof formatDriveUrl === 'function' ? formatDriveUrl(data.fileUrls?.face) : data.fileUrls?.face;
+                armUrl = typeof formatDriveUrl === 'function' ? formatDriveUrl(data.fileUrls?.arm) : data.fileUrls?.arm;
+            } catch (e) {}
 
-        if (typeof faceUrl === 'string' && faceUrl.startsWith('http')) {
-            imageContents.push({ type: "image", url: encodeURI(faceUrl.trim()), size: "full", aspectRatio: "3:4", aspectMode: "cover" });
-        }
-        if (typeof armUrl === 'string' && armUrl.startsWith('http')) {
-            imageContents.push({ type: "image", url: encodeURI(armUrl.trim()), size: "full", aspectRatio: "4:3", aspectMode: "cover" });
-        }
-    }
-
-    // --- 3. จัดการเวลา (Timeline) แบบป้องกันค่าว่าง ---
-    const now = new Date();
-    const formatTimeOnly = (dateObj) => { return dateObj ? dateObj.toTimeString().slice(0,5) : "-"; };
-    
-    let travelMins = Number(data.selfTravelMins);
-    if (isNaN(travelMins) || travelMins <= 0) travelMins = 0;
-
-    let onsetTimeStr = "ไม่ระบุ";
-    if (data.onsetTimeObject) onsetTimeStr = formatTimeOnly(new Date(data.onsetTimeObject));
-    else if (typeof data.onsetTime === 'string' && data.onsetTime.includes(' ')) onsetTimeStr = data.onsetTime.split(' ')[1];
-    else if (data.onsetTime) onsetTimeStr = String(data.onsetTime);
-    if (!onsetTimeStr || onsetTimeStr.trim() === "") onsetTimeStr = "ไม่ระบุ"; // ดักจับค่าว่าง
-
-    let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "ไม่ระบุ";
-    let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "ไม่ระบุ";
-    let selfEtaStr = "ไม่ระบุ";
-    let ambEtaStr = "ไม่ระบุ";
-
-    if (travelMins > 0) {
-        let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
-        selfEtaStr = `${formatTimeOnly(selfEtaDate)} น.`;
-        let ambMins = Math.round((travelMins * 2) + 10);
-        let ambEtaDate = new Date(now.getTime() + (ambMins * 60000));
-        ambEtaStr = `${formatTimeOnly(ambEtaDate)} น.`;
-    }
-
-    let timelineBox = {
-        type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
-        borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "bold", cornerRadius: "md",
-        backgroundColor: "#ffffff",
-        contents: [
-            { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาเริ่มมีอาการ:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: onsetTimeStr, size: "sm", weight: "bold", color: "#333333", flex: 4, align: "end" } ] },
-            { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาต้องถึงรพ.(+3.5ชม.):", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: arrivalDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" } ] },
-            { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาต้องได้ยา(+4.5ชม.):", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: rtpaDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" } ] },
-            { type: "separator", margin: "sm" },
-            { type: "box", layout: "horizontal", margin: "sm", contents: [ { type: "text", text: "ขับรถเองถึง รพ.:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: selfEtaStr, size: "sm", weight: "bold", color: "#17a2b8", flex: 4, align: "end" } ] },
-            { type: "box", layout: "horizontal", contents: [ { type: "text", text: "รอรถ รพ.รับ:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: ambEtaStr, size: "sm", weight: "bold", color: "#f39c12", flex: 4, align: "end" } ] },
-            { type: "separator", margin: "sm" },
-            { type: "text", text: "คำแนะนำ: ออกมารพ.ทันที อย่ารอ", size: "sm", weight: "bold", color: "#D32F2F", margin: "md", align: "center", wrap: true }
-        ]
-    };
-
-    // --- 4. จัดการข้อมูล รพ. และ Body Contents ---
-    let travelText = `🏥 รพ.ที่ใกล้: ${data.nearestHospitalName || 'ไม่ระบุ'}\n📍 ระยะทาง: ${data.distance || '-'}\n🚗 ขับเอง: ${data.selfTravelEstimate || '-'}\n🚑 รถ รพ.รับ: ${data.ambulanceEstimate || '-'}`;
-    let travelBox = {
-        type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", 
-        borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#f9f9f9",
-        contents: [ { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" }, { type: "text", text: travelText, size: "sm", color: "#333333", wrap: true } ]
-    };
-
-    let bodyContents1 = [];
-    if (data.isTestMode) {
-        bodyContents1.push({ type: "text", text: "[โหมดทดสอบ ไม่ได้เรียกรถรพ.จริง]", color: "#FFD700", weight: "bold", size: "xs", align: "center", margin: "sm" });
-    }
-    bodyContents1.push({ type: "text", text: "ชื่อ: " + name, color: (isAbnormal ? "#ffffff" : "#000000"), weight: "bold", size: "lg", wrap: true });
-    
-    let riskStr = String(data.risk_group || "ไม่ระบุ");
-    if (!riskStr || riskStr.trim() === "") riskStr = "ไม่ระบุ";
-    bodyContents1.push({ type: "text", text: "ความเสี่ยงเดิม: " + riskStr, size: "sm", color: riskColor, weight: "bold", margin: "md", wrap: true });
-
-    if (imageContents.length > 0) {
-        bodyContents1.push({ type: "separator", margin: "md" });
-        bodyContents1.push({ type: "box", layout: "horizontal", spacing: "sm", margin: "md", contents: imageContents });
-    }
-
-    bodyContents1.push({ type: "separator", margin: "md", color: isAbnormal ? "#eeeeee" : "#dddddd" });
-    bodyContents1.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
-    bodyContents1.push(travelBox);
-    bodyContents1.push(timelineBox); 
-
-    // --- 5. จัดการ Footer & Liff ID อย่างปลอดภัย ---
-    const lat = data.nearestHospitalLat || 10.229937;
-    const lon = data.nearestHospitalLon || 99.109073;
-    
-    // ✅ แก้ไขเด็ดขาด: ใช้ Official URL แบบค้นหาพิกัด รับรองไม่โดนตี Invalid URI แน่นอน
-    const mapUri = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-    
-    const safeLiffId = typeof LIFF_ID !== 'undefined' ? LIFF_ID : '2009491708-pTYytCZA';
-    const safeDailyId = typeof DAILY_CHECK_LIFF_ID !== 'undefined' ? DAILY_CHECK_LIFF_ID : '2009491708-pTYytCZA';
-    const safeHealthId = typeof HEALTH_INFO_LIFF_ID !== 'undefined' ? HEALTH_INFO_LIFF_ID : '2009491708-pTYytCZA';
-
-    // ================= Bubble 1: สรุปผล =================
-    const bubble1 = {
-        type: "bubble",
-        size: "mega",
-        header: {
-            type: "box", layout: "vertical",
-            background: { type: "linearGradient", angle: "90deg", startColor: isAbnormal ? "#D32F2F" : "#2E7D32", endColor: isAbnormal ? "#000000" : "#0B3D0B" },
-            contents: [ { type: "text", text: "ประเมินอาการสโตรก", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true } ]
-        },
-        body: {
-            type: "box", layout: "vertical",
-            background: { type: "linearGradient", angle: "180deg", startColor: isAbnormal ? "#ef3b36" : "#a5d6a7", endColor: "#ffffff" },
-            contents: bodyContents1
-        },
-        footer: {
-            type: "box", layout: "vertical", spacing: "sm",
-            contents: [
-                { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: `https://liff.line.me/${safeLiffId}` } },
-                { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่", uri: mapUri } },
-                { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: `https://liff.line.me/${safeDailyId}` } },
-                { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: `https://liff.line.me/${safeHealthId}` } },
-                { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "tel:1669" } },
-                { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
-            ]
-        }
-    };
-
-    // ================= Bubble 2: คู่มือนำส่ง =================
-    const bubble2 = {
-        type: "bubble",
-        size: "mega",
-        header: {
-            type: "box", layout: "vertical",
-            background: { type: "linearGradient", angle: "90deg", startColor: "#F57F17", endColor: "#000000" },
-            contents: [{ type: "text", text: "การเตรียมตัวและนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }]
-        },
-        body: {
-            type: "box", layout: "vertical", spacing: "sm",
-            background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
-            contents: [
-                { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง", size: "sm", weight: "bold", wrap: true, color: "#d35400" },
-                { type: "separator", margin: "sm" },
-                { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
-                { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการ\n✅ ถ้ารู้สึกไปช้า โทร 1669", size: "xs", wrap: true, color: "#444444" },
-                { type: "separator", margin: "sm" },
-                { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
-                { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัว (หรือถ่ายรูปมา)", size: "xs", wrap: true, color: "#444444" },
-                { type: "separator", margin: "sm" },
-                { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
-                { type: "text", text: "🏥 เข้าห้องฉุกเฉิน แจ้งว่า \"สงสัยสโตรก\"\n🧠 ทำ CT Scan ด่วน", size: "xs", wrap: true, color: "#444444" }
-            ]
-        },
-        footer: {
-            type: "box", layout: "vertical", spacing: "sm",
-            contents: [
-                { type: "button", style: "primary", color: "#F57C00", margin: "sm", action: { type: "uri", label: "ความรู้สโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
-                { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "message", label: "วิดีโอสโตรก", text: "วิดิโอสโตรก" } },
-                { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
-            ]
-        }
-    };
-
-    return [
-        {
-            type: "flex",
-            altText: data.isTestMode ? "[ทดสอบ] สรุปผลประเมินสโตรก" : "สรุปผลประเมินสโตรก",
-            contents: {
-                type: "carousel",
-                contents: [bubble1, bubble2]
+            // บังคับให้เป็น HTTPS และตัดช่องว่าง
+            if (typeof faceUrl === 'string' && faceUrl.includes('http')) {
+                let cleanFace = encodeURI(faceUrl.trim().replace(/^http:\/\//i, 'https://'));
+                imageContents.push({ type: "image", url: cleanFace, size: "full", aspectRatio: "3:4", aspectMode: "cover" });
             }
-        },
-        {
-            type: "text",
-            text: "ไลน์สวีรู้ทันสโตรกไม่ได้โทรออกหรือเรียกรพ.ให้ท่าน ต้องกดโทรออกด้วยตัวเอง"
+            if (typeof armUrl === 'string' && armUrl.includes('http')) {
+                let cleanArm = encodeURI(armUrl.trim().replace(/^http:\/\//i, 'https://'));
+                imageContents.push({ type: "image", url: cleanArm, size: "full", aspectRatio: "4:3", aspectMode: "cover" });
+            }
         }
-    ];
+
+        // --- 3. จัดการเวลา (Timeline) ---
+        const now = new Date();
+        const formatTimeOnly = (dateObj) => { return dateObj ? dateObj.toTimeString().slice(0,5) : "-"; };
+        
+        let travelMins = Number(data.selfTravelMins);
+        if (isNaN(travelMins) || travelMins <= 0) travelMins = 0;
+
+        let onsetTimeStr = "ไม่ระบุ";
+        if (data.onsetTimeObject) onsetTimeStr = formatTimeOnly(new Date(data.onsetTimeObject));
+        else if (typeof data.onsetTime === 'string' && data.onsetTime.includes(' ')) onsetTimeStr = data.onsetTime.split(' ')[1];
+        else if (data.onsetTime) onsetTimeStr = String(data.onsetTime);
+        if (!onsetTimeStr || onsetTimeStr.trim() === "") onsetTimeStr = "ไม่ระบุ";
+
+        let arrivalDeadlineStr = data.arrivalDeadline ? `${data.arrivalDeadline} น.` : "ไม่ระบุ";
+        let rtpaDeadlineStr = data.rtpaDeadline ? `${data.rtpaDeadline} น.` : "ไม่ระบุ";
+        let selfEtaStr = "ไม่ระบุ";
+        let ambEtaStr = "ไม่ระบุ";
+
+        if (travelMins > 0) {
+            let selfEtaDate = new Date(now.getTime() + (travelMins * 60000));
+            selfEtaStr = `${formatTimeOnly(selfEtaDate)} น.`;
+            let ambMins = Math.round((travelMins * 2) + 10);
+            let ambEtaDate = new Date(now.getTime() + (ambMins * 60000));
+            ambEtaStr = `${formatTimeOnly(ambEtaDate)} น.`;
+        }
+
+        let timelineBox = {
+            type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md",
+            borderColor: isAbnormal ? "#D32F2F" : "#2E7D32", borderWidth: "bold", cornerRadius: "md",
+            backgroundColor: "#ffffff",
+            contents: [
+                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาเริ่มมีอาการ:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: onsetTimeStr, size: "sm", weight: "bold", color: "#333333", flex: 4, align: "end" } ] },
+                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาต้องถึงรพ.(+3.5ชม.):", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: arrivalDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" } ] },
+                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "เวลาต้องได้ยา(+4.5ชม.):", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: rtpaDeadlineStr, size: "sm", weight: "bold", color: "#D32F2F", flex: 4, align: "end" } ] },
+                { type: "separator", margin: "sm" },
+                { type: "box", layout: "horizontal", margin: "sm", contents: [ { type: "text", text: "ขับรถเองถึง รพ.:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: selfEtaStr, size: "sm", weight: "bold", color: "#17a2b8", flex: 4, align: "end" } ] },
+                { type: "box", layout: "horizontal", contents: [ { type: "text", text: "รอรถ รพ.รับ:", size: "xs", color: "#333333", flex: 6 }, { type: "text", text: ambEtaStr, size: "sm", weight: "bold", color: "#f39c12", flex: 4, align: "end" } ] },
+                { type: "separator", margin: "sm" },
+                { type: "text", text: "คำแนะนำ: ออกมารพ.ทันที อย่ารอ", size: "sm", weight: "bold", color: "#D32F2F", margin: "md", align: "center", wrap: true }
+            ]
+        };
+
+        // --- 4. จัดการข้อมูล รพ. และ Body Contents ---
+        let travelText = `🏥 รพ.ที่ใกล้: ${data.nearestHospitalName || 'ไม่ระบุ'}\n📍 ระยะทาง: ${data.distance || '-'}\n🚗 ขับเอง: ${data.selfTravelEstimate || '-'}\n🚑 รถ รพ.รับ: ${data.ambulanceEstimate || '-'}`;
+        let travelBox = {
+            type: "box", layout: "vertical", margin: "md", spacing: "sm", paddingAll: "md", 
+            borderColor: "#cccccc", borderWidth: "normal", cornerRadius: "md", backgroundColor: "#f9f9f9",
+            contents: [ { type: "text", text: "ข้อมูลการเดินทาง", weight: "bold", size: "sm", color: "#17a2b8" }, { type: "text", text: travelText, size: "sm", color: "#333333", wrap: true } ]
+        };
+
+        let bodyContents1 = [];
+        if (data.isTestMode) {
+            bodyContents1.push({ type: "text", text: "[โหมดทดสอบ ไม่ได้เรียกรถรพ.จริง]", color: "#FFD700", weight: "bold", size: "xs", align: "center", margin: "sm" });
+        }
+        bodyContents1.push({ type: "text", text: "ชื่อ: " + name, color: (isAbnormal ? "#ffffff" : "#000000"), weight: "bold", size: "lg", wrap: true });
+        
+        let riskStr = String(data.risk_group || "ไม่ระบุ");
+        if (!riskStr || riskStr.trim() === "") riskStr = "ไม่ระบุ";
+        bodyContents1.push({ type: "text", text: "ความเสี่ยงเดิม: " + riskStr, size: "sm", color: riskColor, weight: "bold", margin: "md", wrap: true });
+
+        if (imageContents.length > 0) {
+            bodyContents1.push({ type: "separator", margin: "md" });
+            bodyContents1.push({ type: "box", layout: "horizontal", spacing: "sm", margin: "md", contents: imageContents });
+        }
+
+        bodyContents1.push({ type: "separator", margin: "md", color: isAbnormal ? "#eeeeee" : "#dddddd" });
+        bodyContents1.push({ type: "text", text: "ผลประเมิน: " + displayAnalysis, wrap: true, size: "md", color: (isAbnormal ? "#ffffff" : "#333333"), margin: "md", weight: "bold" });
+        bodyContents1.push(travelBox);
+        bodyContents1.push(timelineBox); 
+
+        // --- 5. จัดการ Footer & Liff ID อย่างปลอดภัย ---
+        const lat = data.nearestHospitalLat || 10.229937;
+        const lon = data.nearestHospitalLon || 99.109073;
+        
+        // ✅ เปลี่ยนมาใช้ Google Maps URL ของแท้ 100% (ไม่มีปีกกาหลงเหลือแน่นอน)
+        const mapUri = `https://maps.google.com/?q=${lat},${lon}`;
+        
+        const safeLiffId = typeof LIFF_ID !== 'undefined' ? LIFF_ID : '2009491708-pTYytCZA';
+        const safeDailyId = typeof DAILY_CHECK_LIFF_ID !== 'undefined' ? DAILY_CHECK_LIFF_ID : '2009491708-pTYytCZA';
+        const safeHealthId = typeof HEALTH_INFO_LIFF_ID !== 'undefined' ? HEALTH_INFO_LIFF_ID : '2009491708-pTYytCZA';
+
+        // ================= Bubble 1: สรุปผล =================
+        const bubble1 = {
+            type: "bubble",
+            size: "mega",
+            header: {
+                type: "box", layout: "vertical",
+                background: { type: "linearGradient", angle: "90deg", startColor: isAbnormal ? "#D32F2F" : "#2E7D32", endColor: isAbnormal ? "#000000" : "#0B3D0B" },
+                contents: [ { type: "text", text: "ประเมินอาการสโตรก", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true } ]
+            },
+            body: {
+                type: "box", layout: "vertical",
+                background: { type: "linearGradient", angle: "180deg", startColor: isAbnormal ? "#ef3b36" : "#a5d6a7", endColor: "#ffffff" },
+                contents: bodyContents1
+            },
+            footer: {
+                type: "box", layout: "vertical", spacing: "sm",
+                contents: [
+                    { type: "button", style: "primary", color: "#007bff", margin: "sm", action: { type: "uri", label: "ปักหมุดใหม่", uri: `https://liff.line.me/${safeLiffId}` } },
+                    { type: "button", style: "primary", color: "#17a2b8", margin: "sm", action: { type: "uri", label: "เปิดแผนที่", uri: mapUri } },
+                    { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ประเมินใหม่", uri: `https://liff.line.me/${safeDailyId}` } },
+                    { type: "button", style: "secondary", margin: "sm", action: { type: "uri", label: "ดูประวัติ", uri: `https://liff.line.me/${safeHealthId}` } },
+                    { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "uri", label: "โทรฉุกเฉิน 1669", uri: "tel:1669" } },
+                    { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
+                ]
+            }
+        };
+
+        // ================= Bubble 2: คู่มือนำส่ง =================
+        const bubble2 = {
+            type: "bubble",
+            size: "mega",
+            header: {
+                type: "box", layout: "vertical",
+                background: { type: "linearGradient", angle: "90deg", startColor: "#F57F17", endColor: "#000000" },
+                contents: [{ type: "text", text: "การเตรียมตัวและนำส่งผู้ป่วย", color: "#ffffff", weight: "bold", size: "xl", align: "center", wrap: true }]
+            },
+            body: {
+                type: "box", layout: "vertical", spacing: "sm",
+                background: { type: "linearGradient", angle: "180deg", startColor: "#FFF9C4", endColor: "#ffffff" },
+                contents: [
+                    { type: "text", text: "ปากเบี้ยว พูดไม่ชัด แขนขาอ่อนแรง", size: "sm", weight: "bold", wrap: true, color: "#d35400" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "1️⃣ การดูแลระหว่างเดินทาง", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "❌ ห้ามป้อนน้ำ อาหาร ยา\n✅ ให้นอนราบ ตะแคงหน้า\n✅ คลายเสื้อผ้าให้หลวม\n✅ จำ \"เวลา\" ที่เริ่มมีอาการ\n✅ ถ้ารู้สึกไปช้า โทร 1669", size: "xs", wrap: true, color: "#444444" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "2️⃣ สิ่งที่ต้องเตรียมมาด้วย", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "👉 บัตรประชาชน\n👉 ยาประจำตัว (หรือถ่ายรูปมา)", size: "xs", wrap: true, color: "#444444" },
+                    { type: "separator", margin: "sm" },
+                    { type: "text", text: "3️⃣ เมื่อถึงโรงพยาบาล", weight: "bold", size: "sm", color: "#333333", margin: "sm" },
+                    { type: "text", text: "🏥 เข้าห้องฉุกเฉิน แจ้งว่า \"สงสัยสโตรก\"\n🧠 ทำ CT Scan ด่วน", size: "xs", wrap: true, color: "#444444" }
+                ]
+            },
+            footer: {
+                type: "box", layout: "vertical", spacing: "sm",
+                contents: [
+                    { type: "button", style: "primary", color: "#F57C00", margin: "sm", action: { type: "uri", label: "ความรู้สโตรก", uri: "https://liff.line.me/2009491708-VJsxGkrK" } },
+                    { type: "button", style: "primary", color: "#D32F2F", margin: "sm", action: { type: "message", label: "วิดีโอสโตรก", text: "วิดิโอสโตรก" } },
+                    { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
+                ]
+            }
+        };
+
+        return [
+            {
+                type: "flex",
+                altText: data.isTestMode ? "[ทดสอบ] สรุปผลประเมินสโตรก" : "สรุปผลประเมินสโตรก",
+                contents: {
+                    type: "carousel",
+                    contents: [bubble1, bubble2]
+                }
+            },
+            {
+                type: "text",
+                text: "ไลน์สวีรู้ทันสโตรกไม่ได้โทรออกหรือเรียกรพ.ให้ท่าน ต้องกดโทรออกด้วยตัวเอง"
+            }
+        ];
+    } catch (e) {
+        return [
+            { type: "text", text: "เกิดข้อผิดพลาดในการประมวลผล Flex Message" }
+        ];
+    }
 }
     window.showFinalMessage = function(t, txt) { 
         document.getElementById('final-title').textContent = t; 
