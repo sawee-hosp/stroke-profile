@@ -266,7 +266,7 @@
 
         <!-- STROKE HISTORY -->
         <div id="card-stroke-history" class="card-box">
-            <h5 class="card-title text-danger"><i class="bi bi-clock-history"></i> ประวัติการประเมินอาการสโตรก</h5>
+            <h5 class="card-title text-danger"><i class="bi bi-clock-history"></i> เช็คอาการสโตรก</h5>
              <div class="card-loader text-danger"><div class="spinner-border"></div></div>
         </div>
 
@@ -281,7 +281,7 @@
             <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
             <div class="card-loader text-primary"><div class="spinner-border"></div></div>
         </div>
-        
+
         <!-- STICKER CARD -->
         <div id="card-sticker" class="card-box text-center py-4">
             <h5 class="card-title justify-content-center mb-3"><i class="bi bi-line text-success"></i> สถิติการแชร์สติกเกอร์</h5>
@@ -383,9 +383,66 @@
 
 <div class="modal fade" id="modalCall" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 text-center p-4 border-0"><i class="bi bi-shield-lock-fill text-secondary display-4 mb-2"></i><h4 class="fw-bold">ขออนุญาตโทรออก</h4><p class="text-muted small mb-4">ระบบจะบันทึกประวัติการโทรเพื่อเป็นข้อมูลการช่วยเหลือ (PDPA)</p><div class="d-grid gap-2"><button class="btn btn-success btn-pill" onclick="execCall()">ยินยอมและโทรออก</button><button class="btn btn-outline btn-pill" data-bs-dismiss="modal">ยกเลิก</button></div></div></div></div>
 
-<div class="modal fade" id="modalEditEmg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">แก้ไขข้อมูลฉุกเฉิน</h5></div><div class="modal-body pt-2"><div class="mb-3"><label class="text-muted mb-1">คนดูแลที่บ้าน</label><select class="form-select" id="inpHelp"></select></div><div class="mb-4"><label class="text-muted mb-1">การตัดสินใจ</label><select class="form-select" id="inpDec"><option>รอดูอาการ</option><option>โทรให้ญาติมาดู</option><option>ไปคลินิก-อนามัย</option><option>รีบไป รพ.เอง</option><option>โทร 1669 ให้รถมารับ</option></select></div><button class="btn btn-red btn-pill w-100" onclick="saveEmg()">บันทึกข้อมูล</button></div></div></div></div>
+<!-- UPDATED: Edit Emergency Info Modal -->
+<div class="modal fade" id="modalEditEmg" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">แก้ไขข้อมูลฉุกเฉิน</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body pt-2">
+    <div class="mb-3">
+        <label class="text-muted mb-1 small fw-bold">สมมติว่าตื่นเช้ามาแล้วรู้สึกว่ามุมปากตก หน้าเบี้ยวครึ่งซีก ยกแขนไม่ขึ้น สิ่งแรกที่จะเลือกทำคืออะไร?</label>
+        <select class="form-select" id="inpDec">
+            <option>รอดูอาการ เผื่อดีขึ้น</option>
+            <option>นวดเฟ้น ทายา กินยาเอง</option>
+            <option>โทรให้ญาติมาดู</option>
+            <option>ไปคลินิก-อนามัย</option>
+            <option>รีบไป รพ.เอง</option>
+            <option>โทร 1669 ให้รถมารับ</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="text-muted mb-1 small fw-bold">ปกติช่วงกลางวัน/กลางคืน คุณอยู่บ้านกับใคร?</label>
+        <select class="form-select" id="inpHelp">
+            <option>อยู่คนเดียวเป็นส่วนใหญ่</option>
+            <option>อยู่กับผู้สูงอายุด้วยกัน/เด็กเล็ก</option>
+            <option>อยู่กับญาติ/คนวัยทำงาน</option>
+            <option>มีเพื่อนบ้านใกล้ชิด</option>
+        </select>
+    </div>
+    <div class="mb-4">
+        <label class="text-muted mb-1 small fw-bold">ท่านมั่นใจแค่ไหนว่า ถ้ามีคนในบ้านเป็นสโตรก จะพาไป รพ. ได้ทันเวลาทอง 4 ชั่วโมงครึ่ง</label>
+        <select class="form-select" id="inpConf">
+            <option>ไม่มั่นใจเลย</option>
+            <option>มั่นใจนิดหน่อย</option>
+            <option>มั่นใจปานกลาง</option>
+            <option>มั่นใจเต็มร้อย</option>
+        </select>
+    </div>
+    <button class="btn btn-red btn-pill w-100" onclick="saveEmg()">บันทึกข้อมูล</button>
+</div></div></div></div>
 
 <div class="modal fade" id="modalPinUser" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-4 text-center"><i class="bi bi-geo-alt-fill text-danger display-3 mb-3"></i><h4 class="fw-bold">ยืนยันการปักหมุด</h4><p class="text-muted">เลือกประเภทสถานที่</p><div class="d-flex justify-content-center gap-2 mb-3"><input type="radio" class="btn-check" name="pt" id="pt1" value="บ้าน" checked><label class="btn btn-outline-danger" for="pt1">บ้าน</label><input type="radio" class="btn-check" name="pt" id="pt2" value="ทางผ่าน"><label class="btn btn-outline-secondary" for="pt2">ทางผ่าน</label></div><button class="btn btn-red btn-pill w-100" onclick="execPinUser()">ยืนยัน</button></div></div></div>
+
+<!-- NEW: Select Address Modal -->
+<div class="modal fade" id="modalEditAddress" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">ข้อมูลที่อยู่</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body pt-2">
+    <div class="row g-2 mb-3">
+        <div class="col-5">
+            <label class="small text-muted fw-bold">หมู่ที่</label>
+            <select id="userVillage" class="form-select" onchange="updateAddressAndHospital()"><option value="">เลือก</option></select>
+        </div>
+        <div class="col-7">
+            <label class="small text-muted fw-bold">ตำบล</label>
+            <select id="userDistrict" class="form-select" onchange="updateAddressAndHospital(); updateVillages('userDistrict','userVillage');">
+                <option value="">เลือก</option>
+                <option>ท่าหิน</option><option>ด่านสวี</option><option>เขาทะลุ</option>
+                <option>เขาค่าย</option><option>ปากแพรก</option><option>สวี</option>
+                <option>นาสัก</option><option>ทุ่งระยะ</option><option>วิสัยใต้</option>
+                <option>ครน</option><option>นาโพธิ์</option>
+            </select>
+        </div>
+    </div>
+    <div class="mb-4">
+        <label class="small text-muted fw-bold">รพ.สต. ที่รับผิดชอบ</label>
+        <input type="text" id="userPcu" class="form-control bg-light" readonly placeholder="จะแสดงอัตโนมัติเมื่อเลือกตำบลและหมู่">
+    </div>
+    <button class="btn btn-primary btn-pill w-100" onclick="saveAddress()">บันทึกข้อมูลที่อยู่</button>
+</div></div></div></div>
 
 <div class="modal fade" id="modalScoreInfo" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4 rounded-4 text-center"><i class="bi bi-trophy-fill text-danger display-4 mb-3"></i><h5 class="fw-bold">คะแนนความตระหนักรู้</h5><p class="text-muted">เราอยากให้ชาวสวีมีความตระหนักถึงอาการของสโตรก ร่วมกิจกรรมกับเราเพื่อเพิ่มคะแนน</p><button class="btn btn-outline w-100 btn-pill" data-bs-dismiss="modal">ปิด</button></div></div></div>
 
@@ -500,7 +557,7 @@
     window.onload = async () => {
         initDropdowns('vhvDistrict');
         initDropdowns('regisVhvDistrict');
-        ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare', 'modalStrokeHistory', 'modalAssessmentHistory', 'modalVhvRegis'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
+        ['modalEditEmg','modalEditVhv','modalVisit','modalCall','modalPinUser','modalPinAsm','modalQR','modalScoreInfo','modalVhvInfo', 'modalStickerShare', 'modalStrokeHistory', 'modalAssessmentHistory', 'modalVhvRegis', 'modalEditAddress'].forEach(i=>MODALS[i]=new bootstrap.Modal(document.getElementById(i)));
         
         loadFromCache();
         startStrokeAnimation();
@@ -624,7 +681,6 @@
         const pic = PROFILE.pictureUrl || u.pictureUrl || 'https://placehold.co/100';
         
         let rawName = u.name === 'Guest' ? 'กำลังค้นหาชื่อ....' : u.name;
-        // DECRYPT NAME
         const displayName = u.name !== 'Guest' ? decryptName(rawName) : rawName;
 
         document.getElementById('card-profile').innerHTML = `
@@ -634,7 +690,6 @@
                 <button class="btn btn-outline rounded-circle" style="width:45px;height:45px;" onclick="location.href='${LINKS.REGIS}'"><i class="bi bi-pencil"></i></button>
             </div>`;
 
-        // Toggle VHV Tab and Button
         if(DATA.isVhv) {
             document.getElementById('nav-item-vhv').style.display = 'block';
             document.getElementById('btn-vhv-regis').style.display = 'none';
@@ -653,16 +708,20 @@
             const l = DATA.communityLeaders;
             let pcuHtml = `<div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-hospital fs-1 text-danger me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">${l.pcu}</div><div class="small text-muted">รพ.สต. ในพื้นที่</div></div>${l.pcuTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.pcuTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}</div>`;
             
-            // เปลี่ยนให้แสดงแค่ตำแหน่งผู้ใหญ่บ้านและหมู่ โดยไม่แสดงชื่อจริง
             let headHtml = (l.village_name && l.area) ? `<div class="d-flex align-items-center py-3 border-bottom"><i class="bi bi-person-badge fs-1 text-dark me-3"></i><div class="flex-grow-1"><div class="fw-bold fs-5">ผู้ใหญ่บ้าน ${l.village_name}</div><div class="small text-muted">ผู้นำชุมชน</div></div>${l.headTel ? `<button class="btn btn-success rounded-circle" style="width:45px;height:45px;" onclick="call('${l.headTel}')"><i class="bi bi-telephone-fill"></i></button>` : ''}</div>` : '';
 
-            // เปลี่ยนให้แสดงแค่คำว่า อสม.สโตรก ตามด้วยหมู่
             document.getElementById('card-helper').innerHTML = `
                 <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
                 ${pcuHtml} ${headHtml}
-                <div class="d-flex align-items-center py-3"><div class="me-3 position-relative"><i class="bi bi-search fs-2 text-warning icon-pulse position-absolute" style="top:-10px;left:-10px;"></i><i class="bi bi-person-heart fs-1 text-secondary"></i></div><div class="flex-grow-1 ms-2"><div class="fw-bold fs-5 text-secondary">อสม.สโตรก ${l.village_name || ''}</div><div class="text-muted small">พร้อมช่วยเหลือดูแล ${l.vhvCount} ท่าน</div></div></div>`;
+                <div class="d-flex align-items-center py-3"><div class="me-3 position-relative"><i class="bi bi-search fs-2 text-warning icon-pulse position-absolute" style="top:-10px;left:-10px;"></i><i class="bi bi-person-heart fs-1 text-secondary"></i></div><div class="flex-grow-1 ms-2"><div class="fw-bold fs-5 text-secondary">อสม.สโตรก ${l.village_name || ''}</div><div class="text-muted small">พร้อมช่วยเหลือดูแล ${l.vhvCount} ท่าน</div></div></div>
+                <button class="btn btn-outline-primary btn-pill w-100 mt-3" onclick="MODALS.modalEditAddress.show()">เลือกพิกัดที่อยู่</button>
+                `;
         } else {
-             document.getElementById('card-helper').innerHTML = `<h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5><div class="empty-state"><i class="bi bi-people"></i>ยังไม่มีข้อมูลในพื้นที่ของท่าน</div>`;
+             document.getElementById('card-helper').innerHTML = `
+                <h5 class="card-title text-primary"><i class="bi bi-people-fill"></i> บุคคลที่อาจช่วยเหลือท่าน</h5>
+                <div class="empty-state"><i class="bi bi-people"></i>ยังไม่มีข้อมูลในพื้นที่ของท่าน</div>
+                <button class="btn btn-outline-primary btn-pill w-100 mt-3" onclick="MODALS.modalEditAddress.show()">เลือกพิกัดที่อยู่</button>
+             `;
         }
     }
 
@@ -684,14 +743,13 @@
                 <div class="col-3"><div class="score-item-box"><i class="bi bi-book-fill score-icon text-warning"></i><div class="score-num">${g.know}</div><div class="score-label">ความรู้</div></div></div>
             </div>`;
             
-        // ดึงการ์ดสติกเกอร์มาแสดงด้านล่าง
         document.getElementById('card-sticker').innerHTML = `
             <h5 class="card-title justify-content-center text-success mb-2"><i class="bi bi-line"></i> สถิติการแชร์สติกเกอร์</h5>
             <div class="display-4 fw-bold text-success mb-2">${g.share||0}</div>
             <div class="text-muted small mb-3">จำนวนครั้งที่ส่งต่อความห่วงใย</div>
+            <button class="btn btn-success btn-pill w-100 mt-3" onclick="location.href='${LINKS.STICKER}'">ส่งสติกเกอร์ให้เพื่อน</button>
         `;
         
-        // ดึงการ์ดแบบทดสอบมาแสดงด้านล่าง
         document.getElementById('card-knowledge').innerHTML = `
             <h5 class="card-title justify-content-center mb-2"><i class="bi bi-journal-text text-warning"></i> คะแนนสอบวัดความรู้</h5>
             <div class="d-flex justify-content-center gap-2 mt-3 text-center mb-0">
@@ -708,6 +766,7 @@
                     <div class="fw-bold fs-4 text-success">${k.review}</div>
                 </div>
             </div>
+            <button class="btn btn-warning btn-pill w-100 mt-3" onclick="location.href='${LINKS.KNOWLEDGE}'">อ่านความรู้สโตรก</button>
         `;
     }
 
@@ -918,7 +977,11 @@
 
     function renderRiskCard(p, cnt) {
         if(!p || !p.thai_cv_risk_score) {
-            document.getElementById('card-risk').innerHTML = `<div class="card-box text-center py-4"><h5 class="card-title justify-content-center mb-2"><i class="bi bi-activity text-red"></i> ประวัติการประเมินความเสี่ยง</h5><div class="empty-state"><i class="bi bi-clipboard2-x"></i>ยังไม่มีประวัติการประเมิน</div></div>`;
+            document.getElementById('card-risk').innerHTML = `
+                <div class="d-flex justify-content-between mb-2"><h5 class="card-title m-0"><i class="bi bi-activity text-red"></i> ประวัติการประเมินความเสี่ยง</h5></div>
+                <div class="empty-state"><i class="bi bi-clipboard2-x"></i>ยังไม่มีประวัติการประเมิน</div>
+                <button class="btn btn-red btn-pill w-100 mt-3" onclick="location.href='${LINKS.REGIS}'">ประเมินความเสี่ยงใหม่</button>
+            `;
             return;
         }
         let s=parseFloat(p.thai_cv_risk_score), c='#28a745', t='เสี่ยงต่ำ';
@@ -932,12 +995,13 @@
             <div class="text-center my-4"><div class="display-3 fw-bold" style="color:${c};line-height:1">${s.toFixed(2)}%</div><div class="fs-4 fw-bold" style="color:${c}">${t}</div><div class="small text-muted mt-1">วันที่ประเมิน: ${updated}</div></div>
             <div class="risk-grid mb-3">${g}<div class="risk-item" style="grid-column:span 2"><div class="risk-lbl">โรคประจำตัว</div><div class="risk-val"><i class="bi bi-hospital"></i> ${p['u/d']||'-'}</div></div></div>
             <button class="btn btn-outline-secondary btn-pill w-100" onclick="openHistoryModal()"><i class="bi bi-clipboard-data"></i> ดูประวัติย้อนหลัง</button>
+            <button class="btn btn-red btn-pill w-100 mt-3" onclick="location.href='${LINKS.REGIS}'">ประเมินความเสี่ยงใหม่</button>
             `;
     }
 
     function renderHospitalCard() {
         const d = DATA.homeDistance || {km:0,time:0};
-        const e = DATA.emergencyInfo || {help:'-',decision:'-'};
+        const e = DATA.emergencyInfo || {help:'-',decision:'-',confident:'-'};
         
         document.getElementById('card-hospital').innerHTML = `
             <h5 class="card-title"><i class="bi bi-hospital text-red"></i> การเตรียมพร้อม (รพ.สวี)</h5>
@@ -947,13 +1011,14 @@
                 <i class="bi bi-hospital-fill display-4 text-danger"></i>
             </div>
             <div class="bg-white border rounded p-3 mb-2 small">
-                <div class="d-flex justify-content-between mb-2"><span>คนดูแล:</span><strong class="text-primary fs-6">${e.help}</strong></div>
-                <div class="d-flex justify-content-between"><span>ตัดสินใจ:</span><strong class="text-primary fs-6">${e.decision}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span class="text-muted">คนดูแล:</span><strong class="text-primary text-end ms-2">${e.help}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span class="text-muted">ตัดสินใจ:</span><strong class="text-primary text-end ms-2">${e.decision}</strong></div>
+                <div class="d-flex justify-content-between"><span class="text-muted">ความมั่นใจ:</span><strong class="text-success text-end ms-2">${e.confident}</strong></div>
             </div>
             <div class="d-grid gap-2 mt-3">
-                <button class="btn btn-outline btn-pill btn-sm w-100" onclick="openEditEmg('${e.help}','${e.decision}')">แก้ไขข้อมูลเตรียมความพร้อม</button>
+                <button class="btn btn-outline btn-pill btn-sm w-100" onclick="openEditEmg('${e.help}','${e.decision}','${e.confident}')">แก้ไขข้อมูลเตรียมความพร้อม</button>
                 <div class="row g-2">
-                    <div class="col-6"><button class="btn btn-dark btn-pill btn-sm w-100" onclick="MODALS.modalPinUser.show()"><i class="bi bi-geo-alt"></i> อัปเดตพิกัด</button></div>
+                    <div class="col-6"><button class="btn btn-dark btn-pill btn-sm w-100" onclick="MODALS.modalPinUser.show()"><i class="bi bi-geo-alt"></i> อัปเดตพิกัดเดิม</button></div>
                     <div class="col-6"><a href="${LINKS.BEFAST}" class="btn btn-red btn-pill btn-sm w-100">ปักหมุดใหม่</a></div>
                 </div>
             </div>
@@ -964,12 +1029,16 @@
         const sh = DATA.strokeHistory || { total:0, symptom:0, normal:0, history:[] };
         
         if(sh.total === 0) {
-            document.getElementById('card-stroke-history').innerHTML = `<h5 class="card-title text-danger mb-2"><i class="bi bi-clock-history"></i> ประวัติการประเมินสโตรก</h5><div class="empty-state"><i class="bi bi-person-slash"></i>ยังไม่มีประวัติการประเมินอาการ</div>`;
+            document.getElementById('card-stroke-history').innerHTML = `
+                <h5 class="card-title text-danger mb-2"><i class="bi bi-clock-history"></i> เช็คอาการสโตรก</h5>
+                <div class="empty-state"><i class="bi bi-person-slash"></i>ยังไม่มีประวัติการประเมินอาการ</div>
+                <button class="btn btn-red btn-pill w-100 mt-3" onclick="location.href='${LINKS.BEFAST}'">เช็คอาการล่าสุด</button>
+            `;
             return;
         }
 
         document.getElementById('card-stroke-history').innerHTML = `
-            <h5 class="card-title mb-3"><i class="bi bi-clock-history text-danger"></i> ประวัติการประเมินสโตรก</h5>
+            <h5 class="card-title mb-3"><i class="bi bi-clock-history text-danger"></i> เช็คอาการสโตรก</h5>
             <div class="row g-2 text-center mb-3">
                 <div class="col-6">
                     <div class="bg-light p-2 rounded border">
@@ -985,6 +1054,7 @@
                 </div>
             </div>
             <button class="btn btn-outline-primary btn-pill w-100 mb-2" onclick="openStrokeHistoryModal()">ดูประวัติย้อนหลัง</button>
+            <button class="btn btn-red btn-pill w-100 mt-3" onclick="location.href='${LINKS.BEFAST}'">เช็คอาการล่าสุด</button>
         `;
     }
 
@@ -1051,17 +1121,68 @@
         if(document.getElementById(distId).value) for(let i=1;i<=20;i++) v.add(new Option('ม.'+i,'ม.'+i)); 
     }
 
-    function openEditEmg(h,d){ 
-        const s = document.getElementById('inpHelp'); s.innerHTML=''; 
-        ['อยู่ตัวคนเดียว','อยู่กับผู้สูงอายุ/เด็กเล็ก','อยู่กับญาติผู้ใหญ่/คนวัยทำงาน'].forEach(o=>s.add(new Option(o,o)));
-        s.value=(h!='-')?h:'อยู่ตัวคนเดียว'; document.getElementById('inpDec').value=(d!='-')?d:'รอดูอาการ'; 
+    function openEditEmg(h, d, c){ 
+        const helpSel = document.getElementById('inpHelp'); 
+        const decSel = document.getElementById('inpDec');
+        const confSel = document.getElementById('inpConf');
+
+        if(h && h !== '-') helpSel.value = h; else helpSel.selectedIndex = 0;
+        if(d && d !== '-') decSel.value = d; else decSel.selectedIndex = 0;
+        if(c && c !== '-') confSel.value = c; else confSel.selectedIndex = 0;
+
         MODALS.modalEditEmg.show(); 
     }
+
     function saveEmg(){
         showLoad(true);
-        const d = { userId:USER_ID, help:document.getElementById('inpHelp').value, decision:document.getElementById('inpDec').value };
+        const d = { 
+            userId: USER_ID, 
+            help: document.getElementById('inpHelp').value, 
+            decision: document.getElementById('inpDec').value,
+            confident: document.getElementById('inpConf').value
+        };
         fetch(API_URL, {method:'POST', body:JSON.stringify({action:'updateEmergencyInfo', data:d})}).then(()=>{
-            DATA.emergencyInfo=d; renderHospitalCard(); MODALS.modalEditEmg.hide(); showLoad(false); loadGamification();
+            DATA.emergencyInfo = d; 
+            renderHospitalCard(); 
+            MODALS.modalEditEmg.hide(); 
+            showLoad(false); 
+            loadGamification();
+        });
+    }
+
+    function updateAddressAndHospital() {
+        const moo = document.getElementById('userVillage').value.replace('ม.', ''); 
+        const tb = document.getElementById('userDistrict').value;
+        const hospitals = { 
+            "ท่าหิน": "รพ.สต.ท่าหิน", "ด่านสวี": "รพ.สต.ด่านสวี", "เขาทะลุ": "รพ.สต.เขาทะลุ", 
+            "เขาค่าย": "รพ.สต.เขาค่าย", "ปากแพรก": "รพ.สต.ปากแพรก", "สวี": "รพ.สต.สวี", 
+            "นาสัก": { "1": "รพ.สต.บ้านแก่งกระทั่ง", "6": "รพ.สต.บ้านแก่งกระทั่ง", "11": "รพ.สต.บ้านแก่งกระทั่ง", "13": "รพ.สต.บ้านแก่งกระทั่ง", "18": "รพ.สต.บ้านแก่งกระทั่ง", "19": "รพ.สต.บ้านแก่งกระทั่ง", "7": "รพ.สต.บ้านไทยพัฒนา", "8": "รพ.สต.บ้านไทยพัฒนา", "9": "รพ.สต.บ้านไทยพัฒนา", "10": "รพ.สต.บ้านไทยพัฒนา", "12": "รพ.สต.บ้านไทยพัฒนา", "15": "รพ.สต.บ้านไทยพัฒนา", "16": "รพ.สต.บ้านไทยพัฒนา", "2": "รพ.สต.นาสัก", "3": "รพ.สต.นาสัก", "4": "รพ.สต.นาสัก", "5": "รพ.สต.นาสัก", "14": "รพ.สต.นาสัก", "17": "รพ.สต.นาสัก" }, 
+            "ทุ่งระยะ": { "5": "รพ.สต.บ้านคลองน้อย", "6": "รพ.สต.บ้านคลองน้อย", "7": "รพ.สต.บ้านคลองน้อย", "8": "รพ.สต.บ้านคลองน้อย", "9": "รพ.สต.บ้านคลองน้อย", "10": "รพ.สต.บ้านคลองน้อย", "1": "รพ.สต.ทุ่งระยะ", "2": "รพ.สต.ทุ่งระยะ", "3": "รพ.สต.ทุ่งระยะ", "4": "รพ.สต.ทุ่งระยะ", "11": "รพ.สต.ทุ่งระยะ" }, 
+            "วิสัยใต้": { "1": "รพ.สต.บ้านดอนทราย", "3": "รพ.สต.บ้านดอนทราย", "4": "รพ.สต.บ้านดอนทราย", "8": "รพ.สต.บ้านดอนทราย", "2": "รพ.สต.วิสัยใต้", "5": "รพ.สต.วิสัยใต้", "6": "รพ.สต.วิสัยใต้", "7": "รพ.สต.วิสัยใต้", "9": "รพ.สต.วิสัยใต้", "10": "รพ.สต.วิสัยใต้" }, 
+            "ครน": { "1": "รพ.สต.ครน", "2": "รพ.สต.ครน", "3": "รพ.สต.ครน", "4": "รพ.สต.ครน", "6": "รพ.สต.ครน", "12": "รพ.สต.ครน", "9": "รพ.สต.บ้านควนสามัคคี", "10": "รพ.สต.บ้านควนสามัคคี", "13": "รพ.สต.บ้านควนสามัคคี", "14": "รพ.สต.บ้านควนสามัคคี", "5": "รพ.สต.บ้านน้ำฉา", "7": "รพ.สต.บ้านน้ำฉา", "8": "รพ.สต.บ้านน้ำฉา", "11": "รพ.สต.บ้านน้ำฉา" }, 
+            "นาโพธิ์": "รพ.สวี (นาโพธิ์)" 
+        };
+        let hosp = hospitals[tb]; 
+        if (typeof hosp === 'object') { hosp = hosp[moo] || ''; } 
+        document.getElementById('userPcu').value = hosp || '';
+    }
+
+    function saveAddress() {
+        const tb = document.getElementById('userDistrict').value;
+        const moo = document.getElementById('userVillage').value.replace('ม.', '');
+        const pcu = document.getElementById('userPcu').value;
+
+        if(!tb || !moo) { alert('กรุณาเลือกตำบลและหมู่'); return; }
+
+        showLoad(true);
+        const areaStr = `ม.${moo} ต.${tb}`;
+        const d = { userId: USER_ID, area: areaStr, pcu: pcu };
+
+        fetch(API_URL, {method:'POST', body:JSON.stringify({action:'updateUserAddress', data:d})}).then(()=>{
+            if(DATA.userProfile) DATA.userProfile.area = areaStr; 
+            MODALS.modalEditAddress.hide();
+            showLoad(false);
+            loadBasicInfo(); // Reload to update community helpers
         });
     }
     
