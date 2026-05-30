@@ -295,12 +295,12 @@
     function createCallFlexMessage(targetName, targetNumber, locationStr, timeObj) {
         const timeStr = `${timeObj.getDate()}/${timeObj.getMonth()+1}/${timeObj.getFullYear()+543} เวลา ${timeObj.getHours()}:${String(timeObj.getMinutes()).padStart(2, '0')} น.`;
         
-        let mapUri = `https://www.google.com/maps/search/?api=1&query=10.229937,99.109073`; // ค่าเริ่มต้น
+        let mapUri = `https://maps.google.com/maps?q=10.229937,99.109073`; // ค่าเริ่มต้น
         let locStatusText = "ไม่ได้ส่งพิกัด (ดึงตำแหน่งไม่สำเร็จ)";
         let locStatusColor = "#aaaaaa";
 
         if (locationStr) {
-            mapUri = `https://www.google.com/maps/search/?api=1&query=$${locationStr}`;
+            mapUri = `https://maps.google.com/maps?q=${locationStr}`;
             locStatusText = "พิกัดถูกส่งไปยังระบบของ รพ.สวี แล้ว";
             locStatusColor = "#2E7D32";
         }
@@ -319,16 +319,27 @@
                 size: "mega",
                 header: {
                     type: "box", layout: "vertical",
-                    backgroundColor: "#D32F2F", 
+                    background: {
+                        type: "linearGradient",
+                        angle: "90deg",
+                        startColor: "#D32F2F", // แดง
+                        endColor: "#8B0000"    // แดงเข้ม
+                    },
                     contents: [
                         { type: "text", text: "🚨 แจ้งเหตุฉุกเฉิน", color: "#ffffff", weight: "bold", size: "xl", align: "center" }
                     ]
                 },
                 body: {
                     type: "box", layout: "vertical", spacing: "md",
+                    background: {
+                        type: "linearGradient",
+                        angle: "180deg",
+                        startColor: "#ffcccc", // แดงอ่อน
+                        endColor: "#ffffff"    // ขาว
+                    },
                     contents: [
                         { type: "text", text: "บันทึกการโทรออก", weight: "bold", size: "lg", align: "center", color: "#333333" },
-                        { type: "separator", margin: "md" },
+                        { type: "separator", margin: "md", color: "#ffffff55" },
                         {
                             type: "box", layout: "horizontal", margin: "md",
                             contents: [
@@ -350,7 +361,7 @@
                                 { type: "text", text: timeStr, size: "sm", weight: "bold", color: "#333333", flex: 7, wrap: true }
                             ]
                         },
-                        { type: "separator", margin: "lg" },
+                        { type: "separator", margin: "lg", color: "#dddddd" },
                         {
                             type: "box", layout: "vertical", margin: "md",
                             contents: [
@@ -364,7 +375,7 @@
                     type: "box", layout: "vertical", spacing: "sm",
                     contents: [
                         { type: "button", style: "primary", color: "#007bff", action: { type: "uri", label: "🗺️ ดูพิกัดที่โทร (แผนที่)", uri: mapUri } },
-                        { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: `📞 โทรซ้ำ`, uri: `tel:${targetNumber}` } },
+                        { type: "button", style: "primary", color: "#D32F2F", action: { type: "uri", label: `📞 โทรซ้ำ`, uri: `https://liff.line.me/${LIFF_ID}` } },
                         { type: "text", text: "จัดทำโดย รพ.สวี จ.ชุมพร", size: "xxs", color: "#aaaaaa", align: "center", margin: "lg", wrap: true }
                     ]
                 }
