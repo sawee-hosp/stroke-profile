@@ -417,7 +417,7 @@
     <button class="btn btn-red btn-pill w-100" onclick="saveEmg()">บันทึกข้อมูล</button>
 </div></div></div></div>
 
-<div class="modal fade" id="modalPinUser" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-4 text-center"><i class="bi bi-geo-alt-fill text-danger display-3 mb-3"></i><h4 class="fw-bold">ยืนยันการปักหมุด</h4><p class="text-muted">เลือกประเภทสถานที่</p><div class="d-flex justify-content-center gap-2 mb-3"><input type="radio" class="btn-check" name="pt" id="pt1" value="บ้าน" checked><label class="btn btn-outline-danger" for="pt1">บ้าน</label><input type="radio" class="btn-check" name="pt" id="pt2" value="ทางผ่าน"><label class="btn btn-outline-secondary" for="pt2">ทางผ่าน</label></div><button class="btn btn-red btn-pill w-100" onclick="execPinUser()">ยืนยัน</button></div></div></div>
+<div class="modal fade" id="modalPinUser" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 p-4 text-center"><i class="bi bi-geo-alt-fill text-danger display-3 mb-3"></i><h4 class="fw-bold">อัปเดตพิกัด</h4><p class="text-muted">โปรดเลือกสถานที่ปัจจุบันของท่าน</p><div class="d-flex justify-content-center gap-2 mb-3"><input type="radio" class="btn-check" name="pt" id="pt1" value="บ้าน" checked><label class="btn btn-outline-danger" for="pt1">บ้าน</label><input type="radio" class="btn-check" name="pt" id="pt2" value="ที่อื่น"><label class="btn btn-outline-secondary" for="pt2">ที่อื่น</label></div><button class="btn btn-red btn-pill w-100" onclick="execPinUser()">ยืนยันพิกัด</button></div></div></div>
 
 <!-- NEW: Select Address Modal -->
 <div class="modal fade" id="modalEditAddress" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4 border-0 p-3"><div class="modal-header border-0 pb-0"><h5 class="modal-title fw-bold">ข้อมูลที่อยู่</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body pt-2">
@@ -650,9 +650,7 @@
             if (DATA.isVhv) {
                 if (!DATA.patientList) loadVhvData();
                 else loadVhvData();
-            } else {
-                if (!DATA.homeDistance || DATA.homeDistance.km == 0) MODALS.modalPinUser.show();
-            }
+            } 
             saveToCache();
         } catch(e) { console.error(e); }
         finally { stopStrokeAnimation(); }
@@ -1017,10 +1015,7 @@
             </div>
             <div class="d-grid gap-2 mt-3">
                 <button class="btn btn-outline btn-pill btn-sm w-100" onclick="openEditEmg('${e.help}','${e.decision}','${e.confident}')">แก้ไขข้อมูลเตรียมความพร้อม</button>
-                <div class="row g-2">
-                    <div class="col-6"><button class="btn btn-dark btn-pill btn-sm w-100" onclick="MODALS.modalPinUser.show()"><i class="bi bi-geo-alt"></i> อัปเดตพิกัดเดิม</button></div>
-                    <div class="col-6"><a href="${LINKS.BEFAST}" class="btn btn-red btn-pill btn-sm w-100">ปักหมุดใหม่</a></div>
-                </div>
+                <button class="btn btn-dark btn-pill w-100 mt-2" onclick="MODALS.modalPinUser.show()"><i class="bi bi-geo-alt"></i> อัปเดตพิกัดเดิม</button>
             </div>
         `;
     }
@@ -1182,17 +1177,22 @@
             if(DATA.userProfile) DATA.userProfile.area = areaStr; 
             MODALS.modalEditAddress.hide();
             showLoad(false);
-            loadBasicInfo(); // Reload to update community helpers
+            loadBasicInfo(); 
         });
     }
     
     function execPinUser() {
         const type = document.querySelector('input[name="pt"]:checked').value;
-        MODALS.modalPinUser.hide(); showLoad(true);
+        MODALS.modalPinUser.hide(); 
+        showLoad(true);
         navigator.geolocation.getCurrentPosition(p=>{
             const d = { userId:USER_ID, latlong:`${p.coords.latitude},${p.coords.longitude}`, type:type };
-            fetch(API_URL, {method:'POST', body:JSON.stringify({action:'saveNewLocation', data:d})}).then(r=>r.json()).then(res=>{
-                DATA.homeDistance = { km:res.newDist, time:res.newDur }; renderHospitalCard(); showLoad(false); alert('ปักหมุดสำเร็จ! ระยะทางคำนวณจาก รพ.สวี'); loadGamification();
+            fetch(API_URL, {method:'POST', body:JSON.stringify({action:'saveNewLocation', data:d})})
+            .then(r=>r.json()).then(res=>{
+                DATA.homeDistance = { km:res.newDist, time:res.newDur }; 
+                renderHospitalCard(); 
+                showLoad(false); 
+                loadGamification();
             });
         }, ()=>{ showLoad(false); alert('ไม่สามารถระบุพิกัดได้'); });
     }
